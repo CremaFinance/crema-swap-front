@@ -5,7 +5,7 @@
         <img src="../../assets/images/logo@2x@2x.png" />
       </a>
       <nav>
-        <a href="http://app.crema.finance/market" target="_blank">
+        <a href="https://trade.crema.finance/" target="_blank">
           <img src="../../assets/images/icon-Trading@2x.png" />
           <span>Trading</span>
         </a>

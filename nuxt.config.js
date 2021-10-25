@@ -28,11 +28,11 @@ export default {
         name: 'viewport',
         content: 'width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no'
       },
-      {
-        hid: 'description',
-        name: 'description',
-        content: 'Probably the Smartest DEX'
-      },
+      // {
+      //   hid: 'description',
+      //   name: 'description',
+      //   content: 'Probably the Smartest DEX'
+      // },
       // {
       //   'http-equiv': 'Content-Security-Policy',
       //   content: "script-src 'self'; object-src 'none'; style-src beta.hydraswap.io; child-src https:"
