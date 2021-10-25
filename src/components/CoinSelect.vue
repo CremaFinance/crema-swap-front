@@ -85,7 +85,7 @@ export default Vue.extend({
 
       for (const symbol of Object.keys(TOKENS)) {
         let tokenInfo = cloneDeep(TOKENS[symbol])
-
+        console.log(tokenInfo, 'tokenInfo##')
         if (!tokenInfo.showDefault) continue
 
         tokenInfo.symbol = symbol

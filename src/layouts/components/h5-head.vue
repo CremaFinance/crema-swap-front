@@ -112,7 +112,7 @@ export default {
     },
     goToTrade() {
       // const href = `https://trade.hydradex.finance/`
-      const href = `https://app.crema.finance/`
+      const href = `https://app.crema.finance/market`
       const a = document.createElement('a')
       a.setAttribute('href', href)
       a.setAttribute('target', '_blank')

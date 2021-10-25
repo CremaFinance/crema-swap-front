@@ -81,14 +81,23 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   },
+  // USDT: {
+  //   symbol: 'USDT',
+  //   name: 'USDT',
+  //   mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
   USDT: {
     symbol: 'USDT',
     name: 'USDT',
-    mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
+    mintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
     decimals: 6,
-    referrer: '',
+    referrer: '8DwwDNagph8SdwMUdcXS5L9YAyutTyDJmK6cTKrmNFk3',
     official: true,
-    showDefault: true
+    showDefault: false
   },
   USDD: {
     symbol: 'USDD',

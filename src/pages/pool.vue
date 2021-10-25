@@ -28,11 +28,17 @@
         </div>
       </div>
       <div class="form-block">
-        <CoinBlock :coin-name="nowCoinA === coinA ? coinA : coinB"></CoinBlock>
+        <CoinBlock
+          :coin-name="nowCoinA === coinA ? coinA : coinB"
+          :balance="solAccount ? solAccount.balance : null"
+        ></CoinBlock>
         <div class="add-icon">
           <a></a>
         </div>
-        <CoinBlock :coin-name="nowCoinA === coinB ? coinA : coinB"></CoinBlock>
+        <CoinBlock
+          :coin-name="nowCoinA === coinB ? coinA : coinB"
+          :balance="usdtAccount ? usdtAccount.balance : null"
+        ></CoinBlock>
       </div>
       <SetPriceRange
         :coinA="nowCoinA === coinA ? coinA : coinB"
@@ -61,6 +67,9 @@ import { mapState } from 'vuex'
 import WaitingHint from '../components/waiting.vue'
 import SuccessHint from '../components/success.vue'
 import { fixD } from '../utils/index'
+import { cloneDeep } from 'lodash-es'
+import { TokenInfo, TOKENS, NATIVE_SOL } from '@/utils/tokens'
+
 export default Vue.extend({
   components: {
     WaitingHint,
@@ -71,20 +80,29 @@ export default Vue.extend({
   data() {
     return {
       showAddLiquidity: true,
+      tokenList: [] as Array<TokenInfo>,
+      fromCoin: null as TokenInfo | null,
+      toCoin: null as TokenInfo | null,
       showSetting: false,
       showWaitingHint: false,
       showSuccessHint: false,
+      currentCoinKey: 'fromCoin',
       coinARate: 0,
       coinBRate: 0,
       coinA: 'SOL',
       coinB: 'USDT',
-      nowCoinA: 'SOL'
+      nowCoinA: 'SOL',
+      SOLAddress: '11111111111111111111111111111111',
+      USDTAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+      solAccount: {},
+      usdtAccount: {}
     }
   },
   computed: {
     // ...mapState(['wallet', 'farm', 'url', 'price', 'liquidity'])
     ...mapState({
-      price: (state: any) => state.price
+      price: (state: any) => state.price,
+      wallet: (state: any) => state.wallet
     })
   },
   watch: {
@@ -95,14 +113,34 @@ export default Vue.extend({
         this.coinARate = Number(fixD(coinARate / coinBRate, 4))
         this.coinBRate = Number(fixD(coinBRate / coinARate, 4))
       }
+    },
+    'wallet.tokenAccounts': {
+      handler(_newTokenAccounts: any, _oldTokenAccounts: any) {
+        this.createTokenList()
+      },
+      deep: true
     }
   },
   mounted() {
-    // if (this.price) {
-    //   console.log(111)
-    // }
+    // let hasBalance = []
+    this.createTokenList()
   },
-  methods: {}
+  methods: {
+    createTokenList() {
+      const usdtInfo = cloneDeep(TOKENS.USDT)
+      const usdtAccount = this.wallet.tokenAccounts[usdtInfo.mintAddress]
+      const solInfo = cloneDeep(NATIVE_SOL)
+      const solAccount = this.wallet.tokenAccounts[solInfo.mintAddress]
+
+      if (usdtAccount) {
+        this.usdtAccount = usdtAccount
+      }
+
+      if (solAccount) {
+        this.solAccount = solAccount
+      }
+    }
+  }
 })
 </script>
 <style lang="less" scoped>
