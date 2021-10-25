@@ -30,14 +30,18 @@
       <div class="form-block">
         <CoinBlock
           :coin-name="nowCoinA === coinA ? coinA : coinB"
-          :balance="solAccount ? solAccount.balance : null"
+          :balance="
+            nowCoinA === coinA ? (solAccount ? solAccount.balance : null) : usdtAccount ? usdtAccount.balance : null
+          "
         ></CoinBlock>
         <div class="add-icon">
           <a></a>
         </div>
         <CoinBlock
           :coin-name="nowCoinA === coinB ? coinA : coinB"
-          :balance="usdtAccount ? usdtAccount.balance : null"
+          :balance="
+            nowCoinA === coinA ? (usdtAccount ? usdtAccount.balance : null) : solAccount ? solAccount.balance : null
+          "
         ></CoinBlock>
       </div>
       <SetPriceRange
