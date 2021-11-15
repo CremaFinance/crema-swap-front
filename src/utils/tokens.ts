@@ -104,15 +104,15 @@ export const TOKENS: Tokens = {
   //   official: true,
   //   showDefault: false
   // },
-  USDD: {
-    symbol: 'CUSDD',
-    name: 'CUSDD',
-    mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
-    decimals: 6,
-    referrer: '',
-    official: true,
-    showDefault: true
-  },
+  // USDD: {
+  //   symbol: 'CUSDD',
+  //   name: 'CUSDD',
+  //   mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
   // HYSD: {
   //   symbol: 'HYSD',
   //   name: 'HYSD',
@@ -135,6 +135,15 @@ export const TOKENS: Tokens = {
     symbol: 'CUSDC',
     name: 'CUSDC',
     mintAddress: 'GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT',
+    decimals: 8,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
+  CUSDT: {
+    symbol: 'CUSDT',
+    name: 'CUSDT',
+    mintAddress: 'Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q',
     decimals: 8,
     referrer: '',
     official: true,

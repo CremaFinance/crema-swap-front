@@ -152,8 +152,8 @@ import { UserPosition, TokenSwapLayout, Numberu128 } from '@/tokenSwap'
 import { loadAccount } from '@/tokenSwap/util/account'
 import { gt } from '@/utils/safe-math'
 
-const CSOL = getTokenBySymbol('CSOL')
 const CUSDC = getTokenBySymbol('CUSDC')
+const CUSDT = getTokenBySymbol('CUSDT')
 
 export default Vue.extend({
   components: {
@@ -167,8 +167,8 @@ export default Vue.extend({
     return {
       showAddLiquidity: true,
       tokenList: [] as Array<TokenInfo>,
-      fromCoin: CSOL as TokenInfo | null,
-      toCoin: CUSDC as TokenInfo | null,
+      fromCoin: CUSDC as TokenInfo | null,
+      toCoin: CUSDT as TokenInfo | null,
       showSetting: false,
       showWaitingHint: false,
       showSuccessHint: false,
