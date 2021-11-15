@@ -78,11 +78,17 @@ export default Vue.extend({
       this.$router.push(`/detail/${item.nftTokenId}`)
     },
     getCurrentStatus(pItem: any) {
+      console.log('pItem.currentPrice####', pItem.currentPrice)
+      console.log('pItem.minPrice####', pItem.minPrice)
+      console.log('pItem.maxPrice####', pItem.maxPrice)
+      console.log('pItem.minPrice####number###', Number(pItem.minPrice))
+      console.log('pItem.maxPrice####number####', Number(pItem.maxPrice))
       if (!pItem.liquity) {
         return 'Closed'
       } else if (
-        Number(pItem.currentPrice) >= Number(pItem.minPrice) &&
-        Number(pItem.currentPrice) <= Number(pItem.maxPrice)
+        (Number(pItem.currentPrice) >= Number(pItem.minPrice) &&
+          Number(pItem.currentPrice) <= Number(pItem.maxPrice)) ||
+        (!Number(pItem.minPrice) && isNaN(Number(pItem.maxPrice)))
       ) {
         return 'Active'
       } else {
