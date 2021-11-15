@@ -1,6 +1,11 @@
 import { TokenAmount } from '@/utils/safe-math'
 import { cloneDeep } from 'lodash-es'
 
+export const RATES: any = {
+  HYSD: 0.2,
+  USDD: 1,
+  USDC: 1
+}
 export interface TokenInfo {
   symbol: string
   name: string
@@ -72,15 +77,15 @@ export const NATIVE_SOL: TokenInfo = {
 }
 
 export const TOKENS: Tokens = {
-  CRM: {
-    symbol: 'CRM',
-    name: 'CRM',
-    mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
-    decimals: 6,
-    referrer: '',
-    official: true,
-    showDefault: true
-  },
+  // CRM: {
+  //   symbol: 'CRM',
+  //   name: 'CRM',
+  //   mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
   // USDT: {
   //   symbol: 'USDT',
   //   name: 'USDT',
@@ -90,15 +95,15 @@ export const TOKENS: Tokens = {
   //   official: true,
   //   showDefault: true
   // },
-  USDT: {
-    symbol: 'USDT',
-    name: 'USDT',
-    mintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
-    decimals: 6,
-    referrer: '8DwwDNagph8SdwMUdcXS5L9YAyutTyDJmK6cTKrmNFk3',
-    official: true,
-    showDefault: false
-  },
+  // USDT: {
+  //   symbol: 'USDT',
+  //   name: 'USDT',
+  //   mintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+  //   decimals: 6,
+  //   referrer: '8DwwDNagph8SdwMUdcXS5L9YAyutTyDJmK6cTKrmNFk3',
+  //   official: true,
+  //   showDefault: false
+  // },
   USDD: {
     symbol: 'USDD',
     name: 'USDD',
@@ -116,7 +121,34 @@ export const TOKENS: Tokens = {
     referrer: '',
     official: true,
     showDefault: true
+  },
+  CSOL: {
+    symbol: 'CSOL',
+    name: 'CSOL',
+    mintAddress: '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK',
+    decimals: 8,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
+  CUSDC: {
+    symbol: 'CUSDC',
+    name: 'CUSDC',
+    mintAddress: 'GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT',
+    decimals: 8,
+    referrer: '',
+    official: true,
+    showDefault: true
   }
+  // USDC: {
+  //   symbol: 'USDC',
+  //   name: 'USDC',
+  //   mintAddress: '78wWR5HJPujs7RfsbJNDDMbCuYzcZkrdUE3txjnmYdKp',
+  //   decimals: 8,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // }
   // WSOL: {
   //   symbol: 'WSOL',
   //   name: 'Wrapped Solana',

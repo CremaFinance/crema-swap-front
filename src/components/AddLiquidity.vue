@@ -1,5 +1,5 @@
 <template>
-  <Modal title="Select a token" :visible="true" :footer="null" @cancel="$emit('onClose')"> 111 </Modal>
+  <Modal title="Select a token" :visible="true" centered :footer="null" @cancel="$emit('onClose')"> 111 </Modal>
 </template>
 <script lang="ts">
 import Vue from 'vue'

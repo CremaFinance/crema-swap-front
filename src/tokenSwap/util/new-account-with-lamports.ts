@@ -11,7 +11,6 @@ export async function newAccountWithLamports(connection: Connection, lamports: n
   await connection.requestAirdrop(account.publicKey, lamports)
   for (;;) {
     await sleep(500)
-    // eslint-disable-next-line eqeqeq
     if (lamports == (await connection.getBalance(account.publicKey))) {
       return account
     }

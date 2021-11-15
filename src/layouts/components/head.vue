@@ -3,20 +3,28 @@
     <div class="left">
       <a class="logo" href="https://www.crema.finance/" target="_blank">
         <img src="../../assets/images/logo@2x@2x.png" />
+        <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" />
       </a>
       <nav>
         <a href="https://trade.crema.finance/" target="_blank">
           <img src="../../assets/images/icon-Trading@2x.png" />
           <span>Trading</span>
         </a>
-        <!-- <nuxt-link to="/swap">
+        <nuxt-link to="/swap">
           <img src="../../assets/images/icon-Swap@2x.png" />
           <span>Swap</span>
-        </nuxt-link> -->
-        <nuxt-link to="/pool">
+        </nuxt-link>
+        <nuxt-link
+          to="/pool"
+          :class="$route.path === '/' || $route.path === '/pool' ? 'nuxt-link-exact-active nuxt-link-active' : ''"
+        >
           <img src="../../assets/images/icon-Pools@2x.png" />
           <span>Pools</span>
         </nuxt-link>
+        <!-- <nuxt-link to="/farming">
+          <img src="../../assets/images/icon-Pools@2x.png" />
+          <span>Farming</span>
+        </nuxt-link> -->
         <!-- <nuxt-link to="/staking">
           <img src="../../assets/images/icon-Staking@2x.png" />
           <span>Staking</span>
@@ -35,8 +43,14 @@ import Contactus from './contactus.vue'
 export default Vue.extend({
   components: {
     Contactus
+  },
+  mounted() {
+    console.log(this.$route.path, 'this.$route.path##')
+    const slippage = localStorage.getItem('crema-slippage') || '1'
+    this.$accessor.setSlippage(slippage)
   }
 })
+console.log()
 </script>
 <style lang="less" scoped>
 .header-container {
@@ -55,6 +69,11 @@ export default Vue.extend({
     padding-right: 20px;
     img {
       height: 28px;
+    }
+    .test-or-main {
+      // width: 60px;
+      height: 16px;
+      margin-left: 10px;
     }
   }
   nav {

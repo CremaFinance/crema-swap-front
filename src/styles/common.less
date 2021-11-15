@@ -4,6 +4,7 @@
   font-family: 'Rubik-Medium';
   src: url('../assets/fonts/Rubik-Medium.ttf') format('truetype');
 }
+
 @font-face {
   font-family: 'Rubik-Regular';
   src: url('../assets/fonts/Rubik-Regular.ttf') format('truetype');
@@ -11,12 +12,18 @@
 
 @font-face {
   font-family: 'opensans';
-  src: url('../assets/fonts/OpenSans.eot'); /* IE9 Compat Modes */
+  src: url('../assets/fonts/OpenSans.eot');
+  /* IE9 Compat Modes */
   src: url('../assets/fonts/OpenSans.eot?#iefix') format('embedded-opentype'),
-    /* IE6-IE8 */ url('../assets/fonts/OpenSans.woff2') format('woff2'),
-    /* Super Modern Browsers */ url('../assets/fonts/OpenSans.woff') format('woff'),
-    /* Pretty Modern Browsers */ url('../assets/fonts/OpenSans.ttf') format('truetype'),
-    /* Safari, Android, iOS */ url('../assets/fonts/OpenSans.svg#svgFontName') format('svg'); /* Legacy iOS */
+    /* IE6-IE8 */
+    url('../assets/fonts/OpenSans.woff2') format('woff2'),
+    /* Super Modern Browsers */
+    url('../assets/fonts/OpenSans.woff') format('woff'),
+    /* Pretty Modern Browsers */
+    url('../assets/fonts/OpenSans.ttf') format('truetype'),
+    /* Safari, Android, iOS */
+    url('../assets/fonts/OpenSans.svg#svgFontName') format('svg');
+  /* Legacy iOS */
 }
 
 @font-face {
@@ -40,8 +47,9 @@
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  // width: 8px;
 }
+
 html,
 body,
 div,
@@ -86,18 +94,22 @@ h6 {
   font-weight: 400;
   font-size: inherit;
 }
+
 ul {
   list-style: none;
 }
+
 input,
 button,
 textarea {
   outline: none;
 }
+
 button {
   border: none;
   cursor: pointer;
 }
+
 a {
   text-decoration: none;
 }
@@ -123,8 +135,10 @@ a {
   height: 12px;
   fill: #fff;
 }
+
 .icon {
   fill: #fff;
+
   &:hover {
     fill: #0fe;
   }
@@ -135,6 +149,7 @@ input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type='number'] {
   -moz-appearance: textfield;
 }

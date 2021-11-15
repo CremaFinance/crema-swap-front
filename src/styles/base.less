@@ -8,12 +8,20 @@
 .gradient-btn-large {
   width: 100%;
   height: 56px;
-  background: linear-gradient(214deg, #59BDAD 0%, #6676F5 61%, #9A89F9 76%, #EBA7FF 100%);
-  border-radius: 15px;
+  background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
+  border-radius: 10px;
   font-size: 20px;
   font-weight: bold;
-
+  border: none;
+  color: #fff;
   &:hover {
-    background: linear-gradient(214deg, #A4FFF0 0%, #8996FF 61%, #C9C0FF 76%, #F1C3FF 100%);
+    background: linear-gradient(214deg, #a4fff0 0%, #8996ff 61%, #c9c0ff 76%, #f1c3ff 100%);
+  }
+  &:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }

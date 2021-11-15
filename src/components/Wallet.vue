@@ -118,12 +118,12 @@ interface Wallets {
 export default class Wallet extends Vue {
   /* ========== DATA ========== */
   wallets = {
+    Phantom: '',
     Sollet: 'https://www.sollet.io',
     'Sollet Extension': '',
     Ledger: '',
     Solong: '',
     // TrustWallet: '',
-    Phantom: '',
     MathWallet: '',
     Blocto: '',
     // Solflare: 'https://solflare.com/access-wallet',
@@ -367,21 +367,21 @@ export default class Wallet extends Vue {
           this.disconnect()
         }
       }
-    }, 1000)
+    }, 5000)
   }
 
-  setPriceTimer() {
-    this.priceTimer = window.setInterval(async () => {
-      if (!this.price.loading) {
-        if (this.price.countdown < this.price.autoRefreshTime) {
-          this.$accessor.price.setCountdown(this.$accessor.price.countdown + 1)
-          if (this.price.countdown === this.price.autoRefreshTime) {
-            await this.$accessor.price.requestPrices()
-          }
-        }
-      }
-    }, 1000)
-  }
+  // setPriceTimer() {
+  //   this.priceTimer = window.setInterval(async () => {
+  //     if (!this.price.loading) {
+  //       if (this.price.countdown < this.price.autoRefreshTime) {
+  //         this.$accessor.price.setCountdown(this.$accessor.price.countdown + 1)
+  //         if (this.price.countdown === this.price.autoRefreshTime) {
+  //           await this.$accessor.price.requestPrices()
+  //         }
+  //       }
+  //     }
+  //   }, 1000)
+  // }
 
   setLiquidityTimer() {
     this.liquidityTimer = window.setInterval(async () => {
@@ -393,21 +393,21 @@ export default class Wallet extends Vue {
           }
         }
       }
-    }, 1000)
+    }, 5000)
   }
 
-  setFarmTimer() {
-    this.farmTimer = window.setInterval(async () => {
-      if (!this.farm.loading) {
-        if (this.farm.countdown < this.farm.autoRefreshTime) {
-          this.$accessor.farm.setCountdown(this.$accessor.farm.countdown + 1)
-          if (this.farm.countdown === this.farm.autoRefreshTime) {
-            await this.$accessor.farm.requestInfos()
-          }
-        }
-      }
-    }, 1000)
-  }
+  // setFarmTimer() {
+  //   this.farmTimer = window.setInterval(async () => {
+  //     if (!this.farm.loading) {
+  //       if (this.farm.countdown < this.farm.autoRefreshTime) {
+  //         this.$accessor.farm.setCountdown(this.$accessor.farm.countdown + 1)
+  //         if (this.farm.countdown === this.farm.autoRefreshTime) {
+  //           await this.$accessor.farm.requestInfos()
+  //         }
+  //       }
+  //     }
+  //   }, 1000)
+  // }
 
   // setIdoTimer() {
   //   this.idoTimer = window.setInterval(async () => {

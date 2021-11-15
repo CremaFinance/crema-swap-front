@@ -29,6 +29,7 @@
         v-model="fromCoinAmount"
         :coin-name="fromCoin ? fromCoin.symbol : null"
         :balance="fromCoin ? fromCoin.balance : null"
+        :swapDirection="'From'"
         @onInput="(amount) => (fromCoinAmount = amount)"
         @onFocus="
           () => {
@@ -45,8 +46,9 @@
         v-model="toCoinAmount"
         :coin-name="toCoin ? toCoin.symbol : ''"
         :balance="toCoin ? toCoin.balance : null"
-        :show-max="false"
+        :swapDirection="'To'"
         :disabled="false"
+        :showMax="false"
         @onInput="(amount) => (toCoinAmount = amount)"
         @onFocus="
           () => {
@@ -57,9 +59,14 @@
         @onSelect="openCoinSelect('toCoin')"
       ></CoinBlock>
     </div>
-    <button
+    <Button v-if="!wallet.connected" class="swap-btn" @click="$accessor.wallet.openModal">Connect Wallet</Button>
+    <Button
+      v-else
       class="swap-btn"
+      :loading="loading"
       :disabled="
+        insufficientLiquidity ||
+        loading ||
         !fromCoin ||
         !toCoin ||
         !Number(fromCoinAmount) ||
@@ -68,45 +75,84 @@
       "
       @click="placeOrder"
     >
-      Swap
-    </button>
-    <SwapInfo></SwapInfo>
+      <!-- Swap -->
+      {{
+        insufficientLiquidity
+          ? 'Insufficient Liquidity'
+          : gt(fromCoinAmount, fromCoin && fromCoin.balance ? fromCoin.balance.fixed() : '0')
+          ? 'Insufficient balance'
+          : 'Swap'
+      }}
+    </Button>
+    <SwapInfo
+      :from-coin="fromCoin"
+      :to-coin="toCoin"
+      :from-coin-amount="fromCoinAmount"
+      :to-coin-amount="toCoinAmount"
+      :pool-info="poolInfo"
+    ></SwapInfo>
     <Setting v-if="showSetting" @onClose="() => (showSetting = false)"></Setting>
-    <CoinSelect v-if="showCoinSelect" @onClose="() => (showCoinSelect = false)" @onSelect="onCoinSelect"></CoinSelect>
+    <CoinSelect
+      v-if="showCoinSelect"
+      :existing-coins="existingCoins"
+      @onClose="() => (showCoinSelect = false)"
+      @onSelect="onCoinSelect"
+    ></CoinSelect>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
 // import { Tooltip } from 'ant-design-vue'
-import { TokenInfo } from '@/utils/tokens'
+import { TokenInfo, getTokenBySymbol } from '@/utils/tokens'
 import { gt } from '@/utils/safe-math'
 import { getUnixTs } from '@/utils'
-import { get } from 'lodash-es'
-import { swap } from '@/utils/swap'
+import { get, cloneDeep } from 'lodash-es'
+import { swap, getOutAmount } from '@/utils/swap'
+import { inputRegex, escapeRegExp } from '@/utils/regex'
+import { TokenAmount } from '@/utils/safe-math'
+import { Button } from 'ant-design-vue'
+import { LIQUIDITY_POOLS } from '@/utils/pools'
+
+const HYSD = getTokenBySymbol('HYSD')
+const USDD = getTokenBySymbol('USDD')
 
 export default Vue.extend({
   components: {
     // Tooltip
+    Button
   },
   data() {
     return {
       showCoinSelect: false,
-      fromCoin: null as TokenInfo | null,
-      toCoin: null as TokenInfo | null,
+      fromCoin: HYSD as TokenInfo | null,
+      toCoin: USDD as TokenInfo | null,
       fromCoinAmount: '',
       toCoinAmount: '',
       currentCoinKey: 'fromCoin',
       fixedFromCoin: true,
       swaping: false,
-      showSetting: false
+      showSetting: false,
+      loading: false,
+      existingCoins: '', // 已选择的一边币种
+      // Insufficient liquidity
+      insufficientLiquidity: false
     }
   },
   head: {
     title: 'Crema Finance | A Powerful Concentrated Liquidity Protocol'
   },
   computed: {
-    ...mapState(['wallet', 'url'])
+    ...mapState(['wallet', 'url']),
+    poolInfo() {
+      const info: any = Object.values(this.$accessor.liquidity.infos).find((p: any) => {
+        return (
+          (p.coin.symbol === this.fromCoin?.symbol && p.pc.symbol === this.toCoin?.symbol) ||
+          (p.coin.symbol === this.toCoin?.symbol && p.pc.symbol === this.fromCoin?.symbol)
+        )
+      })
+      return info
+    }
   },
   watch: {
     'wallet.tokenAccounts': {
@@ -114,6 +160,66 @@ export default Vue.extend({
         this.updateCoinInfo(newTokenAccounts)
       },
       deep: true
+    },
+    'liquidity.infos': {
+      handler(_newInfos: any) {
+        this.updateAmounts(this.poolInfo.currentPrice)
+      },
+      deep: true
+    },
+    poolInfo: {
+      handler(value: any) {
+        if (value) {
+          this.updateAmounts(value.currentPrice)
+        } else {
+          // for (const coinPair in LIQUIDITY_POOLS) {
+          //   const poolInfo = cloneDeep(LIQUIDITY_POOLS[coinPair])
+          //   if (
+          //     this.fixedFromCoin &&
+          //     (poolInfo.coin.symbol === this.fromCoin?.symbol || poolInfo.pc.symbol === this.fromCoin?.symbol)
+          //   ) {
+          //     this.toCoin = poolInfo.coin.symbol === this.fromCoin?.symbol ? poolInfo.pc : poolInfo.coin
+          //     break
+          //   }
+
+          //   if (
+          //     !this.fixedFromCoin &&
+          //     (poolInfo.pc.symbol === this.toCoin?.symbol || poolInfo.coin.symbol === this.toCoin?.symbol)
+          //   ) {
+          //     this.fromCoin = poolInfo.coin.symbol === this.fromCoin?.symbol ? poolInfo.pc : poolInfo.coin
+          //     break
+          //   }
+          // }
+          if (this.fixedFromCoin) {
+            this.toCoin = null
+          } else {
+            this.fromCoin = null
+          }
+        }
+      },
+      deep: true
+    },
+    fromCoinAmount(newAmount: string, oldAmount: string) {
+      this.$nextTick(() => {
+        if (!inputRegex.test(escapeRegExp(newAmount))) {
+          this.fromCoinAmount = oldAmount
+        } else {
+          if (this.fixedFromCoin) {
+            this.updateAmounts(this.poolInfo.currentPrice)
+          }
+        }
+      })
+    },
+    toCoinAmount(newAmount: string, oldAmount: string) {
+      this.$nextTick(() => {
+        if (!inputRegex.test(escapeRegExp(newAmount))) {
+          this.toCoinAmount = oldAmount
+        } else {
+          if (!this.fixedFromCoin) {
+            this.updateAmounts(this.poolInfo.currentPrice)
+          }
+        }
+      })
     }
   },
   mounted() {
@@ -138,9 +244,66 @@ export default Vue.extend({
         }
       }
     },
-    async updateAmounts() {},
+    async updateAmounts(price: string) {
+      console.log('进来了啊')
+      // const slippage = 2 // 滑点暂写2%, 合约计算时候算了fee， 收了1%,  sdk没有，所以滑点暂时写为2%
+      const slippage = Number(this.$accessor.slippage) // 滑点暂写2%, 合约计算时候算了fee， 收了1%,  sdk没有，所以滑点暂时写为2%
+      if (this.fromCoin && this.toCoin && (this.fromCoinAmount || this.toCoinAmount)) {
+        this.loading = true
+        if (this.fixedFromCoin) {
+          const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+          console.log('到这里了吗')
+          const { amountOut, amountOutWithSlippage } = await getOutAmount(
+            this.$web3,
+            this.poolInfo,
+            this.fromCoin?.mintAddress,
+            this.toCoin?.mintAddress,
+            source_amount,
+            slippage
+          )
+          console.log('fixedFromCoin###if####amountOut###', amountOut.fixed())
+          console.log('fixedFromCoin###if####amountOutWithSlippage###', amountOutWithSlippage.fixed())
+
+          if (Number(amountOutWithSlippage.fixed())) {
+            this.insufficientLiquidity = false
+            this.toCoinAmount = amountOutWithSlippage.fixed()
+          } else {
+            this.insufficientLiquidity = true
+            this.toCoinAmount = '0'
+          }
+          this.loading = false
+        } else {
+          const source_amount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+
+          const { amountOut, amountOutWithSlippage } = await getOutAmount(
+            this.$web3,
+            this.poolInfo,
+            this.toCoin?.mintAddress,
+            this.fromCoin?.mintAddress,
+            source_amount,
+            slippage
+          )
+          if (Number(amountOut.fixed())) {
+            this.insufficientLiquidity = false
+            this.fromCoinAmount = amountOut.fixed()
+          } else {
+            this.insufficientLiquidity = true
+            this.fromCoinAmount = '0'
+          }
+          this.loading = false
+          console.log('fixedFromCoin###else####amountOut###', amountOut.fixed())
+          console.log('fixedFromCoin###else####amountOutWithSlippage###', amountOutWithSlippage.fixed())
+        }
+      }
+    },
     openCoinSelect(key: string) {
       this.currentCoinKey = key
+      if (key === 'fromCoin') {
+        this.existingCoins = this.toCoin?.symbol || ''
+      } else {
+        this.existingCoins = this.fromCoin?.symbol || ''
+      }
+      // existingCoins
       this.showCoinSelect = true
     },
     onCoinSelect(token: TokenInfo) {
@@ -214,7 +377,10 @@ export default Vue.extend({
         // this.fixedFromCoin ? this.fromCoinAmount : this.fromCoinWithSlippage,
         // this.fixedFromCoin ? this.toCoinWithSlippage : this.toCoinAmount
         this.fromCoinAmount,
-        this.toCoinAmount
+        // this.toCoinAmount
+        this.fixedFromCoin
+          ? this.toCoinAmount
+          : String(Number(this.toCoinAmount) / (1 + Number(this.$accessor.slippage) / 100))
       )
         .then((txid: any) => {
           this.$notify.info({

@@ -23,10 +23,10 @@
           <img src="@/assets/images/icon-Trading@2x.png" alt="" />
           <span>Trading</span>
         </li>
-        <!-- <li :class="{ active: $route.name === 'swap' || $route.name === 'index' }" @click="goUrl('swap')">
+        <li :class="{ active: $route.name === 'swap' || $route.name === 'index' }" @click="goUrl('swap')">
           <img src="@/assets/images/icon-Swap@2x.png" alt="" />
           <span>Swap</span>
-        </li> -->
+        </li>
         <li class="have-sub-menu" @click="goUrl('pool')">
           <div
             :class="{ active: $route.name === 'liquidity' || $route.name === 'farming', title: true }"

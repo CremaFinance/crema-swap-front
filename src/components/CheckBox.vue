@@ -1,7 +1,7 @@
 <template>
   <div :class="['c-checkbox', disabled ? 'disabled' : '']" @click="toggle">
-    <img v-if="!cvalue" src="../assets/images/select_check.png" />
-    <img v-else src="../assets/images/select_check.png" />
+    <img v-if="cvalue" src="../assets/images/select_check.png" />
+    <img v-else src="../assets/images/select_none.png" />
     <label class="label"><slot></slot></label>
   </div>
 </template>

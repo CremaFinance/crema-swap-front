@@ -4,8 +4,84 @@ import * as BufferLayout from 'buffer-layout'
 import { Account, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
 import { NATIVE_SOL, TOKENS, getTokenByMintAddress } from './tokens'
 import { TokenAmount } from '@/utils/safe-math'
-import { createTokenAccountIfNotExist, createAssociatedTokenAccountIfNotExist, sendTransaction } from '@/utils/web3'
+import {
+  createTokenAccountIfNotExist,
+  createAssociatedTokenAccountIfNotExist,
+  sendTransaction,
+  getMultipleAccounts,
+  commitment
+} from '@/utils/web3'
 import { closeAccount } from '@project-serum/serum/lib/token-instructions'
+import { price2tick, tick2price } from './common'
+import { loadAccount } from '@/tokenSwap/util/account'
+import { TokenSwap, TokenSwapLayout, Numberu128, TickInfoLayout, Number128, TickInfo } from '@/tokenSwap'
+import { SWAPV3_PROGRAMID, SWAP_PAYER, PAYER } from './ids'
+import { preswap, TickWord } from '@/tokenSwap/swapv3'
+
+// export async function loadTickInfo(
+//   connection: Connection,
+//   address: PublicKey,
+//   tick_append_index: number
+// ): Promise<Array<TickInfo>> {
+//   // const connection = await getConnection()
+//   let tickInfos = await TickInfo.loadTickInfo(connection, address, SWAPV3_PROGRAMID, tick_append_index)
+//   // for (let i = 0; i < tick_append_index; i++) {
+//   //   let tickInfo = tickInfos[i]
+//   //   console.log('the %dth tickinfo is %s', i, tickInfo)
+//   // }
+//   return tickInfos
+// }
+
+export async function getOutAmount(
+  connection: Connection,
+  poolInfo: any,
+  fromCoinMint: string,
+  toCoinMint: string,
+  amount: number,
+  slippage: number
+) {
+  const { coin, pc } = poolInfo
+  //direct is swap dirction, 0 -> x swap y  1 -> y swap x
+  const direct = fromCoinMint === coin.mintAddress && toCoinMint === pc.mintAddress ? 0 : 1
+
+  const data = await loadAccount(connection, new PublicKey(poolInfo.tokenSwapAccount), SWAPV3_PROGRAMID)
+
+  const tokenSwapData = TokenSwapLayout.decode(data)
+
+  const tokenSwap = await TokenSwap.loadTokenSwap(
+    connection,
+    new PublicKey(poolInfo.tokenSwapAccount),
+    SWAPV3_PROGRAMID,
+    PAYER
+  )
+
+  console.log('tokenSwap###', tokenSwap)
+
+  const tick_detail_key = new PublicKey(tokenSwapData.tick_detail_key) // tick_info
+  const tick_append_index = tokenSwapData.tick_append_index
+  console.log('3333333333##@')
+  const tickInfos = await TickInfo.loadTickInfo(connection, tick_detail_key, SWAPV3_PROGRAMID, tick_append_index)
+  console.log('没走到这里吧####')
+
+  let test_tick_word = new TickWord(tickInfos, tick_append_index)
+
+  /*
+   *feeGrowthGlobal0: number,
+   *feeGrowthGlobal1: number,
+   *current_price: number,
+   *liquity: number,
+   *fee: number
+   */
+  let dst = preswap(amount, direct, tokenSwap, test_tick_word)
+  console.log('the preswap caclutate the result is ', dst)
+  const _decimals = direct === 0 ? pc.decimals : coin.decimals
+  const amountOutWithSlippage = dst / (1 + slippage / 100)
+
+  return {
+    amountOut: new TokenAmount(dst, _decimals),
+    amountOutWithSlippage: new TokenAmount(amountOutWithSlippage, _decimals)
+  }
+}
 
 export async function swap(
   connection: Connection,
@@ -38,6 +114,9 @@ export async function swap(
 
   console.log('amountIn####', amountIn)
   console.log('amountOut####', amountOut)
+
+  console.log('Math.floor(amountIn.toWei().toNumber())###', Math.floor(amountIn.toWei().toNumber()))
+  console.log('Math.floor(amountOut.toWei().toNumber())####', Math.floor(amountOut.toWei().toNumber()))
 
   let fromMint = fromCoinMint
   let toMint = toCoinMint
@@ -98,25 +177,25 @@ export async function swap(
       new PublicKey(poolInfo.tokenSwapAccount),
       new PublicKey(poolInfo.authority),
       owner,
-      // wrappedSolAccount ?? newFromTokenAccount,
-      // wrappedSolAccount2 ?? newToTokenAccount,
-      wrappedSolAccount ?? new PublicKey(fromTokenAccount),
-      wrappedSolAccount2 ?? new PublicKey(toTokenAccount),
+      wrappedSolAccount ?? newFromTokenAccount,
+      wrappedSolAccount2 ?? newToTokenAccount,
+      // wrappedSolAccount ?? new PublicKey(fromTokenAccount),
+      // wrappedSolAccount2 ?? new PublicKey(toTokenAccount),
       fromCoinMint === poolInfo.coin.mintAddress
         ? new PublicKey(poolInfo.poolCoinTokenAccount)
         : new PublicKey(poolInfo.poolPcTokenAccount),
       toCoinMint === poolInfo.pc.mintAddress
         ? new PublicKey(poolInfo.poolPcTokenAccount)
         : new PublicKey(poolInfo.poolCoinTokenAccount),
-      new PublicKey(poolInfo.tickMapPubkey),
-      new PublicKey(poolInfo.tickPositionKey),
+      // new PublicKey(poolInfo.tickMapPubkey),
+      // new PublicKey(poolInfo.tickPositionKey),
       new PublicKey(poolInfo.tickDetailKey),
       SWAPV3_PROGRAMID,
       new PublicKey(poolInfo.programId),
-      // Math.floor(amountIn.toWei().toNumber()),
-      // Math.floor(amountOut.toWei().toNumber())
-      40000,
-      1
+      Math.floor(amountIn.toWei().toNumber()),
+      Math.floor(amountOut.toWei().toNumber())
+      // 40000,
+      // 1
     )
   )
 
@@ -142,7 +221,7 @@ export async function swap(
   return await sendTransaction(connection, wallet, transaction, signers)
 }
 
-export function swapInstruction(
+function swapInstruction(
   tokenSwap: PublicKey,
   authority: PublicKey,
   userTransferAuthority: PublicKey,
@@ -150,8 +229,6 @@ export function swapInstruction(
   userDestination: PublicKey,
   swapSource: PublicKey,
   swapDestination: PublicKey,
-  tick_map_key: PublicKey,
-  tick_position_key: PublicKey,
   tick_info_key: PublicKey,
   swapProgramId: PublicKey,
   tokenProgramId: PublicKey,
@@ -173,18 +250,6 @@ export function swapInstruction(
     },
     data
   )
-
-  console.log('参数1###tokenSwap####', tokenSwap.toString())
-  console.log('参数2###authority####', authority.toString())
-  console.log('参数3###userTransferAuthority####', userTransferAuthority.toString())
-  console.log('参数4###userSource####', userSource.toString())
-  console.log('参数5###userDestination####', userDestination.toString())
-  console.log('参数6###swapSource####', swapSource.toString())
-  console.log('参数7###swapDestination####', swapDestination.toString())
-  console.log('参数8###tick_map_key####', tick_map_key.toString())
-  console.log('参数9###tick_position_key####', tick_position_key.toString())
-  console.log('参数10###tick_info_key####', tick_info_key.toString())
-  console.log('参数11###tokenProgramId####', tokenProgramId.toString())
   const keys = [
     { pubkey: tokenSwap, isSigner: false, isWritable: true },
     { pubkey: authority, isSigner: false, isWritable: false },
@@ -193,24 +258,9 @@ export function swapInstruction(
     { pubkey: userDestination, isSigner: false, isWritable: true },
     { pubkey: swapSource, isSigner: false, isWritable: true },
     { pubkey: swapDestination, isSigner: false, isWritable: true },
-    { pubkey: tick_map_key, isSigner: false, isWritable: true },
-    { pubkey: tick_position_key, isSigner: false, isWritable: true },
     { pubkey: tick_info_key, isSigner: false, isWritable: true },
     { pubkey: tokenProgramId, isSigner: false, isWritable: false }
   ]
-  // const keys = [
-  //   { pubkey: new PublicKey('CHdxYT1DWMraPrMUa5suYdNeh9h5SL7ZoZsXVJPxEYNV'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('Dwesu9Fg63QifmUP7epm9RHhDD8e9rpCdMYA3keqCCyN'), isSigner: false, isWritable: false },
-  //   { pubkey: new PublicKey('Dk16caR9W5joxGB74wJ2PsYJVvvvVD8bKPkzYHq7qVot'), isSigner: true, isWritable: false },
-  //   { pubkey: new PublicKey('4pi8DAxwQ13SJiDCw5WT5AqKZsGbtz2HQSTsJy3Pxcy4'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('Cyrfy1xsvuRv3BGnTdpELtT5BvGUQygqXo7iDRkjsX4v'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('3jgBQWwgsLnUU8mMyags9f4sqKaMdAweV6dAv5B8ULET'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('DGRXbamNuabgabHCpT4S9eExKEGQgShXAtX8TeH1ere6'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('GznACvQZxes7k2CA7z5SQYpjdmYUysBTvZ4C4AXkifbL'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('D9bMcvY4oXeJ9bBp618EAAgiH3JrQqqU3PQjmVp7yqW8'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('2BNMYw76D6bgBSTaGMJ9pyDZ2xKw8HgnQbbukPoG2TNr'), isSigner: false, isWritable: true },
-  //   { pubkey: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'), isSigner: false, isWritable: false }
-  // ]
   return new TransactionInstruction({
     keys,
     programId: swapProgramId,

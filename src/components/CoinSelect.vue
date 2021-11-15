@@ -1,5 +1,5 @@
 <template>
-  <Modal title="Select a token" :visible="true" :footer="null" @cancel="$emit('onClose')">
+  <Modal title="Select a token" centered :visible="true" :footer="null" @cancel="$emit('onClose')">
     <div class="coin-select-modal">
       <div class="search-input">
         <input v-model="keyword" placeholder="Enter the token symbol or address" />
@@ -23,6 +23,7 @@
           </li>
         </ul>
         <div v-else class="no-data">
+          <img src="../assets/images/icon_NoDate@2x.png" />
           <p>No Data</p>
         </div>
       </div>
@@ -34,6 +35,7 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 import { Modal, Icon } from 'ant-design-vue'
 import { TOKENS, TokenInfo, NATIVE_SOL } from '@/utils/tokens'
+import { LIQUIDITY_POOLS } from '@/utils/pools'
 import { cloneDeep } from 'lodash-es'
 
 Vue.use(Modal)
@@ -42,6 +44,12 @@ export default Vue.extend({
   components: {
     Modal,
     Icon
+  },
+  props: {
+    existingCoins: {
+      type: String,
+      default: ''
+    }
   },
   data() {
     return {
@@ -83,9 +91,25 @@ export default Vue.extend({
       let hasBalance = []
       const noBalance = []
 
-      for (const symbol of Object.keys(TOKENS)) {
-        let tokenInfo = cloneDeep(TOKENS[symbol])
-        console.log(tokenInfo, 'tokenInfo##')
+      let tokenObject: any = {}
+      // if (this.existingCoins) {
+      //   for (const coinPair in LIQUIDITY_POOLS) {
+      //     const poolInfo = cloneDeep(LIQUIDITY_POOLS[coinPair])
+      //     if (poolInfo.coin.symbol === this.existingCoins) {
+      //       tokenObject[poolInfo.pc.symbol] = poolInfo.pc
+      //     }
+
+      //     if (poolInfo.pc.symbol === this.existingCoins) {
+      //       tokenObject[poolInfo.coin.symbol] = poolInfo.coin
+      //     }
+      //   }
+      // } else {
+      //   tokenObject = cloneDeep(TOKENS)
+      // }
+      tokenObject = cloneDeep(TOKENS)
+
+      for (const symbol of Object.keys(tokenObject)) {
+        let tokenInfo = cloneDeep(tokenObject[symbol])
         if (!tokenInfo.showDefault) continue
 
         tokenInfo.symbol = symbol
@@ -111,13 +135,37 @@ export default Vue.extend({
         return b.balance.toEther() - a.balance.toEther()
       })
 
-      tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
+      // if (this.existingCoins !== 'SOL') {
+      //   tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
+      // } else {
+      //   tokenList = [...hasBalance, ...noBalance]
+      // }
+
+      // 暂时没有sol相关交易对，先注释了
+      tokenList = [...hasBalance, ...noBalance]
 
       if (keyword) {
         tokenList = tokenList.filter((token) => token.symbol.includes(keyword.toUpperCase()))
       }
 
       this.tokenList = cloneDeep(tokenList)
+
+      // const resultObj: any = {}
+      // if (this.existingCoins) {
+      //   for (const coinPair in LIQUIDITY_POOLS) {
+      //     const poolInfo = cloneDeep(LIQUIDITY_POOLS[coinPair])
+      //     if (poolInfo.coin.symbol === this.existingCoins && tokenList.includes(poolInfo.pc)) {
+      //       resultObj[poolInfo.pc.symbol] = poolInfo.pc
+      //     }
+
+      //     if (poolInfo.pc.symbol === this.existingCoins && tokenList.includes(poolInfo.coin)) {
+      //       resultObj[poolInfo.coin.symbol] = poolInfo.coin
+      //     }
+      //   }
+      //   this.tokenList = cloneDeep(Object.values(resultObj))
+      // } else {
+      //   this.tokenList = cloneDeep(tokenList)
+      // }
     }
   }
 })
@@ -167,6 +215,22 @@ export default Vue.extend({
           }
         }
       }
+    }
+  }
+  .no-data {
+    width: 100%;
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    img {
+      width: 80px;
+      height: 80px;
+    }
+    p {
+      color: rgba(255, 255, 255, 0.8);
+      padding-top: 10px;
     }
   }
 }

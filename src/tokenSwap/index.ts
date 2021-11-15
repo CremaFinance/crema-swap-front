@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import assert from 'assert'
 import BN from 'bn.js'
 import { Buffer } from 'buffer'
@@ -11,30 +10,10 @@ import * as Layout from './layout'
 import { sendAndConfirmTransaction } from './util/send-and-confirm-transaction'
 import { loadAccount } from './util/account'
 export const ORACLE_PRAGRAM_ID = new PublicKey('gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s')
-export const SWAPV3_PROGRAMID: PublicKey = new PublicKey('C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N')
-
-const amm_test = {
-  tick_map_account: new Account([
-    63, 142, 248, 74, 136, 12, 8, 235, 128, 48, 114, 134, 53, 187, 166, 210, 190, 167, 105, 131, 62, 154, 236, 196, 142,
-    28, 246, 39, 93, 163, 215, 239, 237, 172, 120, 156, 87, 136, 219, 14, 107, 15, 207, 189, 209, 232, 202, 55, 146,
-    157, 151, 12, 145, 165, 39, 3, 133, 121, 2, 130, 21, 26, 62, 183
-  ]),
-  tick_position_account: new Account([
-    72, 74, 243, 207, 113, 67, 225, 200, 93, 223, 110, 201, 108, 0, 124, 207, 35, 217, 237, 83, 223, 161, 108, 118, 194,
-    198, 226, 174, 5, 145, 87, 203, 17, 131, 163, 242, 208, 221, 35, 183, 31, 147, 92, 182, 213, 119, 112, 138, 155, 19,
-    55, 39, 39, 139, 213, 1, 187, 137, 133, 120, 187, 220, 0, 115
-  ]),
-  tick_info_account: new Account([
-    210, 224, 116, 2, 106, 5, 28, 126, 130, 188, 145, 43, 245, 100, 243, 252, 182, 174, 143, 253, 188, 164, 109, 27, 93,
-    83, 125, 99, 249, 81, 154, 233, 180, 127, 188, 72, 167, 11, 53, 121, 227, 54, 33, 170, 100, 143, 156, 187, 112, 81,
-    67, 65, 1, 130, 114, 130, 171, 156, 248, 154, 135, 238, 145, 217
-  ]),
-  user_postion_account: new Account([
-    118, 12, 183, 31, 169, 40, 129, 189, 147, 252, 232, 124, 183, 186, 16, 240, 38, 146, 237, 52, 116, 13, 171, 40, 224,
-    73, 204, 165, 14, 178, 68, 181, 194, 25, 148, 22, 81, 185, 223, 89, 188, 238, 200, 195, 90, 115, 233, 149, 40, 179,
-    191, 113, 195, 123, 83, 241, 129, 61, 3, 131, 36, 223, 244, 90
-  ])
-}
+export const SWAPV3_PROGRAMID: PublicKey = new PublicKey(
+  //'VenTxqaDv4Mj2krfs5Xahf23owM2MCVDQmTR1Qxj7J5',
+  'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N'
+)
 
 /**
  * Some amount of tokens
@@ -68,6 +47,60 @@ export class Numberu64 extends BN {
         .join(''),
       16
     )
+  }
+}
+
+export class Number128 extends BN {
+  /**
+   * Convert to Buffer representation
+   */
+  toBuffer(): Buffer {
+    const a = super.toArray().reverse()
+    const b = Buffer.from(a)
+    if (b.length === 16) {
+      return b
+    }
+    assert(b.length < 16, 'Number128 too large')
+
+    const zeroPad = Buffer.alloc(16)
+    b.copy(zeroPad)
+    return zeroPad
+  }
+
+  /**
+   * Construct a Numberu64 from Buffer representation
+   */
+  static fromBuffer(buffer: Buffer): Number128 {
+    assert(buffer.length === 16, `Invalid buffer length: ${buffer.length}`)
+    let negtive = false
+    if (buffer[15] >= 0x80) {
+      negtive = true
+    }
+    let tmp: Number128
+    if (negtive === true) {
+      tmp = new Number128(
+        [...buffer]
+          .reverse()
+          // eslint-disable-next-line unicorn/number-literal-case
+          .map((i) => `00${Math.abs(~i & 0xff).toString(16)}`.slice(-2))
+          .join(''),
+        16
+      )
+      tmp = tmp.add(new BN(1))
+    } else {
+      tmp = new Number128(
+        [...buffer]
+          .reverse()
+          // eslint-disable-next-line unicorn/number-literal-case
+          .map((i) => `00${Math.abs(i & 0xff).toString(16)}`.slice(-2))
+          .join(''),
+        16
+      )
+    }
+    if (negtive) {
+      tmp.ineg()
+    }
+    return tmp
   }
 }
 
@@ -112,11 +145,8 @@ export const TokenSwapLayout = BufferLayout.struct([
   Layout.publicKey('tokenAccountB'),
   Layout.publicKey('mintA'),
   Layout.publicKey('mintB'),
-  Layout.publicKey('tick_map_pubkey'),
   Layout.publicKey('tick_detail_key'),
-  Layout.publicKey('tick_position_key'),
   Layout.publicKey('user_position_key'),
-  Layout.publicKey('oracleProgramID'),
   BufferLayout.u8('curveType'),
   BufferLayout.u32('fee'),
   BufferLayout.u32('tick_space'),
@@ -128,15 +158,10 @@ export const TokenSwapLayout = BufferLayout.struct([
   Layout.uint128('fee_growth_global1')
 ])
 
-export const CurveType = Object.freeze({
-  AMMv3: 0, // Constant product curve, Uniswap-style
-  HMMv3: 1 // Offset curve, like Uniswap, but with an additional offset on the token B side
-})
-
 export const UserPositionLayout = BufferLayout.struct([
   Layout.publicKey('nft_token_id'),
-  BufferLayout.u32('lower_tick'),
-  BufferLayout.u32('upper_tick'),
+  BufferLayout.s32('lower_tick'),
+  BufferLayout.s32('upper_tick'),
   Layout.uint128('liquity'),
   Layout.uint128('fee_growth_inside_a_last'),
   Layout.uint128('fee_growth_inside_b_last'),
@@ -150,11 +175,11 @@ export class UserPosition {
     public nft_token_id: PublicKey,
     public lower_tick: number,
     public upper_tick: number,
-    public liquity: number,
-    public fee_growth_inside_a_last: number,
-    public fee_growth_inside_b_last: number,
-    public token_a_fee: number,
-    public token_b_fee: number
+    public liquity: Numberu128,
+    public fee_growth_inside_a_last: Numberu128,
+    public fee_growth_inside_b_last: Numberu128,
+    public token_a_fee: Numberu128,
+    public token_b_fee: Numberu128
   ) {
     this.connection = connection
     this.nft_token_id = nft_token_id
@@ -175,21 +200,20 @@ export class UserPosition {
   ): Promise<Array<UserPosition>> {
     const data = await loadAccount(connection, address, programId)
     // eslint-disable-next-line no-array-constructor
-    const array = new Array<UserPosition>()
+    let array = new Array<UserPosition>()
     for (let i = 0; i < length; i++) {
       const userPositionData = UserPositionLayout.decode(
         data.slice(i * UserPositionLayout.span, (i + 1) * UserPositionLayout.span)
       )
       const nft_token_id = new PublicKey(userPositionData.nft_token_id)
-      console.log('the nft_token_id is %s', nft_token_id.toString())
-      const liquity = Numberu128.fromBuffer(userPositionData.liquity).toNumber()
+      const liquity = Numberu128.fromBuffer(userPositionData.liquity)
       const lower_tick = userPositionData.lower_tick
       const upper_tick = userPositionData.upper_tick
-      const fee_growth_inside_a_last = Numberu128.fromBuffer(userPositionData.fee_growth_inside_a_last).toNumber()
-      const fee_growth_inside_b_last = Numberu128.fromBuffer(userPositionData.fee_growth_inside_b_last).toNumber()
-      const token_a_fee = Numberu128.fromBuffer(userPositionData.token_a_fee).toNumber()
-      const token_b_fee = Numberu128.fromBuffer(userPositionData.token_b_fee).toNumber()
-      const userPostion = new UserPosition(
+      const fee_growth_inside_a_last = Numberu128.fromBuffer(userPositionData.fee_growth_inside_a_last)
+      const fee_growth_inside_b_last = Numberu128.fromBuffer(userPositionData.fee_growth_inside_b_last)
+      const token_a_fee = Numberu128.fromBuffer(userPositionData.token_a_fee)
+      const token_b_fee = Numberu128.fromBuffer(userPositionData.token_b_fee)
+      let userPostion = new UserPosition(
         connection,
         nft_token_id,
         lower_tick,
@@ -199,6 +223,85 @@ export class UserPosition {
         fee_growth_inside_b_last,
         token_a_fee,
         token_b_fee
+      )
+      array.push(userPostion)
+    }
+    return array
+  }
+
+  static async getUserPositionIdx(
+    connection: Connection,
+    address: PublicKey,
+    nft_pubkey: PublicKey,
+    programId: PublicKey,
+    length: number
+  ): Promise<{ index: number; new_flag: number }> {
+    let array = await UserPosition.loadUserPosition(connection, address, programId, length)
+    for (let i = 0; i < length; i++) {
+      if (array[i].nft_token_id.equals(nft_pubkey)) {
+        console.log('there already exist deposit user ', nft_pubkey.toString())
+        return { index: i, new_flag: 1 }
+      }
+    }
+    console.log('there not exist deposit user ', nft_pubkey.toString())
+    return { index: length, new_flag: 0 }
+  }
+}
+export const TickInfoLayout = BufferLayout.struct([
+  Layout.int32('tick'),
+  Layout.uint128('tick_price'),
+  Layout.uint128('liquity_gross'),
+  Layout.uint128('liquity_net'),
+  Layout.uint128('fee_growth_outside_a'),
+  Layout.uint128('fee_growth_outside_b')
+])
+export class TickInfo {
+  // unsigned int 引用这个tick得引用总和，不需要区分upper tick 和 lower tick，主要用来判断是否被position判断，可以用来计算费用
+  // siged int  价格由左向右穿过时，流动性增加得净值
+  constructor(
+    private connection: Connection,
+    public tick: number,
+    public tick_price: Numberu128,
+    public liquity_gross: Numberu128,
+    public liquity_net: Number128,
+    public feeGrowthOutside0: Numberu128,
+    public feeGrowthOutside1: Numberu128
+  ) {
+    this.connection = connection
+    this.tick = tick
+    this.tick_price = tick_price
+    this.liquity_gross = liquity_gross
+    this.liquity_net = liquity_net
+    this.feeGrowthOutside0 = feeGrowthOutside0
+    this.feeGrowthOutside1 = feeGrowthOutside1
+  }
+
+  static async loadTickInfo(
+    connection: Connection,
+    address: PublicKey,
+    programId: PublicKey,
+    length: number
+  ): Promise<Array<TickInfo>> {
+    const data = await loadAccount(connection, address, programId)
+    // eslint-disable-next-line no-array-constructor
+    let array = new Array<TickInfo>()
+    for (let i = 0; i < length; i++) {
+      const tickInfoData = TickInfoLayout.decode(data.slice(i * TickInfoLayout.span, (i + 1) * TickInfoLayout.span))
+      // const tick = tickInfoData.tick.readInt32LE()
+      const tick = Buffer.from(tickInfoData.tick).readInt32LE(0)
+      const tick_price = Numberu128.fromBuffer(tickInfoData.tick_price)
+      const liquity_gross = Numberu128.fromBuffer(tickInfoData.liquity_gross)
+      const liquity_net = Number128.fromBuffer(tickInfoData.liquity_net)
+      const fee_growth_outside_a = Numberu128.fromBuffer(tickInfoData.fee_growth_outside_a)
+      const fee_growth_outside_b = Numberu128.fromBuffer(tickInfoData.fee_growth_outside_b)
+      let userPostion = new TickInfo(
+        connection,
+        tick,
+        tick_price,
+        liquity_gross,
+        liquity_net,
+        fee_growth_outside_a,
+        fee_growth_outside_b
       )
       array.push(userPostion)
     }
@@ -235,19 +338,17 @@ export class TokenSwap {
     public tokenAccountB: PublicKey,
     public mintA: PublicKey,
     public mintB: PublicKey,
-    public tick_map_pubkey: PublicKey,
     public tick_detail_key: PublicKey,
-    public tick_position_key: PublicKey,
     public user_position_key: PublicKey,
     public curveType: number,
     public fee: number,
     public tick_space: number,
     public tick_append_index: number,
     public user_postion_index: number,
-    public current_price: number,
-    public current_liquity: number,
-    public fee_growth_global0: number,
-    public fee_growth_global1: number,
+    public current_price: Numberu128,
+    public current_liquity: Numberu128,
+    public fee_growth_global0: Numberu128,
+    public fee_growth_global1: Numberu128,
     public payer: Account
   ) {
     this.connection = connection
@@ -259,6 +360,8 @@ export class TokenSwap {
     this.tokenAccountB = tokenAccountB
     this.mintA = mintA
     this.mintB = mintB
+    this.tick_detail_key = tick_detail_key
+    this.user_position_key = user_position_key
     this.curveType = curveType
     this.fee = fee
     this.tick_space = tick_space
@@ -288,9 +391,7 @@ export class TokenSwap {
     authority: PublicKey,
     tokenAccountA: PublicKey,
     tokenAccountB: PublicKey,
-    tick_map_pubkey: PublicKey,
     tick_detail_key: PublicKey,
-    tick_position_key: PublicKey,
     user_position_key: PublicKey,
     tokenProgramId: PublicKey,
     swapProgramId: PublicKey,
@@ -305,9 +406,7 @@ export class TokenSwap {
       { pubkey: authority, isSigner: false, isWritable: false },
       { pubkey: tokenAccountA, isSigner: false, isWritable: false },
       { pubkey: tokenAccountB, isSigner: false, isWritable: false },
-      { pubkey: tick_map_pubkey, isSigner: false, isWritable: false },
       { pubkey: tick_detail_key, isSigner: false, isWritable: false },
-      { pubkey: tick_position_key, isSigner: false, isWritable: false },
       { pubkey: user_position_key, isSigner: false, isWritable: false },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false },
       { pubkey: ORACLE_PRAGRAM_ID, isSigner: false, isWritable: false }
@@ -326,25 +425,24 @@ export class TokenSwap {
       Layout.uint128('fee_growth_global1')
     ])
     const data = Buffer.alloc(commandDataLayout.span)
-    // eslint-disable-next-line no-lone-blocks
-    {
-      commandDataLayout.encode(
-        {
-          instruction: 0, // InitializeSwap instruction
-          nonce,
-          curveType,
-          fee,
-          tick_space,
-          tick_append_index: 0,
-          user_position_index: 0,
-          current_price: new Numberu128(current_price).toBuffer(),
-          current_liquity: new Numberu128(0).toBuffer(),
-          fee_growth_global0: new Numberu128(0).toBuffer(),
-          fee_growth_global1: new Numberu128(0).toBuffer()
-        },
-        data
-      )
-    }
+    // {
+    commandDataLayout.encode(
+      {
+        instruction: 0, // InitializeSwap instruction
+        nonce,
+        curveType,
+        fee,
+        tick_space,
+        tick_append_index: 0,
+        user_position_index: 0,
+        current_price: new Numberu128(current_price).toBuffer(),
+        current_liquity: new Numberu128(0).toBuffer(),
+        fee_growth_global0: new Numberu128(0).toBuffer(),
+        fee_growth_global1: new Numberu128(0).toBuffer()
+      },
+      data
+    )
+    // }
     return new TransactionInstruction({
       keys,
       programId: swapProgramId,
@@ -369,33 +467,31 @@ export class TokenSwap {
     const tokenAccountB = new PublicKey(tokenSwapData.tokenAccountB)
     const mintA = new PublicKey(tokenSwapData.mintA)
     const mintB = new PublicKey(tokenSwapData.mintB)
-    const tick_map_pubkey = new PublicKey(tokenSwapData.tick_map_pubkey)
     const tick_detail_key = new PublicKey(tokenSwapData.tick_detail_key)
-    const tick_position_key = new PublicKey(tokenSwapData.tick_position_key)
     const user_position_key = new PublicKey(tokenSwapData.user_position_key)
     const tokenProgramId = new PublicKey(tokenSwapData.tokenProgramId)
     console.log('the token a pool is ', tokenAccountA.toString())
     console.log('the token b pool is ', tokenAccountB.toString())
     console.log('the mint a is ', mintA.toString())
     console.log('the mint b is ', mintB.toString())
-    console.log('the tick_map_pubkey is ', tick_map_pubkey.toString())
     console.log('the tick_detail_key is ', tick_detail_key.toString())
-    console.log('the tick_position_key is ', tick_position_key.toString())
     console.log('the user_position_key is ', user_position_key.toString())
     console.log('the tokenProgramId is ', tokenProgramId.toString())
     const curveType = tokenSwapData.curveType
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // eslint-disable-next-line no-unused-vars
     const fee = tokenSwapData.fee
     const tick_space = tokenSwapData.tick_space
     const tick_append_index = tokenSwapData.tick_append_index
-    const user_position_index = tokenSwapData.tick_append_index
-    const current_price = Numberu128.fromBuffer(tokenSwapData.current_price).toNumber()
-    const current_liquity = Numberu128.fromBuffer(tokenSwapData.current_liquity).toNumber()
-    const fee_growth_global0 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global0).toNumber()
-    const fee_growth_global1 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global1).toNumber()
-    console.log('the current_price is ', current_price)
-    console.log('the current_liquity is ', current_liquity)
+    const user_position_index = tokenSwapData.user_position_index
+    const current_price = Numberu128.fromBuffer(tokenSwapData.current_price)
+    const current_liquity = Numberu128.fromBuffer(tokenSwapData.current_liquity)
+    const fee_growth_global0 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global0)
+    const fee_growth_global1 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global1)
+    console.log('the fee is ', fee)
+    console.log('the current_price is ', current_price.toString())
+    console.log('the current_liquity is ', current_liquity.toString())
+    console.log('the user append index is', user_position_index)
+    console.log('the fee_growth_global0 is %d', fee_growth_global0.toString())
+    console.log('the fee_growth_global1 is %d', fee_growth_global1.toString())
     return new TokenSwap(
       connection,
       address,
@@ -406,12 +502,10 @@ export class TokenSwap {
       tokenAccountB,
       mintA,
       mintB,
-      tick_map_pubkey,
       tick_detail_key,
-      tick_position_key,
       user_position_key,
       curveType,
-      0,
+      fee,
       tick_space,
       tick_append_index,
       user_position_index,
@@ -445,14 +539,14 @@ export class TokenSwap {
     connection: Connection,
     payer: Account,
     tokenSwapAccount: Account,
+    tick_info_account: Account,
+    user_postion_account: Account,
     authority: PublicKey,
     tokenAccountA: PublicKey,
     tokenAccountB: PublicKey,
     mintA: PublicKey,
     mintB: PublicKey,
-    tick_map_pubkey: PublicKey,
     tick_detail_key: PublicKey,
-    tick_position_key: PublicKey,
     user_position_key: PublicKey,
     swapProgramId: PublicKey,
     tokenProgramId: PublicKey,
@@ -462,6 +556,7 @@ export class TokenSwap {
     tick_space: number,
     current_price: number
   ): Promise<TokenSwap> {
+    let transaction
     console.log('create toke swap program id is ', swapProgramId.toString())
     const tokenSwap = new TokenSwap(
       connection,
@@ -473,33 +568,27 @@ export class TokenSwap {
       tokenAccountB,
       mintA,
       mintB,
-      tick_map_pubkey,
       tick_detail_key,
-      tick_position_key,
       user_position_key,
       curveType,
       fee,
       tick_space,
       0,
       0,
-      current_price,
-      0,
-      0,
-      0,
+      new Numberu64(current_price),
+      new Numberu64(0),
+      new Numberu64(0),
+      new Numberu64(0),
       payer
     )
 
     // Allocate memory for the account
     const balanceNeeded = await TokenSwap.getMinBalanceRentForExemptTokenSwap(connection)
-    const tick_map_length = 221824
-    const tick_position_length = 1774592
-    const tick_info_length = 64000
-    const user_positon_length = 36000
-    const tick_map_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, tick_map_length)
-    const tick_position_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, tick_position_length)
-    const tick_info_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, tick_info_length)
-    const user_position_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, user_positon_length)
-    const transaction = new Transaction()
+    let tick_info_length = 64000
+    let user_positon_length = 36000
+    let tick_info_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, tick_info_length)
+    let user_position_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, user_positon_length)
+    transaction = new Transaction()
     transaction.add(
       SystemProgram.createAccount({
         fromPubkey: payer.publicKey,
@@ -510,23 +599,9 @@ export class TokenSwap {
       }),
       SystemProgram.createAccount({
         fromPubkey: payer.publicKey,
-        newAccountPubkey: tick_map_pubkey,
-        lamports: tick_map_balance,
-        space: 221824,
-        programId: swapProgramId
-      }),
-      SystemProgram.createAccount({
-        fromPubkey: payer.publicKey,
-        newAccountPubkey: tick_position_key,
-        lamports: tick_position_balance,
-        space: 1774592,
-        programId: swapProgramId
-      }),
-      SystemProgram.createAccount({
-        fromPubkey: payer.publicKey,
         newAccountPubkey: tick_detail_key,
         lamports: tick_info_balance,
-        space: 64000,
+        space: 84000,
         programId: swapProgramId
       }),
       SystemProgram.createAccount({
@@ -542,9 +617,7 @@ export class TokenSwap {
       authority,
       tokenAccountA,
       tokenAccountB,
-      tick_map_pubkey,
       tick_detail_key,
-      tick_position_key,
       user_position_key,
       tokenProgramId,
       swapProgramId,
@@ -562,10 +635,8 @@ export class TokenSwap {
       transaction,
       payer,
       tokenSwapAccount,
-      amm_test.tick_map_account,
-      amm_test.tick_info_account,
-      amm_test.tick_position_account,
-      amm_test.user_postion_account
+      tick_info_account,
+      user_postion_account
     )
     return tokenSwap
   }
@@ -601,8 +672,6 @@ export class TokenSwap {
           userDestination,
           this.tokenAccountA,
           this.tokenAccountB,
-          this.tick_map_pubkey,
-          this.tick_position_key,
           this.tick_detail_key,
           this.swapProgramId,
           this.tokenProgramId,
@@ -623,8 +692,6 @@ export class TokenSwap {
     userDestination: PublicKey,
     swapSource: PublicKey,
     swapDestination: PublicKey,
-    tick_map_key: PublicKey,
-    tick_position_key: PublicKey,
     tick_info_key: PublicKey,
     swapProgramId: PublicKey,
     tokenProgramId: PublicKey,
@@ -654,8 +721,6 @@ export class TokenSwap {
       { pubkey: userDestination, isSigner: false, isWritable: true },
       { pubkey: swapSource, isSigner: false, isWritable: true },
       { pubkey: swapDestination, isSigner: false, isWritable: true },
-      { pubkey: tick_map_key, isSigner: false, isWritable: true },
-      { pubkey: tick_position_key, isSigner: false, isWritable: true },
       { pubkey: tick_info_key, isSigner: false, isWritable: true },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false }
     ]
@@ -682,14 +747,19 @@ export class TokenSwap {
     userTransferAuthority: Account,
     nft_mint_pubkey: PublicKey,
     user_nft_pubkey: PublicKey,
-    new_position: number,
     tick_lower: number,
     tick_upper: number,
     liquity_mount: number | Numberu64,
     maximumTokenA: number | Numberu64,
-    maximumTokenB: number | Numberu64,
-    user_position_index: number | Numberu64
+    maximumTokenB: number | Numberu64
   ): Promise<TransactionSignature> {
+    let { index: user_position_index, new_flag: new_position } = await UserPosition.getUserPositionIdx(
+      this.connection,
+      this.user_position_key,
+      user_nft_pubkey,
+      this.swapProgramId,
+      this.user_postion_index
+    )
     return await sendAndConfirmTransaction(
       'depositAllTokenTypes',
       this.connection,
@@ -704,8 +774,6 @@ export class TokenSwap {
           this.tokenAccountB,
           nft_mint_pubkey,
           user_nft_pubkey,
-          this.tick_map_pubkey,
-          this.tick_position_key,
           this.tick_detail_key,
           this.user_position_key,
           this.swapProgramId,
@@ -734,8 +802,6 @@ export class TokenSwap {
     intoB: PublicKey,
     nft_mint_pubkey: PublicKey,
     user_nft_pubkey: PublicKey,
-    tick_map_key: PublicKey,
-    tick_position_key: PublicKey,
     tick_info_key: PublicKey,
     user_postion_key: PublicKey,
     swapProgramId: PublicKey,
@@ -746,15 +812,14 @@ export class TokenSwap {
     liquity_amount: number | Numberu64,
     maximumTokenA: number | Numberu64,
     maximumTokenB: number | Numberu64,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     user_position_index: number | Numberu64
   ): TransactionInstruction {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8('instruction'),
       BufferLayout.u8('new_position'),
       Layout.uint64('liquity_amount'),
-      BufferLayout.u32('tick_lower'),
-      BufferLayout.u32('tick_upper'),
+      BufferLayout.s32('tick_lower'),
+      BufferLayout.s32('tick_upper'),
       Layout.uint64('maximumTokenA'),
       Layout.uint64('maximumTokenB'),
       Layout.uint64('user_position_index')
@@ -773,7 +838,7 @@ export class TokenSwap {
         tick_upper: tick_upper,
         maximumTokenA: new Numberu64(maximumTokenA).toBuffer(),
         maximumTokenB: new Numberu64(maximumTokenB).toBuffer(),
-        user_position_index: new Numberu64(0).toBuffer()
+        user_position_index: new Numberu64(user_position_index).toBuffer()
       },
       data
     )
@@ -788,8 +853,6 @@ export class TokenSwap {
       { pubkey: intoB, isSigner: false, isWritable: true },
       { pubkey: nft_mint_pubkey, isSigner: false, isWritable: true },
       { pubkey: user_nft_pubkey, isSigner: false, isWritable: true },
-      { pubkey: tick_map_key, isSigner: false, isWritable: true },
-      { pubkey: tick_position_key, isSigner: false, isWritable: true },
       { pubkey: tick_info_key, isSigner: false, isWritable: true },
       { pubkey: user_postion_key, isSigner: false, isWritable: true },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false }
@@ -820,9 +883,15 @@ export class TokenSwap {
     user_nft_pubkey: PublicKey,
     liquity_amount: number | Numberu64,
     minimumTokenA: number | Numberu64,
-    minimumTokenB: number | Numberu64,
-    user_position_index: number | Numberu64
+    minimumTokenB: number | Numberu64
   ): Promise<TransactionSignature> {
+    let { index: user_position_index, new_flag: new_position } = await UserPosition.getUserPositionIdx(
+      this.connection,
+      this.user_position_key,
+      user_nft_pubkey,
+      this.swapProgramId,
+      this.user_postion_index
+    )
     return await sendAndConfirmTransaction(
       'withdraw',
       this.connection,
@@ -837,8 +906,6 @@ export class TokenSwap {
           userAccountB,
           nft_mint_pubkey,
           user_nft_pubkey,
-          this.tick_map_pubkey,
-          this.tick_position_key,
           this.tick_detail_key,
           this.user_position_key,
           this.swapProgramId,
@@ -864,8 +931,6 @@ export class TokenSwap {
     userAccountB: PublicKey,
     nft_mint_pubkey: PublicKey,
     user_nft_pubkey: PublicKey,
-    tick_map_key: PublicKey,
-    tick_position_key: PublicKey,
     tick_info_key: PublicKey,
     user_postion_key: PublicKey,
     swapProgramId: PublicKey,
@@ -905,8 +970,6 @@ export class TokenSwap {
       { pubkey: fromB, isSigner: false, isWritable: true },
       { pubkey: userAccountA, isSigner: false, isWritable: true },
       { pubkey: userAccountB, isSigner: false, isWritable: true },
-      { pubkey: tick_map_key, isSigner: false, isWritable: true },
-      { pubkey: tick_position_key, isSigner: false, isWritable: true },
       { pubkey: tick_info_key, isSigner: false, isWritable: true },
       { pubkey: user_postion_key, isSigner: false, isWritable: true },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false }
@@ -933,9 +996,15 @@ export class TokenSwap {
     userAccountA: PublicKey,
     userAccountB: PublicKey,
     user_account: Account,
-    user_nft_pubkey: PublicKey,
-    user_position_index: number | Numberu64
+    user_nft_pubkey: PublicKey
   ): Promise<TransactionSignature> {
+    let { index: user_position_index, new_flag: new_position } = await UserPosition.getUserPositionIdx(
+      this.connection,
+      this.user_position_key,
+      user_nft_pubkey,
+      this.swapProgramId,
+      this.user_postion_index
+    )
     return await sendAndConfirmTransaction(
       'claim',
       this.connection,
@@ -949,8 +1018,6 @@ export class TokenSwap {
           userAccountA,
           userAccountB,
           user_nft_pubkey,
-          this.tick_map_pubkey,
-          this.tick_position_key,
           this.tick_detail_key,
           this.user_position_key,
           this.swapProgramId,
@@ -972,8 +1039,6 @@ export class TokenSwap {
     userAccountA: PublicKey,
     userAccountB: PublicKey,
     user_nft_pubkey: PublicKey,
-    tick_map_key: PublicKey,
-    tick_position_key: PublicKey,
     tick_info_key: PublicKey,
     user_postion_key: PublicKey,
     swapProgramId: PublicKey,
@@ -1000,8 +1065,6 @@ export class TokenSwap {
       { pubkey: fromB, isSigner: false, isWritable: true },
       { pubkey: userAccountA, isSigner: false, isWritable: true },
       { pubkey: userAccountB, isSigner: false, isWritable: true },
-      { pubkey: tick_map_key, isSigner: false, isWritable: false },
-      { pubkey: tick_position_key, isSigner: false, isWritable: false },
       { pubkey: tick_info_key, isSigner: false, isWritable: false },
       { pubkey: user_postion_key, isSigner: false, isWritable: true },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false }

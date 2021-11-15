@@ -1,5 +1,5 @@
 <template>
-  <Modal title="" :visible="true" :footer="null" :dialog-style="{ top: '30%' }" @cancel="$emit('onClose')">
+  <Modal title="" centered :visible="true" :footer="null" :dialog-style="{ top: '30%' }" @cancel="$emit('onClose')">
     <div class="waiting-container">
       <img src="@/assets/images/loading.png" alt="" />
       <p class="waiting-title">Waiting For Confirmation</p>

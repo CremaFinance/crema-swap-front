@@ -7,6 +7,7 @@ import * as swap from './swap'
 import * as liquidity from './liquidity'
 import * as farm from './farm'
 import * as transaction from './transaction'
+import * as position from './position'
 
 import { getAccessorType, mutationTree, actionTree } from 'typed-vuex'
 
@@ -26,7 +27,8 @@ function enquireScreen(call: Function) {
 }
 
 export const state = () => ({
-  isMobile: false
+  isMobile: false,
+  slippage: '1'
 })
 
 export type RootState = ReturnType<typeof state>
@@ -36,6 +38,10 @@ export const getters = {}
 export const mutations = mutationTree(state, {
   setIsMobile(state, isMobile: boolean) {
     state.isMobile = isMobile
+  },
+  setSlippage(state, slippage: string) {
+    state.slippage = slippage
+    localStorage.setItem('crema-slippage', slippage)
   }
 })
 
@@ -65,6 +71,10 @@ export const actions = actionTree(
             icon: (h: any) => h('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
           })
         })
+    },
+
+    setSlippage({ commit }, slippage) {
+      commit('setSlippage', slippage)
     }
   }
 )
@@ -83,6 +93,7 @@ export const accessorType = getAccessorType({
     swap,
     liquidity,
     farm,
-    transaction
+    transaction,
+    position
   }
 })

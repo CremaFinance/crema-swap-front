@@ -14,6 +14,7 @@ import {
 // @ts-ignore
 import SERUM_MARKETS from '@project-serum/serum/lib/markets.json'
 import { cloneDeep } from 'lodash-es'
+import { Numberu128 } from '@/tokenSwap'
 
 // export interface LiquidityPoolInfo {
 //   name: string
@@ -58,7 +59,7 @@ export interface LiquidityPoolInfo {
   name: string
   coin: TokenInfo
   pc: TokenInfo
-  lp: TokenInfo
+  // lp: TokenInfo
 
   programId: string
   authority: string
@@ -66,10 +67,14 @@ export interface LiquidityPoolInfo {
   poolCoinTokenAccount: string
   poolPcTokenAccount: string
   tokenSwapAccount: string
-  tickMapPubkey: string
+  tokenSwapToken: string
+  // tickMapPubkey: string
   tickDetailKey: string
-  tickPositionKey: string
+  // tickPositionKey: string
   userPositionKey: string
+  userPositionIndex: number
+  currentPrice: Numberu128
+  fee: number
 }
 
 /**
@@ -136,34 +141,6 @@ export function getPoolListByTokenMintAddresses(
   }
 }
 
-export function getLpMintByTokenMintAddresses(
-  coinMintAddress: string,
-  pcMintAddress: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  version = [3, 4]
-): string | null {
-  // const pool = LIQUIDITY_POOLS.find(
-  //   (pool) =>
-  //     ((pool.coin.mintAddress === coinMintAddress && pool.pc.mintAddress === pcMintAddress) ||
-  //       (pool.coin.mintAddress === pcMintAddress && pool.pc.mintAddress === coinMintAddress)) &&
-  //     version.includes(pool.version)
-  // )
-  const pool = LIQUIDITY_POOLS.find((pool) => {
-    return (
-      (pool.coin.mintAddress === coinMintAddress && pool.pc.mintAddress === pcMintAddress) ||
-      (pool.coin.mintAddress === pcMintAddress && pool.pc.mintAddress === coinMintAddress) ||
-      (pool.coin.mintAddress === coinMintAddress && pool.pc.mintAddress === pcMintAddress) ||
-      (pool.coin.mintAddress === pcMintAddress && pool.pc.mintAddress === coinMintAddress)
-    )
-  })
-
-  if (pool) {
-    return pool.lp.mintAddress
-  }
-
-  return null
-}
-
 export function getLpListByTokenMintAddresses(
   coinMintAddress: string,
   pcMintAddress: string,
@@ -207,32 +184,6 @@ export function canWrap(fromMintAddress: string, toMintAddress: string): boolean
   return fromMintAddress === TOKENS.WUSDT.mintAddress && toMintAddress === TOKENS.USDT.mintAddress
 }
 
-export function getPoolByLpMintAddress(lpMintAddress: string): LiquidityPoolInfo | undefined {
-  const pool = LIQUIDITY_POOLS.find((pool) => pool.lp.mintAddress === lpMintAddress)
-
-  if (pool) {
-    return cloneDeep(pool)
-  }
-
-  return pool
-}
-
-export function getAddressForWhat(address: string) {
-  for (const pool of LIQUIDITY_POOLS) {
-    for (const [key, value] of Object.entries(pool)) {
-      if (key === 'lp') {
-        if (value.mintAddress === address) {
-          return { key: 'lpMintAddress', lpMintAddress: pool.lp.mintAddress, version: '' }
-        }
-      } else if (value === address) {
-        return { key, lpMintAddress: pool.lp.mintAddress, version: '' }
-      }
-    }
-  }
-
-  return {}
-}
-
 export function isOfficalMarket(marketAddress: string) {
   for (const market of SERUM_MARKETS) {
     if (market.address === marketAddress && !market.deprecated) {
@@ -254,17 +205,85 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
     name: 'HYSD-USDD',
     coin: { ...TOKENS.HYSD },
     pc: { ...TOKENS.USDD },
-    lp: { ...LP_TOKENS['HYSD-USDD'] },
+    // lp: { ...LP_TOKENS['HYSD-USDD'] },
     programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-    authority: 'Dwesu9Fg63QifmUP7epm9RHhDD8e9rpCdMYA3keqCCyN',
-    tokenSwapAccount: 'CHdxYT1DWMraPrMUa5suYdNeh9h5SL7ZoZsXVJPxEYNV',
-    poolCoinTokenAccount: '3jgBQWwgsLnUU8mMyags9f4sqKaMdAweV6dAv5B8ULET',
-    poolPcTokenAccount: 'DGRXbamNuabgabHCpT4S9eExKEGQgShXAtX8TeH1ere6',
-    tickMapPubkey: 'GznACvQZxes7k2CA7z5SQYpjdmYUysBTvZ4C4AXkifbL',
-    tickDetailKey: '2BNMYw76D6bgBSTaGMJ9pyDZ2xKw8HgnQbbukPoG2TNr',
-    tickPositionKey: 'D9bMcvY4oXeJ9bBp618EAAgiH3JrQqqU3PQjmVp7yqW8',
-    userPositionKey: 'E4giUZhTVxq5oNq4wSGsdxUWiTtNmm4CWSuLgZPgaifb'
+    authority: 'BVMrSmqEuzU9YC48FrKTAsxMHFDJmPFkDMZdnZvFchW9',
+    tokenSwapAccount: 'CoNeVJauDhYAWzN9JCFwFq8QZP5MY83yrFJuikd8aTmM',
+    tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
+    poolCoinTokenAccount: 'J17HLnZRGbV7koT8oeaY4tzAU3iPpf4S6DAERzK3uWpk',
+    poolPcTokenAccount: '6Y6dAWQZXz6NXy3dSRMCVLRLC5Bk1sW3gUrra9Uv3j77',
+    tickDetailKey: '7Qar8wQ1fQ1dkHao67fgVab6aAJmdbmXkMjfoLzMmDRD',
+    userPositionKey: 'yxf3KxY8Qjf3goML3dE9Bo6mQhcqD6d1mjXH4zWKHvm',
+    userPositionIndex: 2,
+    currentPrice: new Numberu128(0),
+    fee: 0
+  },
+  {
+    name: 'CSOL-CUSDC',
+    coin: { ...TOKENS.CSOL },
+    pc: { ...TOKENS.CUSDC },
+    programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+    authority: '6E8nkxyb2yjVR3jE5P7ffiGjWX6WLGM1J1cHpJRrGoNk',
+    tokenSwapAccount: 'DVARSmW7FNauTfJkpVvcGoPATyU61xRGo9K6nzZxBDq4',
+    tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
+    poolCoinTokenAccount: '48L7wCo6z6KHY8p4yMaWRXf1KfyXJHcUPorzUi9L6yNW',
+    poolPcTokenAccount: 'AC94xqiTMNP9mtB7yPjXHiMFwi6KWu95hLbYW7gr7C8k',
+    tickDetailKey: '3Y8xFVjPkmf2bnyK5pgi51FQa4qLfSoCXD57dkPxGDar',
+    userPositionKey: '23avuYmyZxQJbn8qu4a3rHipmsVRVXtGwgZ8WAUZ7TXC',
+    userPositionIndex: 2,
+    currentPrice: new Numberu128(0),
+    fee: 0
+  },
+  {
+    name: 'CUSDC-USDD',
+    coin: { ...TOKENS.CUSDC },
+    pc: { ...TOKENS.USDD },
+    programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+    authority: 'Aa1PZbUBqnjJvdQ5gs71aJkskcWBTmQ6Qh5KDx3K2xnc',
+    tokenSwapAccount: 'CJRGUYSNz6WBp2ZVpm75uqB2soxxBvmWmgQG2NPZC4Lr',
+    tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
+    poolCoinTokenAccount: 'CbZCHymADCLygdxoE1HE7G4251T8mF2Q6rKhyceDipyZ',
+    poolPcTokenAccount: 'BWaJSJ6kc4V9eomxG7XbJt6BFjWNvteGsJ58RcSs5TYH',
+    tickDetailKey: 'CmKHdLP9PHnje84jemRwcPBGULsqjbgCt9xDheUPxCdD',
+    userPositionKey: 'GbqyKw4TSRmsBdw8C3HULMHPGKDoUWnLSi29evLcMJTP',
+    userPositionIndex: 2,
+    currentPrice: new Numberu128(0),
+    fee: 0
   }
+  // {
+  //   name: 'CSOL-USDC',
+  //   coin: { ...TOKENS.CSOL },
+  //   pc: { ...TOKENS.USDC },
+  //   // lp: { ...LP_TOKENS['CSOL-USDC'] },
+  //   programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  //   authority: '7pMg6c8Y375CMFv3fkoF7x6DYW2QxFR3W4X3gEStY4aH',
+  //   tokenSwapAccount: 'GDy7ip2WQX52avJz8qKnpRUBQ3hMpkSdLYMcPtHaFx1M',
+  //   tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
+  //   poolCoinTokenAccount: '4n7GEvJsyDWkX3WBHJUXkxbgvZvPHSKPrAZkUbFTe5tX',
+  //   poolPcTokenAccount: 'C7AZy7aie5a28KMZLwTuuTSTk4s9PyyK2GhLSTJ42LYe',
+  //   tickDetailKey: '49Z9YptbwTerQThmsY9HXWa4XaFYqwj5pgoZvawBj7kF',
+  //   userPositionKey: 'GXYWqgZER3wwa5vsiBrwK52rjqErtxXfhgps3gDJuiaY',
+  //   userPositionIndex: 2,
+  //   currentPrice: new Numberu128(0),
+  //   fee: 0
+  // },
+  // {
+  //   name: 'USDC-USDD',
+  //   coin: { ...TOKENS.USDC },
+  //   pc: { ...TOKENS.USDD },
+  //   // lp: { ...LP_TOKENS['CSOL-USDC'] },
+  //   programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  //   authority: '2C5SPpb88tbuF11UbH5y3XwXJu44hAyBrEQvDUN7JaR2',
+  //   tokenSwapAccount: '5FD6LzMpwH5HPkuv2DeFdunaWtDP8Yg7mnAYVm3yvk9Y',
+  //   tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
+  //   poolCoinTokenAccount: 'CR7X57dusbS6DxPfWZCkh1SXZAXeaMAA8CHp7Dz4TooK',
+  //   poolPcTokenAccount: '3reUj9ay7Nz6uUdr7MzENym5DzxEVWHKacMPtim1Zk4E',
+  //   tickDetailKey: '28pABjsJdi1vQqBLuH9GEunzX6wz3uQQd9ZAKD6Xhb8j',
+  //   userPositionKey: '7o9thAcg15Q9AGhS7aG27Jn7fbpyEB1Bss4mZg4eQ89i',
+  //   userPositionIndex: 2,
+  //   currentPrice: new Numberu128(0),
+  //   fee: 0
+  // }
   // {
   //   name: 'SOL-USDC',
   //   coin: { ...NATIVE_SOL },

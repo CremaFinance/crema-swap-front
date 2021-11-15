@@ -2,7 +2,6 @@ import { sendAndConfirmTransaction as realSendAndConfirmTransaction } from '@sol
 import type { Account, Connection, Transaction, TransactionSignature } from '@solana/web3.js'
 
 export function sendAndConfirmTransaction(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   title: string,
   connection: Connection,
   transaction: Transaction,

@@ -22,10 +22,10 @@ import { struct } from 'superstruct@0.8.4'
 export const web3Config = {
   strategy: 'speed',
   rpcs: [
-    { url: 'https://solana-api.projectserum.com', weight: 50 }
+    // { url: 'https://solana-api.projectserum.com', weight: 50 }
     // { url: 'https://raydium.rpcpool.com', weight: 40 },
     // { url: 'https://api.mainnet-beta.solana.com', weight: 50 }
-    // { url: 'https://api.devnet.solana.com', weight: 50 }
+    { url: 'https://api.devnet.solana.com', weight: 50 }
   ]
 }
 
@@ -118,7 +118,8 @@ export async function createAssociatedTokenAccountIfNotExist(
   const ata = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, mint, owner, true)
   console.log('ata###', ata.toString())
   console.log('publicKey####', publicKey?.toString())
-  if ((!publicKey || !ata.equals(publicKey)) && !atas.includes(ata.toBase58())) {
+  // if ((!publicKey || !ata.equals(publicKey)) && !atas.includes(ata.toBase58())) {
+  if (!publicKey) {
     console.log('进来了吗####')
     transaction.add(
       Token.createAssociatedTokenAccountInstruction(

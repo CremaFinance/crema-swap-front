@@ -13,23 +13,50 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+// import { Vue, Component } from 'nuxt-property-decorator'
+import Vue from 'vue'
+import { mapState } from 'vuex'
 
-import { Layout } from 'ant-design-vue'
+// import { Layout } from 'ant-design-vue'
 import Head from './components/head.vue'
 import H5Head from './components/h5-head.vue'
 
-const { Content } = Layout
+// const { Content } = Layout
 
-@Component({
+// @Component({
+//   components: {
+//     Layout,
+//     Content,
+//     Head,
+//     H5Head
+//   }
+// })
+// export default class Default extends Vue {}
+
+export default Vue.extend({
   components: {
-    Layout,
-    Content,
+    // Layout,
+    // Content,
     Head,
     H5Head
+  },
+  computed: {
+    ...mapState(['wallet'])
+  },
+  watch: {
+    'wallet.tokenAccounts': {
+      handler: 'watchWalletTokenAccounts',
+      immediate: true
+    }
+  },
+  methods: {
+    watchWalletTokenAccounts(newTokenAccounts: any) {
+      if (this.wallet.connected && newTokenAccounts && Object.keys(newTokenAccounts).length > 0) {
+        this.$accessor.position.requestMyPositions(newTokenAccounts)
+      }
+    }
   }
 })
-export default class Default extends Vue {}
 </script>
 
 <style lang="less">
@@ -39,22 +66,29 @@ export default class Default extends Vue {}
 .layout-container {
   width: 100%;
   min-height: 100vh;
-  background: #1b2023;
+  background: #1b2023 url('../assets/images/img-bg.svg') no-repeat;
+  background-position: 60% 30%;
 }
 .pc-header-container {
   display: block;
   padding: 0px 40px;
+  z-index: 5;
   position: fixed;
   left: 0px;
   top: 0px;
   width: 100%;
-  box-sizing: border-box;
+  box-sizing: border-box !important;
 }
 .body-container {
   width: 100%;
   min-height: 100vh;
   padding-top: 200px;
   padding-bottom: 40px;
+}
+@media screen and (max-width: 1366px) {
+  .body-container {
+    padding-top: 150px;
+  }
 }
 .h5-header-container {
   display: none;
