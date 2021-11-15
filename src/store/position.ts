@@ -1,8 +1,8 @@
 import { getterTree, mutationTree, actionTree } from 'typed-vuex'
 import { loadAccount } from '@/tokenSwap/util/account'
 import { PublicKey } from '@solana/web3.js'
-import { UserPosition, TokenSwapLayout, Numberu128 } from '@/tokenSwap'
-import { USER_POSITION_ACCOUNT, SWAPV3_PROGRAMID } from '@/utils/ids'
+import { UserPosition, TokenSwapLayout, Numberu128, TokenSwap } from '@/tokenSwap'
+import { USER_POSITION_ACCOUNT, SWAPV3_PROGRAMID, SWAP_PAYER } from '@/utils/ids'
 import { tick2price } from '@/tokenSwap/swapv3'
 import { fixD } from '@/utils'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
@@ -95,6 +95,15 @@ export const actions = actionTree(
         const priceDecimal = 12
         const currentPrice = Numberu128.fromBuffer(tokenSwapData.current_price).toNumber() / Math.pow(10, priceDecimal)
 
+        const tokenSwap = await TokenSwap.loadTokenSwap(
+          this.$web3,
+          new PublicKey(poolInfo.tokenSwapAccount),
+          SWAPV3_PROGRAMID,
+          SWAP_PAYER
+        )
+
+        const feeTier = tokenSwap.fee / Math.pow(10, 10) + '%' // 考虑到展示百分比，所以除以了10次方， 实际decimal为12
+
         let userPositions = await UserPosition.loadUserPosition(
           this.$web3,
           // USER_POSITION_ACCOUNT.publicKey,
@@ -128,6 +137,7 @@ export const actions = actionTree(
               maxPrice: fixD(Math.pow(maxPrice, 2), priceDecimal),
               currentPrice: fixD(Math.pow(currentPrice, 2), priceDecimal),
               currentPriceOrigin: Numberu128.fromBuffer(tokenSwapData.current_price).toNumber(),
+              feeTier,
               ...item
             })
           }

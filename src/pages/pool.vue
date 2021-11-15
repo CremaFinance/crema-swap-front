@@ -305,6 +305,7 @@ export default Vue.extend({
     },
     openAddLiquiditySecondConfirm() {
       const currentPriceP = Number(Math.pow(Number(this.poolInfo.currentPrice) / Math.pow(10, 12), 2))
+      console.log('openAddLiquiditySecondConfirm###this.poolInfo###', this.poolInfo)
       this.secondConfirmData = {
         fromCoin: this.fromCoin,
         toCoin: this.toCoin,
@@ -315,7 +316,7 @@ export default Vue.extend({
         maxPrice: this.maxPrice,
         showFromCoinLock: this.showFromCoinLock,
         showToCoinLock: this.showToCoinLock,
-        feeTier: '0.01%'
+        feeTier: this.poolInfo.fee + '%'
       }
       this.showAddLiquiditySecondConfirm = true
     },

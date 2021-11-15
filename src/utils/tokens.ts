@@ -4,7 +4,10 @@ import { cloneDeep } from 'lodash-es'
 export const RATES: any = {
   HYSD: 0.2,
   USDD: 1,
-  USDC: 1
+  USDC: 1,
+  CUSDT: 1,
+  CUSDC: 1,
+  CSOL: 1
 }
 export interface TokenInfo {
   symbol: string
