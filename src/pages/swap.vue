@@ -114,8 +114,8 @@ import { TokenAmount } from '@/utils/safe-math'
 import { Button } from 'ant-design-vue'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
 
-const HYSD = getTokenBySymbol('HYSD')
-const USDD = getTokenBySymbol('USDD')
+const CSOL = getTokenBySymbol('CSOL')
+const CUSDC = getTokenBySymbol('CUSDC')
 
 export default Vue.extend({
   components: {
@@ -125,8 +125,8 @@ export default Vue.extend({
   data() {
     return {
       showCoinSelect: false,
-      fromCoin: HYSD as TokenInfo | null,
-      toCoin: USDD as TokenInfo | null,
+      fromCoin: CSOL as TokenInfo | null,
+      toCoin: CUSDC as TokenInfo | null,
       fromCoinAmount: '',
       toCoinAmount: '',
       currentCoinKey: 'fromCoin',

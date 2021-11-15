@@ -105,23 +105,23 @@ export const TOKENS: Tokens = {
   //   showDefault: false
   // },
   USDD: {
-    symbol: 'USDD',
-    name: 'USDD',
+    symbol: 'CUSDD',
+    name: 'CUSDD',
     mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
     decimals: 6,
     referrer: '',
     official: true,
     showDefault: true
   },
-  HYSD: {
-    symbol: 'HYSD',
-    name: 'HYSD',
-    mintAddress: 'HdJ8pzRMFquse6MAdLTm2JHum51WFkocZX8YzXpPjNpG',
-    decimals: 6,
-    referrer: '',
-    official: true,
-    showDefault: true
-  },
+  // HYSD: {
+  //   symbol: 'HYSD',
+  //   name: 'HYSD',
+  //   mintAddress: 'HdJ8pzRMFquse6MAdLTm2JHum51WFkocZX8YzXpPjNpG',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
   CSOL: {
     symbol: 'CSOL',
     name: 'CSOL',

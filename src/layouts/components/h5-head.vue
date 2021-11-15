@@ -3,6 +3,7 @@
     <div class="top">
       <div class="left">
         <img src="@/assets/images/logo@2x@2x.png" />
+        <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" />
       </div>
       <div class="right">
         <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
@@ -139,6 +140,11 @@ export default {
     .left {
       img {
         height: 28px;
+      }
+      .test-or-main {
+        // width: 60px;
+        height: 16px;
+        margin-left: 10px;
       }
     }
     .right {

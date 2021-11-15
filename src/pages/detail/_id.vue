@@ -193,9 +193,6 @@ export default Vue.extend({
           new Numberu128(currentData.currentPriceOrigin)
         )
 
-        console.log('_id.vue##isFind###ans_src###', ans_src)
-        console.log('_id.vue##isFind###ans_dst###', ans_dst)
-
         const fromCoinAmount = fixD(ans_src / Math.pow(10, currentData.coin.decimals), currentData.coin.decimals)
         const toCoinAmount = fixD(ans_dst / Math.pow(10, currentData.pc.decimals), currentData.pc.decimals)
         this.currentData = {

@@ -195,6 +195,7 @@ export function preview_calculate_liqudity(
   current_price: Numberu128
 ): { ans_src: number; ans_dst: number } {
   let PRICISE_DECIMAL_INTERN = PRICISE_DECIMAL * 100
+  current_price = current_price.mul(new Numberu128(100))
   let n_pricise_decimal = new Numberu128(PRICISE_DECIMAL_INTERN)
   let lower_price_number = tick2price(tick_lower)
   let lower_price = new Numberu128(0)
@@ -235,7 +236,7 @@ export function preview_calculate_liqudity(
   let dst = new Numberu128(0)
   if (current_price.lt(lower_price)) {
     src = delta_liquity.mul(n_pricise_decimal).mul(upper_price.sub(lower_price)).div(lower_price).div(upper_price)
-  } else if (current_price > upper_price) {
+  } else if (current_price.gt(upper_price)) {
     dst = delta_liquity.mul(upper_price.sub(lower_price)).div(n_pricise_decimal)
   } else {
     src = delta_liquity.mul(n_pricise_decimal).mul(upper_price.sub(current_price)).div(current_price).div(upper_price)
@@ -424,9 +425,9 @@ function test_price2tick() {
 
 //test_byte_get_next_tick();
 export function test_preview_calculate_liqudity() {
-  let upper_index = 552648
-  let lower_index = -552648
-  let deposit_liquity = new Numberu128(2049138316000)
+  let upper_index = 21156
+  let lower_index = 13863
+  let deposit_liquity = new Numberu128(113644200)
   let { ans_src, ans_dst } = preview_calculate_liqudity(
     lower_index,
     upper_index,

@@ -201,23 +201,23 @@ export function isOfficalMarket(marketAddress: string) {
 }
 
 export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
-  {
-    name: 'HYSD-USDD',
-    coin: { ...TOKENS.HYSD },
-    pc: { ...TOKENS.USDD },
-    // lp: { ...LP_TOKENS['HYSD-USDD'] },
-    programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-    authority: 'BVMrSmqEuzU9YC48FrKTAsxMHFDJmPFkDMZdnZvFchW9',
-    tokenSwapAccount: 'CoNeVJauDhYAWzN9JCFwFq8QZP5MY83yrFJuikd8aTmM',
-    tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
-    poolCoinTokenAccount: 'J17HLnZRGbV7koT8oeaY4tzAU3iPpf4S6DAERzK3uWpk',
-    poolPcTokenAccount: '6Y6dAWQZXz6NXy3dSRMCVLRLC5Bk1sW3gUrra9Uv3j77',
-    tickDetailKey: '7Qar8wQ1fQ1dkHao67fgVab6aAJmdbmXkMjfoLzMmDRD',
-    userPositionKey: 'yxf3KxY8Qjf3goML3dE9Bo6mQhcqD6d1mjXH4zWKHvm',
-    userPositionIndex: 2,
-    currentPrice: new Numberu128(0),
-    fee: 0
-  },
+  // {
+  //   name: 'HYSD-USDD',
+  //   coin: { ...TOKENS.HYSD },
+  //   pc: { ...TOKENS.USDD },
+  //   // lp: { ...LP_TOKENS['HYSD-USDD'] },
+  //   programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  //   authority: 'BVMrSmqEuzU9YC48FrKTAsxMHFDJmPFkDMZdnZvFchW9',
+  //   tokenSwapAccount: 'CoNeVJauDhYAWzN9JCFwFq8QZP5MY83yrFJuikd8aTmM',
+  //   tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
+  //   poolCoinTokenAccount: 'J17HLnZRGbV7koT8oeaY4tzAU3iPpf4S6DAERzK3uWpk',
+  //   poolPcTokenAccount: '6Y6dAWQZXz6NXy3dSRMCVLRLC5Bk1sW3gUrra9Uv3j77',
+  //   tickDetailKey: '7Qar8wQ1fQ1dkHao67fgVab6aAJmdbmXkMjfoLzMmDRD',
+  //   userPositionKey: 'yxf3KxY8Qjf3goML3dE9Bo6mQhcqD6d1mjXH4zWKHvm',
+  //   userPositionIndex: 2,
+  //   currentPrice: new Numberu128(0),
+  //   fee: 0
+  // },
   {
     name: 'CSOL-CUSDC',
     coin: { ...TOKENS.CSOL },
@@ -235,7 +235,7 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
     fee: 0
   },
   {
-    name: 'CUSDC-USDD',
+    name: 'CUSDC-CUSDD',
     coin: { ...TOKENS.CUSDC },
     pc: { ...TOKENS.USDD },
     programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
