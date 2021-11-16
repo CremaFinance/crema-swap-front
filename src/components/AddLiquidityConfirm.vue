@@ -115,12 +115,12 @@
           <span>Current price</span>
           <div v-if="direct">
             1 {{ secondConfirmData.fromCoin.symbol }} ≈
-            {{ fixD(secondConfirmData.currentPrice, secondConfirmData.toCoin.decimal) }}
+            {{ fixD(secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
             {{ secondConfirmData.toCoin.symbol }}
           </div>
           <div v-else>
             1 {{ secondConfirmData.toCoin.symbol }} ≈
-            {{ fixD(1 / secondConfirmData.currentPrice, secondConfirmData.toCoin.decimal) }}
+            {{ fixD(1 / secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
             {{ secondConfirmData.fromCoin.symbol }}
           </div>
         </div>

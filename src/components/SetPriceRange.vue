@@ -107,9 +107,35 @@ export default Vue.extend({
       const price = 1 / this.currentPrice
       // console.log('难道进这里了###')
       this.step = price / 100
+    },
+    fromCoin: {
+      handler: 'watchFromCoin',
+      immediate: true
+    },
+    toCoin: {
+      handler: 'watchToCoin',
+      immediate: true
     }
   },
   methods: {
+    watchFromCoin(value: any) {
+      console.log('watchFromCoin####', value)
+      if (!value) {
+        this.onChangeMin('0')
+        this.onChangeMax('0')
+        this.minPrice = '0'
+        this.maxPrice = '0'
+      }
+    },
+    watchToCoin(value: any) {
+      console.log('watchToCoin####', value)
+      if (!value) {
+        this.onChangeMin('0')
+        this.onChangeMax('0')
+        this.minPrice = '0'
+        this.maxPrice = '0'
+      }
+    },
     addMinPrice() {
       // console.log('addMinPrice####this.step###', this.step)
       const min = Number(this.minPrice) + Number(this.minPrice) * this.step
@@ -133,15 +159,21 @@ export default Vue.extend({
     watchCurrentPrice(value: number) {
       if (value) {
         // current price精度为12， 陈杨志demo中写
-        const num = fixD(Math.pow(value / Math.pow(10, 12), 2), 12)
+        // const num = fixD(Math.pow(value / Math.pow(10, 12), 2), 12)
+        const num = Math.pow(value / Math.pow(10, 12), 2)
         this.step = Number(num) / 100
+
+        // 稳定币（即fee为0.05%）的池子，默认最小、最大价格需在当前价格 -+0.01%
+        const defaultMinPrice = String(num - num * 0.0001)
+        const defaultMaxPrice = String(num + num * 0.0001)
+
         // 默认min是0， max是num+1
-        this.onChangeMin('2') // min不能等于0， 陈杨志要求写大于1的值
-        this.onChangeMax(String(Number(num) + 1))
-        this.minPrice = '2'
-        this.maxPrice = String(Number(num) + 1)
-        this.$emit('onChangeMin', '2')
-        this.$emit('onChangeMax', String(Number(num) + 1))
+        this.onChangeMin(defaultMinPrice)
+        this.onChangeMax(defaultMaxPrice)
+        this.minPrice = defaultMinPrice
+        this.maxPrice = defaultMaxPrice
+        // this.$emit('onChangeMin', '2')
+        // this.$emit('onChangeMax', String(Number(num) + 1))
       }
     },
     fullRange() {

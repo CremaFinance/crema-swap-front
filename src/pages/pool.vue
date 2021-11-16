@@ -286,10 +286,14 @@ export default Vue.extend({
       })
     },
     minPrice(value: string) {
-      this.updateAmounts(this.poolInfo.currentPrice, value, this.maxPrice)
+      if ((Number(value) || Number(this.maxPrice)) && this.poolInfo) {
+        this.updateAmounts(this.poolInfo.currentPrice, value, this.maxPrice)
+      }
     },
     maxPrice(value: string) {
-      this.updateAmounts(this.poolInfo.currentPrice, this.minPrice, value)
+      if ((Number(value) || Number(this.minPrice)) && this.poolInfo) {
+        this.updateAmounts(this.poolInfo.currentPrice, this.minPrice, value)
+      }
     }
   },
   mounted() {
