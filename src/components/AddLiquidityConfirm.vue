@@ -136,9 +136,18 @@
             :show-to-coin-lock="secondConfirmData.showToCoinLock"
             :current-data="secondConfirmData"
             @onChange="addFormChanged"
+            @onChangeInsufficientBalance="onChangeInsufficientBalance"
           ></AddLiquidityForm>
         </div>
-        <button class="add-btn" @click="toAdd">Add</button>
+        <button
+          v-if="title !== 'Add Liquidity'"
+          class="add-btn"
+          :disabled="isDisabled || insufficientBalance"
+          @click="toAdd"
+        >
+          {{ insufficientBalance ? 'Insufficient balance' : 'Add' }}
+        </button>
+        <button v-else class="add-btn" @click="toAdd">Add</button>
       </div>
     </Modal>
     <Setting v-if="showSetting" @onClose="() => (showSetting = false)"></Setting>
@@ -150,6 +159,7 @@ import { Modal } from 'ant-design-vue'
 import importIcon from '@/utils/import-icon'
 import { eventBus } from '@/utils/eventBus'
 import { fixD } from '@/utils'
+import { gt } from '@/utils/safe-math'
 
 Vue.use(Modal)
 
@@ -195,7 +205,26 @@ export default Vue.extend({
       fromCoinAmount: '',
       toCoinAmount: '',
       showSetting: false,
-      deltaLiquity: 0
+      deltaLiquity: 0,
+      insufficientBalance: false
+    }
+  },
+  computed: {
+    isDisabled(): boolean {
+      const showFromCoinLock = this.secondConfirmData && this.secondConfirmData.showFromCoinLock
+      const showToCoinLock = this.secondConfirmData && this.secondConfirmData.showToCoinLock
+
+      const fromCoinAmount = this.$data.fromCoinAmount
+      const toCoinAmount = this.$data.toCoinAmount
+
+      if (showFromCoinLock && !showToCoinLock && toCoinAmount) {
+        return false
+      } else if (showToCoinLock && !showFromCoinLock && fromCoinAmount) {
+        return false
+      } else if (!showToCoinLock && !showFromCoinLock && toCoinAmount && fromCoinAmount) {
+        return false
+      }
+      return true
     }
   },
   watch: {
@@ -207,8 +236,12 @@ export default Vue.extend({
     console.log(this.secondConfirmData, 'secondConfirmData##')
   },
   methods: {
+    gt,
     fixD,
     importIcon,
+    onChangeInsufficientBalance(value: boolean) {
+      this.insufficientBalance = value
+    },
     changeDirect(value: boolean) {
       this.direct = value
     },

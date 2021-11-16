@@ -78,7 +78,7 @@
         @onChangeMin="priceRangeChangeMin"
         @onChangeMax="priceRangeChangeMax"
       ></SetPriceRange>
-      <PriceRangeHint v-if="Number(minPrice) > Number(maxPrice)"></PriceRangeHint>
+      <PriceRangeHint v-if="invalidPriceRange"></PriceRangeHint>
       <!-- <button class="add-liquidity-btn" @click="showSuccessHint = true">Add Liquidity</button> -->
       <Button v-if="!wallet.connected" class="add-liquidity-btn" @click="$accessor.wallet.openModal"
         >Connect Wallet</Button
@@ -86,7 +86,7 @@
       <Button
         v-else
         class="add-liquidity-btn"
-        :disabled="suppling || isDisabled"
+        :disabled="suppling || isDisabled || invalidPriceRange"
         :loading="suppling"
         @click="openAddLiquiditySecondConfirm"
       >
@@ -229,6 +229,12 @@ export default Vue.extend({
       } else {
         return true
       }
+    },
+    invalidPriceRange() {
+      if (Number(this.minPrice) > Number(this.maxPrice)) {
+        return true
+      }
+      return false
     }
   },
   watch: {
@@ -267,7 +273,7 @@ export default Vue.extend({
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.fromCoinAmount = oldAmount
         } else {
-          if (this.fixedFromCoin) {
+          if (this.fixedFromCoin && this.poolInfo) {
             this.updateAmounts(this.poolInfo.currentPrice, this.minPrice, this.maxPrice)
           }
         }
@@ -279,7 +285,7 @@ export default Vue.extend({
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.toCoinAmount = oldAmount
         } else {
-          if (!this.fixedFromCoin) {
+          if (!this.fixedFromCoin && this.poolInfo) {
             this.updateAmounts(this.poolInfo.currentPrice, this.minPrice, this.maxPrice)
           }
         }

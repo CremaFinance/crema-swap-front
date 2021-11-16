@@ -74,15 +74,9 @@ export default Vue.extend({
       console.log('pItemWatch####value####', value)
     },
     gotoDetail(item: any) {
-      console.log('到这里了吗####item###', item)
       this.$router.push(`/detail/${item.nftTokenId}`)
     },
     getCurrentStatus(pItem: any) {
-      console.log('pItem.currentPrice####', pItem.currentPrice)
-      console.log('pItem.minPrice####', pItem.minPrice)
-      console.log('pItem.maxPrice####', pItem.maxPrice)
-      console.log('pItem.minPrice####number###', Number(pItem.minPrice))
-      console.log('pItem.maxPrice####number####', Number(pItem.maxPrice))
       if (!pItem.liquity) {
         return 'Closed'
       } else if (
@@ -108,6 +102,10 @@ export default Vue.extend({
   background: rgba(255, 255, 255, 0.03);
   border-radius: 30px;
   padding: 23px 20px;
+  cursor: pointer;
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
   // filter: blur(50px);
   > .left {
     .pos-info {

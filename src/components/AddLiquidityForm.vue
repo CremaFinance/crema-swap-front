@@ -46,7 +46,7 @@ import {
   deposit_only_token_b,
   deposit_only_token_a
 } from '@/tokenSwap/swapv3'
-import { TokenAmount } from '@/utils/safe-math'
+import { TokenAmount, gt } from '@/utils/safe-math'
 import { fixD, getUnixTs } from '../utils/index'
 import { Numberu128 } from '@/tokenSwap'
 
@@ -96,7 +96,27 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['wallet'])
+    ...mapState(['wallet']),
+    insufficientBalance(): boolean {
+      const fromCoinBalance =
+        (this.$data.fromCoin && this.$data.fromCoin.balance && this.$data.fromCoin.balance.fixed()) || ''
+      const toCoinBalance = (this.$data.toCoin && this.$data.toCoin.balance && this.$data.toCoin.balance.fixed()) || ''
+
+      const fromCoinInsufficient = gt(this.$data.fromCoinAmount, fromCoinBalance)
+      const toCoinInsufficient = gt(this.$data.toCoinAmount, toCoinBalance)
+
+      const showFromCoinLock = this.showFromCoinLock
+      const showToCoinLock = this.showToCoinLock
+
+      if (showFromCoinLock && !showToCoinLock && !toCoinInsufficient) {
+        return false
+      } else if (showToCoinLock && !showFromCoinLock && !fromCoinInsufficient) {
+        return false
+      } else if (!showFromCoinLock && !showToCoinLock && !fromCoinInsufficient && !toCoinInsufficient) {
+        return false
+      }
+      return true
+    }
   },
   watch: {
     defaultFromCoin: {
@@ -110,12 +130,16 @@ export default Vue.extend({
     currentData: {
       handler: 'currentDataWatch',
       immediate: true
+    },
+    insufficientBalance(value: boolean) {
+      this.$emit('onChangeInsufficientBalance', value)
     }
   },
   mounted() {
     this.updateCoinInfo(this.wallet.tokenAccounts)
   },
   methods: {
+    gt,
     currentDataWatch(data: any) {
       if (data.currentPriceOrigin && data.lower_tick && data.upper_tick) {
         this.updateAmounts(data.currentPriceOrigin, data.lower_tick, data.upper_tick)

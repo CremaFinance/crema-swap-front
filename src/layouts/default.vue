@@ -9,6 +9,8 @@
     <div class="body-container">
       <Nuxt />
     </div>
+
+    <NoticeModal v-if="showNotice" @onClose="showNotice = false"></NoticeModal>
   </div>
 </template>
 
@@ -20,6 +22,7 @@ import { mapState } from 'vuex'
 // import { Layout } from 'ant-design-vue'
 import Head from './components/head.vue'
 import H5Head from './components/h5-head.vue'
+import NoticeModal from '@/components/Notice.vue'
 
 // const { Content } = Layout
 
@@ -38,7 +41,13 @@ export default Vue.extend({
     // Layout,
     // Content,
     Head,
-    H5Head
+    H5Head,
+    NoticeModal
+  },
+  data() {
+    return {
+      showNotice: false
+    }
   },
   computed: {
     ...mapState(['wallet'])
@@ -47,6 +56,13 @@ export default Vue.extend({
     'wallet.tokenAccounts': {
       handler: 'watchWalletTokenAccounts',
       immediate: true
+    }
+  },
+  mounted() {
+    const showNotice = localStorage.getItem('crema_show_notice')
+    if (!showNotice) {
+      this.showNotice = true
+      localStorage.setItem('crema_show_notice', '1')
     }
   },
   methods: {

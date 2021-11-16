@@ -7,27 +7,30 @@
         <div class="title-right">
           <div class="pool-status-tab">
             <div
-              :class="poolStatus ? 'pool-status-staked-active' : 'pool-status-staked'"
-              @click="poolStatus = !poolStatus"
+              :class="poolStatus === 'Staked' ? 'pool-status-staked-active' : 'pool-status-staked'"
+              @click="poolStatus = 'Staked'"
             >
               Staked
             </div>
-            <div :class="!poolStatus ? 'pool-status-all-active' : 'pool-status-all'" @click="poolStatus = !poolStatus">
+            <div
+              :class="poolStatus === 'All' ? 'pool-status-all-active' : 'pool-status-all'"
+              @click="poolStatus = 'All'"
+            >
               All
             </div>
           </div>
           <div class="search-pool">
-            <Input placeholder="Search Token or Pools" />
+            <Input v-model="searchKey" placeholder="Search Token or Pools" />
             <div class="input-search"></div>
           </div>
         </div>
       </div>
       <!-- banner -->
       <div class="farming-banner">
-        <img src="" alt="" />
+        <img src="@/assets/images/farming-banner-pc.png" alt="" />
       </div>
       <!-- 池子列表 -->
-      <FarmingPool></FarmingPool>
+      <FarmingPool :isStaked="poolStatus" :searchKey="searchKey"></FarmingPool>
     </div>
   </div>
 </template>
@@ -37,7 +40,8 @@ import { Input } from 'ant-design-vue'
 export default Vue.extend({
   data() {
     return {
-      poolStatus: true
+      poolStatus: 'Staked',
+      searchKey: ''
     }
   }
 })
@@ -111,19 +115,19 @@ export default Vue.extend({
           .input-search {
             width: 30px;
             height: 30px;
-            background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
-            border-radius: 15px;
-            border: 1px solid;
+            background: url('../assets/images/input-search.png');
+            background-size: 100% auto;
           }
         }
       }
     }
     .farming-banner {
-      width: 1000px;
-      height: 120px;
-      background: red;
       margin-top: 20px;
       border-radius: 20px;
+      img {
+        width: 1000px;
+        height: 120px;
+      }
     }
   }
 }

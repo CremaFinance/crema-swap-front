@@ -9,7 +9,7 @@
         <div class="coin-select" @click="$emit('onSelect')">
           <img v-if="coinName" :src="importIcon(`/coins/${coinName.toLowerCase()}.png`)" />
           <img v-else src="../assets/images/icon_missing.svg" />
-          <span>{{ coinName }}</span>
+          <span class="coin-name">{{ coinName }}</span>
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-icon-on"></use>
           </svg>
@@ -104,6 +104,9 @@ export default Vue.extend({
     padding: 2px;
     position: relative;
     background-color: #33383b;
+    .coin-name {
+      white-space: nowrap;
+    }
     &:active,
     &:hover {
       background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
