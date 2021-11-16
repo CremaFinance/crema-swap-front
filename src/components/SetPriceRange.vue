@@ -164,8 +164,8 @@ export default Vue.extend({
         this.step = Number(num) / 100
 
         // 稳定币（即fee为0.05%）的池子，默认最小、最大价格需在当前价格 -+0.01%
-        const defaultMinPrice = String(num - num * 0.0001)
-        const defaultMaxPrice = String(num + num * 0.0001)
+        const defaultMinPrice = String(num - num * 0.01)
+        const defaultMaxPrice = String(num + num * 0.01)
 
         // 默认min是0， max是num+1
         this.onChangeMin(defaultMinPrice)

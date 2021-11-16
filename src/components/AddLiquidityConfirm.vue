@@ -21,7 +21,7 @@
             <svg class="icon" aria-hidden="true" @click="$emit('onClose')" v-if="title == 'Increase Liquidity'">
               <use xlink:href="#icon-icon-return"></use>
             </svg>
-            {{ title }}
+            {{ title }} {{ secondConfirmData.currentStatus }}
           </div>
           <div class="modal-header-right">
             <svg class="icon" aria-hidden="true" @click="showSetting = true" v-if="title == 'Increase Liquidity'">
@@ -38,7 +38,8 @@
             <img :src="importIcon(`/coins/${secondConfirmData.toCoin.symbol.toLowerCase()}.png`)" />
             <span>{{ secondConfirmData.fromCoin.symbol }} / {{ secondConfirmData.toCoin.symbol }}</span>
           </div>
-          <div v-if="secondConfirmData.currentStatus === 'Closed'" class="status">Closed</div>
+          <StatusBlock :current-status="secondConfirmData.currentStatus" />
+          <!-- <div v-if="secondConfirmData.currentStatus === 'Closed'" class="status">Closed</div>
           <div v-else-if="secondConfirmData.currentStatus === 'Active'" class="status">
             <i></i>
             <span>Active</span>
@@ -48,7 +49,7 @@
               <use xlink:href="#icon-icon-tips"></use>
             </svg>
             <span>InActive</span>
-          </div>
+          </div> -->
         </div>
         <div class="info">
           <div v-if="!secondConfirmData.showFromCoinLock" class="coin-info-block">
@@ -160,12 +161,14 @@ import importIcon from '@/utils/import-icon'
 import { eventBus } from '@/utils/eventBus'
 import { fixD } from '@/utils'
 import { gt } from '@/utils/safe-math'
+import StatusBlock from '@/components/StatusBlock.vue'
 
 Vue.use(Modal)
 
 export default Vue.extend({
   components: {
-    Modal
+    Modal,
+    StatusBlock
   },
   props: {
     title: {

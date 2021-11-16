@@ -631,6 +631,9 @@ export default Vue.extend({
       height: 20px;
       cursor: pointer;
       margin: 0 4px;
+      &:hover {
+        fill: #fff;
+      }
     }
   }
 }
