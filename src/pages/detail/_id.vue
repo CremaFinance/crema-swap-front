@@ -55,11 +55,11 @@
         </div>
       </div>
       <div class="information-pool">
-        <PriceRange type="min" :current-data="currentData" :direction="direction" />
+        <PriceRange type="Min" :current-data="currentData" :direction="direction" />
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-link"></use>
         </svg>
-        <PriceRange type="max" :current-data="currentData" :direction="direction" />
+        <PriceRange type="Max" :current-data="currentData" :direction="direction" />
       </div>
     </div>
 
@@ -149,6 +149,10 @@ export default Vue.extend({
       this.tokenbFee = token_b_fee
     },
     watchCurrentData(newData: any) {
+      if (!newData) {
+        this.gotoMyPosition()
+        return
+      }
       const currentPrice = Number(newData.currentStatus)
       const minPrice = Number(newData.minPrice)
       const maxPrice = Number(newData.maxPrice)
@@ -214,12 +218,12 @@ export default Vue.extend({
           // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
           this.currentStatus = 'InActive'
         }
+      } else {
+        this.gotoMyPosition()
       }
     },
     openAddLiquiditySecondConfirm() {
       const currentPriceP = Number(Math.pow(Number(this.currentData.currentPrice) / Math.pow(10, 12), 2))
-
-      console.log('this.currentData.####', this.currentData)
       this.secondConfirmData = {
         fromCoin: this.currentData.coin,
         toCoin: this.currentData.pc,

@@ -35,8 +35,8 @@
           </a>
         </div>
         <div class="right">
-          <p v-if="title === 'Liquidity'">{{ currentData.fromCoinAmount }}</p>
-          <p v-else>{{ token_a_fee }}</p>
+          <p v-if="title === 'Liquidity'">{{ decimalFormat(currentData.fromCoinAmount, currentData.coin.decimals) }}</p>
+          <p v-else>{{ decimalFormat(token_a_fee, currentData.coin.decimals) }}</p>
           <span v-if="title === 'Liquidity'">{{ getPercent('from') }}</span>
         </div>
       </div>
@@ -46,8 +46,8 @@
           <span v-if="currentData.pc">{{ currentData.pc.symbol }}</span>
         </div>
         <div class="right">
-          <p v-if="title === 'Liquidity'">{{ currentData.toCoinAmount }}</p>
-          <p v-else>{{ token_b_fee }}</p>
+          <p v-if="title === 'Liquidity'">{{ decimalFormat(currentData.toCoinAmount, currentData.pc.decimals) }}</p>
+          <p v-else>{{ decimalFormat(token_b_fee, currentData.pc.decimals) }}</p>
           <span v-if="title === 'Liquidity'">{{ getPercent('to') }}</span>
         </div>
       </div>
@@ -65,7 +65,7 @@ import { loadAccount } from '@/tokenSwap/util/account'
 import { Account, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
 import { SWAPV3_PROGRAMID, SWAP_PAYER, PAYER } from '@/utils/ids'
 import { TokenSwap, TokenSwapLayout, Numberu128, TickInfoLayout, Number128, TickInfo } from '@/tokenSwap'
-import { fixD, getUnixTs } from '../utils/index'
+import { decimalFormat } from '../utils/index'
 import { Button } from 'ant-design-vue'
 import BigNumber from 'bignumber.js'
 
@@ -116,6 +116,7 @@ export default Vue.extend({
     }
   },
   methods: {
+    decimalFormat,
     importIcon,
     async watchCurrentData(poolData: any) {
       if (poolData && poolData.tokenSwapAccount) {
@@ -129,7 +130,6 @@ export default Vue.extend({
 
         const current_price = Numberu128.fromBuffer(tokenSwapData.current_price).toNumber()
         account.current_price = current_price
-        // console.log('current_price#####', current_price)
         this.currentPrice = Math.pow(current_price / Math.pow(10, 12), 2)
         const tick_detail_key = new PublicKey(tokenSwapData.tick_detail_key) // tick_info
         const tick_append_index = tokenSwapData.tick_append_index
@@ -144,11 +144,11 @@ export default Vue.extend({
         const a = token_a_fee.toNumber() / Math.pow(10, poolData.coin.decimals)
         const b = token_b_fee.toNumber() / Math.pow(10, poolData.pc.decimals)
 
-        const tokenaFee = fixD(a, poolData.coin.decimals) || ''
-        const tokenbFee = fixD(b, poolData.pc.decimals) || ''
-        this.token_a_fee = tokenaFee
-        this.token_b_fee = tokenbFee
-        this.$emit('onChange', tokenaFee, tokenbFee)
+        // const tokenaFee = fixD(a, poolData.coin.decimals) || ''
+        // const tokenbFee = fixD(b, poolData.pc.decimals) || ''
+        this.token_a_fee = String(a)
+        this.token_b_fee = String(b)
+        this.$emit('onChange', String(a), String(b))
       }
     },
     toClaim() {
@@ -168,35 +168,22 @@ export default Vue.extend({
     },
     // 换算为美元的价格
     getConvertedPrice() {
-      console.log('detailPool###this.currentPrice######', this.currentPrice)
       if (this.title === 'Liquidity') {
-        console.log('getConvertedPrice11111111')
-        // console.log('换算之前的this.currentPrice######', this.currentPrice)
         const fromCoinAmount = new BigNumber(this.currentData.fromCoinAmount)
         const toCoinAmount = new BigNumber(this.currentData.toCoinAmount)
-
         const fromNum = fromCoinAmount.multipliedBy(this.currentPrice)
         const toNum = toCoinAmount.plus(fromNum)
         const result = toNum.multipliedBy(RATES[this.currentData.pc.symbol])
 
-        // const fromCoinRates = fromCoinAmount.multipliedBy(RATES[this.currentData.coin.symbol])
-        // const toCoinRates = toCoinAmount.multipliedBy(RATES[this.currentData.pc.symbol])
-        // return fromCoinRates.plus(toCoinRates).toFixed()
-        return result.toFixed()
+        return decimalFormat(result.toFixed(), 4)
       } else {
-        console.log('getConvertedPrice111111')
-        console.log('getConvertedPrice###token_a_fee#####', this.token_a_fee)
-        console.log('getConvertedPrice###token_b_fee#####', this.token_b_fee)
         const token_a_fee = new BigNumber(this.token_a_fee)
         const token_b_fee = new BigNumber(this.token_b_fee)
 
-        // const tokenfeeA = token_a_fee.multipliedBy(RATES[this.currentData.coin.symbol])
         const tokenfeeA = token_a_fee.multipliedBy(this.currentPrice)
-        // const tokenfeeB = token_b_fee.multipliedBy(RATES[this.currentData.pc.symbol])
         const tokenfeeB = token_b_fee.plus(tokenfeeA)
         const result = tokenfeeB.multipliedBy(RATES[this.currentData.pc.symbol])
-        // return tokenfeeA.plus(tokenfeeB).toFixed()
-        return result.toFixed()
+        return decimalFormat(result.toFixed(), 4)
       }
     }
   }

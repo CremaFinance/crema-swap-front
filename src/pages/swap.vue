@@ -90,6 +90,7 @@
       :from-coin-amount="fromCoinAmount"
       :to-coin-amount="toCoinAmount"
       :pool-info="poolInfo"
+      :fixedFromCoin="fixedFromCoin"
     ></SwapInfo>
     <Setting v-if="showSetting" @onClose="() => (showSetting = false)"></Setting>
     <CoinSelect
@@ -264,9 +265,9 @@ export default Vue.extend({
           console.log('fixedFromCoin###if####amountOut###', amountOut.fixed())
           console.log('fixedFromCoin###if####amountOutWithSlippage###', amountOutWithSlippage.fixed())
 
-          if (Number(amountOutWithSlippage.fixed())) {
+          if (Number(amountOut.fixed())) {
             this.insufficientLiquidity = false
-            this.toCoinAmount = amountOutWithSlippage.fixed()
+            this.toCoinAmount = amountOut.fixed()
           } else {
             this.insufficientLiquidity = true
             this.toCoinAmount = '0'

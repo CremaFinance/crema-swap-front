@@ -6,7 +6,7 @@
       <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-a-icon-AddCustomMarket"></use>
       </svg> -->
-      <p v-if="type === 'max'">{{ currentData.maxPrice }}</p>
+      <p v-if="type === 'Max'">{{ currentData.maxPrice }}</p>
       <p v-else>{{ currentData.minPrice }}</p>
       <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-icon-Reduction"></use>
@@ -20,7 +20,7 @@
     </div>
     <div class="price-position">
       Your position will be 100%
-      {{ type === 'max' ? currentData.coin && currentData.coin.symbol : currentData.pc && currentData.pc.symbol }} at
+      {{ type === 'Max' ? currentData.coin && currentData.coin.symbol : currentData.pc && currentData.pc.symbol }} at
       this price
     </div>
   </div>
@@ -32,7 +32,7 @@ export default Vue.extend({
   props: {
     type: {
       type: String,
-      default: 'max'
+      default: 'Max'
     },
     currentData: {
       type: Object,

@@ -104,7 +104,7 @@ export function fixD(num: any, precision: any) {
   if (`${num}` === '0') {
     // if (!window.parseFloat(precision)) {
     if (!parseFloat(precision)) {
-      return 0
+      return '0'
     }
     return '0.'.padEnd(precision + 2, '0')
   }
@@ -176,4 +176,27 @@ export function fixD(num: any, precision: any) {
     }
   }
   return (flag ? '-' : '') + fixNum
+}
+
+function removeEndingZero(num: string) {
+  return num.replace(/(\s|0)+$/g, '')
+}
+
+export function decimalFormat(num: string, d: number) {
+  if (!Number(num)) {
+    return 0
+  }
+
+  const minimum = Math.pow(10, -d)
+  if (Number(num) < minimum) {
+    return removeEndingZero(num)
+  }
+
+  const result = fixD(num, d)
+
+  if (result === '--') {
+    return '--'
+  }
+
+  return removeEndingZero(String(result))
 }

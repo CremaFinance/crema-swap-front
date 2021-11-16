@@ -12,6 +12,16 @@
         >
       </div>
     </div>
+    <div v-if="toCoinAmount && fromCoinAmount" class="block">
+      <span>{{ fixedFromCoin ? 'Minimum Received' : 'Maximum Sold' }}</span>
+      <div class="right">
+        {{
+          fixedFromCoin
+            ? Number(toCoinAmount) / (1 + Number($accessor.slippage) / 100)
+            : fromCoinAmount * (1 + Number($accessor.slippage) / 100)
+        }}
+      </div>
+    </div>
     <div class="block">
       <span>Price Impact</span>
       <div class="right">&lt;0.01%</div>
@@ -54,6 +64,10 @@ export default Vue.extend({
     toCoinAmount: {
       type: String,
       default: ''
+    },
+    fixedFromCoin: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
