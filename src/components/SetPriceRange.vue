@@ -102,10 +102,11 @@ export default Vue.extend({
       this.$emit('onChangeMax', value)
     },
     direction(value: boolean) {
-      this.onChangeMin(String(1 / Number(this.maxPrice)))
-      this.onChangeMax(String(1 / Number(this.minPrice)))
+      const min = Number(this.minPrice)
+      const max = Number(this.maxPrice)
+      this.onChangeMin(String(1 / max))
+      this.onChangeMax(String(1 / min))
       const price = 1 / this.currentPrice
-      // console.log('难道进这里了###')
       this.step = price / 100
     },
     fromCoin: {
@@ -119,7 +120,6 @@ export default Vue.extend({
   },
   methods: {
     watchFromCoin(value: any) {
-      console.log('watchFromCoin####', value)
       if (!value) {
         this.onChangeMin('0')
         this.onChangeMax('0')
@@ -128,7 +128,6 @@ export default Vue.extend({
       }
     },
     watchToCoin(value: any) {
-      console.log('watchToCoin####', value)
       if (!value) {
         this.onChangeMin('0')
         this.onChangeMax('0')

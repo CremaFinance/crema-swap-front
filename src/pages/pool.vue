@@ -387,8 +387,14 @@ export default Vue.extend({
         tick_lower = -552648
         tick_upper = 552648
       } else {
-        minPrice = Number(min)
-        maxPrice = Number(max)
+        if (this.direction) {
+          minPrice = Number(min)
+          maxPrice = Number(max)
+        } else {
+          minPrice = 1 / Number(max)
+          maxPrice = 1 / Number(min)
+        }
+
         tick_lower = price2tick(Math.sqrt(minPrice))
         tick_upper = price2tick(Math.sqrt(maxPrice))
       }

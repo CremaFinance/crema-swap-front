@@ -21,10 +21,10 @@
           <img src="../../assets/images/icon-Pools@2x.png" />
           <span>Pools</span>
         </nuxt-link>
-        <!-- <nuxt-link to="/farming">
-          <img src="../../assets/images/icon-Pools@2x.png" />
+        <nuxt-link to="/farming">
+          <img src="../../assets/images/icon-Farming@2x.png" />
           <span>Farming</span>
-        </nuxt-link> -->
+        </nuxt-link>
         <!-- <nuxt-link to="/staking">
           <img src="../../assets/images/icon-Staking@2x.png" />
           <span>Staking</span>
@@ -32,6 +32,12 @@
       </nav>
     </div>
     <div class="right">
+      <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-icon_guide"></use>
+        </svg>
+        <span>Test Guide</span>
+      </a>
       <Wallet />
       <Contactus></Contactus>
     </div>
@@ -136,6 +142,29 @@ console.log()
   > .right {
     display: flex;
     align-items: center;
+    .test-guide {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-right: 20px;
+      .icon {
+        width: 20px;
+        height: 20px;
+        fill: rgba(255, 255, 255, 0.5);
+      }
+      span {
+        color: rgba(255, 255, 255, 0.5);
+        margin-left: 4px;
+      }
+      &:hover {
+        .icon {
+          fill: #fff;
+        }
+        span {
+          color: #fff;
+        }
+      }
+    }
   }
 }
 </style>

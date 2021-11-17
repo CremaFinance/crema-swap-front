@@ -43,6 +43,14 @@
             </svg>
           </div>
         </li>
+        <li>
+          <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-icon_guide"></use>
+            </svg>
+            <span>Test Guide</span>
+          </a>
+        </li>
 
         <!-- <li :class="{ active: $route.name === 'staking' }" @click="goUrl('staking')">
           <img src="@/assets/images/icon-Staking@2x.png" alt="" />
@@ -243,6 +251,30 @@ export default {
               &.active {
                 color: #00ffd0;
               }
+            }
+          }
+        }
+
+        .test-guide {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          margin-right: 20px;
+          .icon {
+            width: 28px;
+            height: 28px;
+            fill: rgba(255, 255, 255, 0.5);
+          }
+          span {
+            color: rgba(255, 255, 255, 0.5);
+            margin-left: 0px;
+          }
+          &:hover {
+            .icon {
+              fill: #fff;
+            }
+            span {
+              color: #fff;
             }
           }
         }
