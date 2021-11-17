@@ -267,6 +267,22 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
     fee: 0
   }
   // {
+  //   name: 'CTA-CTB',
+  //   coin: { ...TOKENS.CTA },
+  //   pc: { ...TOKENS.CTB },
+  //   programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  //   authority: '28FBQfWBqw7ZHRKLcxfiFbu3VoPDUKUH5TsZcX4mdNYw',
+  //   tokenSwapAccount: 'BeHeQPu2GWxvNJ3xqFgWUx6CoSnvFLZdDj7P4NkN1nXo',
+  //   tokenSwapToken: 'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N',
+  //   poolCoinTokenAccount: 'CUdhfvSxkXjP67uLGzQKEjkonZ7usg8U1kmC5MFNbF29',
+  //   poolPcTokenAccount: 'HbhrQhf4i98rCyJnAqsjHBDqCo73yLKtGdXkYJYG88mk',
+  //   tickDetailKey: '4qDqiyeKe37U6BeV6Wu8xZ793LZM8mMsseQUXgJmyrKe',
+  //   userPositionKey: '9vWstD9S7hDYDCAaF2qF9ENUZDNxPHBQXuYZrwHA8YvV',
+  //   userPositionIndex: 2,
+  //   currentPrice: new Numberu128(0),
+  //   fee: 0
+  // }
+  // {
   //   name: 'CSOL-USDC',
   //   coin: { ...TOKENS.CSOL },
   //   pc: { ...TOKENS.USDC },

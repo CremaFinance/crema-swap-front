@@ -116,6 +116,21 @@ export default Vue.extend({
         return false
       }
       return true
+    },
+    noEnterAmount(): boolean {
+      const fromCoinAmount = Number(this.fromCoinAmount)
+      const toCoinAmount = Number(this.toCoinAmount)
+      const showFromCoinLock = this.showFromCoinLock
+      const showToCoinLock = this.showToCoinLock
+      if (showFromCoinLock && !showToCoinLock && !toCoinAmount) {
+        return true
+      } else if (showToCoinLock && !showFromCoinLock && !fromCoinAmount) {
+        return true
+      } else if (!showFromCoinLock && !showToCoinLock && (!fromCoinAmount || !toCoinAmount)) {
+        return true
+      }
+
+      return false
     }
   },
   watch: {
@@ -133,6 +148,9 @@ export default Vue.extend({
     },
     insufficientBalance(value: boolean) {
       this.$emit('onChangeInsufficientBalance', value)
+    },
+    noEnterAmount(value: boolean) {
+      this.$emit('onChangeNoEnterAmount', value)
     }
   },
   mounted() {

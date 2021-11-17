@@ -85,6 +85,7 @@
       }}
     </Button>
     <SwapInfo
+      v-if="fromCoin && toCoin"
       :from-coin="fromCoin"
       :to-coin="toCoin"
       :from-coin-amount="fromCoinAmount"
@@ -292,8 +293,6 @@ export default Vue.extend({
             this.fromCoinAmount = '0'
           }
           this.loading = false
-          console.log('fixedFromCoin###else####amountOut###', amountOut.fixed())
-          console.log('fixedFromCoin###else####amountOutWithSlippage###', amountOutWithSlippage.fixed())
         }
       }
     },
@@ -307,7 +306,8 @@ export default Vue.extend({
       // existingCoins
       this.showCoinSelect = true
     },
-    onCoinSelect(token: TokenInfo) {
+    onCoinSelect(token: any) {
+      // if (token.unusable) return
       if (this.currentCoinKey === 'fromCoin') {
         this.fromCoin = token
       } else {

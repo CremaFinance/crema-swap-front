@@ -6,7 +6,7 @@
         <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" />
       </a>
       <nav>
-        <a href="https://trade.crema.finance/" target="_blank">
+        <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
           <img src="../../assets/images/icon-Trading@2x.png" />
           <span>Trading</span>
         </a>
@@ -135,6 +135,16 @@ console.log()
         height: 100%;
         background: #1b2023;
         z-index: -1;
+      }
+    }
+    .to-trading {
+      &:hover,
+      &.active,
+      &.nuxt-link-exact-active {
+        &::after,
+        &::before {
+          display: none;
+        }
       }
     }
   }

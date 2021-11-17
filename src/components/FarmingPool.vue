@@ -19,7 +19,7 @@
                     />
                   </div>
                   <div class="symbol-text">
-                    <div class="symbol-name">{{ item.symbolName }}</div>
+                    <div class="symbol-name">{{ item.coinA }}/{{ item.coinB }}</div>
                     <div class="fee-rate">Fee Rate {{ item.feeRate }}%</div>
                   </div>
                 </div>
@@ -33,14 +33,24 @@
                 <div class="td-text">$ {{ item.liquidity }}</div>
               </td>
               <td width="20%">
-                <div class="td-title">Reward Range</div>
+                <div class="td-title">
+                  Reward Range
+                  <svg class="icon" aria-hidden="true" @click="toogleData(index, item)">
+                    <use xlink:href="#icon-reward-range"></use>
+                  </svg>
+                </div>
                 <div class="td-text">{{ item.rewardRange }}</div>
               </td>
               <td>
                 <div class="td-title">Earned</div>
                 <div class="td-text">
                   -- CRM
-                  <img v-if="index == 0" src="@/assets/images/farming-earned-icon.png" alt="" />
+                  <img
+                    v-if="index == 0"
+                    @click="showStakeConfirm('Harvest')"
+                    src="@/assets/images/farming-earned-icon.png"
+                    alt=""
+                  />
                 </div>
               </td>
               <!-- <td>
@@ -49,13 +59,13 @@
                 </Button>
               </td> -->
               <td>
-                <div class="open-or-close">
+                <div class="open-or-close" :class="index !== 0 ? 'open-or-close-disabled' : ''">
                   Details
                   <svg
                     class="icon"
                     :class="isShowTableTr == index ? 'icon-open' : ''"
                     aria-hidden="true"
-                    @click="isShowTableTr !== index ? (isShowTableTr = index) : (isShowTableTr = -1)"
+                    @click="updateIsShowTableTr(index)"
                   >
                     <use xlink:href="#icon-icon-on"></use>
                   </svg>
@@ -92,7 +102,7 @@
                 </div>
               </td>
               <td>
-                <Button class="action-btn" @click="showStakeConfirm('Stake')">
+                <Button class="action-btn" @click="showNotify('Stake')">
                   <div>Stake - preview</div>
                 </Button>
               </td>
@@ -114,10 +124,16 @@
               </td>
               <td>
                 <div class="td-title">Earned</div>
-                <div class="td-text">106.01CRM<img src="@/assets/images/farming-earned-icon.png" alt="" /></div>
+                <div class="td-text">
+                  106.01CRM<img
+                    src="@/assets/images/farming-earned-icon.png"
+                    @click="showStakeConfirm('Harvest')"
+                    alt=""
+                  />
+                </div>
               </td>
               <td>
-                <Button class="action-btn" @click="showStakeConfirm('UnStake')">
+                <Button class="action-btn" @click="showNotify('Unstake')">
                   <div>Unstake - preview</div>
                 </Button>
               </td>
@@ -142,7 +158,7 @@ export default Vue.extend({
   props: {
     isStaked: {
       type: String,
-      default: 'Staked'
+      default: 'All'
     },
     searchKey: {
       type: String,
@@ -163,6 +179,7 @@ export default Vue.extend({
           apr: '106.8',
           liquidity: '999.8',
           rewardRange: '1 - 1.002',
+          rewardRangeTab: '0.989 - 1',
           earned: '17.54',
           isStaked: 'Staked'
         },
@@ -173,7 +190,8 @@ export default Vue.extend({
           coinB: 'USDC',
           apr: '620.15',
           liquidity: '6,808,102.16',
-          rewardRange: '215.4906 - 220.1256 ',
+          rewardRange: '215.4906 - 220.1256',
+          rewardRangeTab: '0.004638 - 0.004936',
           earned: '- -'
         },
         {
@@ -184,6 +202,7 @@ export default Vue.extend({
           apr: '306.12',
           liquidity: '2,588,575.18',
           rewardRange: '0.9771 - 0.9901',
+          rewardRangeTab: '1.007998 - 1.008013',
           earned: '- -'
         },
         {
@@ -194,9 +213,11 @@ export default Vue.extend({
           apr: '201.09',
           liquidity: '1,592,057.39',
           rewardRange: '219.5432 - 236.1908',
+          rewardRangeTab: '0.004561 - 0.004682',
           earned: '- -'
         }
-      ]
+      ],
+      isEewardRangeTab: -1
     }
   },
   watch: {
@@ -208,13 +229,41 @@ export default Vue.extend({
   methods: {
     importIcon,
     showStakeConfirm(title: string) {
-      // this.stakeTitle = title
-      // this.showStake = true
+      this.stakeTitle = title
+      this.showStake = true
+    },
+    showNotify(title: string) {
       this.$notify.success({
         message: `${title} Success`,
         icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Copied@2x.png' } }),
         description: (h: any) => h('div', [`${title} Success`])
       })
+    },
+    updateIsShowTableTr(index: any) {
+      if (index == 0 && this.isShowTableTr != 0) {
+        this.isShowTableTr = 0
+      } else if (index == 0 && this.isShowTableTr == 0) {
+        this.isShowTableTr = -1
+      }
+    },
+    toogleData(index: number, item: any) {
+      const info = this.tableDataArr[index]
+      const tempcoinA = info.coinB
+      const tempcoinB = info.coinA
+      const temprewardRange = info.rewardRange
+      const temprewardRangeTab = info.rewardRangeTab
+      // this.isEewardRangeTab = this.isEewardRangeTab == index ? -1 : index
+      // const temprewardRange = info.rewardRange.split('').reverse().join('')
+      const data = {
+        ...info,
+        coinA: tempcoinA,
+        coinB: tempcoinB,
+        rewardRange: temprewardRangeTab,
+        rewardRangeTab: temprewardRange
+        // rewardRange: temprewardRange
+      }
+      this.tableDataArr[index] = data
+      this.$forceUpdate()
     }
   }
 })
@@ -271,6 +320,17 @@ export default Vue.extend({
   .td-title {
     font-size: 12px;
     color: #5f667c;
+    display: flex;
+    align-items: center;
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: #b5b8c2;
+      margin-left: 4px;
+      &:hover {
+        fill: #fff;
+      }
+    }
   }
   .td-text {
     font-size: 14px;
@@ -278,7 +338,7 @@ export default Vue.extend({
     color: #fff;
     margin-top: 10px;
     display: flex;
-    align-items: center;
+    // align-items: center;
     img {
       width: 20px;
       height: 20px;
@@ -314,20 +374,25 @@ export default Vue.extend({
   .action-btn {
     width: 140px;
     line-height: 1;
-    height: auto;
+    height: 40px;
     padding: 1px;
-    background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
-
+    // background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
+    background: linear-gradient(180deg, #e4e2fe 0%, #2881f2 100%);
+    border-radius: 13px;
+    border: none;
     div {
-      border-radius: 7px;
       // line-height: 1;
       text-align: center;
-      line-height: 40px;
+      border-radius: 12px;
+      line-height: 38px;
       // padding: 13px 19px;
       font-size: 14px;
       font-weight: normal;
       color: #fff;
-      background: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58)) 1 1;
+      background: linear-gradient(268deg, #5fe6d0 0%, #597bff 38%, #9380ff 72%, #e590ff 100%);
+      &:hover {
+        background: linear-gradient(270deg, #93ffed 0%, #84caff 34%, #a291ff 68%, #efb9ff 100%);
+      }
     }
   }
   .open-or-close {
@@ -342,6 +407,15 @@ export default Vue.extend({
     }
     .icon-open {
       transform: rotate(180deg);
+    }
+  }
+  .open-or-close-disabled {
+    color: #5f667c;
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: #5f667c;
+      // transform: rotate(180deg);
     }
   }
 }

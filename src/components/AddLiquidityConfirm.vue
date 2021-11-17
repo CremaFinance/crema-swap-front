@@ -86,7 +86,7 @@
           <div class="price-range-block">
             <div class="price-item">
               <div class="title">Min Price</div>
-              <p class="price">{{ secondConfirmData.minPrice }}</p>
+              <p class="price">{{ decimalFormat(secondConfirmData.minPrice, 6) }}</p>
               <div class="text" v-if="direct">
                 {{ secondConfirmData.fromCoin.symbol }} per {{ secondConfirmData.toCoin.symbol }}
               </div>
@@ -99,7 +99,9 @@
             </div>
             <div class="price-item">
               <div class="title">Max Price</div>
-              <p class="price">{{ secondConfirmData.maxPrice }}</p>
+              <p class="price">
+                {{ secondConfirmData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(secondConfirmData.maxPrice, 6) }}
+              </p>
               <div class="text" v-if="!direct">
                 {{ secondConfirmData.fromCoin.symbol }} per {{ secondConfirmData.toCoin.symbol }}
               </div>
@@ -138,6 +140,7 @@
             :current-data="secondConfirmData"
             @onChange="addFormChanged"
             @onChangeInsufficientBalance="onChangeInsufficientBalance"
+            @onChangeNoEnterAmount="onChangeNoEnterAmount"
           ></AddLiquidityForm>
         </div>
         <button
@@ -146,7 +149,7 @@
           :disabled="isDisabled || insufficientBalance"
           @click="toAdd"
         >
-          {{ insufficientBalance ? 'Insufficient balance' : 'Add' }}
+          {{ noEnterAmount ? 'Enter an amount' : insufficientBalance ? 'Insufficient balance' : 'Add' }}
         </button>
         <button v-else class="add-btn" @click="toAdd">Add</button>
       </div>
@@ -159,7 +162,7 @@ import Vue from 'vue'
 import { Modal } from 'ant-design-vue'
 import importIcon from '@/utils/import-icon'
 import { eventBus } from '@/utils/eventBus'
-import { fixD } from '@/utils'
+import { fixD, decimalFormat } from '@/utils'
 import { gt } from '@/utils/safe-math'
 import StatusBlock from '@/components/StatusBlock.vue'
 
@@ -209,7 +212,8 @@ export default Vue.extend({
       toCoinAmount: '',
       showSetting: false,
       deltaLiquity: 0,
-      insufficientBalance: false
+      insufficientBalance: false,
+      noEnterAmount: true
     }
   },
   computed: {
@@ -242,8 +246,12 @@ export default Vue.extend({
     gt,
     fixD,
     importIcon,
+    decimalFormat,
     onChangeInsufficientBalance(value: boolean) {
       this.insufficientBalance = value
+    },
+    onChangeNoEnterAmount(value: boolean) {
+      this.noEnterAmount = value
     },
     changeDirect(value: boolean) {
       this.direct = value

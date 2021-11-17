@@ -70,10 +70,11 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { fixD } from '@/utils'
+import { fixD, decimalFormat } from '@/utils'
 import { Button } from 'ant-design-vue'
 import { eventBus } from '@/utils/eventBus'
 import { price2tick, tick2price } from '@/tokenSwap/swapv3'
+import { debounce, throttle } from 'lodash-es'
 Vue.use(Button)
 export default Vue.extend({
   components: {
@@ -96,16 +97,27 @@ export default Vue.extend({
       immediate: true
     },
     minPrice(value: string) {
+      // this.minPrice = String(decimalFormat(value, 6))
       this.$emit('onChangeMin', value)
     },
     maxPrice(value: string) {
+      if (value !== '∞') {
+        // this.maxPrice = String(decimalFormat(value, 6))
+      }
       this.$emit('onChangeMax', value)
     },
     direction(value: boolean) {
-      const min = Number(this.minPrice)
-      const max = Number(this.maxPrice)
-      this.onChangeMin(String(1 / max))
-      this.onChangeMax(String(1 / min))
+      console.log('SetPriceRange###directiong##value###', value)
+      if (this.maxPrice === '∞') {
+        this.onChangeMax('∞')
+        this.onChangeMin('0')
+      } else {
+        const min = Number(this.minPrice)
+        const max = Number(this.maxPrice)
+        this.onChangeMin(String(1 / max))
+        this.onChangeMax(String(1 / min))
+      }
+
       const price = 1 / this.currentPrice
       this.step = price / 100
     },
@@ -136,24 +148,24 @@ export default Vue.extend({
       }
     },
     addMinPrice() {
-      // console.log('addMinPrice####this.step###', this.step)
-      const min = Number(this.minPrice) + Number(this.minPrice) * this.step
-      this.onChangeMin(String(min))
+      const minTick = price2tick(Number(this.minPrice))
+      const newValue = tick2price(minTick + 6)
+      this.onChangeMin(String(newValue))
     },
     minusMinPrice() {
-      // console.log('minusMinPrice####this.step###', this.step)
-      const min = Number(this.minPrice) - Number(this.minPrice) * this.step
-      this.onChangeMin(String(min))
+      const minTick = price2tick(Number(this.minPrice))
+      const newValue = tick2price(minTick - 6)
+      this.onChangeMin(String(newValue))
     },
     addMaxPrice() {
-      // console.log('addMaxPrice####this.step###', this.step)
-      const max = Number(this.maxPrice) + Number(this.maxPrice) * this.step
-      this.onChangeMax(String(max))
+      const maxTick = price2tick(Number(this.maxPrice))
+      const newValue = tick2price(maxTick + 6)
+      this.onChangeMax(String(newValue))
     },
     minusMaxPrice() {
-      // console.log('minusMaxPrice####this.step###', this.step)
-      const max = Number(this.maxPrice) - Number(this.maxPrice) * this.step
-      this.onChangeMax(String(max))
+      const maxTick = price2tick(Number(this.maxPrice))
+      const newValue = tick2price(maxTick - 6)
+      this.onChangeMax(String(newValue))
     },
     watchCurrentPrice(value: number) {
       if (value) {
@@ -185,14 +197,22 @@ export default Vue.extend({
       this.$emit('onChangeMax', '∞')
     },
     onChangeMin(value: string) {
-      const tick = price2tick(Number(value))
-      const price = tick2price(tick)
-      this.minPrice = String(price)
+      if (value !== '0') {
+        const tick = price2tick(Number(value))
+        const price = tick2price(tick)
+        this.minPrice = String(decimalFormat(String(price), 6))
+      } else {
+        this.minPrice = '0'
+      }
     },
     onChangeMax(value: string) {
-      const tick = price2tick(Number(value))
-      const price = tick2price(tick)
-      this.maxPrice = String(price)
+      if (value !== '∞') {
+        const tick = price2tick(Number(value))
+        const price = tick2price(tick)
+        this.maxPrice = String(decimalFormat(String(price), 6))
+      } else {
+        this.maxPrice = '∞'
+      }
     }
   }
 })

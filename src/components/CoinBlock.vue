@@ -9,7 +9,7 @@
         <div class="coin-select" @click="$emit('onSelect')">
           <img v-if="coinName" :src="importIcon(`/coins/${coinName.toLowerCase()}.png`)" />
           <img v-else src="../assets/images/icon_missing.svg" />
-          <span class="coin-name">{{ coinName }}</span>
+          <span class="coin-name">{{ coinName || 'Select' }}</span>
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-icon-on"></use>
           </svg>

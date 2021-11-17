@@ -13,25 +13,25 @@
           </svg>
           <span>Docs</span>
         </a> -->
-        <a href="https://t.me/cremafinance" target="_blank" rel="noopener noreferrer">
+        <a href="https://twitter.com/Crema_Finance" target="_blank" rel="noopener noreferrer">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-twitter"></use>
           </svg>
           <span>Twitter</span>
         </a>
-        <a href="https://t.me/cremaofficial" target="_blank" rel="noopener noreferrer">
+        <a href="https://t.me/cremafinance" target="_blank" rel="noopener noreferrer">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-telegram"></use>
           </svg>
           <span>Telegram</span>
         </a>
-        <a href="https://medium.com/@hello_9645" target="_blank" rel="noopener noreferrer">
+        <a href="https://medium.com/@Crema.finance" target="_blank" rel="noopener noreferrer">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-medium"></use>
           </svg>
           <span>Medium</span>
         </a>
-        <a href="https://discord.com/invite/5bVg7frrkr" target="_blank" rel="noopener noreferrer">
+        <a href="https://discord.gg/hCaFmvvPYH" target="_blank" rel="noopener noreferrer">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-discord"></use>
           </svg>

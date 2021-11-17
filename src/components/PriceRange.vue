@@ -6,8 +6,10 @@
       <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-a-icon-AddCustomMarket"></use>
       </svg> -->
-      <p v-if="type === 'Max'">{{ currentData.maxPrice }}</p>
-      <p v-else>{{ currentData.minPrice }}</p>
+      <p v-if="type === 'Max'">
+        {{ currentData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(currentData.maxPrice, 6) }}
+      </p>
+      <p v-else>{{ decimalFormat(currentData.minPrice, 6) }}</p>
       <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-icon-Reduction"></use>
       </svg> -->
@@ -27,6 +29,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import { decimalFormat } from '@/utils'
 export default Vue.extend({
   // props: ['Reference', 'sized'],
   props: {
@@ -44,6 +47,9 @@ export default Vue.extend({
       type: Boolean,
       default: false
     }
+  },
+  methods: {
+    decimalFormat
   }
 })
 </script>

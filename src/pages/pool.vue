@@ -86,19 +86,12 @@
       <Button
         v-else
         class="add-liquidity-btn"
-        :disabled="suppling || isDisabled || invalidPriceRange"
+        :disabled="suppling || isDisabled || noEnterAmount || invalidPriceRange"
         :loading="suppling"
         @click="openAddLiquiditySecondConfirm"
       >
-        {{
-          (fromCoinAmount && gt(fromCoinAmount, toCoin && fromCoin.balance && fromCoin.balance.fixed())) ||
-          (showFromCoinLock && toCoinAmount && gt(toCoinAmount, toCoin && toCoin.balance && toCoin.balance.fixed())) ||
-          (showToCoinLock &&
-            fromCoinAmount &&
-            gt(fromCoinAmount, toCoin && fromCoin.balance && fromCoin.balance.fixed()))
-            ? 'Insufficient balance'
-            : 'Add Liquidity'
-        }}
+        <!-- {{ insufficientBalance ? 'Insufficient balance' : 'Add Liquidity' }} -->
+        {{ noEnterAmount ? 'Enter an amount' : insufficientBalance ? 'Insufficient balance' : 'Add Liquidity' }}
       </Button>
       <div v-if="wallet.connected" class="link-block">
         <nuxt-link to="/position">
@@ -111,7 +104,12 @@
       <Setting v-if="showSetting" @onClose="() => (showSetting = false)"></Setting>
       <WaitingHint v-if="showWaitingHint" @onClose="() => (showWaitingHint = false)"></WaitingHint>
       <SuccessHint v-if="showSuccessHint" @onClose="() => (showSuccessHint = false)"></SuccessHint>
-      <CoinSelect v-if="showCoinSelect" @onClose="() => (showCoinSelect = false)" @onSelect="onCoinSelect"></CoinSelect>
+      <CoinSelect
+        v-if="showCoinSelect"
+        :existing-coins="existingCoins"
+        @onClose="() => (showCoinSelect = false)"
+        @onSelect="onCoinSelect"
+      ></CoinSelect>
 
       <AddLiquidityConfirm
         v-if="showAddLiquiditySecondConfirm"
@@ -187,7 +185,8 @@ export default Vue.extend({
       deltaLiquity: 0,
       showAddLiquiditySecondConfirm: false,
       secondConfirmData: {},
-      displayCurrentprice: 0 // 展示的价格
+      displayCurrentprice: 0, // 展示的价格
+      existingCoins: ''
     }
   },
   computed: {
@@ -210,6 +209,48 @@ export default Vue.extend({
         )
       })
       return info
+    },
+    insufficientBalance(): boolean {
+      // (fromCoinAmount && gt(fromCoinAmount, toCoin && fromCoin.balance && fromCoin.balance.fixed())) ||
+      //     (showFromCoinLock && toCoinAmount && gt(toCoinAmount, toCoin && toCoin.balance && toCoin.balance.fixed())) ||
+      //     (showToCoinLock &&
+      //       fromCoinAmount &&
+      //       gt(fromCoinAmount, toCoin && fromCoin.balance && fromCoin.balance.fixed()))
+      // return false
+
+      const fromCoinBalance =
+        (this.$data.fromCoin && this.$data.fromCoin.balance && this.$data.fromCoin.balance.fixed()) || ''
+      const toCoinBalance = (this.$data.toCoin && this.$data.toCoin.balance && this.$data.toCoin.balance.fixed()) || ''
+
+      const fromCoinInsufficient = gt(this.$data.fromCoinAmount, fromCoinBalance)
+      const toCoinInsufficient = gt(this.$data.toCoinAmount, toCoinBalance)
+
+      const showFromCoinLock = this.showFromCoinLock
+      const showToCoinLock = this.showToCoinLock
+
+      if (showFromCoinLock && !showToCoinLock && !toCoinInsufficient) {
+        return false
+      } else if (showToCoinLock && !showFromCoinLock && !fromCoinInsufficient) {
+        return false
+      } else if (!showFromCoinLock && !showToCoinLock && !fromCoinInsufficient && !toCoinInsufficient) {
+        return false
+      }
+      return true
+    },
+    noEnterAmount(): boolean {
+      const fromCoinAmount = Number(this.fromCoinAmount)
+      const toCoinAmount = Number(this.toCoinAmount)
+      const showFromCoinLock = this.showFromCoinLock
+      const showToCoinLock = this.showToCoinLock
+      if (showFromCoinLock && !showToCoinLock && !toCoinAmount) {
+        return true
+      } else if (showToCoinLock && !showFromCoinLock && !fromCoinAmount) {
+        return true
+      } else if (!showFromCoinLock && !showToCoinLock && (!fromCoinAmount || !toCoinAmount)) {
+        return true
+      }
+
+      return false
     },
     isDisabled(): boolean {
       const toCoin = gt(
@@ -395,6 +436,9 @@ export default Vue.extend({
           maxPrice = 1 / Number(min)
         }
 
+        console.log('pool.vue####minPrice####', minPrice)
+        console.log('pool.vue####maxPrice####', maxPrice)
+
         tick_lower = price2tick(Math.sqrt(minPrice))
         tick_upper = price2tick(Math.sqrt(maxPrice))
       }
@@ -464,9 +508,15 @@ export default Vue.extend({
     },
     openCoinSelect(key: string) {
       this.currentCoinKey = key
+      if (key === 'fromCoin') {
+        this.existingCoins = this.toCoin?.symbol || ''
+      } else {
+        this.existingCoins = this.fromCoin?.symbol || ''
+      }
       this.showCoinSelect = true
     },
-    onCoinSelect(token: TokenInfo) {
+    onCoinSelect(token: any) {
+      // if (token.unusable) return
       if (this.currentCoinKey === 'fromCoin') {
         this.fromCoin = token
       } else {
@@ -576,8 +626,13 @@ export default Vue.extend({
         tick_lower = -552648
         tick_upper = 552648
       } else {
-        tick_lower = price2tick(Math.sqrt(Number(this.minPrice)))
-        tick_upper = price2tick(Math.sqrt(Number(this.maxPrice)))
+        if (this.direction) {
+          tick_lower = price2tick(Math.sqrt(Number(this.minPrice)))
+          tick_upper = price2tick(Math.sqrt(Number(this.maxPrice)))
+        } else {
+          tick_lower = price2tick(Math.sqrt(1 / Number(this.maxPrice)))
+          tick_upper = price2tick(Math.sqrt(1 / Number(this.minPrice)))
+        }
       }
 
       let nftMintToken: any

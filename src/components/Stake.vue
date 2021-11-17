@@ -40,12 +40,12 @@
       </div>
       <div class="rewards">
         <div class="rewards-text">Rewards</div>
-        <div class="rewards-balance">12.83</div>
+        <div class="rewards-balance">106.01CRM</div>
       </div>
     </div>
     <div class="btn-box">
-      <Button class="cancel-btn">Cancle</Button>
-      <Button class="submit-btn">{{ title }}</Button>
+      <Button class="cancel-btn" @click="$emit('onClose')">Cancle</Button>
+      <Button class="submit-btn" @click="submit">{{ title }}</Button>
     </div>
   </Modal>
 </template>
@@ -69,7 +69,15 @@ export default Vue.extend({
     return {}
   },
   methods: {
-    importIcon
+    importIcon,
+    submit() {
+      this.$notify.success({
+        message: `Harvest Success`,
+        icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Copied@2x.png' } }),
+        description: (h: any) => h('div', [`Harvest Success`])
+      })
+      this.$emit('onClose')
+    }
   }
 })
 </script>

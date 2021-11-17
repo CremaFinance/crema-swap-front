@@ -12,42 +12,26 @@
       <div class="min-and-max">
         <p>
           <span>Min:</span>
-          {{ pItem.minPrice }}
+          {{ decimalFormat(pItem.minPrice, 6) }}
         </p>
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-link"></use>
         </svg>
         <p>
           <span>Max:</span>
-          {{ pItem.maxPrice }}
+          {{ pItem.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(pItem.maxPrice, 6) }}
         </p>
       </div>
     </div>
     <div class="right">
-      <!-- <button v-if="!pItem.liquity">Closed</button> -->
       <StatusBlock :current-status="getCurrentStatus(pItem)" />
-      <!-- <button
-        v-else-if="
-          Number(pItem.currentPrice) >= Number(pItem.minPrice) && Number(pItem.currentPrice) <= Number(pItem.maxPrice)
-        "
-      >
-        <i class="circle"></i>
-        <span>Active</span>
-        <div class="active-tooltip">The price of this pool is currently within your position price range.</div>
-      </button>
-      <button v-else>
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-icon-tips"></use>
-        </svg>
-        <span>InActive</span>
-        <div class="active-tooltip">The price of this pool is currently out of your position price range.</div>
-      </button> -->
     </div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
+import { decimalFormat } from '@/utils'
 
 export default Vue.extend({
   props: {
@@ -70,6 +54,7 @@ export default Vue.extend({
   },
   methods: {
     importIcon,
+    decimalFormat,
     pItemWatch(value: any) {
       console.log('pItemWatch####value####', value)
     },

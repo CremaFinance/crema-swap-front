@@ -27,10 +27,16 @@
       </div>
       <!-- banner -->
       <div class="farming-banner">
-        <img src="@/assets/images/farming-banner-pc.png" alt="" />
+        <img class="pc-banner" src="@/assets/images/farming-banner-pc.png" alt="" />
+        <img class="h5-banner" src="@/assets/images/farming-banner-h5.png" alt="" />
+      </div>
+      <div class="h5-search-pool">
+        <Input v-model="searchKey" placeholder="Search Token or Pools" />
+        <div class="input-search"></div>
       </div>
       <!-- 池子列表 -->
-      <FarmingPool :isStaked="poolStatus" :searchKey="searchKey"></FarmingPool>
+      <FarmingPool class="pc-farming-pool" :isStaked="poolStatus" :searchKey="searchKey"></FarmingPool>
+      <H5FarmingPool class="h5-farming-pool" :isStaked="poolStatus" :searchKey="searchKey"></H5FarmingPool>
     </div>
   </div>
 </template>
@@ -40,7 +46,7 @@ import { Input } from 'ant-design-vue'
 export default Vue.extend({
   data() {
     return {
-      poolStatus: 'Staked',
+      poolStatus: 'All',
       searchKey: ''
     }
   }
@@ -127,6 +133,74 @@ export default Vue.extend({
       img {
         width: 1000px;
         height: 120px;
+      }
+      .h5-banner {
+        display: none;
+      }
+    }
+    .h5-search-pool {
+      display: none;
+    }
+    .pc-farming-pool {
+      display: block;
+    }
+    .h5-farming-pool {
+      display: none;
+    }
+  }
+}
+@media screen and (max-width: 750px) {
+  .farming-container {
+    width: 100%;
+    padding: 20px 16px 0;
+    .farming-container-center {
+      width: 100%;
+      .farming-title {
+        .title-right {
+          .search-pool {
+            display: none;
+          }
+        }
+      }
+      .farming-banner {
+        .pc-banner {
+          display: none;
+        }
+        .h5-banner {
+          display: block;
+          width: 100%;
+          height: 88px;
+        }
+      }
+      .h5-search-pool {
+        width: 100%;
+        margin-top: 20px;
+        padding-left: 20px;
+        padding-right: 5px;
+        background: #23262b;
+        box-shadow: 0px 0px 2px 0px #535966, 0px 2px 3px 1px #1a1c1f;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        input {
+          border: none;
+          outline: none;
+          background: #23262b;
+          line-height: 40px;
+        }
+        .input-search {
+          width: 30px;
+          height: 30px;
+          background: url('../assets/images/input-search.png');
+          background-size: 100% auto;
+        }
+      }
+      .pc-farming-pool {
+        display: none;
+      }
+      .h5-farming-pool {
+        display: block;
       }
     }
   }

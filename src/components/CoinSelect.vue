@@ -6,7 +6,12 @@
       </div>
       <div class="coin-list-box">
         <ul v-if="tokenList && tokenList.length > 0" class="coin-list">
-          <li v-for="(item, index) in tokenList" :key="index" @click="$emit('onSelect', item)">
+          <li
+            v-for="(item, index) in tokenList"
+            :key="index"
+            :class="item.unusable ? 'unusable' : ''"
+            @click="$emit('onSelect', item)"
+          >
             <div class="left">
               <img :src="importIconNew(`/coins/${item.symbol.toLowerCase()}.png`)" />
               <span>{{ item.symbol }}</span>
@@ -92,24 +97,31 @@ export default Vue.extend({
       const noBalance = []
 
       let tokenObject: any = {}
-      // if (this.existingCoins) {
-      //   for (const coinPair in LIQUIDITY_POOLS) {
-      //     const poolInfo = cloneDeep(LIQUIDITY_POOLS[coinPair])
-      //     if (poolInfo.coin.symbol === this.existingCoins) {
-      //       tokenObject[poolInfo.pc.symbol] = poolInfo.pc
-      //     }
+      const usableTokenObject: any = {} // 可以配对的币种
+      if (this.existingCoins) {
+        for (const coinPair in LIQUIDITY_POOLS) {
+          const poolInfo = cloneDeep(LIQUIDITY_POOLS[coinPair])
+          if (poolInfo.coin.symbol === this.existingCoins) {
+            usableTokenObject[poolInfo.pc.symbol] = poolInfo.pc
+          }
 
-      //     if (poolInfo.pc.symbol === this.existingCoins) {
-      //       tokenObject[poolInfo.coin.symbol] = poolInfo.coin
-      //     }
-      //   }
-      // } else {
+          if (poolInfo.pc.symbol === this.existingCoins) {
+            usableTokenObject[poolInfo.coin.symbol] = poolInfo.coin
+          }
+        }
+      }
+      // else {
       //   tokenObject = cloneDeep(TOKENS)
       // }
       tokenObject = cloneDeep(TOKENS)
 
       for (const symbol of Object.keys(tokenObject)) {
-        let tokenInfo = cloneDeep(tokenObject[symbol])
+        let tokenInfo: any = cloneDeep(tokenObject[symbol])
+
+        if (this.existingCoins && !usableTokenObject[symbol]) {
+          tokenInfo.unusable = true
+        }
+
         if (!tokenInfo.showDefault) continue
 
         tokenInfo.symbol = symbol
@@ -212,6 +224,15 @@ export default Vue.extend({
           }
           span {
             margin-left: 10px;
+          }
+        }
+        &.unusable {
+          color: rgba(255, 255, 255, 0.5);
+          cursor: not-allowed;
+          .left {
+            img {
+              filter: grayscale(1);
+            }
           }
         }
       }
