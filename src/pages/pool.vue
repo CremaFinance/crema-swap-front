@@ -19,7 +19,7 @@
           <!-- </Tooltip> -->
         </div>
       </div>
-      <div class="coin-rate">
+      <div v-if="!currentPriceIsLoading" class="coin-rate">
         <div v-if="fromCoin && toCoin" class="coin-text">
           <div v-if="direction">
             1 {{ fromCoin.symbol }} ≈ {{ fixD(displayCurrentprice, toCoin.decimals) }} {{ toCoin.symbol }}
@@ -36,6 +36,9 @@
             {{ direction ? toCoin.symbol : fromCoin.symbol }}
           </div>
         </div>
+      </div>
+      <div v-else class="price-loading">
+        <Icon type="loading" />
       </div>
       <div class="form-block">
         <CoinBlock
@@ -70,14 +73,20 @@
           @onMax="maxBtnSelect('toCoin')"
         ></CoinBlock>
       </div>
-      <SetPriceRange
-        :from-coin="fromCoin"
-        :to-coin="toCoin"
-        :current-price="(poolInfo && poolInfo.currentPrice) || 0"
-        :direction="direction"
-        @onChangeMin="priceRangeChangeMin"
-        @onChangeMax="priceRangeChangeMax"
-      ></SetPriceRange>
+      <div class="set-price-range-box">
+        <SetPriceRange
+          :from-coin="fromCoin"
+          :to-coin="toCoin"
+          :current-price="(poolInfo && poolInfo.currentPrice) || 0"
+          :direction="direction"
+          @onChangeMin="priceRangeChangeMin"
+          @onChangeMax="priceRangeChangeMax"
+        ></SetPriceRange>
+        <div v-if="currentPriceIsLoading" class="set-price-range-loading">
+          <Icon type="loading" />
+        </div>
+      </div>
+
       <PriceRangeHint v-if="invalidPriceRange"></PriceRangeHint>
       <!-- <button class="add-liquidity-btn" @click="showSuccessHint = true">Add Liquidity</button> -->
       <Button v-if="!wallet.connected" class="add-liquidity-btn" @click="$accessor.wallet.openModal"
@@ -125,7 +134,7 @@
 <script lang="ts">
 import { Vue } from 'nuxt-property-decorator'
 import { mapState } from 'vuex'
-import { Button } from 'ant-design-vue'
+import { Button, Icon } from 'ant-design-vue'
 // import AddLiquidity from '../layouts/components/AddLiquidity.vue'
 import WaitingHint from '../components/waiting.vue'
 import SuccessHint from '../components/success.vue'
@@ -157,7 +166,8 @@ export default Vue.extend({
   components: {
     WaitingHint,
     SuccessHint,
-    Button
+    Button,
+    Icon
     // Tooltip
     // AddLiquidity
   },
@@ -186,7 +196,9 @@ export default Vue.extend({
       showAddLiquiditySecondConfirm: false,
       secondConfirmData: {},
       displayCurrentprice: 0, // 展示的价格
-      existingCoins: ''
+      existingCoins: '',
+      currentPriceIsLoading: true
+      // poolInfo: null as any
     }
   },
   computed: {
@@ -290,7 +302,15 @@ export default Vue.extend({
     },
     // 'liquidity.infos': {
     //   handler(_newInfos: any) {
-    //     this.updateAmounts()
+    //     // this.updateAmounts()
+    //     console.log('poolInfo这里进来了几次')
+    //     const info: any = Object.values(this.$accessor.liquidity.infos).find((p: any) => {
+    //       return (
+    //         (p.coin.symbol === this.fromCoin?.symbol && p.pc.symbol === this.toCoin?.symbol) ||
+    //         (p.coin.symbol === this.toCoin?.symbol && p.pc.symbol === this.fromCoin?.symbol)
+    //       )
+    //     })
+    //     this.poolInfo = info
     //   },
     //   deep: true
     // },
@@ -358,6 +378,7 @@ export default Vue.extend({
       // 前端页面展示用
       const displayCurrentprice = Number(Math.pow(Number(value) / Math.pow(10, 12), 2))
       this.displayCurrentprice = displayCurrentprice
+      this.currentPriceIsLoading = false
     },
     openAddLiquiditySecondConfirm() {
       const currentPriceP = Number(Math.pow(Number(this.poolInfo.currentPrice) / Math.pow(10, 12), 2))
@@ -831,6 +852,22 @@ export default Vue.extend({
         height: 20px;
         fill: #fff;
       }
+    }
+  }
+
+  .set-price-range-box {
+    position: relative;
+    .set-price-range-loading {
+      position: absolute;
+      left: 0px;
+      right: 0px;
+      top: 27px;
+      bottom: 0px;
+      background: rgba(#33383b, 0.5);
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   }
 }

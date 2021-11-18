@@ -1,7 +1,11 @@
 <template>
   <div class="farming-pool-card-list">
     <div class="farming-pool-card-box" v-for="(item, index) in tableDataArr" :key="index">
-      <div class="farming-pool-card" :class="isShowTableTr == index && index == 0 ? 'is-open' : ''">
+      <div
+        class="farming-pool-card"
+        :class="isShowTableTr == index && index == 0 ? 'is-open' : ''"
+        v-if="isStaked === 'All' || isStaked === item.isStaked"
+      >
         <div class="symbol-info">
           <div class="symbol-left">
             <img class="coin-before" :src="importIcon(`/coins/${item.coinA.toLowerCase()}.png`)" alt="" /><img
@@ -73,7 +77,7 @@
             </div>
             <div class="trade-info-item">
               <div class="trade-info-title">Price Range</div>
-              <div class="trade-info-text">0.999 - 1.001</div>
+              <div class="trade-info-text">1 - 1.001</div>
             </div>
             <div class="trade-info-item">
               <div class="trade-info-title">Earned</div>

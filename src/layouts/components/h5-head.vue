@@ -30,7 +30,7 @@
         </li>
         <li class="have-sub-menu" @click="goUrl('pool')">
           <div
-            :class="{ active: $route.name === 'liquidity' || $route.name === 'farming', title: true }"
+            :class="{ active: $route.name === 'liquidity' || $route.name === 'pool', title: true }"
             @click="liquiditySubMenuIsShow = !liquiditySubMenuIsShow"
           >
             <!-- <svg class="icon" aria-hidden="true">
@@ -42,6 +42,10 @@
               <use xlink:href="#icondown"></use>
             </svg>
           </div>
+        </li>
+        <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
+          <img src="@/assets/images/icon-Farming@2x.png" alt="" />
+          <span>Farming</span>
         </li>
         <li>
           <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">

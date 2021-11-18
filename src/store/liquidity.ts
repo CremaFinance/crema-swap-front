@@ -30,7 +30,8 @@ import { TokenAmount } from '@/utils/safe-math'
 
 import logger from '@/utils/logger'
 
-const AUTO_REFRESH_TIME = 60
+// const AUTO_REFRESH_TIME = 60
+const AUTO_REFRESH_TIME = 6
 
 export const state = () => ({
   initialized: false,
@@ -83,6 +84,7 @@ export const actions = actionTree(
   { state, getters, mutations },
   {
     async requestInfos({ commit }) {
+      console.log('liquidity###requestInfos#####')
       commit('setLoading', true)
 
       const conn = this.$web3

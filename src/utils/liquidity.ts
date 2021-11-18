@@ -342,13 +342,13 @@ function depositAllTokenTypesInstruction(
   console.log('depositAllTokenTypesInstruction####maximumTokenA###', maximumTokenA)
   console.log('depositAllTokenTypesInstruction###maximumTokenB###', maximumTokenB)
 
-  // console.log('depositAllTokenTypesInstruction###new_position######', new_position)
-  // console.log('depositAllTokenTypesInstruction###liquity_amount######', liquity_amount)
-  // console.log('depositAllTokenTypesInstruction###tick_lower######', tick_lower)
-  // console.log('depositAllTokenTypesInstruction###tick_upper######', tick_upper)
-  // console.log('depositAllTokenTypesInstruction###maximumTokenA######', maximumTokenA)
-  // console.log('depositAllTokenTypesInstruction###maximumTokenB######', maximumTokenB)
-  // console.log('depositAllTokenTypesInstruction###user_position_index######', user_position_index)
+  console.log('depositAllTokenTypesInstruction###new_position######', new_position)
+  console.log('depositAllTokenTypesInstruction###liquity_amount######', liquity_amount)
+  console.log('depositAllTokenTypesInstruction###tick_lower######', tick_lower)
+  console.log('depositAllTokenTypesInstruction###tick_upper######', tick_upper)
+  console.log('depositAllTokenTypesInstruction###maximumTokenA######', maximumTokenA)
+  console.log('depositAllTokenTypesInstruction###maximumTokenB######', maximumTokenB)
+  console.log('depositAllTokenTypesInstruction###user_position_index######', user_position_index)
 
   const dataLayout = BufferLayout.struct([
     BufferLayout.u8('instruction'),
@@ -363,12 +363,15 @@ function depositAllTokenTypesInstruction(
 
   const data = Buffer.alloc(dataLayout.span)
 
+  const lq = String(liquity_amount).split('.')[0]
+  console.log('depositAllTokenTypesInstruction###lq#######', lq)
+
   dataLayout.encode(
     {
       instruction: 2, // Deposit instruction
       // eslint-disable-next-line object-shorthand
       new_position: new_position,
-      liquity_amount: new Numberu64(String(liquity_amount)).toBuffer(),
+      liquity_amount: new Numberu64(lq).toBuffer(),
       // liquity_amount,
       // eslint-disable-next-line object-shorthand
       tick_lower: tick_lower,

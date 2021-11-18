@@ -92,7 +92,7 @@
               </td>
               <td>
                 <div class="td-title">Price Range</div>
-                <div class="td-text">0.999 - 1.001</div>
+                <div class="td-text">1 - 1.001</div>
               </td>
               <td>
                 <div class="td-title">Earned</div>

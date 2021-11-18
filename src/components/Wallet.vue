@@ -171,7 +171,7 @@ export default class Wallet extends Vue {
     // await this.$accessor.farm.requestInfos()
     // this.setWalletTimer()
     // this.setPriceTimer()
-    // this.setLiquidityTimer()
+    this.setLiquidityTimer()
     // this.setFarmTimer()
     // this.setIdoTimer()
   }

@@ -169,7 +169,8 @@ export default Vue.extend({
         .h5-banner {
           display: block;
           width: 100%;
-          height: 88px;
+          // height: 88px;
+          height: auto;
         }
       }
       .h5-search-pool {
