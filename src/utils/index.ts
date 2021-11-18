@@ -179,7 +179,7 @@ export function fixD(num: any, precision: any) {
 }
 
 function removeEndingZero(num: string) {
-  return num.replace(/(\s|0)+$/g, '')
+  return num.replace(/(\s|0|\.)+$/g, '')
 }
 
 export function decimalFormat(num: string, d: number) {

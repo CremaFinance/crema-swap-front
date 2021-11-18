@@ -297,6 +297,11 @@ export default Vue.extend({
     poolInfo: {
       handler(value: any) {
         if (value) {
+          if (value.coin.symbol === this.fromCoin?.symbol && value.pc.symbol === this.toCoin?.symbol) {
+            this.direction = true
+          } else {
+            this.direction = false
+          }
           this.updateAmounts(value.currentPrice, this.minPrice, this.maxPrice)
           this.setDisplayCurrentprice(value.currentPrice)
         } else {
@@ -464,7 +469,9 @@ export default Vue.extend({
         } else {
           coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
           direction =
-            this.toCoin?.symbol === this.poolInfo.coin.symbol && this.toCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
+            this.toCoin?.symbol === this.poolInfo.coin.symbol && this.fromCoin?.symbol === this.poolInfo.pc.symbol
+              ? 0
+              : 1
         }
         // console.log('deposit_src_calulate_dst###tick_lower###', tick_lower)
         // console.log('deposit_src_calulate_dst###tick_upper###', tick_upper)
