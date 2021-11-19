@@ -44,7 +44,7 @@
               <td>
                 <div class="td-title">Earned</div>
                 <div class="td-text">
-                  -- CRM
+                  106.01CRM
                   <img
                     v-if="index == 0"
                     @click="showStakeConfirm('Harvest')"
@@ -59,14 +59,13 @@
                 </Button>
               </td> -->
               <td>
-                <div class="open-or-close" :class="index !== 0 ? 'open-or-close-disabled' : ''">
+                <div
+                  class="open-or-close"
+                  @click="updateIsShowTableTr(index)"
+                  :class="index !== 0 ? 'open-or-close-disabled' : ''"
+                >
                   Details
-                  <svg
-                    class="icon"
-                    :class="isShowTableTr == index ? 'icon-open' : ''"
-                    aria-hidden="true"
-                    @click="updateIsShowTableTr(index)"
-                  >
+                  <svg class="icon" :class="isShowTableTr == index ? 'icon-open' : ''" aria-hidden="true">
                     <use xlink:href="#icon-icon-on"></use>
                   </svg>
                 </div>
@@ -319,7 +318,7 @@ export default Vue.extend({
   }
   .td-title {
     font-size: 12px;
-    color: #5f667c;
+    color: #b5b8c2;
     display: flex;
     align-items: center;
     .icon {

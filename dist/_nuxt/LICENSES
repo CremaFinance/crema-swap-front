@@ -104,8 +104,6 @@ PERFORMANCE OF THIS SOFTWARE.
 
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
-/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
-
 /**
   * vue-class-component v7.2.6
   * (c) 2015-present Evan You
