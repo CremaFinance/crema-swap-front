@@ -71,7 +71,7 @@ export default Vue.extend({
       ) {
         return 'Active'
       } else {
-        return 'InActive'
+        return 'Inactive'
       }
     }
   }

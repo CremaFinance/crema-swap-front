@@ -4,7 +4,7 @@
       <div v-if="currentStatus === 'Active'" class="active-tooltip">
         The price of this pool is currently within your position price range.
       </div>
-      <div v-if="currentStatus === 'InActive'" class="active-tooltip">
+      <div v-if="currentStatus === 'Inactive'" class="active-tooltip">
         The price of this pool is currently out of your position price range.
       </div>
     </template>

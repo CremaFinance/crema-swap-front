@@ -163,10 +163,10 @@ export default Vue.extend({
         this.currentStatus = 'Active'
       } else if (currentPrice > maxPrice) {
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-        this.currentStatus = 'InActive'
+        this.currentStatus = 'Inactive'
       } else if (currentPrice < minPrice) {
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-        this.currentStatus = 'InActive'
+        this.currentStatus = 'Inactive'
       }
     },
     gotoMyPosition() {
@@ -213,10 +213,10 @@ export default Vue.extend({
           this.currentStatus = 'Active'
         } else if (currentPrice > maxPrice) {
           // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-          this.currentStatus = 'InActive'
+          this.currentStatus = 'Inactive'
         } else if (currentPrice < minPrice) {
           // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-          this.currentStatus = 'InActive'
+          this.currentStatus = 'Inactive'
         }
       } else {
         this.gotoMyPosition()

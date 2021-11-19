@@ -19,7 +19,7 @@
                     />
                   </div>
                   <div class="symbol-text">
-                    <div class="symbol-name">{{ item.coinA }}/{{ item.coinB }}</div>
+                    <div class="symbol-name">{{ item.coinA }}-{{ item.coinB }}</div>
                     <div class="fee-rate">Fee Rate {{ item.feeRate }}%</div>
                   </div>
                 </div>
@@ -172,19 +172,19 @@ export default Vue.extend({
       isShowTableTr: -1,
       tableDataArr: [
         {
-          symbolName: 'CUSDC/CUSDT',
+          symbolName: 'CUSDT-CUSDC',
           feeRate: '0.05',
-          coinA: 'CUSDC',
-          coinB: 'CUSDT',
+          coinA: 'CUSDT',
+          coinB: 'CUSDC',
           apr: '106.8',
           liquidity: '999.8',
-          rewardRange: '1 - 1.002',
-          rewardRangeTab: '0.989 - 1',
+          rewardRangeTab: '1 - 1.002',
+          rewardRange: '0.989 - 1',
           earned: '17.54',
           isStaked: 'Staked'
         },
         {
-          symbolName: 'SOL/USDC',
+          symbolName: 'SOL-USDC',
           feeRate: '0.3',
           coinA: 'SOL',
           coinB: 'USDC',
@@ -195,18 +195,18 @@ export default Vue.extend({
           earned: '- -'
         },
         {
-          symbolName: 'SOL/mSOL',
+          symbolName: 'mSOL-SOL',
           feeRate: '0.3',
-          coinA: 'SOL',
-          coinB: 'mSOL',
+          coinA: 'mSOL',
+          coinB: 'SOL',
           apr: '306.12',
           liquidity: '2,588,575.18',
-          rewardRange: '0.9771 - 0.9901',
-          rewardRangeTab: '1.007998 - 1.008013',
+          rewardRangeTab: '0.9771 - 0.9901',
+          rewardRange: '1.007998 - 1.008013',
           earned: '- -'
         },
         {
-          symbolName: 'mSOL/USDC',
+          symbolName: 'mSOL-USDC',
           feeRate: '0.3',
           coinA: 'mSOL',
           coinB: 'USDC',
@@ -421,6 +421,7 @@ export default Vue.extend({
 }
 tr {
   background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+  background-attachment: fixed; /* worked for me */
   border-radius: 20px;
   // border: 1px solid #565c6a;
   margin-top: 20px;

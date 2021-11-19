@@ -21,7 +21,7 @@
             <svg class="icon" aria-hidden="true" @click="$emit('onClose')" v-if="title == 'Increase Liquidity'">
               <use xlink:href="#icon-icon-return"></use>
             </svg>
-            {{ title }} {{ secondConfirmData.currentStatus }}
+            {{ title }}
           </div>
           <div class="modal-header-right">
             <svg class="icon" aria-hidden="true" @click="showSetting = true" v-if="title == 'Increase Liquidity'">
@@ -48,7 +48,7 @@
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-icon-tips"></use>
             </svg>
-            <span>InActive</span>
+            <span>Inactive</span>
           </div> -->
         </div>
         <div class="info">

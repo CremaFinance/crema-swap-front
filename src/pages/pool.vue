@@ -382,19 +382,20 @@ export default Vue.extend({
     },
     openAddLiquiditySecondConfirm() {
       const currentPriceP = Number(Math.pow(Number(this.poolInfo.currentPrice) / Math.pow(10, 12), 2))
-      console.log('openAddLiquiditySecondConfirm###this.poolInfo###', this.poolInfo)
+
+      const dPrice = this.direction ? currentPriceP : 1 / currentPriceP
 
       let currentStatus = 'Active'
       if (!this.deltaLiquity) {
         currentStatus = 'Closed'
-      } else if (currentPriceP >= Number(this.minPrice) && currentPriceP <= Number(this.maxPrice)) {
+      } else if (dPrice >= Number(this.minPrice) && dPrice <= Number(this.maxPrice)) {
         currentStatus = 'Active'
-      } else if (currentPriceP > Number(this.maxPrice)) {
+      } else if (dPrice > Number(this.maxPrice)) {
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-        currentStatus = 'InActive'
-      } else if (currentPriceP < Number(this.minPrice)) {
+        currentStatus = 'Inactive'
+      } else if (dPrice < Number(this.minPrice)) {
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-        currentStatus = 'InActive'
+        currentStatus = 'Inactive'
       }
 
       this.secondConfirmData = {
