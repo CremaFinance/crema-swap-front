@@ -107,7 +107,6 @@ export default Vue.extend({
       this.$emit('onChangeMax', value)
     },
     direction(value: boolean) {
-      console.log('SetPriceRange###directiong##value###', value)
       if (this.maxPrice === '∞') {
         this.onChangeMax('∞')
         this.onChangeMin('0')
@@ -167,8 +166,9 @@ export default Vue.extend({
       const newValue = tick2price(maxTick - 6)
       this.onChangeMax(String(newValue))
     },
-    watchCurrentPrice(value: number) {
+    watchCurrentPrice(value: number, old: number) {
       if (value) {
+        console.log('value是什么###', value.toString())
         // current price精度为12， 陈杨志demo中写
         // const num = fixD(Math.pow(value / Math.pow(10, 12), 2), 12)
         const num = Math.pow(value / Math.pow(10, 12), 2)
@@ -177,12 +177,20 @@ export default Vue.extend({
         // 稳定币（即fee为0.05%）的池子，默认最小、最大价格需在当前价格 -+0.01%
         const defaultMinPrice = String(num - num * 0.01)
         const defaultMaxPrice = String(num + num * 0.01)
-
+        console.log('watchCurrentPrice###direction####', this.direction)
         // 默认min是0， max是num+1
+        // if (this.direction) {
         this.onChangeMin(defaultMinPrice)
         this.onChangeMax(defaultMaxPrice)
         this.minPrice = defaultMinPrice
         this.maxPrice = defaultMaxPrice
+        // } else {
+        //   this.onChangeMin(String(1 / Number(defaultMaxPrice)))
+        //   this.onChangeMax(String(1 / Number(defaultMinPrice)))
+        //   this.minPrice = String(1 / Number(defaultMaxPrice))
+        //   this.maxPrice = String(1 / Number(defaultMinPrice))
+        // }
+
         // this.$emit('onChangeMin', '2')
         // this.$emit('onChangeMax', String(Number(num) + 1))
       }
