@@ -35,7 +35,7 @@
         <div class="trade-info">
           <div class="trade-info-item">
             <div class="trade-info-title">APR</div>
-            <div class="trade-info-text">{{ item.apr }}</div>
+            <div class="trade-info-text">{{ item.apr }}%</div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Liquidity</div>
