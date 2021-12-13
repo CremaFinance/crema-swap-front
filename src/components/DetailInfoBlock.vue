@@ -30,14 +30,7 @@
           </a>
         </div>
         <div class="right">
-          <span class="num">{{
-            title !== 'Liquidity' // eslint-disable-next-line vue/no-parsing-error
-              ? Number(currentData.tokenaFee) <= 0
-                ? // eslint-disable-next-line vue/no-parsing-error
-                  '<0.00001'
-                : decimalFormat(currentData.tokenaFee, poolInfo.coin.decimals)
-              : decimalFormat(currentData.fromCoinAmount, poolInfo.coin.decimals)
-          }}</span>
+          <span class="num">{{ tokenaNum }}</span>
           <span v-if="title === 'Liquidity'" class="percent">{{ currentData.fromPercent }}%</span>
         </div>
       </div>
@@ -47,14 +40,7 @@
           <span>{{ poolInfo.pc.symbol }}</span>
         </div>
         <div class="right">
-          <span class="num">{{
-            title !== 'Liquidity' // eslint-disable-next-line vue/no-parsing-error
-              ? Number(currentData.tokenbFee) <= 0
-                ? // eslint-disable-next-line vue/no-parsing-error
-                  '<0.00001'
-                : decimalFormat(currentData.tokenbFee, poolInfo.pc.decimals)
-              : decimalFormat(currentData.toCoinAmount, poolInfo.pc.decimals)
-          }}</span>
+          <span class="num">{{ tokenbNum }}</span>
           <span v-if="title === 'Liquidity'" class="percent">{{ currentData.toPercent }}%</span>
         </div>
       </div>
@@ -103,7 +89,39 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['wallet', 'url'])
+    ...mapState(['wallet', 'url']),
+    tokenaNum() {
+      if (this.currentData && this.poolInfo) {
+        if (this.title !== 'Liquidity') {
+          if (Number(this.currentData.tokenaFee) > 0.000001) {
+            return decimalFormat(this.currentData.tokenaFee, this.poolInfo.coin.decimals)
+          } else if (Number(this.currentData.tokenaFee) === 0) {
+            return '0'
+          } else {
+            return '<0.00001'
+          }
+        } else {
+          return decimalFormat(this.currentData.fromCoinAmount, this.poolInfo.coin.decimals)
+        }
+      }
+      return '--'
+    },
+    tokenbNum() {
+      if (this.currentData && this.poolInfo) {
+        if (this.title !== 'Liquidity') {
+          if (Number(this.currentData.tokenbFee) > 0.000001) {
+            return decimalFormat(this.currentData.tokenbFee, this.poolInfo.pc.decimals)
+          } else if (Number(this.currentData.tokenbFee) === 0) {
+            return '0'
+          } else {
+            return '<0.00001'
+          }
+        } else {
+          return decimalFormat(this.currentData.toCoinAmount, this.poolInfo.pc.decimals)
+        }
+      }
+      return '--'
+    }
   },
   watch: {
     currentData: {

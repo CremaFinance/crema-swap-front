@@ -28,7 +28,7 @@
             />
           </template>
           <span v-if="poolInfo && direction">{{ poolInfo.coin.symbol }} - {{ poolInfo.pc.symbol }}</span>
-          <span v-else>{{ poolInfo.pc.symbol }} - {{ poolInfo.coin.symbol }}</span>
+          <span v-else-if="poolInfo && !direction">{{ poolInfo.pc.symbol }} - {{ poolInfo.coin.symbol }}</span>
         </div>
         <span class="fee">{{ poolInfo && poolInfo.feeView }} %</span>
         <StatusBlock :current-status="currentData.currentStatus" />
@@ -182,6 +182,11 @@ export default Vue.extend({
     'liquidity.currentPositon': {
       handler: 'watchCurrentPositon',
       immediate: true
+    },
+    'wallet.connected'(newVal: boolean) {
+      if (!newVal) {
+        this.$router.push('/position')
+      }
     },
     direction(newVal: boolean) {
       if (newVal) {

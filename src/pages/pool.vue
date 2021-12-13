@@ -5,7 +5,7 @@
         <div class="c-title"><span>Concentrated Liquidity</span></div>
         <!-- <h3 class="title"></h3> -->
         <div class="right">
-          <!-- <a class="clear-all" @click="clearAll">Clear All</a> -->
+          <a class="clear-all" @click="clearAll">Clear All</a>
           <CoinTab
             v-if="fromCoin && toCoin"
             :list="coinTabList"
@@ -46,9 +46,10 @@
               @onMax="maxBtnSelect('fromCoin')"
             ></CoinBlock>
             <div class="add-icon">
-              <svg class="icon" aria-hidden="true">
+              <!-- <svg class="icon" aria-hidden="true" @click="changeCoinPosition">
                 <use xlink:href="#icon-a-icon-AddCustomMarket"></use>
-              </svg>
+              </svg> -->
+              <a @click="changeCoinPosition"></a>
             </div>
             <CoinBlock
               v-model="toCoinAmount"
@@ -349,12 +350,16 @@ export default Vue.extend({
       })
     },
     minPrice(value: string) {
-      if ((Number(value) || Number(this.maxPrice)) && this.poolInfo) {
+      // if ((Number(value) || Number(this.maxPrice)) && this.poolInfo) {
+      console.log('minPrice###watch####')
+      if (value) {
         this.updateAmounts()
       }
     },
     maxPrice(value: string) {
-      if ((Number(value) || Number(this.minPrice)) && this.poolInfo) {
+      // if ((Number(value) || Number(this.minPrice)) && this.poolInfo) {
+      console.log('maxPrice###watch####')
+      if (value) {
         this.updateAmounts()
       }
     },
@@ -450,6 +455,8 @@ export default Vue.extend({
         this.currentFeeTier = 100
         this.minPrice = ''
         this.maxPrice = ''
+        this.showFromCoinLock = false
+        this.showToCoinLock = false
       }
     },
     changeDirection(value: string) {
@@ -519,6 +526,7 @@ export default Vue.extend({
     // updateAmounts(price: string, min: string, max: string) {
     updateAmounts() {
       if (!this.poolInfo) return
+      if (!this.fromCoinAmount && !this.toCoinAmount && !this.minPrice && !this.maxPrice) return
 
       // 处理过的current price , 与前端价格区间比较时用
       const currentPriceP = this.direction ? this.poolInfo.currentPriceView : this.poolInfo.currentPriceViewReverse
@@ -553,6 +561,9 @@ export default Vue.extend({
         return
       }
 
+      console.log('updateAmounts###currentPriceP###', currentPriceP)
+      console.log('updateAmounts###min###', min)
+      console.log('updateAmounts###max###', max)
       // 区间中包含当前价格, 一种资产返回另外一种资产，并且返回liquity
       if (max === '∞' || (currentPriceP >= Number(min) && currentPriceP <= Number(max))) {
         let coinAmount: any
@@ -582,16 +593,17 @@ export default Vue.extend({
         this.showToCoinLock = false
         const decimal = this.toCoin?.decimals || 6
         if (this.fixedFromCoin) {
-          this.toCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
+          const toCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
+          this.toCoinAmount = toCoinAmount === '--' ? '' : toCoinAmount
         } else {
-          this.fromCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
+          const fromCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
+          this.fromCoinAmount = fromCoinAmount === '--' ? '' : '0'
         }
 
         this.deltaLiquity = delta_liquity
       } else if (currentPriceP > Number(max)) {
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
-        console.log('coinAmount####', coinAmount)
         const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
@@ -733,9 +745,9 @@ export default Vue.extend({
       }
 
       this.$accessor.transaction.setTransactionDesc(
-        `Add liquidity  ${this.fromCoinAmount && this.fromCoinAmount} ${
-          this.fromCoinAmount && this.fromCoin?.symbol
-        } and ${this.toCoinAmount && this.toCoinAmount} ${this.toCoinAmount && this.toCoin?.symbol}`
+        `Add liquidity  ${this.fromCoinAmount && this.fromCoinAmount} ${this.fromCoinAmount && this.fromCoin?.symbol} ${
+          this.fromCoinAmount && this.toCoinAmount ? 'and' : ''
+        } ${this.toCoinAmount && this.toCoinAmount} ${this.toCoinAmount && this.toCoin?.symbol}`
       )
       this.$accessor.transaction.setShowWaiting(true)
 
@@ -855,20 +867,38 @@ export default Vue.extend({
       .form-box {
         margin-top: 12px;
         .add-icon {
-          width: 48px;
-          height: 48px;
-          background: linear-gradient(214deg, #3e434e 0%, #373b42 100%);
-          box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
-          border-radius: 10px;
-          border: 1px solid #3f434e;
+          // width: 48px;
+          // height: 48px;
+          // background: linear-gradient(214deg, #3e434e 0%, #373b42 100%);
+          // box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+          // border-radius: 10px;
+          // border: 1px solid #3f434e;
+          // display: flex;
+          // align-items: center;
+          // justify-content: center;
+          // margin: 10px auto;
+          // svg {
+          //   width: 38px;
+          //   height: 38px;
+          //   fill: rgba(#fff, 1);
+          // }
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 10px auto;
-          svg {
-            width: 38px;
-            height: 38px;
-            fill: rgba(#fff, 1);
+          padding: 11px 0px;
+          a {
+            display: block;
+            width: 48px;
+            height: 48px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            background-image: url('../assets/images/add@2x.png');
+            box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+
+            &:hover {
+              background-image: url('../assets/images/add_hover@2x.png');
+            }
           }
         }
       }

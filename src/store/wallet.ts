@@ -100,7 +100,6 @@ export const actions = actionTree(
     },
 
     getTokenAccounts({ commit }) {
-      console.log('进到getTokenAccounts里吗#####')
       const conn = this.$web3
       const wallet = (this as any)._vm.$wallet
 

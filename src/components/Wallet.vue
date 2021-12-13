@@ -263,6 +263,25 @@ export default class Wallet extends Vue {
   isDisConnect: boolean = false
   isLoading: boolean = false
 
+  walletErrorObj: any = {
+    WalletNotFoundError: 'Wallet not found error',
+    WalletNotInstalledError: 'Wallet not installed error',
+    WalletNotReadyError: 'Wallet not ready error',
+    WalletConnectionError: 'Wallet connection error',
+    WalletDisconnectedError: 'Wallet disconnected error',
+    WalletDisconnectionError: 'Wallet disconnection error',
+    WalletAccountError: 'Wallet account error',
+    WalletPublicKeyError: 'Wallet publicKey error',
+    WalletKeypairError: 'Wallet keypair error',
+    WalletNotConnectedError: 'Wallet not connected error',
+    WalletSendTransactionError: 'Wallet send transaction error',
+    WalletSignMessageError: 'Wallet sign message error',
+    WalletSignTransactionError: 'Wallet signTransaction error',
+    WalletTimeoutError: 'Wallet timeout error',
+    WalletWindowBlockedError: 'Wallet window blocked error',
+    WalletWindowClosedError: 'Wallet window closed error'
+  }
+
   connectingWallet = {
     name: null as string | null,
     adapter: null as WalletAdapter | null
@@ -349,7 +368,6 @@ export default class Wallet extends Vue {
   importIcon = importIcon
 
   autoConnect() {
-    console.log('进来了几次####autoConnect')
     const name = this.lastWalletName
     if (name && !this.$accessor.wallet.connected) {
       const info = this.wallets[name]
@@ -382,7 +400,9 @@ export default class Wallet extends Vue {
         this.subWallet()
         this.$notify.success({
           message: 'Wallet connected',
-          description: `Connect to ${name}`
+          description: `Connect to ${name}`,
+          class: 'success',
+          icon: (h: any) => h('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Copied@2x.png' } })
         })
 
         LocalStorage.set('WALLET_NAME', name)
@@ -415,12 +435,12 @@ export default class Wallet extends Vue {
     this.$accessor.wallet.setDisconnected()
     this.$notify.warning({
       message: 'Wallet disconnected',
-      description: ''
+      description: '',
+      icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
     })
   }
 
   onWalletError(error: Error) {
-    console.log('是走到这里了么###error####', error)
     const { name } = this.connectingWallet
     this.isLoading = false
 
@@ -431,7 +451,6 @@ export default class Wallet extends Vue {
         const { website, chromeUrl, firefoxUrl } = info
 
         if (['WalletNotFoundError', 'WalletNotInstalledError', 'WalletNotReadyError'].includes(error.name)) {
-          console.log('进到这里了吗34334###')
           const errorName = error.name
             .replace('Error', '')
             .split(/(?=[A-Z])/g)
@@ -454,7 +473,9 @@ export default class Wallet extends Vue {
               }
 
               return h('div', msg)
-            }
+            },
+            class: 'error',
+            icon: (h: any) => h('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
           })
 
           return
@@ -467,12 +488,13 @@ export default class Wallet extends Vue {
       return
     }
 
-    console.log('112231232131232')
     // throttle(() => {
     //   console.log('增加debounce后调到了几次#####')
     this.$notify.error({
       message: 'Connect wallet failed',
-      description: `${error.name}`
+      description: this.walletErrorObj[error.name] || error.name,
+      class: 'error',
+      icon: (h: any) => h('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
     })
     // }, 500)
   }

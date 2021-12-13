@@ -1,7 +1,8 @@
 <template>
   <div class="positon-container">
     <div class="position-title">
-      <span>Your Positions {{ list.length > 0 ? `( ${list.length} )` : '' }}</span>
+      <span v-if="wallet.connected">Your Positions {{ list.length > 0 ? `( ${list.length} )` : '' }}</span>
+      <span v-else>Your Positions（0）</span>
       <div class="btn-list">
         <button>
           <div @click="gotoPool">
