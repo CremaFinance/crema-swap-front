@@ -28,10 +28,7 @@ export const PAYER = new Account([
   135, 31, 160, 75, 250, 72, 225, 22, 173, 88, 38, 147, 165, 53
 ])
 
-export const SWAPV3_PROGRAMID: PublicKey = new PublicKey(
-  //'VenTxqaDv4Mj2krfs5Xahf23owM2MCVDQmTR1Qxj7J5',
-  'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N'
-)
+export const SWAPV3_PROGRAMID: PublicKey = new PublicKey('6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319')
 export const SWAP_PAYER = new Account([
   104, 175, 178, 162, 29, 34, 251, 8, 16, 31, 138, 62, 52, 119, 198, 130, 5, 225, 96, 153, 237, 181, 67, 56, 93, 203,
   160, 38, 160, 129, 138, 11, 55, 165, 121, 217, 51, 156, 240, 143, 43, 176, 65, 227, 29, 128, 188, 67, 226, 178, 84,

@@ -3,7 +3,7 @@
     title="Settings"
     :zIndex="1070"
     centered
-    width="430px"
+    width="400px"
     :visible="true"
     :footer="null"
     @cancel="$emit('onClose')"
@@ -22,11 +22,34 @@
         </div>
         <Input v-model="slippage" typ="number" size="large" suffix="%" @input="oninput" />
       </div>
+      <div
+        class="slippage-hint"
+        v-if="slippage"
+        :class="
+          Number(slippage) > 1 && 50 >= Number(slippage)
+            ? 'slippage-hint-waring'
+            : Number(slippage) > 50
+            ? 'slippage-hint-error'
+            : ''
+        "
+      >
+        {{
+          Number(slippage) > 1 && 50 >= Number(slippage)
+            ? 'Your transaction may be fronturn'
+            : Number(slippage) > 50
+            ? 'Enter a valid slippage percentage'
+            : ''
+        }}
+      </div>
       <div class="btn-box">
-        <div class="disconnect-btn-box">
-          <Button class="disconnect-btn" ghost @click="$emit('onClose')"> Cancel </Button>
+        <!-- <div class="disconnect-btn-box"> -->
+        <Button class="disconnect-btn" @click="$emit('onClose')"> Cancel </Button>
+        <!-- </div> -->
+        <div class="switch-wallet-btn-box">
+          <Button class="switch-wallet-btn" :disabled="Number(slippage) > 50" @click="confirmSlippage">
+            Confirm
+          </Button>
         </div>
-        <Button class="switch-wallet-btn" ghost @click="confirmSlippage"> Confirm </Button>
       </div>
     </div>
   </Modal>
@@ -69,10 +92,12 @@ export default Vue.extend({
 })
 </script>
 <style lang="less" scope>
+@import '../styles/base.less';
 .pool-setting {
   // padding-bottom: 43px;
   .slippage-tolerance {
     margin-top: 14px;
+    color: #b5b8c2;
   }
   .input-content {
     margin-top: 10px;
@@ -86,74 +111,106 @@ export default Vue.extend({
       // border-radius: 8px;
       font-size: 14px;
       font-weight: 500;
-      color: #07ebad;
+      // color: #07ebad;
+      color: #fff;
       text-align: center;
       line-height: 40px;
-      // border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0px 4px 12px 0px #25282c;
       border-radius: 10px;
-      border: 1px solid #07ebad;
+      border: 1px solid #3f434e;
     }
     .slippage-item-active {
-      background: rgba(7, 235, 173, 0.3);
+      background: #42454b;
+      box-shadow: 0px 2px 6px 0px rgba(26, 28, 31, 0.5);
       border-radius: 10px;
+      color: #07ebad;
       border: 1px solid #07ebad;
     }
     input {
       width: 80px;
       height: 40px;
-      background: rgba(#1a1e21, 1);
-      border: 1px solid #07ebad;
-      color: #07ebad;
+      // background: rgba(#1a1e21, 1);
+      // border: 1px solid #07ebad;
+      color: #fff;
+      border: none;
+      background: #23262b;
+      box-shadow: 0px 2px 3px 1px #1a1c1f;
       border-radius: 10px;
     }
 
     .ant-input-affix-wrapper {
       width: auto;
-      background: rgba(#1a1e21, 1);
       .ant-input-suffix {
-        color: #07ebad;
+        color: #fff;
       }
       input {
         // background-color: #fff;
-        background: rgba(#1a1e21, 1);
         text-align: center !important;
         font-size: 14px;
         line-height: 20px;
+        background: #23262b;
+        box-shadow: 0px 2px 3px 1px #1a1c1f;
         // font-weight: 600;
         border-radius: 10px;
       }
     }
+  }
+  .slippage-hint {
+    margin-top: 14px;
+  }
+  .slippage-hint-waring {
+    color: #fb0;
+  }
+  .slippage-hint-error {
+    color: #ff5050;
   }
   .btn-box {
     display: flex;
     margin-top: 40px;
     justify-content: space-between;
   }
-  .disconnect-btn-box {
+  .disconnect-btn {
     width: 168px;
     height: 48px;
+    box-shadow: 0px 4px 12px 0px #25282c;
+    border-radius: 12px;
     font-size: 16px;
-    border-radius: 10px;
-    padding: 2px;
-    background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
-    .disconnect-btn {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #1b2023 !important;
-      border-radius: 10px;
-      color: #fff;
+    border: 1px solid #3f434e;
+    font-weight: 600;
+    background: transparent;
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
     }
   }
-  .switch-wallet-btn {
+  .switch-wallet-btn-box {
     width: 168px;
-    height: 48px;
-    background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%) !important;
-    font-size: 16px;
-    margin-left: 12px;
-    border-radius: 10px;
-    color: #fff;
-    border: none;
+    height: 46px;
+    margin-top: 0;
+    margin-left: 0 !important;
+    border-radius: 12px;
+    .switch-wallet-btn {
+      .gradient-btn-large();
+      // width: 100%;
+      height: 100%;
+      // color: #fff;
+      // border: none;
+      font-size: 16px;
+      // background: linear-gradient(268deg, #5fe6d0 0%, #597bff 38%, #9380ff 72%, #e590ff 100%);
+      // border-radius: 12px;
+      // line-height: 46px;
+      // font-weight: 600;
+      // &:hover {
+      //   background: linear-gradient(270deg, #93ffed 0%, #84caff 34%, #a291ff 68%, #efb9ff 100%);
+      // }
+    }
+  }
+}
+@media screen and (max-width: 750px) {
+  .pool-setting .input-content .slippage-item {
+    width: 60px;
+  }
+  .pool-setting .input-content input {
+    width: 60px;
   }
 }
 </style>

@@ -1,3 +1,6 @@
+import { initializeAccount } from '@project-serum/serum/lib/token-instructions'
+// @ts-ignore without ts ignore, yarn build will failed
+import { Token } from '@solana/spl-token'
 import {
   Account,
   AccountInfo,
@@ -6,25 +9,23 @@ import {
   PublicKey,
   SystemProgram,
   Transaction,
-  TransactionSignature,
-  TransactionInstruction
+  TransactionInstruction,
+  TransactionSignature
 } from '@solana/web3.js'
-import { Token } from '@solana/spl-token'
-// import { TOKENS } from '@/utils/tokens'
+
+import { ASSOCIATED_TOKEN_PROGRAM_ID, RENT_PROGRAM_ID, SYSTEM_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@/utils/ids'
 import { ACCOUNT_LAYOUT, MINT_LAYOUT } from '@/utils/layouts'
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, SYSTEM_PROGRAM_ID, RENT_PROGRAM_ID } from '@/utils/ids'
-// eslint-disable-next-line
-import assert from 'assert'
-import { initializeAccount } from '@project-serum/serum/lib/token-instructions'
-import { struct } from 'superstruct@0.8.4'
-// import { struct } from '@project-serum/borsh'
+import { TOKENS } from '@/utils/tokens'
 
 export const web3Config = {
   strategy: 'speed',
   rpcs: [
-    // { url: 'https://solana-api.projectserum.com', weight: 50 }
-    // { url: 'https://raydium.rpcpool.com', weight: 40 },
-    // { url: 'https://api.mainnet-beta.solana.com', weight: 50 }
+    // { url: 'https://free.rpcpool.com', weight: 10 },
+    // { url: 'https://mainnet.rpcpool.com', weight: 10 },
+    // { url: 'https://api.rpcpool.com', weight: 10 },
+    // { url: 'https://solana-api.projectserum.com', weight: 10 },
+    // { url: 'https://raydium.rpcpool.com', weight: 50 },
+    // { url: 'https://api.mainnet-beta.solana.com', weight: 10 }
     { url: 'https://api.devnet.solana.com', weight: 50 }
   ]
 }
@@ -45,9 +46,9 @@ export async function createAmmAuthority(programId: PublicKey) {
   )
 }
 
-export async function createAmmId(infoId: PublicKey, marketAddress: PublicKey) {
+export async function createAssociatedId(infoId: PublicKey, marketAddress: PublicKey, bufferKey: string) {
   const { publicKey } = await findProgramAddress(
-    [infoId.toBuffer(), marketAddress.toBuffer(), Buffer.from('amm_associated_seed')],
+    [infoId.toBuffer(), marketAddress.toBuffer(), Buffer.from(bufferKey)],
     infoId
   )
   return publicKey
@@ -57,6 +58,18 @@ export async function findAssociatedTokenAddress(walletAddress: PublicKey, token
   const { publicKey } = await findProgramAddress(
     [walletAddress.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), tokenMintAddress.toBuffer()],
     ASSOCIATED_TOKEN_PROGRAM_ID
+  )
+  return publicKey
+}
+
+export async function findAssociatedStakeInfoAddress(
+  poolId: PublicKey,
+  walletAddress: PublicKey,
+  programId: PublicKey
+) {
+  const { publicKey } = await findProgramAddress(
+    [poolId.toBuffer(), walletAddress.toBuffer(), Buffer.from('staker_info_v2_associated_seed')],
+    programId
   )
   return publicKey
 }
@@ -113,14 +126,10 @@ export async function createAssociatedTokenAccountIfNotExist(
   }
 
   const mint = new PublicKey(mintAddress)
-  console.log('owner#####', owner.toString())
   // @ts-ignore without ts ignore, yarn build will failed
   const ata = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, mint, owner, true)
-  console.log('ata###', ata.toString())
-  console.log('publicKey####', publicKey?.toString())
-  // if ((!publicKey || !ata.equals(publicKey)) && !atas.includes(ata.toBase58())) {
-  if (!publicKey) {
-    console.log('进来了吗####')
+
+  if ((!publicKey || !ata.equals(publicKey)) && !atas.includes(ata.toBase58())) {
     transaction.add(
       Token.createAssociatedTokenAccountInstruction(
         ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -135,6 +144,52 @@ export async function createAssociatedTokenAccountIfNotExist(
   }
 
   return ata
+}
+
+export async function createAtaSolIfNotExistAndWrap(
+  connection: Connection,
+  account: string | undefined | null,
+  owner: PublicKey,
+  transaction: Transaction,
+  signers: Array<Account>,
+  amount: number
+) {
+  let publicKey
+  if (account) {
+    publicKey = new PublicKey(account)
+  }
+  const mint = new PublicKey(TOKENS.WSOL.mintAddress)
+  // @ts-ignore without ts ignore, yarn build will failed
+  const ata = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, mint, owner, true)
+  if (!publicKey) {
+    const rent = await Token.getMinBalanceRentForExemptAccount(connection)
+    transaction.add(
+      SystemProgram.transfer({ fromPubkey: owner, toPubkey: ata, lamports: amount + rent }),
+      Token.createAssociatedTokenAccountInstruction(
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+        TOKEN_PROGRAM_ID,
+        mint,
+        ata,
+        owner,
+        owner
+      )
+    )
+  } else {
+    const rent = await Token.getMinBalanceRentForExemptAccount(connection)
+    const wsol = await createTokenAccountIfNotExist(
+      connection,
+      null,
+      owner,
+      TOKENS.WSOL.mintAddress,
+      amount + rent,
+      transaction,
+      signers
+    )
+    transaction.add(
+      Token.createTransferInstruction(TOKEN_PROGRAM_ID, wsol, ata, owner, [], amount),
+      Token.createCloseAccountInstruction(TOKEN_PROGRAM_ID, wsol, owner, owner, [])
+    )
+  }
 }
 
 export async function createProgramAccountIfNotExist(
@@ -154,7 +209,6 @@ export async function createProgramAccountIfNotExist(
     publicKey = new PublicKey(account)
   } else {
     const newAccount = new Account()
-
     publicKey = newAccount.publicKey
 
     transaction.add(
@@ -184,7 +238,7 @@ export async function createAssociatedTokenAccount(
     {
       pubkey: owner,
       isSigner: true,
-      isWritable: true
+      isWritable: false
     },
     {
       pubkey: associatedTokenAddress,
@@ -229,17 +283,6 @@ export async function createAssociatedTokenAccount(
   return associatedTokenAddress
 }
 
-export async function createTokenAccount(connection: Connection, wallet: any, mint: string) {
-  const transaction = new Transaction()
-  const signers: Account[] = []
-
-  const owner = wallet.publicKey
-
-  await createAssociatedTokenAccount(new PublicKey(mint), owner, transaction)
-
-  return await sendTransaction(connection, wallet, transaction, signers)
-}
-
 export async function getFilteredProgramAccounts(
   connection: Connection,
   programId: PublicKey,
@@ -257,7 +300,6 @@ export async function getFilteredProgramAccounts(
   if (resp.error) {
     throw new Error(resp.error.message)
   }
-
   // @ts-ignore
   return resp.result.map(({ pubkey, account: { data, executable, owner, lamports } }) => ({
     publicKey: new PublicKey(pubkey),
@@ -270,21 +312,51 @@ export async function getFilteredProgramAccounts(
   }))
 }
 
+export async function getFilteredProgramAccountsAmmOrMarketCache(
+  cacheName: String,
+  connection: Connection,
+  programId: PublicKey,
+  filters: any
+): Promise<{ publicKey: PublicKey; accountInfo: AccountInfo<Buffer> }[]> {
+  try {
+    if (!cacheName) {
+      throw new Error('cacheName error')
+    }
+
+    const resp = await (await fetch('https://api.raydium.io/cache/rpc/' + cacheName)).json()
+    if (resp.error) {
+      throw new Error(resp.error.message)
+    }
+    // @ts-ignore
+    return resp.result.map(({ pubkey, account: { data, executable, owner, lamports } }) => ({
+      publicKey: new PublicKey(pubkey),
+      accountInfo: {
+        data: Buffer.from(data[0], 'base64'),
+        executable,
+        owner: new PublicKey(owner),
+        lamports
+      }
+    }))
+  } catch (e) {
+    return getFilteredProgramAccounts(connection, programId, filters)
+  }
+}
+
 // getMultipleAccounts
 export async function getMultipleAccounts(
   connection: Connection,
   publicKeys: PublicKey[],
   commitment?: Commitment
 ): Promise<Array<null | { publicKey: PublicKey; account: AccountInfo<Buffer> }>> {
-  const keys: string[][] = []
-  let tempKeys: string[] = []
+  const keys: PublicKey[][] = []
+  let tempKeys: PublicKey[] = []
 
   publicKeys.forEach((k) => {
     if (tempKeys.length >= 100) {
       keys.push(tempKeys)
       tempKeys = []
     }
-    tempKeys.push(k.toBase58())
+    tempKeys.push(k)
   })
   if (tempKeys.length > 0) {
     keys.push(tempKeys)
@@ -297,47 +369,22 @@ export async function getMultipleAccounts(
     data: Buffer
   }> = []
 
-  for (const key of keys) {
-    const args = [key, { commitment }]
+  const resArray: { [key: number]: any } = {}
+  await Promise.all(
+    keys.map(async (key, index) => {
+      const res = await connection.getMultipleAccountsInfo(key, commitment)
+      resArray[index] = res
+    })
+  )
 
-    // @ts-ignore
-    const unsafeRes = await connection._rpcRequest('getMultipleAccounts', args)
-    const res = GetMultipleAccountsAndContextRpcResult(unsafeRes)
-    if (res.error) {
-      throw new Error(
-        'failed to get info about accounts ' + publicKeys.map((k) => k.toBase58()).join(', ') + ': ' + res.error.message
-      )
-    }
-
-    assert(typeof res.result !== 'undefined')
-
-    for (const account of res.result.value) {
-      let value: {
-        executable: any
-        owner: PublicKey
-        lamports: any
-        data: Buffer
-      } | null = null
-      if (account === null) {
-        accounts.push(null)
-        continue
+  Object.keys(resArray)
+    .sort((a, b) => parseInt(a) - parseInt(b))
+    .forEach((itemIndex) => {
+      const res = resArray[parseInt(itemIndex)]
+      for (const account of res) {
+        accounts.push(account)
       }
-      if (res.result.value) {
-        const { executable, owner, lamports, data } = account
-        assert(data[1] === 'base64')
-        value = {
-          executable,
-          owner: new PublicKey(owner),
-          lamports,
-          data: Buffer.from(data[0], 'base64')
-        }
-      }
-      if (value === null) {
-        throw new Error('Invalid response')
-      }
-      accounts.push(value)
-    }
-  }
+    })
 
   return accounts.map((account, idx) => {
     if (account === null) {
@@ -349,44 +396,6 @@ export async function getMultipleAccounts(
     }
   })
 }
-
-function jsonRpcResult(resultDescription: any) {
-  const jsonRpcVersion = struct.literal('2.0')
-  return struct.union([
-    struct({
-      jsonrpc: jsonRpcVersion,
-      id: 'string',
-      error: 'any'
-    }),
-    struct({
-      jsonrpc: jsonRpcVersion,
-      id: 'string',
-      error: 'null?',
-      result: resultDescription
-    })
-  ])
-}
-
-function jsonRpcResultAndContext(resultDescription: any) {
-  return jsonRpcResult({
-    context: struct({
-      slot: 'number'
-    }),
-    value: resultDescription
-  })
-}
-
-const AccountInfoResult = struct({
-  executable: 'boolean',
-  owner: 'string',
-  lamports: 'number',
-  data: 'any',
-  rentEpoch: 'number?'
-})
-
-const GetMultipleAccountsAndContextRpcResult = jsonRpcResultAndContext(
-  struct.array([struct.union(['null', AccountInfoResult])])
-)
 
 // transaction
 export async function signTransaction(
@@ -403,40 +412,14 @@ export async function signTransaction(
   return await wallet.signTransaction(transaction)
 }
 
-async function covertToProgramWalletTransaction(
-  connection: Connection,
-  wallet: any,
-  transaction: Transaction,
-  signers: Array<Account> = []
-) {
-  transaction.recentBlockhash = (await connection.getRecentBlockhash(commitment)).blockhash
-  transaction.feePayer = wallet.publicKey
-  if (signers.length > 0) {
-    transaction = await wallet.convertToProgramWalletTransaction(transaction)
-    transaction.partialSign(...signers)
-  }
-  return transaction
-}
-
 export async function sendTransaction(
   connection: Connection,
   wallet: any,
   transaction: Transaction,
   signers: Array<Account> = []
 ) {
-  if (wallet.isProgramWallet) {
-    const programWalletTransaction = await covertToProgramWalletTransaction(connection, wallet, transaction, signers)
-    return await wallet.signAndSendTransaction(programWalletTransaction)
-  } else {
-    const signedTransaction = await signTransaction(connection, wallet, transaction, signers)
-    return await sendSignedTransaction(connection, signedTransaction)
-  }
-}
-
-export async function sendSignedTransaction(connection: Connection, signedTransaction: Transaction): Promise<string> {
-  const rawTransaction = signedTransaction.serialize()
-
-  const txid: TransactionSignature = await connection.sendRawTransaction(rawTransaction, {
+  const txid: TransactionSignature = await wallet.sendTransaction(transaction, connection, {
+    signers,
     skipPreflight: true,
     preflightCommitment: commitment
   })

@@ -12,17 +12,36 @@
       <div class="liquidity-coins">
         <div class="before-coin">
           <div class="coin-num">
-            <img class="img-left" src="../assets/images/icon_coins.png" alt="" />
-            {{ tokenaFee }}
+            <img
+              v-if="poolInfo"
+              class="img-left"
+              :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)"
+              alt=""
+            />
           </div>
-          <div class="coin-label">{{ currentData.coin.symbol }}</div>
+          <div v-if="poolInfo" class="coin-label">
+            {{
+              // eslint-disable-next-line vue/no-parsing-error
+              Number(tokenaFee) <= 0 // eslint-disable-next-line vue/no-parsing-error
+                ? '<0.00001'
+                : tokenaFee
+            }}
+            <span>{{ poolInfo.coin.symbol }}</span>
+          </div>
         </div>
         <div class="before-coin after-coin">
-          <div class="coin-num">
-            <img class="img-right" src="../assets/images/USDT.png" alt="" />
-            {{ tokenbFee }}
+          <div v-if="poolInfo" class="coin-num">
+            <img class="img-right" :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)" alt="" />
           </div>
-          <div class="coin-label">{{ currentData.pc.symbol }}</div>
+          <div v-if="poolInfo" class="coin-label">
+            {{
+              // eslint-disable-next-line vue/no-parsing-error
+              Number(tokenbFee) <= 0 // eslint-disable-next-line vue/no-parsing-error
+                ? '<0.00001'
+                : tokenbFee
+            }}
+            <span>{{ poolInfo.pc.symbol }}</span>
+          </div>
         </div>
       </div>
       <Button class="claim-pond" :disabled="isLoading" :loading="isLoading" @click="toClaim">Claim</Button>
@@ -31,13 +50,10 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import importIcon from '@/utils/import-icon'
 import { Modal, Button } from 'ant-design-vue'
-import { loadAccount } from '@/tokenSwap/util/account'
-import { Account, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
-import { TokenSwap, TokenSwapLayout, Numberu128, TickInfoLayout, Number128, TickInfo } from '@/tokenSwap'
-import { SWAPV3_PROGRAMID, SWAP_PAYER, PAYER } from '@/utils/ids'
 import { preclaim } from '@/tokenSwap/swapv3'
-import { fixD, getUnixTs } from '../utils/index'
+import { fixD, getUnixTs } from '@/utils/index'
 
 export default Vue.extend({
   components: {
@@ -46,6 +62,12 @@ export default Vue.extend({
   },
   props: {
     currentData: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    poolInfo: {
       type: Object,
       default: () => {
         return {}
@@ -70,28 +92,10 @@ export default Vue.extend({
       token_b_fee: ''
     }
   },
-  // watch: {
-  //   currentData: {
-  //     handler: 'watchCurrentData',
-  //     immediate: true
-  //   }
-  // },
   methods: {
+    importIcon,
     fixD,
     preclaim,
-    // async watchCurrentData(poolData: any) {
-    //   if (poolData && poolData.tokenSwapAccount) {
-    //     const conn = this.$web3
-    //     const data = await loadAccount(conn, new PublicKey(poolData.tokenSwapAccount), SWAPV3_PROGRAMID)
-    //     const tokenSwapData = TokenSwapLayout.decode(data)
-    //     const fee_growth_global0 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global0).toNumber()
-    //     const fee_growth_global1 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global1).toNumber()
-    //     const account = { ...tokenSwapData, fee_growth_global0, fee_growth_global1 }
-    //     const { token_a_fee, token_b_fee } = claim(poolData, account)
-    //     this.token_a_fee = fixD(token_a_fee / Math.pow(10, poolData.coin.decimals), poolData.coin.decimals) || ''
-    //     this.token_b_fee = fixD(token_b_fee / Math.pow(10, poolData.pc.decimals), poolData.pc.decimals) || ''
-    //   }
-    // },
     toClaim() {
       this.$emit('toClaim')
     }
@@ -103,6 +107,9 @@ export default Vue.extend({
 
 .claim-container {
   .liquidity-coins {
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
     .before-coin {
       display: flex;
       justify-content: space-between;
@@ -110,6 +117,9 @@ export default Vue.extend({
       .coin-label {
         font-size: 14px;
         color: #fff;
+        span {
+          margin-left: 15px;
+        }
       }
       .coin-num {
         font-size: 16px;
@@ -118,9 +128,9 @@ export default Vue.extend({
         display: flex;
         align-items: center;
         img {
-          width: 20px;
-          height: 20px;
-          margin-right: 10px;
+          width: 36px;
+          height: 36px;
+          // margin-right: 10px;
         }
       }
     }
@@ -137,7 +147,7 @@ export default Vue.extend({
     // min-width: 62px;
     height: 48px;
     line-height: 48px;
-    font-size: 14px;
+    font-size: 16px;
     border-radius: 10px;
     font-family: 'PingFang';
   }

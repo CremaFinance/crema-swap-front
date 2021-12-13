@@ -43,7 +43,8 @@ export function getTokenBySymbol(symbol: string): TokenInfo | null {
     return cloneDeep(NATIVE_SOL)
   }
 
-  let token = cloneDeep(TOKENS[symbol])
+  // let token = cloneDeep(TOKENS[symbol])
+  let token = Object.values(TOKENS).find((item) => item.symbol === symbol)
 
   if (!token) {
     token = null
@@ -109,9 +110,27 @@ export const TOKENS: Tokens = {
   //   official: true,
   //   showDefault: false
   // },
+  // D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm: {
+  //   symbol: 'USDD',
+  //   name: 'USDD',
+  //   mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // HdJ8pzRMFquse6MAdLTm2JHum51WFkocZX8YzXpPjNpG: {
+  //   symbol: 'HYSD',
+  //   name: 'HYSD',
+  //   mintAddress: 'HdJ8pzRMFquse6MAdLTm2JHum51WFkocZX8YzXpPjNpG',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
   // USDD: {
-  //   symbol: 'CUSDD',
-  //   name: 'CUSDD',
+  //   symbol: 'USDD',
+  //   name: 'USDD',
   //   mintAddress: 'D11M7swUBM2wJWnUeTU9KCEv317gn8s1C8V7SJzXbfmm',
   //   decimals: 6,
   //   referrer: '',
@@ -127,7 +146,7 @@ export const TOKENS: Tokens = {
   //   official: true,
   //   showDefault: true
   // },
-  CSOL: {
+  '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
     symbol: 'CSOL',
     name: 'CSOL',
     mintAddress: '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK',
@@ -136,7 +155,7 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   },
-  CUSDC: {
+  GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT: {
     symbol: 'CUSDC',
     name: 'CUSDC',
     mintAddress: 'GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT',
@@ -145,7 +164,7 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   },
-  CUSDT: {
+  Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q: {
     symbol: 'CUSDT',
     name: 'CUSDT',
     mintAddress: 'Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q',

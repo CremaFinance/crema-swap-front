@@ -8,7 +8,17 @@
     :footer="null"
     @cancel="$emit('onClose')"
   >
-    <div class="stake-confirm-container" v-if="title !== 'Harvest'">
+    <div v-if="title == 'Harvest' || title == 'Harvest All'" class="stake-confirm-container">
+      <div class="harvest-title">
+        <img src="@/assets/coins/crm.png" alt="" />
+        CRM
+      </div>
+      <div class="rewards">
+        <div class="rewards-text">Rewards</div>
+        <div class="rewards-balance">106.01CRM</div>
+      </div>
+    </div>
+    <div class="stake-confirm-container" v-else>
       <div class="get-lp" v-if="title === 'Stake'">
         Get {{ 'USDT / USDC' }} LPT
         <svg class="icon" aria-hidden="true">
@@ -31,16 +41,6 @@
           <div class="balance-text">Balance 100.122312</div>
           <Button class="max-btn">MAX</Button>
         </div>
-      </div>
-    </div>
-    <div v-else class="stake-confirm-container">
-      <div class="harvest-title">
-        <img src="@/assets/coins/crm.png" alt="" />
-        CRM
-      </div>
-      <div class="rewards">
-        <div class="rewards-text">Rewards</div>
-        <div class="rewards-balance">106.01CRM</div>
       </div>
     </div>
     <div class="btn-box">

@@ -1,88 +1,138 @@
 <template>
-  <div class="pool-container-box">
-    <div class="pool-container-rollback">
+  <div class="position-detail-container">
+    <div class="go-back">
       <svg class="icon" aria-hidden="true" @click="gotoMyPosition">
         <use xlink:href="#icon-icon-return"></use>
       </svg>
       Back to Pools Overview
     </div>
-    <div class="pool-container-filePacket">
-      <HeaderDetails headers-value="yes" :current-data="currentData" :current-status="currentStatus" />
-      <div class="filePacket-right">
-        <a class="title-active exact-active" :disabled="!wallet.connected" @click="openAddLiquiditySecondConfirm"
-          >Increase Liquidity</a
-        >
-        <a
-          v-if="currentStatus !== 'Closed'"
-          class="title-active"
-          :disabled="!wallet.connected"
-          @click="openRemoveLiquidityHint"
-          >Remove Liquidity</a
-        >
+    <div class="top">
+      <div class="left">
+        <div class="coin-name">
+          <template v-if="direction">
+            <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)" alt="" />
+            <img
+              v-if="poolInfo"
+              class="last"
+              :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)"
+              alt=""
+            />
+          </template>
+          <template v-else>
+            <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)" alt="" />
+            <img
+              v-if="poolInfo"
+              class="last"
+              :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)"
+              alt=""
+            />
+          </template>
+          <span v-if="poolInfo && direction">{{ poolInfo.coin.symbol }} - {{ poolInfo.pc.symbol }}</span>
+          <span v-else>{{ poolInfo.pc.symbol }} - {{ poolInfo.coin.symbol }}</span>
+        </div>
+        <span class="fee">{{ poolInfo && poolInfo.feeView }} %</span>
+        <StatusBlock :current-status="currentData.currentStatus" />
+      </div>
+      <div class="right">
+        <button v-if="poolInfo" class="remove-btn" :disabled="!wallet.connected" @click="gotoRemove">Remove</button>
+        <button v-if="poolInfo" class="increase-btn" :disabled="!wallet.connected" @click="gotoIncrease">
+          Increase
+        </button>
       </div>
     </div>
-    <div class="pool-container-argument">
-      <DetailPool title="Liquidity" :current-data="currentData" :direction="direction" />
-      <DetailPool
+    <div class="pool-info-box">
+      <DetailInfoBlock
+        title="Liquidity"
+        :current-data="currentData"
+        :pool-info="poolInfo"
+        :direction="direction"
+      ></DetailInfoBlock>
+      <div class="detail-info-block-gap"></div>
+      <DetailInfoBlock
         title="Unclaimed fees"
         :current-data="currentData"
+        :pool-info="poolInfo"
         :direction="direction"
-        @onChange="tokenfeeChanged"
         @claim="showClaimHint = true"
       />
+      <div class="nft-card-box">
+        <NftCard :pool-info="poolInfo" :current-data="currentData"></NftCard>
+        <!-- <div v-if="poolInfo" class="nft-info">
+          <div class="coin-name">{{ poolInfo.coin.symbol }} - {{ poolInfo.pc.symbol }}</div>
+          <div class="fee-tier-tag">{{ poolInfo.feeView }}%</div>
+          <ul>
+            <li>
+              <span>Min Tick</span>
+              <span>{{ currentData.lower_tick }}</span>
+            </li>
+            <li>
+              <span>Max Tick</span>
+              <span>{{ currentData.upper_tick }}</span>
+            </li>
+          </ul>
+        </div> -->
+      </div>
     </div>
-    <div class="pool-container-rateExchange">
-      <div class="price-range">
-        <div class="price-range-left">
+    <div class="price-range-box">
+      <div class="price-range-title">
+        <div class="left">
           <span>Price range</span>
-          <StatusBlock :current-status="currentStatus" />
+          <StatusBlock :current-status="currentData.currentStatus" />
         </div>
-        <div v-if="currentData.coin && currentData.pc" class="price-range-right">
-          <span v-if="direction"
-            >1 {{ currentData.coin.symbol }} ≈ {{ fixD(currentData.currentPrice, currentData.pc.decimals) }}
-            {{ currentData.pc.symbol }}</span
-          >
-          <span v-else
-            >1 {{ currentData.pc.symbol }} ≈ {{ fixD(1 / currentData.currentPrice, currentData.coin.decimals) }}
-            {{ currentData.coin.symbol }}</span
-          >
-          <div class="range-icon">
-            <div :class="direction ? 'active' : ''" @click="direction = true">{{ currentData.coin.symbol }}</div>
-            <div :class="!direction ? 'active' : ''" @click="direction = false">
-              {{ currentData.pc.symbol }}
-            </div>
+        <div v-if="poolInfo" class="right">
+          <div v-if="direction" class="price-box">
+            1 {{ poolInfo.coin.symbol }} ≈ {{ fixD(poolInfo.currentPriceView, poolInfo.pc.decimals) }}
+            {{ poolInfo.pc.symbol }}
+          </div>
+          <div v-else class="price-box">
+            1 {{ poolInfo.pc.symbol }} ≈ {{ fixD(poolInfo.currentPriceViewReverse, poolInfo.coin.decimals) }}
+            {{ poolInfo.coin.symbol }}
+          </div>
+          <div class="coin-tab-box">
+            <CoinTab :list="coinTabList" :current="currentCoin" @onChange="changeDirection"></CoinTab>
           </div>
         </div>
       </div>
-      <div class="information-pool">
-        <PriceRange type="Min" :current-data="currentData" :direction="direction" />
+      <div class="range-info-box">
+        <div v-if="poolInfo" class="range-item">
+          <div class="title">Min Price</div>
+          <div v-if="direction" class="price">{{ decimalFormat(currentData.minPrice, 6) }}</div>
+          <div v-else class="price">{{ decimalFormat(1 / currentData.maxPrice, 6) }}</div>
+          <div class="per">
+            {{ direction ? poolInfo.pc.symbol : poolInfo.coin.symbol }} per
+            {{ direction ? poolInfo.coin.symbol : poolInfo.pc.symbol }}
+          </div>
+          <div class="note">
+            Your position will be 100% {{ direction ? poolInfo.coin.symbol : poolInfo.pc.symbol }} at this price
+          </div>
+        </div>
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-link"></use>
         </svg>
-        <PriceRange type="Max" :current-data="currentData" :direction="direction" />
+        <div v-if="poolInfo" class="range-item">
+          <div class="title">Max Price</div>
+          <div v-if="direction" class="price">
+            {{ currentData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(currentData.maxPrice, 6) }}
+          </div>
+          <div v-else class="price">
+            {{ currentData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(1 / currentData.minPrice, 6) }}
+          </div>
+          <div class="per">
+            {{ direction ? poolInfo.pc.symbol : poolInfo.coin.symbol }} per
+            {{ direction ? poolInfo.coin.symbol : poolInfo.pc.symbol }}
+          </div>
+          <div class="note">
+            Your position will be 100% {{ direction ? poolInfo.pc.symbol : poolInfo.coin.symbol }} at this price
+          </div>
+        </div>
       </div>
     </div>
-
-    <AddLiquidityConfirm
-      v-if="showAddLiquiditySecondConfirm"
-      :second-confirm-data="secondConfirmData"
-      title="Increase Liquidity"
-      @supply="supply"
-      @onClose="closeAddLiquiditySecondConfirm"
-    ></AddLiquidityConfirm>
-
-    <RemoveLiquidity
-      v-if="showRemoveLiquidityHint"
-      :is-loading="isLoading"
-      :current-data="currentData"
-      @onClose="() => (showRemoveLiquidityHint = false)"
-      @remove="toRemoveLiquidity"
-    ></RemoveLiquidity>
     <Claim
       v-if="showClaimHint"
       :current-data="currentData"
-      :tokena-fee="tokenaFee"
-      :tokenb-fee="tokenbFee"
+      :pool-info="poolInfo"
+      :tokena-fee="String(currentData.tokenaFee)"
+      :tokenb-fee="String(currentData.tokenbFee)"
       :is-loading="isLoading"
       @onClose="() => (showClaimHint = false)"
       @toClaim="toClaim"
@@ -92,20 +142,12 @@
 <script lang="ts">
 import { Vue } from 'nuxt-property-decorator'
 import { mapState } from 'vuex'
-import { preview_calculate_liqudity } from '@/tokenSwap/swapv3'
-import { fixD, getUnixTs } from '@/utils'
-import { Account, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { fixD, getUnixTs, decimalFormat, checkNullObj } from '@/utils'
 import { cloneDeep, get } from 'lodash-es'
-import { addLiquidity, claim, removeLiquidity } from '@/utils/liquidity'
-import { Numberu128 } from '@/tokenSwap'
+import { claim, removeLiquidity } from '@/utils/liquidity'
+import importIcon from '@/utils/import-icon'
 
 export default Vue.extend({
-  components: {
-    // WaitingHint,
-    // SuccessHint
-    // // Tooltip
-    // // AddLiquidity
-  },
   data() {
     return {
       isShowTitleOne: true,
@@ -117,110 +159,80 @@ export default Vue.extend({
       showRemoveLiquidityHint: false,
       showClaimHint: false,
       isLoading: false,
-      currentStatus: 'Active',
-      tokenaFee: '',
-      tokenbFee: ''
+      coinTabList: [] as any,
+      currentCoin: '',
+      poolInfo: null as any
     }
   },
   computed: {
     // ...mapState(['wallet', 'farm', 'url', 'price', 'liquidity'])
     ...mapState({
-      price: (state: any) => state.price,
+      // price: (state: any) => state.price,
       wallet: (state: any) => state.wallet,
-      position: (state: any) => state.position,
-      url: (state: any) => state.url
+      // position: (state: any) => state.position,
+      url: (state: any) => state.url,
+      liquidity: (state: any) => state.liquidity
     })
   },
   watch: {
-    'position.myPositions': {
+    'liquidity.myPositions': {
       handler: 'watchMyPosions',
       immediate: true
     },
-    currentData: {
-      handler: 'watchCurrentData',
+    'liquidity.currentPositon': {
+      handler: 'watchCurrentPositon',
       immediate: true
+    },
+    direction(newVal: boolean) {
+      if (newVal) {
+        this.currentCoin = this.coinTabList[0]
+      } else {
+        this.currentCoin = this.coinTabList[1]
+      }
     }
   },
   mounted() {},
   methods: {
+    importIcon,
     fixD,
-    tokenfeeChanged(token_a_fee: string, token_b_fee: string) {
-      this.tokenaFee = token_a_fee
-      this.tokenbFee = token_b_fee
+    decimalFormat,
+    watchCurrentPositon(currentPositon: any) {
+      console.log('currentPositon#####', currentPositon)
+      this.currentData = currentPositon
+      if (!checkNullObj(currentPositon)) {
+        const poolInfo = currentPositon.poolInfo
+        this.poolInfo = poolInfo
+        if (poolInfo.coin && poolInfo.pc) {
+          this.coinTabList = [poolInfo.coin.symbol, poolInfo.pc.symbol]
+          this.currentCoin = poolInfo.coin.symbol
+        }
+      }
     },
-    watchCurrentData(newData: any) {
-      if (!newData) {
-        this.gotoMyPosition()
-        return
-      }
-      const currentPrice = Number(newData.currentStatus)
-      const minPrice = Number(newData.minPrice)
-      const maxPrice = Number(newData.maxPrice)
-      // // 区间中包含当前价格, 一种资产返回另外一种资产，并且返回liquity
-      if (!newData.liquity) {
-        this.currentStatus = 'Closed'
-      } else if (currentPrice >= minPrice && currentPrice <= maxPrice) {
-        this.currentStatus = 'Active'
-      } else if (currentPrice > maxPrice) {
-        // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-        this.currentStatus = 'Inactive'
-      } else if (currentPrice < minPrice) {
-        // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-        this.currentStatus = 'Inactive'
-      }
+    changeDirection() {
+      this.direction = !this.direction
     },
     gotoMyPosition() {
       this.$router.push('/position')
     },
+    gotoIncrease() {
+      const id = this.$route.params.id
+      this.$router.push(`/increase/${id}`)
+    },
+    gotoRemove() {
+      const id = this.$route.params.id
+      this.$router.push(`/remove/${id}`)
+    },
     openRemoveLiquidityHint() {
+      const id = this.$route.params.id
+      this.$router.push(`/remove-liquidity/${id}`)
       this.showRemoveLiquidityHint = true
     },
     watchMyPosions(myPosions: any) {
-      const list = myPosions
-      // const id = this.$router
-      let currentData: any = {}
-      let isFind = false
-      for (let i = 0; i < list.length; i++) {
-        if (list[i].nftTokenId === this.$route.params.id) {
-          currentData = list[i]
-          isFind = true
-          break
-        }
-      }
-
-      if (isFind) {
-        console.log('currentData.currentPriceOrigin#####', currentData.currentPriceOrigin)
-        const { ans_src, ans_dst } = preview_calculate_liqudity(
-          currentData.lower_tick,
-          currentData.upper_tick,
-          currentData.liquity,
-          new Numberu128(currentData.currentPriceOrigin)
-        )
-
-        const fromCoinAmount = fixD(ans_src / Math.pow(10, currentData.coin.decimals), currentData.coin.decimals)
-        const toCoinAmount = fixD(ans_dst / Math.pow(10, currentData.pc.decimals), currentData.pc.decimals)
-        this.currentData = {
-          ...currentData,
-          fromCoinAmount,
-          toCoinAmount
-        }
-        // const current
-        const currentPrice = Number(currentData.currentPrice)
-        const minPrice = Number(currentData.minPrice)
-        const maxPrice = Number(currentData.maxPrice)
-        // // 区间中包含当前价格, 一种资产返回另外一种资产，并且返回liquity
-        if (currentPrice >= minPrice && currentPrice <= maxPrice) {
-          this.currentStatus = 'Active'
-        } else if (currentPrice > maxPrice) {
-          // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-          this.currentStatus = 'Inactive'
-        } else if (currentPrice < minPrice) {
-          // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-          this.currentStatus = 'Inactive'
-        }
-      } else {
-        this.gotoMyPosition()
-      }
+      console.log('myPosions###', myPosions)
+      this.$accessor.liquidity.setCurrentPositon({
+        myPosions,
+        id: this.$route.params.id
+      })
     },
     openAddLiquiditySecondConfirm() {
       const currentPriceP = Number(Math.pow(Number(this.currentData.currentPrice) / Math.pow(10, 12), 2))
@@ -235,7 +247,7 @@ export default Vue.extend({
         showFromCoinLock: !Number(this.currentData.fromCoinAmount),
         showToCoinLock: !Number(this.currentData.toCoinAmount),
         // feeTier: '0.01%',
-        currentStatus: this.currentStatus,
+        currentStatus: this.currentData.currentStatus,
         ...this.currentData
       }
       this.showAddLiquiditySecondConfirm = true
@@ -244,182 +256,20 @@ export default Vue.extend({
       this.secondConfirmData = {}
       this.showAddLiquiditySecondConfirm = false
     },
-    supply(fromCoinAmount: string, toCoinAmount: string, deltaLiquity: number) {
-      const conn = this.$web3
-      const wallet = (this as any).$wallet
-
-      const poolInfo = cloneDeep(this.currentData)
-      // const poolInfo = JSON.parse(JSON.stringify(this.currentData))
-      const nftMintToken = new PublicKey(poolInfo.nftTokenMint)
-      const userNftPubkey = poolInfo.nft_token_id
-
-      console.log('_id.vue###supply###poolInfo.nftTokenMint###', poolInfo.nftTokenMint)
-      console.log('_id.vue###supply###poolInfo.nft_token_id###', poolInfo.nft_token_id.toString())
-
-      // @ts-ignore
-      const fromCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.coin.mintAddress}.tokenAccountAddress`)
-      // @ts-ignore
-      const toCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.pc.mintAddress}.tokenAccountAddress`)
-
-      const key = getUnixTs().toString()
-      this.$notify.info({
-        key,
-        message: 'Making transaction...',
-        description: '',
-        duration: 0,
-        icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
-      })
-
-      addLiquidity(
-        conn,
-        wallet,
-        poolInfo,
-        nftMintToken,
-        userNftPubkey,
-        fromCoinAccount,
-        toCoinAccount,
-        poolInfo.coin,
-        poolInfo.pc,
-        fromCoinAmount,
-        toCoinAmount,
-        poolInfo.lower_tick,
-        poolInfo.upper_tick,
-        deltaLiquity
-        // poolInfo.liquity.toNumber()
-        // Number(fixD(this.deltaLiquity, 0))
-      )
-        .then((txid) => {
-          this.$notify.info({
-            key,
-            message: 'Transaction has been sent',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } }),
-            description: (h: any) =>
-              h('div', [
-                'Confirmation is in progress.  Check your transaction on ',
-                h('a', { attrs: { href: `${this.url.explorer}/tx/${txid}`, target: '_blank' } }, 'here')
-              ])
-          })
-
-          const description = `Add liquidity for ${fromCoinAmount} ${poolInfo.coin?.symbol} and ${toCoinAmount} ${poolInfo.pc?.symbol}`
-
-          this.$accessor.transaction.sub({ txid, description })
-          // this.$accessor.transaction.sub({ txid: 'txid问题？', description: '难道是这个问题吗' })
-        })
-        .catch((error) => {
-          console.log('error#####', error)
-          this.$notify.error({
-            key,
-            message: 'Add liquidity failed',
-            description: error.message,
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-          })
-        })
-        .finally(() => {
-          // this.suppling = false
-          // this.fromCoinAmount = ''
-          // this.toCoinAmount = ''
-          console.log('结束了###')
-        })
-    },
-    toRemoveLiquidity(fromCoinAmount: string, toCoinAmount: string, sliderValue: number) {
-      this.isLoading = true
-      // this.showRemoveLiquidityHint = false
-
-      const conn = this.$web3
-      const wallet = (this as any).$wallet
-
-      const poolInfo = cloneDeep(this.currentData)
-      // const poolInfo = JSON.parse(JSON.stringify(this.currentData))
-      // const nftMintToken = new PublicKey(poolInfo.nftTokenMint)
-      const nftMintToken = poolInfo.nftTokenMint
-      const userNftPubkey = poolInfo.nft_token_id
-
-      // @ts-ignore
-      const fromCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.coin.mintAddress}.tokenAccountAddress`)
-      // @ts-ignore
-      const toCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.pc.mintAddress}.tokenAccountAddress`)
-
-      const key = getUnixTs().toString()
-      this.$notify.info({
-        key,
-        message: 'Making transaction...',
-        description: '',
-        duration: 0,
-        icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
-      })
-
-      // console.log('toRemoveLiquidity###fromCoinAmount#####', fromCoinAmount)
-      // console.log('toRemoveLiquidity###toCoinAmount#####', toCoinAmount)
-      // console.log(
-      //   'toRemoveLiquidity###poolInfo.liquity * (sliderValue / 100)#####',
-      //   poolInfo.liquity * (sliderValue / 100)
-      // )
-
-      removeLiquidity(
-        conn,
-        wallet,
-        poolInfo,
-        nftMintToken,
-        userNftPubkey,
-        fromCoinAccount,
-        toCoinAccount,
-        poolInfo.coin,
-        poolInfo.pc,
-        fromCoinAmount,
-        toCoinAmount,
-        // poolInfo.lower_tick,
-        // poolInfo.upper_tick,
-        poolInfo.liquity.toNumber() * (sliderValue / 100)
-        // Number(fixD(this.deltaLiquity, 0))
-      )
-        .then((txid) => {
-          this.$notify.info({
-            key,
-            message: 'Transaction has been sent',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } }),
-            description: (h: any) =>
-              h('div', [
-                'Confirmation is in progress.  Check your transaction on ',
-                h('a', { attrs: { href: `${this.url.explorer}/tx/${txid}`, target: '_blank' } }, 'here')
-              ])
-          })
-
-          this.showRemoveLiquidityHint = false
-          this.isLoading = false
-          const description = `Remove liquidity for ${fromCoinAmount} ${poolInfo.coin?.symbol} and ${toCoinAmount} ${poolInfo.pc?.symbol}`
-
-          this.$accessor.transaction.sub({ txid, description })
-          // this.$accessor.transaction.sub({ txid: 'txid问题？', description: '难道是这个问题吗' })
-        })
-        .catch((error) => {
-          console.log('error#####', error)
-          this.$notify.error({
-            key,
-            message: 'Remove liquidity failed',
-            description: error.message,
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-          })
-        })
-        .finally(() => {
-          this.isLoading = false
-          // this.fromCoinAmount = ''
-          // this.toCoinAmount = ''
-          console.log('结束了###')
-        })
-    },
     toClaim() {
       this.isLoading = true
       const conn = this.$web3
       const wallet = (this as any).$wallet
 
-      const poolInfo = cloneDeep(this.currentData)
+      const poolInfo = cloneDeep(this.poolInfo)
+      const currentData = cloneDeep(this.currentData)
 
       // @ts-ignore
       const fromCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.coin.mintAddress}.tokenAccountAddress`)
       // @ts-ignore
       const toCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.pc.mintAddress}.tokenAccountAddress`)
+
+      const nftAccount = get(this.wallet.tokenAccounts, `${currentData.nft_token_id}.tokenAccountAddress`)
 
       const key = getUnixTs().toString()
       this.$notify.info({
@@ -429,7 +279,8 @@ export default Vue.extend({
         duration: 0,
         icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
       })
-      claim(conn, wallet, poolInfo, fromCoinAccount, toCoinAccount)
+
+      claim(conn, wallet, poolInfo, fromCoinAccount, toCoinAccount, currentData.nft_token_id, nftAccount)
         .then((txid) => {
           this.$notify.info({
             key,
@@ -442,9 +293,21 @@ export default Vue.extend({
               ])
           })
 
-          const description = `claim liquidity is ${poolInfo.liquity}`
+          // let description = `claim liquidity is ${currentData.liquity}`
+          let description = ''
+          if (currentData.tokenaFee && currentData.tokenbFee) {
+            description = `Claimed ${currentData.tokenaFee} ${poolInfo.coin.symbol} and ${currentData.tokenbFee} ${poolInfo.pc.symbol}`
+          } else if (currentData.tokenaFee) {
+            description = `Claimed ${currentData.tokenaFee} ${poolInfo.coin.symbol}`
+          } else if (currentData.tokenbFee) {
+            description = `Claimed ${currentData.tokenbFee} ${poolInfo.pc.symbol}`
+          }
+
           this.showClaimHint = false
           this.$accessor.transaction.sub({ txid, description })
+          setTimeout(() => {
+            this.$accessor.liquidity.requestInfos()
+          }, 2000)
           // this.$accessor.transaction.sub({ txid: 'txid问题？', description: '难道是这个问题吗' })
         })
         .catch((error) => {
@@ -468,199 +331,270 @@ export default Vue.extend({
   }
 })
 </script>
+
 <style lang="less" scoped>
-@import '../../styles/base.less';
-.pool-container-box {
-  width: 770px;
-  margin: auto;
-}
-.pool-container-rollback {
-  font-size: 14px;
-  color: rgba(#fff);
-  display: flex;
-  align-items: center;
-  margin-bottom: 2px;
-  .icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    cursor: pointer;
-  }
-}
-.pool-container-filePacket {
-  // height: 74px;
-  padding: 20px 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  .filePacket-right {
-    // width: 334px;
-    // height: 34px;
+.position-detail-container {
+  width: 700px;
+  margin: 0 auto;
+  .go-back {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    .title-active {
-      color: #fff;
+    align-items: center;
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+      margin-right: 4px;
+      &:hover {
+        fill: #07ebad;
+      }
     }
-    a {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  > .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    .left,
+    .right {
+      display: flex;
+      align-items: center;
+      .remove-btn {
+        &:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+      }
+    }
+    .coin-name {
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+      img {
+        width: 30px;
+        height: 30px;
+        border-radius: 100%;
+        &.last {
+          margin-left: -10px;
+          margin-right: 8px;
+        }
+      }
+    }
+    .fee {
+      min-width: 60px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 137px;
-      height: 28px;
-      position: relative;
-      z-index: 1;
-      background: #1b2023;
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 8px;
+      filter: blur(0px);
       margin-left: 10px;
-      color: rgba(255, 255, 255, 0.5);
-      font-family: 'Arial Bold';
-      font-weight: bold;
-      &:hover,
-      &.active,
-      &.exact-active {
-        &::after,
-        &::before {
-          display: block;
-        }
-      }
-      &::after,
-      &::before {
-        content: '';
-        display: none;
-        width: 139px;
-        height: 30px;
-        background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
-        position: absolute;
-        z-index: -2;
+      margin-right: 10px;
+      font-size: 14px;
+      padding: 0px 6px;
+    }
+    > .right {
+      button {
+        width: 120px;
+        height: 28px;
+        box-shadow: 0px 4px 12px 0px #25282c;
         border-radius: 8px;
-      }
-      &::before {
-        width: 100%;
-        height: 100%;
-        background: #1b2023;
-        z-index: -1;
-      }
-    }
-  }
-}
-.pool-container-argument {
-  // width: 770px;
-  // height: 225px;
-  // margin: auto;
-  padding-bottom: 20px;
-  // background: rgba(255,255,255,0.06);
-  display: flex;
-  justify-content: space-between;
-}
-.pool-container-rateExchange {
-  // width: 770px;
-  // height: 187px;
-  // margin: auto;
-  border-radius: 30px;
-  background: rgba(#fff, 0.03);
-  padding: 14px 20px 20px;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: space-between;
-  .price-range {
-    width: 100%;
-    // width: 730px;
-    // height: 34px;
-    // background: #000;
-    display: flex;
-    justify-content: space-between;
-    .price-range-left {
-      display: flex;
-      align-items: center;
-      // justify-content: space-between;
-      // width: 205px;
-      // height: 28px;
-      > span {
-        width: 92px;
-        height: 30px;
-        line-height: 30px;
-        font-family: 'Arial Bold';
-        font-size: 16px;
-        font-weight: bold;
-        margin-right: 10px;
-      }
-    }
-    .price-range-right {
-      margin-top: 6px;
-      // height: 28px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      > span {
-        font-weight: 700;
-        font-size: 16px;
-        background: linear-gradient(to right, #59bdad, #6676f5, #9a89f9, #eba7ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-right: 10px;
-      }
-      .range-icon {
-        display: flex;
-        align-items: center;
-        padding: 3px;
-        border-radius: 7px;
-        background: rgba(255, 255, 255, 0.1);
-        height: 26px;
-        div {
-          height: 20px;
-          padding: 0px 10px;
-          cursor: pointer;
-          &.active {
-            background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
-            border-radius: 7px;
-            cursor: pointer;
+        border: 1px solid #3f434e;
+        background: none;
+        margin-left: 12px;
+        &.increase-btn {
+          background: linear-gradient(270deg, #5fe6d0 0%, #60b2f1 33%, #9380ff 68%, #e590ff 100%);
+          &:hover {
+            background: linear-gradient(268deg, #74ffe8 0%, #7592ff 39%, #a08fff 74%, #e89aff 100%);
           }
         }
       }
     }
   }
-  .information-pool {
-    // width: 730px;
-    width: 100%;
-    // height: 105px;
-    // background: #aaa;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 16px;
-    .icon {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-      margin: 0 4px;
-      &:hover {
-        fill: #fff;
+  .pool-info-box {
+    position: relative;
+    padding-left: 240px;
+    margin-top: 20px;
+
+    .detail-info-block-gap {
+      width: 100%;
+      height: 18px;
+    }
+    .nft-card-box {
+      position: absolute;
+      left: 0px;
+      top: 18px;
+      .nft-info {
+        width: 140px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        .coin-name {
+          text-align: center;
+          font-size: 20px;
+          color: #fff;
+        }
+        .fee-tier-tag {
+          width: 80px;
+          height: 24px;
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          color: #fff;
+          margin: 0 auto;
+          margin-top: 10px;
+        }
+        > ul {
+          margin-bottom: 0px;
+          li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+            margin-top: 10px;
+            font-size: 14px;
+            span {
+              &:first-child {
+                color: rgba(255, 255, 255, 0.2);
+              }
+              &:last-child {
+                text-align: right;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  .price-range-box {
+    width: 700px;
+    height: 208px;
+    background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+    box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+    border-radius: 10px;
+    border: 1px solid #3f434e;
+    padding: 20px;
+    margin-top: 20px;
+    .price-range-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      > div {
+        display: flex;
+        align-items: center;
+      }
+      .left {
+        > span {
+          font-size: 14px;
+          margin-right: 8px;
+        }
+      }
+      .right {
+        .price-box {
+          // width: 165px;
+          height: 16px;
+          font-size: 16px;
+          font-family: Arial-BoldMT, Arial;
+          font-weight: normal;
+          color: #fff;
+          line-height: 16px;
+          background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-right: 16px;
+        }
+      }
+    }
+    .range-info-box {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+      .range-item {
+        width: 308px;
+        height: 119px;
+        background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+        box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+        border-radius: 10px;
+        border: 1px solid #3f434e;
+        text-align: center;
+        flex: 1;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.5);
+        padding: 10px 0px;
+        .price {
+          font-size: 16px;
+          color: #fff;
+          font-weight: 600;
+        }
+        .note {
+          font-size: 12px;
+          color: #b5b8c2;
+          margin-top: 8px;
+        }
+      }
+      > svg {
+        margin: 12px;
+        width: 20px;
+        height: 20px;
+        fill: rgba(255, 255, 255, 0.5);
       }
     }
   }
 }
 @media screen and (max-width: 750px) {
-  .pool-container-box {
+  .position-detail-container {
     width: 100%;
-    padding: 0 20px;
-  }
-  .pool-container-rollback {
-    margin-top: 10px;
-  }
-  .pool-container-filePacket {
-    display: block;
-    .filePacket-right {
+    .go-back {
       margin-top: 10px;
     }
-  }
-  .pool-container-argument {
-    display: block;
-  }
-  .pool-container-rateExchange {
-    .price-range {
+    .top {
       display: block;
+      .left {
+        span {
+          font-size: 16px;
+        }
+      }
+      .right {
+        margin-top: 10px;
+        padding: 0 10px;
+        justify-content: flex-end;
+      }
+    }
+    .pool-info-box {
+      padding-left: 0;
+      .nft-card-box {
+        position: relative;
+        margin: 0 auto;
+        top: 0;
+        display: flex;
+        flex-direction: column-reverse;
+        flex-wrap: wrap;
+      }
+    }
+    .price-range-box {
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+      .price-range-title {
+        display: block;
+        .right {
+          margin-top: 10px;
+          display: block;
+          .coin-tab-box {
+            display: flex;
+            margin-top: 10px;
+            justify-content: flex-end;
+          }
+        }
+      }
+      .range-info-box .range-item {
+        height: auto;
+      }
     }
   }
 }

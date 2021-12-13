@@ -1,62 +1,49 @@
 <template>
   <div class="layout-container">
     <div class="pc-header-container">
-      <Head></Head>
+      <Head v-if="isPc"></Head>
     </div>
     <div class="h5-header-container">
       <H5Head></H5Head>
     </div>
     <div class="body-container">
       <Nuxt />
+      <Wallet v-if="!isPc" class="h5-wallet"></Wallet>
     </div>
 
     <NoticeModal v-if="showNotice" @onClose="showNotice = false"></NoticeModal>
+    <Waiting
+      v-show="$accessor.transaction.showWaiting"
+      @onClose="$accessor.transaction.setShowWaiting(false)"
+    ></Waiting>
+    <Success
+      v-if="$accessor.transaction.showSubmitted"
+      @onClose="$accessor.transaction.setShowSubmitted(false)"
+    ></Success>
   </div>
 </template>
 
 <script lang="ts">
-// import { Vue, Component } from 'nuxt-property-decorator'
 import Vue from 'vue'
 import { mapState } from 'vuex'
-
-// import { Layout } from 'ant-design-vue'
 import Head from './components/head.vue'
 import H5Head from './components/h5-head.vue'
 import NoticeModal from '@/components/Notice.vue'
 
-// const { Content } = Layout
-
-// @Component({
-//   components: {
-//     Layout,
-//     Content,
-//     Head,
-//     H5Head
-//   }
-// })
-// export default class Default extends Vue {}
-
 export default Vue.extend({
   components: {
-    // Layout,
-    // Content,
     Head,
     H5Head,
     NoticeModal
   },
   data() {
     return {
-      showNotice: false
+      showNotice: false,
+      isPc: true
     }
   },
   computed: {
-    ...mapState(['wallet'])
-  },
-  watch: {
-    'wallet.tokenAccounts': {
-      handler: 'watchWalletTokenAccounts',
-      immediate: true
-    }
+    ...mapState(['transaction', 'url'])
   },
   mounted() {
     const showNotice = localStorage.getItem('crema_show_notice')
@@ -64,13 +51,18 @@ export default Vue.extend({
       this.showNotice = true
       localStorage.setItem('crema_show_notice', '1')
     }
-  },
-  methods: {
-    watchWalletTokenAccounts(newTokenAccounts: any) {
-      if (this.wallet.connected && newTokenAccounts && Object.keys(newTokenAccounts).length > 0) {
-        this.$accessor.position.requestMyPositions(newTokenAccounts)
+
+    window.onresize = () => {
+      const screenWidth = document.body.clientWidth
+      if (screenWidth < 750) {
+        this.isPc = false
+      } else {
+        this.isPc = true
       }
     }
+  },
+  destroyed() {
+    window.onresize = null
   }
 })
 </script>
@@ -82,13 +74,13 @@ export default Vue.extend({
 .layout-container {
   width: 100%;
   min-height: 100vh;
-  background: #1b2023 url('../assets/images/img-bg.svg') no-repeat;
-  background-position: 60% 30%;
+  background: #22252b;
+  min-width: 1128px;
 }
 .pc-header-container {
   display: block;
   padding: 0px 40px;
-  z-index: 5;
+  z-index: 999;
   position: fixed;
   left: 0px;
   top: 0px;
@@ -100,6 +92,9 @@ export default Vue.extend({
   min-height: 100vh;
   padding-top: 200px;
   padding-bottom: 40px;
+  .h5-wallet {
+    display: none;
+  }
 }
 @media screen and (max-width: 1366px) {
   .body-container {
@@ -110,6 +105,9 @@ export default Vue.extend({
   display: none;
 }
 @media screen and (max-width: 750px) {
+  .layout-container {
+    min-width: 100%;
+  }
   .h5-header-container {
     display: block;
   }
@@ -117,7 +115,13 @@ export default Vue.extend({
     display: none;
   }
   .body-container {
-    padding-top: 0;
+    padding: 0 20px 0;
+    .h5-wallet {
+      display: block;
+      padding: 60px 0 20px 0px;
+      width: 198px;
+      margin: auto;
+    }
   }
 }
 </style>

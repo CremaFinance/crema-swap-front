@@ -2,6 +2,8 @@ import { TokenSwap, TickInfo, TickInfoLayout, UserPosition, Numberu128 } from '.
 
 const LIQUITY_FEE_DECIMAL = 10000_0000_0000_0000
 const PRICISE_DECIMAL = 10000_0000_0000
+const MIN_TICK = -443632
+const MAX_TICK = 443632
 // storge x or token a price:  p = y / x   l / p = x * x
 export class TickWord {
   constructor(public tick_infos: TickInfo[], public tick_append_index: number) {
@@ -114,11 +116,40 @@ export class TickWord {
   }
 }
 
+export function contractPrice2showPrice(
+  contract_price: number,
+  token_a_decimal: number,
+  token_b_decimal: number
+): number {
+  let tmp_price = contract_price / PRICISE_DECIMAL
+  tmp_price *= tmp_price
+  let show_price = tmp_price * Math.pow(10, token_a_decimal - token_b_decimal)
+  return show_price
+}
+
+export function showPrice2contractPrice(show_price: number, token_a_decimal: number, token_b_decimal: number): number {
+  let tmp_price = Math.sqrt(show_price)
+  tmp_price = tmp_price * Math.pow(10, token_b_decimal - token_a_decimal)
+  let contract_price = tmp_price * PRICISE_DECIMAL
+  return contract_price
+}
+
 export function price2tick(price: number) {
   let d = Math.pow(1.0001, 1 / 2)
   let tick_index = Math.floor(Math.log(price) / Math.log(d))
   return tick_index
 }
+
+export function getNearestTick(price: number, tick_space: number, lower: boolean): number {
+  let tick = price2tick(price)
+  let mod_tick = (tick - MIN_TICK) % tick_space
+  let res = tick - mod_tick
+  if (lower != true) {
+    res += tick_space
+  }
+  return res
+}
+
 export function tick2price(tick_index: number): number {
   let absTick = Math.abs(tick_index)
   let ratio = 1
@@ -261,7 +292,7 @@ export function deposit_src_calulate_dst(
     delta_liquity = src / (1 / current_price - 1 / upper_price)
     dst = delta_liquity * (current_price - lower_price)
   } else {
-    delta_liquity = src / current_price - lower_price
+    delta_liquity = src / (current_price - lower_price)
     dst = delta_liquity * (1 / current_price - 1 / upper_price)
   }
   return { dst, delta_liquity }
@@ -343,12 +374,24 @@ export function preswap(source_amount: number, direct: number, account: TokenSwa
       let step_fee = remind.mul(fee_rate).div(n_pricise_decimal)
       let remind_with_fee = remind.sub(step_fee)
       if (direct == 0) {
-        next_price = liquity
-          .mul(current_price)
-          .mul(n_pricise_decimal)
-          .div(remind_with_fee.mul(current_price).add(liquity.mul(n_pricise_decimal)))
+        let liquity_precise = liquity.mul(n_pricise_decimal)
+        let mutiple = new Numberu128(1)
+        if (liquity_precise.lt(new Numberu128('34028236692093846346337460743176821'))) {
+          mutiple = new Numberu128(10000)
+        } else if (liquity_precise.lt(new Numberu128('3402823669209384634633746074317'))) {
+          mutiple = new Numberu128(100000000)
+        }
+        next_price = liquity_precise
+          .mul(mutiple)
+          .div(remind_with_fee.mul(mutiple).add(liquity.mul(mutiple).mul(n_pricise_decimal).div(current_price)))
         let delta_dst = liquity.mul(current_price.sub(next_price)).div(n_pricise_decimal)
         dst_amount = dst_amount.add(delta_dst)
+        console.log(
+          'next_price: %s, delta_price: %s delta_dst: %s',
+          next_price.toString(),
+          current_price.sub(next_price),
+          dst_amount.toString()
+        )
       } else {
         next_price = remind_with_fee.mul(n_pricise_decimal).div(liquity).add(current_price)
         let delta_dst = liquity
@@ -365,7 +408,7 @@ export function preswap(source_amount: number, direct: number, account: TokenSwa
   return dst_amount.toNumber()
 }
 
-export function preclaim(tick_word: TickWord, user_position: UserPosition, account: any) {
+export function preclaim(tick_word: TickWord, user_position: UserPosition, account: TokenSwap) {
   let lower_tick_info = tick_word.get_tick_info(user_position.lower_tick)
   let upper_tick_info = tick_word.get_tick_info(user_position.upper_tick)
   if (lower_tick_info == null || upper_tick_info == null) {
@@ -375,7 +418,7 @@ export function preclaim(tick_word: TickWord, user_position: UserPosition, accou
   let n_liquity_fee_decimal_1 = new Numberu128(10000_0000)
   let n_liquity_fee_decimal_2 = new Numberu128(10000_0000)
   let n_liquity_fee_decimal = n_liquity_fee_decimal_1.mul(n_liquity_fee_decimal_2)
-  let current_tick = price2tick(account.current_price / PRICISE_DECIMAL)
+  let current_tick = price2tick(account.current_price.toNumber() / PRICISE_DECIMAL)
   let lower_tick = user_position.lower_tick
   let upper_tick = user_position.upper_tick
   let lowerFeeGrowthOutside0
@@ -397,8 +440,25 @@ export function preclaim(tick_word: TickWord, user_position: UserPosition, accou
     upperFeeGrowthOutside0 = upper_tick_info.feeGrowthOutside0
     upperFeeGrowthOutside1 = upper_tick_info.feeGrowthOutside1
   }
+  console.log(
+    'the upperFeeGrowthOutside0 %d, lowerFeeGrowthOutside0 %d, fee_growth_global0: %d',
+    upperFeeGrowthOutside0.toString(),
+    lowerFeeGrowthOutside0.toString(),
+    account.fee_growth_global0.toString()
+  )
   let new_fee_a = account.fee_growth_global0.sub(lowerFeeGrowthOutside0).sub(upperFeeGrowthOutside0)
   let new_fee_b = account.fee_growth_global1.sub(lowerFeeGrowthOutside1).sub(upperFeeGrowthOutside1)
+  console.log('the new token_a fee is ', new_fee_a.toString())
+  // user_position.token_a_fee = new_fee_a
+  //   .sub(user_position.fee_growth_inside_a_last)
+  //   .mul(user_position.liquity)
+  //   .div(n_liquity_fee_decimal)
+  //   .add(user_position.token_a_fee)
+  // user_position.token_b_fee = new_fee_b
+  //   .sub(user_position.fee_growth_inside_b_last)
+  //   .mul(user_position.liquity)
+  //   .div(n_liquity_fee_decimal)
+  //   .add(user_position.token_b_fee)
   const token_a_fee = new_fee_a
     .sub(user_position.fee_growth_inside_a_last)
     .mul(user_position.liquity)
@@ -410,7 +470,10 @@ export function preclaim(tick_word: TickWord, user_position: UserPosition, accou
     .div(n_liquity_fee_decimal)
     .add(user_position.token_b_fee)
 
-  return { token_a_fee, token_b_fee }
+  return {
+    token_a_fee,
+    token_b_fee
+  }
 }
 
 export function test_tick2price() {

@@ -2,8 +2,8 @@
   <div class="swap-info">
     <div class="block">
       <span>Exchange Rate</span>
-      <div v-if="fromCoin && toCoin" class="right">
-        <span v-if="fromCoinAmount && toCoinAmount">
+      <div v-if="fromCoin && toCoin && Number(fromCoinAmount) && Number(toCoinAmount) && defaultRates" class="right">
+        <span v-if="Number(fromCoinAmount) && Number(toCoinAmount)">
           1 {{ fromCoin.symbol }} = {{ fixD(Number(toCoinAmount) / Number(fromCoinAmount), toCoin.decimals) }}
           {{ toCoin.symbol }}
         </span>
@@ -11,30 +11,35 @@
           >1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span
         >
       </div>
-    </div>
-    <div v-if="toCoinAmount && fromCoinAmount" class="block">
-      <span>{{ fixedFromCoin ? 'Minimum Received' : 'Maximum Sold' }}</span>
-      <div class="right">
-        {{
-          fixedFromCoin
-            ? Number(toCoinAmount) / (1 + Number($accessor.slippage) / 100)
-            : fromCoinAmount * (1 + Number($accessor.slippage) / 100)
-        }}
+      <div v-if="fromCoin && toCoin && (!Number(fromCoinAmount) || !Number(toCoinAmount))">
+        <span>1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span>
       </div>
     </div>
-    <div class="block">
-      <span>Price Impact</span>
-      <div class="right">&lt;0.01%</div>
-    </div>
-    <div class="block">
-      <span>Fee</span>
-      <div class="right">{{ poolInfo.fee }}%</div>
-    </div>
+    <template v-if="toCoinAmount && fromCoinAmount && Number(toCoinAmount) > 0">
+      <div v-if="toCoinAmount && fromCoinAmount" class="block">
+        <span>{{ fixedFromCoin ? 'Minimum Received' : 'Maximum Sold' }}</span>
+        <div class="right">
+          {{
+            fixedFromCoin
+              ? fixD(Number(toCoinAmount) / (1 + Number($accessor.slippage) / 100), toCoin.decimals)
+              : fixD(fromCoinAmount * (1 + Number($accessor.slippage) / 100), toCoin.decimals)
+          }}
+        </div>
+      </div>
+      <!-- <div class="block">
+        <span>Price Impact</span>
+        <div class="right">&lt;0.01%</div>
+      </div> -->
+      <div class="block">
+        <span>Fee</span>
+        <div v-if="poolInfo" class="right">{{ poolInfo.feeView }}%</div>
+      </div>
+    </template>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { fixD, getUnixTs } from '../utils/index'
+import { fixD, getUnixTs } from '@/utils/index'
 export default Vue.extend({
   // eslint-disable-next-line vue/require-prop-types
   // props: ['poolInfo', 'fromCoin', 'toCoin', 'fromCoinAmount', 'toCoinAmount'],
@@ -107,9 +112,11 @@ export default Vue.extend({
     },
     setDefaultExchangeRate(poolInfo: any) {
       if (this.fromCoin?.symbol === poolInfo.coin.symbol && this.toCoin?.symbol === poolInfo.pc.symbol) {
-        this.defaultRates = String(Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
+        // this.defaultRates = String(Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
+        this.defaultRates = poolInfo.currentPriceView
       } else {
-        this.defaultRates = String(1 / Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
+        // this.defaultRates = String(1 / Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
+        this.defaultRates = poolInfo.currentPriceViewReverse
       }
     }
   }
@@ -124,7 +131,7 @@ export default Vue.extend({
     margin-top: 20px;
     font-size: 14px;
     > span {
-      color: rgba(255, 255, 255, 0.8);
+      color: #b5b8c2;
     }
     .right {
       display: flex;

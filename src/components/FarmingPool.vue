@@ -44,10 +44,10 @@
               <td>
                 <div class="td-title">Earned</div>
                 <div class="td-text">
-                  106.01CRM
+                  -- CRM
                   <img
                     v-if="index == 0"
-                    @click="showStakeConfirm('Harvest')"
+                    @click="showStakeConfirm('Harvest All')"
                     src="@/assets/images/farming-earned-icon.png"
                     alt=""
                   />
@@ -61,8 +61,8 @@
               <td>
                 <div
                   class="open-or-close"
-                  @click="updateIsShowTableTr(index)"
                   :class="index !== 0 ? 'open-or-close-disabled' : ''"
+                  @click="updateIsShowTableTr(index)"
                 >
                   Details
                   <svg class="icon" :class="isShowTableTr == index ? 'icon-open' : ''" aria-hidden="true">

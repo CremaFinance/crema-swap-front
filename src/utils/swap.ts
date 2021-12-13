@@ -17,6 +17,7 @@ import { loadAccount } from '@/tokenSwap/util/account'
 import { TokenSwap, TokenSwapLayout, Numberu128, TickInfoLayout, Number128, TickInfo } from '@/tokenSwap'
 import { SWAPV3_PROGRAMID, SWAP_PAYER, PAYER } from './ids'
 import { preswap, TickWord } from '@/tokenSwap/swapv3'
+import { cloneDeep } from 'lodash-es'
 
 // export async function loadTickInfo(
 //   connection: Connection,
@@ -32,47 +33,23 @@ import { preswap, TickWord } from '@/tokenSwap/swapv3'
 //   return tickInfos
 // }
 
-export async function getOutAmount(
+export function getOutAmount(
   connection: Connection,
-  poolInfo: any,
+  pool: any,
   fromCoinMint: string,
   toCoinMint: string,
   amount: number,
   slippage: number
 ) {
+  const poolInfo = cloneDeep(pool)
   const { coin, pc } = poolInfo
   //direct is swap dirction, 0 -> x swap y  1 -> y swap x
   const direct = fromCoinMint === coin.mintAddress && toCoinMint === pc.mintAddress ? 0 : 1
 
-  const data = await loadAccount(connection, new PublicKey(poolInfo.tokenSwapAccount), SWAPV3_PROGRAMID)
+  let tick_infos = poolInfo.tick_info_array
+  let tick_word = new TickWord(tick_infos, tick_infos.length)
 
-  const tokenSwapData = TokenSwapLayout.decode(data)
-
-  const tokenSwap = await TokenSwap.loadTokenSwap(
-    connection,
-    new PublicKey(poolInfo.tokenSwapAccount),
-    SWAPV3_PROGRAMID,
-    PAYER
-  )
-
-  console.log('tokenSwap###', tokenSwap)
-
-  const tick_detail_key = new PublicKey(tokenSwapData.tick_detail_key) // tick_info
-  const tick_append_index = tokenSwapData.tick_append_index
-  console.log('3333333333##@')
-  const tickInfos = await TickInfo.loadTickInfo(connection, tick_detail_key, SWAPV3_PROGRAMID, tick_append_index)
-  console.log('没走到这里吧####')
-
-  let test_tick_word = new TickWord(tickInfos, tick_append_index)
-
-  /*
-   *feeGrowthGlobal0: number,
-   *feeGrowthGlobal1: number,
-   *current_price: number,
-   *liquity: number,
-   *fee: number
-   */
-  let dst = preswap(amount, direct, tokenSwap, test_tick_word)
+  let dst = preswap(amount, direct, poolInfo, tick_word)
   console.log('the preswap caclutate the result is ', dst)
   const _decimals = direct === 0 ? pc.decimals : coin.decimals
   const amountOutWithSlippage = dst / (1 + slippage / 100)
@@ -94,6 +71,8 @@ export async function swap(
   aIn: string,
   aOut: string
 ) {
+  console.log('swap####aIn####', aIn)
+  console.log('swap####aOut####', aOut)
   const transaction = new Transaction()
   const signers: Account[] = []
 
@@ -170,32 +149,24 @@ export async function swap(
   console.log('wrappedSolAccount####', wrappedSolAccount)
   console.log('newToTokenAccount####', newToTokenAccount.toString())
 
-  const SWAPV3_PROGRAMID = new PublicKey('C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N')
-
   transaction.add(
     swapInstruction(
-      new PublicKey(poolInfo.tokenSwapAccount),
-      new PublicKey(poolInfo.authority),
+      poolInfo.tokenSwap,
+      poolInfo.authority,
       owner,
       wrappedSolAccount ?? newFromTokenAccount,
       wrappedSolAccount2 ?? newToTokenAccount,
-      // wrappedSolAccount ?? new PublicKey(fromTokenAccount),
-      // wrappedSolAccount2 ?? new PublicKey(toTokenAccount),
       fromCoinMint === poolInfo.coin.mintAddress
         ? new PublicKey(poolInfo.poolCoinTokenAccount)
         : new PublicKey(poolInfo.poolPcTokenAccount),
       toCoinMint === poolInfo.pc.mintAddress
         ? new PublicKey(poolInfo.poolPcTokenAccount)
         : new PublicKey(poolInfo.poolCoinTokenAccount),
-      // new PublicKey(poolInfo.tickMapPubkey),
-      // new PublicKey(poolInfo.tickPositionKey),
-      new PublicKey(poolInfo.tickDetailKey),
-      SWAPV3_PROGRAMID,
-      new PublicKey(poolInfo.programId),
+      poolInfo.tick_detail_key,
+      poolInfo.swapProgramId,
+      poolInfo.tokenProgramId,
       Math.floor(amountIn.toWei().toNumber()),
       Math.floor(amountOut.toWei().toNumber())
-      // 40000,
-      // 1
     )
   )
 

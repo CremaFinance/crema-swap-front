@@ -200,3 +200,7 @@ export function decimalFormat(num: string, d: number) {
 
   return removeEndingZero(String(result))
 }
+
+export function checkNullObj(obj: object) {
+  return Object.keys(obj).length === 0
+}

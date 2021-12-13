@@ -2,17 +2,29 @@ import assert from 'assert'
 import BN from 'bn.js'
 import { Buffer } from 'buffer'
 import * as BufferLayout from 'buffer-layout'
-import type { Connection, TransactionSignature } from '@solana/web3.js'
+import {
+  Connection,
+  GetProgramAccountsConfig,
+  GetProgramAccountsFilter,
+  Keypair,
+  MemcmpFilter,
+  TransactionSignature
+} from '@solana/web3.js'
+import type { Signer } from '@solana/web3.js'
 import { Account, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js'
 
 import * as Layout from './layout'
-// import * as amm_test from '../cli/ammv3-test'
 import { sendAndConfirmTransaction } from './util/send-and-confirm-transaction'
-import { loadAccount } from './util/account'
+import { deserializeTickInfo, deserializeTokenSwapAccount, deserializeUserPositionn, loadAccount } from './util/account'
+import { AccountLayout, MintLayout, Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 export const ORACLE_PRAGRAM_ID = new PublicKey('gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s')
+export const INIT_PUBKEY = new PublicKey('11111111111111111111111111111111')
+export const USER_POSITION_LENGTH = 360000
+export const TICK_INFO_LENGTH = 840000
 export const SWAPV3_PROGRAMID: PublicKey = new PublicKey(
   //'VenTxqaDv4Mj2krfs5Xahf23owM2MCVDQmTR1Qxj7J5',
-  'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N'
+  //'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N'
+  '6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319'
 )
 
 /**
@@ -137,10 +149,15 @@ export class Numberu128 extends BN {
 }
 
 export const TokenSwapLayout = BufferLayout.struct([
+  Layout.publicKey('swapTokenPubkey'),
+  BufferLayout.u8('accountType'),
   BufferLayout.u8('version'),
   BufferLayout.u8('isInitialized'),
   BufferLayout.u8('nonce'),
   Layout.publicKey('tokenProgramId'),
+  Layout.publicKey('managerKey'),
+  Layout.publicKey('managerTokenAKey'),
+  Layout.publicKey('managerTokenBKey'),
   Layout.publicKey('tokenAccountA'),
   Layout.publicKey('tokenAccountB'),
   Layout.publicKey('mintA'),
@@ -148,14 +165,15 @@ export const TokenSwapLayout = BufferLayout.struct([
   Layout.publicKey('tick_detail_key'),
   Layout.publicKey('user_position_key'),
   BufferLayout.u8('curveType'),
-  BufferLayout.u32('fee'),
+  Layout.uint64('fee'),
+  Layout.uint64('manager_fee'),
   BufferLayout.u32('tick_space'),
-  BufferLayout.u32('tick_append_index'),
-  BufferLayout.u32('user_position_index'),
   Layout.uint128('current_price'),
   Layout.uint128('current_liquity'),
   Layout.uint128('fee_growth_global0'),
-  Layout.uint128('fee_growth_global1')
+  Layout.uint128('fee_growth_global1'),
+  Layout.uint128('manager_fee_a'),
+  Layout.uint128('manager_fee_b')
 ])
 
 export const UserPositionLayout = BufferLayout.struct([
@@ -171,7 +189,6 @@ export const UserPositionLayout = BufferLayout.struct([
 
 export class UserPosition {
   constructor(
-    private connection: Connection,
     public nft_token_id: PublicKey,
     public lower_tick: number,
     public upper_tick: number,
@@ -181,7 +198,6 @@ export class UserPosition {
     public token_a_fee: Numberu128,
     public token_b_fee: Numberu128
   ) {
-    this.connection = connection
     this.nft_token_id = nft_token_id
     this.lower_tick = lower_tick
     this.upper_tick = upper_tick
@@ -191,62 +207,15 @@ export class UserPosition {
     this.token_a_fee = token_a_fee
     this.token_b_fee = token_b_fee
   }
+}
 
-  static async loadUserPosition(
-    connection: Connection,
-    address: PublicKey,
-    programId: PublicKey,
-    length: number
-  ): Promise<Array<UserPosition>> {
-    const data = await loadAccount(connection, address, programId)
-    // eslint-disable-next-line no-array-constructor
-    let array = new Array<UserPosition>()
-    for (let i = 0; i < length; i++) {
-      const userPositionData = UserPositionLayout.decode(
-        data.slice(i * UserPositionLayout.span, (i + 1) * UserPositionLayout.span)
-      )
-      const nft_token_id = new PublicKey(userPositionData.nft_token_id)
-      const liquity = Numberu128.fromBuffer(userPositionData.liquity)
-      const lower_tick = userPositionData.lower_tick
-      const upper_tick = userPositionData.upper_tick
-      const fee_growth_inside_a_last = Numberu128.fromBuffer(userPositionData.fee_growth_inside_a_last)
-      const fee_growth_inside_b_last = Numberu128.fromBuffer(userPositionData.fee_growth_inside_b_last)
-      const token_a_fee = Numberu128.fromBuffer(userPositionData.token_a_fee)
-      const token_b_fee = Numberu128.fromBuffer(userPositionData.token_b_fee)
-      let userPostion = new UserPosition(
-        connection,
-        nft_token_id,
-        lower_tick,
-        upper_tick,
-        liquity,
-        fee_growth_inside_a_last,
-        fee_growth_inside_b_last,
-        token_a_fee,
-        token_b_fee
-      )
-      array.push(userPostion)
-    }
-    return array
-  }
-
-  static async getUserPositionIdx(
-    connection: Connection,
-    address: PublicKey,
-    nft_pubkey: PublicKey,
-    programId: PublicKey,
-    length: number
-  ): Promise<{ index: number; new_flag: number }> {
-    let array = await UserPosition.loadUserPosition(connection, address, programId, length)
-    for (let i = 0; i < length; i++) {
-      if (array[i].nft_token_id.equals(nft_pubkey)) {
-        console.log('there already exist deposit user ', nft_pubkey.toString())
-        return { index: i, new_flag: 1 }
-      }
-    }
-    console.log('there not exist deposit user ', nft_pubkey.toString())
-    return { index: length, new_flag: 0 }
+export class UserPositionsAccount {
+  constructor(public pubkey: PublicKey, public user_positions: Array<UserPosition>) {
+    this.pubkey = pubkey
+    this.user_positions = user_positions
   }
 }
+
 export const TickInfoLayout = BufferLayout.struct([
   Layout.int32('tick'),
   Layout.uint128('tick_price'),
@@ -259,7 +228,6 @@ export class TickInfo {
   // unsigned int 引用这个tick得引用总和，不需要区分upper tick 和 lower tick，主要用来判断是否被position判断，可以用来计算费用
   // siged int  价格由左向右穿过时，流动性增加得净值
   constructor(
-    private connection: Connection,
     public tick: number,
     public tick_price: Numberu128,
     public liquity_gross: Numberu128,
@@ -267,7 +235,6 @@ export class TickInfo {
     public feeGrowthOutside0: Numberu128,
     public feeGrowthOutside1: Numberu128
   ) {
-    this.connection = connection
     this.tick = tick
     this.tick_price = tick_price
     this.liquity_gross = liquity_gross
@@ -275,39 +242,8 @@ export class TickInfo {
     this.feeGrowthOutside0 = feeGrowthOutside0
     this.feeGrowthOutside1 = feeGrowthOutside1
   }
-
-  static async loadTickInfo(
-    connection: Connection,
-    address: PublicKey,
-    programId: PublicKey,
-    length: number
-  ): Promise<Array<TickInfo>> {
-    const data = await loadAccount(connection, address, programId)
-    // eslint-disable-next-line no-array-constructor
-    let array = new Array<TickInfo>()
-    for (let i = 0; i < length; i++) {
-      const tickInfoData = TickInfoLayout.decode(data.slice(i * TickInfoLayout.span, (i + 1) * TickInfoLayout.span))
-      // const tick = tickInfoData.tick.readInt32LE()
-      const tick = Buffer.from(tickInfoData.tick).readInt32LE(0)
-      const tick_price = Numberu128.fromBuffer(tickInfoData.tick_price)
-      const liquity_gross = Numberu128.fromBuffer(tickInfoData.liquity_gross)
-      const liquity_net = Number128.fromBuffer(tickInfoData.liquity_net)
-      const fee_growth_outside_a = Numberu128.fromBuffer(tickInfoData.fee_growth_outside_a)
-      const fee_growth_outside_b = Numberu128.fromBuffer(tickInfoData.fee_growth_outside_b)
-      let userPostion = new TickInfo(
-        connection,
-        tick,
-        tick_price,
-        liquity_gross,
-        liquity_net,
-        fee_growth_outside_a,
-        fee_growth_outside_b
-      )
-      array.push(userPostion)
-    }
-    return array
-  }
 }
+
 /**
  * A program to exchange tokens against a pool of liquidity
  */
@@ -329,11 +265,14 @@ export class TokenSwap {
    * @param payer Pays for the transaction
    */
   constructor(
-    private connection: Connection,
+    public connection: Connection,
     public tokenSwap: PublicKey,
     public swapProgramId: PublicKey,
     public tokenProgramId: PublicKey,
     public authority: PublicKey,
+    public managerKey: PublicKey,
+    public managerTokenAKey: PublicKey,
+    public managerTokenBKey: PublicKey,
     public tokenAccountA: PublicKey,
     public tokenAccountB: PublicKey,
     public mintA: PublicKey,
@@ -341,14 +280,17 @@ export class TokenSwap {
     public tick_detail_key: PublicKey,
     public user_position_key: PublicKey,
     public curveType: number,
-    public fee: number,
+    public fee: Numberu64,
+    public managerFee: Numberu64,
     public tick_space: number,
-    public tick_append_index: number,
-    public user_postion_index: number,
     public current_price: Numberu128,
     public current_liquity: Numberu128,
     public fee_growth_global0: Numberu128,
     public fee_growth_global1: Numberu128,
+    public manager_fee_a: Numberu128,
+    public manager_fee_b: Numberu128,
+    public tick_info_array: Array<TickInfo>,
+    public user_position_account_array: Array<UserPositionsAccount>,
     public payer: Account
   ) {
     this.connection = connection
@@ -364,13 +306,57 @@ export class TokenSwap {
     this.user_position_key = user_position_key
     this.curveType = curveType
     this.fee = fee
+    this.managerFee = managerFee
     this.tick_space = tick_space
-    this.tick_append_index = tick_append_index
     this.current_price = current_price
     this.current_liquity = current_liquity
     this.fee_growth_global0 = fee_growth_global0
     this.fee_growth_global1 = fee_growth_global1
+    this.manager_fee_a = manager_fee_a
+    this.manager_fee_b = manager_fee_b
     this.payer = payer
+    this.tick_info_array = tick_info_array
+    this.user_position_account_array = user_position_account_array
+  }
+
+  toString() {
+    console.log(
+      'tokenSwap: %s, current_price: %s, fee: %s, managerFee: %s, fee_global_fee_a: %s, fee_global_fee_b: %s, manager_fee_a: %s, manager_fee_b: %s',
+      this.tokenSwap.toString(),
+      this.current_price.toString(),
+      this.fee.toString(),
+      this.managerFee.toString(),
+      this.fee_growth_global0.toString(),
+      this.fee_growth_global1.toString(),
+      this.manager_fee_a.toString(),
+      this.manager_fee_b.toString()
+    )
+    console.log('tick info:')
+    for (let tick_info of this.tick_info_array) {
+      console.log(
+        'tick: %d, liquity_gross: %s, liquity_net: %s, outsid_fee_a: %s, outside_fee_b: %s',
+        tick_info.tick.toString(),
+        tick_info.liquity_gross,
+        tick_info.liquity_net,
+        tick_info.feeGrowthOutside1,
+        tick_info.feeGrowthOutside1
+      )
+    }
+    for (let user_position_account of this.user_position_account_array) {
+      for (let user_postion of user_position_account.user_positions) {
+        console.log(
+          'nft: %s, lower_tick: %d, upper_tick: %d, liquity: %s, token_a_fee: %s, token_b_fee: %s, fee_a_last: %s, fee_b_last: %s',
+          user_postion.nft_token_id.toString(),
+          user_postion.lower_tick,
+          user_postion.upper_tick,
+          user_postion.liquity.toString(),
+          user_postion.token_a_fee.toString(),
+          user_postion.token_b_fee.toString(),
+          user_postion.fee_growth_inside_a_last.toString(),
+          user_postion.fee_growth_inside_b_last.toString()
+        )
+      }
+    }
   }
 
   /**
@@ -389,6 +375,9 @@ export class TokenSwap {
   static createInitSwapInstruction(
     tokenSwapAccount: Account,
     authority: PublicKey,
+    managerKey: PublicKey,
+    managerTokenAKey: PublicKey,
+    managerTokenBKey: PublicKey,
     tokenAccountA: PublicKey,
     tokenAccountB: PublicKey,
     tick_detail_key: PublicKey,
@@ -398,51 +387,54 @@ export class TokenSwap {
     nonce: number,
     curveType: number,
     fee: number,
+    managerFee: number,
     tick_space: number,
     current_price: number
   ): TransactionInstruction {
     const keys = [
       { pubkey: tokenSwapAccount.publicKey, isSigner: false, isWritable: true },
       { pubkey: authority, isSigner: false, isWritable: false },
+      { pubkey: managerKey, isSigner: false, isWritable: false },
+      { pubkey: managerTokenAKey, isSigner: false, isWritable: false },
+      { pubkey: managerTokenBKey, isSigner: false, isWritable: false },
       { pubkey: tokenAccountA, isSigner: false, isWritable: false },
       { pubkey: tokenAccountB, isSigner: false, isWritable: false },
-      { pubkey: tick_detail_key, isSigner: false, isWritable: false },
-      { pubkey: user_position_key, isSigner: false, isWritable: false },
-      { pubkey: tokenProgramId, isSigner: false, isWritable: false },
-      { pubkey: ORACLE_PRAGRAM_ID, isSigner: false, isWritable: false }
+      { pubkey: tick_detail_key, isSigner: false, isWritable: true },
+      { pubkey: user_position_key, isSigner: false, isWritable: true },
+      { pubkey: tokenProgramId, isSigner: false, isWritable: false }
     ]
     const commandDataLayout = BufferLayout.struct([
       BufferLayout.u8('instruction'),
       BufferLayout.u8('nonce'),
       BufferLayout.u8('curveType'),
-      BufferLayout.u32('fee'),
+      Layout.uint64('fee'),
+      Layout.uint64('manager_fee'),
       BufferLayout.u32('tick_space'),
-      BufferLayout.u32('tick_append_index'),
-      BufferLayout.u32('user_postion_index'),
       Layout.uint128('current_price'),
       Layout.uint128('current_liquity'),
       Layout.uint128('fee_growth_global0'),
-      Layout.uint128('fee_growth_global1')
+      Layout.uint128('fee_growth_global1'),
+      Layout.uint128('manager_fee_a'),
+      Layout.uint128('manager_fee_b')
     ])
     const data = Buffer.alloc(commandDataLayout.span)
-    // {
     commandDataLayout.encode(
       {
         instruction: 0, // InitializeSwap instruction
         nonce,
         curveType,
-        fee,
+        fee: new Numberu64(fee).toBuffer(),
+        manager_fee: new Numberu64(managerFee).toBuffer(),
         tick_space,
-        tick_append_index: 0,
-        user_position_index: 0,
         current_price: new Numberu128(current_price).toBuffer(),
         current_liquity: new Numberu128(0).toBuffer(),
         fee_growth_global0: new Numberu128(0).toBuffer(),
-        fee_growth_global1: new Numberu128(0).toBuffer()
+        fee_growth_global1: new Numberu128(0).toBuffer(),
+        manager_fee_a: new Numberu128(0).toBuffer(),
+        manager_fee_b: new Numberu128(0).toBuffer()
       },
       data
     )
-    // }
     return new TransactionInstruction({
       keys,
       programId: swapProgramId,
@@ -450,71 +442,95 @@ export class TokenSwap {
     })
   }
 
-  static async loadTokenSwap(
+  choosePosition(): PublicKey | null {
+    for (let i = 0; i < this.user_position_account_array.length; i++) {
+      let length = this.user_position_account_array[i].user_positions.length
+      if (length < USER_POSITION_LENGTH) {
+        let user_position_pubkey = this.user_position_account_array[i].pubkey
+        return user_position_pubkey
+      }
+    }
+    return null
+  }
+
+  getUserPositionIdx(nft_pubkey: PublicKey): { index: number; user_position_pubkey?: PublicKey } {
+    for (let i = 0; i < this.user_position_account_array.length; i++) {
+      let length = this.user_position_account_array[i].user_positions.length
+      let user_position_pubkey = this.user_position_account_array[i].pubkey
+      let user_position_array = this.user_position_account_array[i].user_positions
+      for (let j = 0; j < length; j++) {
+        if (user_position_array[j].nft_token_id.equals(nft_pubkey)) {
+          console.log('there already exist deposit user ', nft_pubkey.toString())
+          return { index: j, user_position_pubkey }
+        }
+      }
+    }
+    return { index: 0 }
+  }
+
+  static async getAllAccounts(
     connection: Connection,
     address: PublicKey,
     programId: PublicKey,
     payer: Account
   ): Promise<TokenSwap> {
-    const data = await loadAccount(connection, address, programId)
-    const tokenSwapData = TokenSwapLayout.decode(data)
-    if (!tokenSwapData.isInitialized) {
-      throw new Error(`Invalid token swap state`)
-    }
-
-    const [authority] = await PublicKey.findProgramAddress([address.toBuffer()], programId)
-    const tokenAccountA = new PublicKey(tokenSwapData.tokenAccountA)
-    const tokenAccountB = new PublicKey(tokenSwapData.tokenAccountB)
-    const mintA = new PublicKey(tokenSwapData.mintA)
-    const mintB = new PublicKey(tokenSwapData.mintB)
-    const tick_detail_key = new PublicKey(tokenSwapData.tick_detail_key)
-    const user_position_key = new PublicKey(tokenSwapData.user_position_key)
-    const tokenProgramId = new PublicKey(tokenSwapData.tokenProgramId)
-    console.log('the token a pool is ', tokenAccountA.toString())
-    console.log('the token b pool is ', tokenAccountB.toString())
-    console.log('the mint a is ', mintA.toString())
-    console.log('the mint b is ', mintB.toString())
-    console.log('the tick_detail_key is ', tick_detail_key.toString())
-    console.log('the user_position_key is ', user_position_key.toString())
-    console.log('the tokenProgramId is ', tokenProgramId.toString())
-    const curveType = tokenSwapData.curveType
-    const fee = tokenSwapData.fee
-    const tick_space = tokenSwapData.tick_space
-    const tick_append_index = tokenSwapData.tick_append_index
-    const user_position_index = tokenSwapData.user_position_index
-    const current_price = Numberu128.fromBuffer(tokenSwapData.current_price)
-    const current_liquity = Numberu128.fromBuffer(tokenSwapData.current_liquity)
-    const fee_growth_global0 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global0)
-    const fee_growth_global1 = Numberu128.fromBuffer(tokenSwapData.fee_growth_global1)
-    console.log('the fee is ', fee)
-    console.log('the current_price is ', current_price.toString())
-    console.log('the current_liquity is ', current_liquity.toString())
-    console.log('the user append index is', user_position_index)
-    console.log('the fee_growth_global0 is %d', fee_growth_global0.toString())
-    console.log('the fee_growth_global1 is %d', fee_growth_global1.toString())
-    return new TokenSwap(
+    let tokenSwap: TokenSwap = new TokenSwap(
       connection,
       address,
       programId,
-      tokenProgramId,
-      authority,
-      tokenAccountA,
-      tokenAccountB,
-      mintA,
-      mintB,
-      tick_detail_key,
-      user_position_key,
-      curveType,
-      fee,
-      tick_space,
-      tick_append_index,
-      user_position_index,
-      current_price,
-      current_liquity,
-      fee_growth_global0,
-      fee_growth_global1,
+      TOKEN_PROGRAM_ID,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      INIT_PUBKEY,
+      0,
+      new Numberu64(0),
+      new Numberu64(0),
+      0,
+      new Numberu64(0),
+      new Numberu64(0),
+      new Numberu64(0),
+      new Numberu64(0),
+      new Numberu64(0),
+      new Numberu64(0),
+      // eslint-disable-next-line no-array-constructor
+      new Array<TickInfo>(),
+      // eslint-disable-next-line no-array-constructor
+      new Array<UserPositionsAccount>(),
       payer
     )
+    let memFilter: MemcmpFilter = {
+      memcmp: {
+        offset: 1,
+        bytes: address.toBase58()
+      }
+    }
+    let filters: GetProgramAccountsFilter[] = [memFilter]
+    let config: GetProgramAccountsConfig = {
+      encoding: 'base64',
+      filters
+    }
+    const [authority] = await PublicKey.findProgramAddress([address.toBuffer()], programId)
+    tokenSwap.authority = authority
+    let accounts = await connection.getProgramAccounts(programId, config)
+    // eslint-disable-next-line array-callback-return
+    accounts.map((item) => {
+      if (item.account.data.length === TokenSwapLayout.span) {
+        deserializeTokenSwapAccount(item.account.data, tokenSwap)
+      } else if (item.account.data.length === TICK_INFO_LENGTH) {
+        deserializeTickInfo(item.account.data, tokenSwap)
+        tokenSwap.tick_detail_key = item.pubkey
+      } else if (item.account.data.length === USER_POSITION_LENGTH) {
+        deserializeUserPositionn(item.account.data, item.pubkey, tokenSwap)
+      }
+    })
+    return tokenSwap
   }
 
   /**
@@ -542,6 +558,9 @@ export class TokenSwap {
     tick_info_account: Account,
     user_postion_account: Account,
     authority: PublicKey,
+    managerKey: PublicKey,
+    managerTokenAKey: PublicKey,
+    managerTokenBKey: PublicKey,
     tokenAccountA: PublicKey,
     tokenAccountB: PublicKey,
     mintA: PublicKey,
@@ -553,6 +572,7 @@ export class TokenSwap {
     nonce: number,
     curveType: number,
     fee: number,
+    managerFee: number,
     tick_space: number,
     current_price: number
   ): Promise<TokenSwap> {
@@ -564,6 +584,9 @@ export class TokenSwap {
       swapProgramId,
       tokenProgramId,
       authority,
+      managerKey,
+      managerTokenAKey,
+      managerTokenBKey,
       tokenAccountA,
       tokenAccountB,
       mintA,
@@ -571,21 +594,23 @@ export class TokenSwap {
       tick_detail_key,
       user_position_key,
       curveType,
-      fee,
+      new Numberu64(fee),
+      new Numberu64(managerFee),
       tick_space,
-      0,
-      0,
       new Numberu64(current_price),
       new Numberu64(0),
       new Numberu64(0),
       new Numberu64(0),
+      new Numberu64(0),
+      new Numberu64(0),
+      new Array<TickInfo>(0),
+      new Array<UserPositionsAccount>(0),
       payer
     )
-
     // Allocate memory for the account
     const balanceNeeded = await TokenSwap.getMinBalanceRentForExemptTokenSwap(connection)
-    let tick_info_length = 64000
-    let user_positon_length = 36000
+    let tick_info_length = TICK_INFO_LENGTH
+    let user_positon_length = USER_POSITION_LENGTH
     let tick_info_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, tick_info_length)
     let user_position_balance = await TokenSwap.getMinBalanceRentForExemptAccount(connection, user_positon_length)
     transaction = new Transaction()
@@ -601,20 +626,23 @@ export class TokenSwap {
         fromPubkey: payer.publicKey,
         newAccountPubkey: tick_detail_key,
         lamports: tick_info_balance,
-        space: 84000,
+        space: tick_info_length,
         programId: swapProgramId
       }),
       SystemProgram.createAccount({
         fromPubkey: payer.publicKey,
         newAccountPubkey: user_position_key,
         lamports: user_position_balance,
-        space: 36000,
+        space: user_positon_length,
         programId: swapProgramId
       })
     )
     const instruction = TokenSwap.createInitSwapInstruction(
       tokenSwapAccount,
       authority,
+      managerKey,
+      managerTokenAKey,
+      managerTokenBKey,
       tokenAccountA,
       tokenAccountB,
       tick_detail_key,
@@ -624,6 +652,7 @@ export class TokenSwap {
       nonce,
       curveType,
       fee,
+      managerFee,
       tick_space,
       current_price
     )
@@ -654,6 +683,7 @@ export class TokenSwap {
    * @param minimumAmountOut Minimum amount of tokens the user will receive
    */
   async swap(
+    user_wallet_signer: Signer,
     userSource: PublicKey,
     userDestination: PublicKey,
     userTransferAuthority: Account,
@@ -679,7 +709,7 @@ export class TokenSwap {
           minimumAmountOut
         )
       ),
-      this.payer,
+      user_wallet_signer,
       userTransferAuthority
     )
   }
@@ -744,52 +774,170 @@ export class TokenSwap {
   async depositAllTokenTypes(
     userAccountA: PublicKey,
     userAccountB: PublicKey,
-    userTransferAuthority: Account,
-    nft_mint_pubkey: PublicKey,
-    user_nft_pubkey: PublicKey,
+    userTransferAuthority: Signer,
+    user_mint_pubkey: PublicKey | null,
+    user_nft_pubkey: PublicKey | null,
     tick_lower: number,
     tick_upper: number,
-    liquity_mount: number | Numberu64,
+    liquity_mount: number | Numberu128,
     maximumTokenA: number | Numberu64,
-    maximumTokenB: number | Numberu64
-  ): Promise<TransactionSignature> {
-    let { index: user_position_index, new_flag: new_position } = await UserPosition.getUserPositionIdx(
-      this.connection,
-      this.user_position_key,
-      user_nft_pubkey,
-      this.swapProgramId,
-      this.user_postion_index
+    maximumTokenB: number | Numberu64,
+    new_position: number
+  ): Promise<TransactionSignature | null> {
+    let result
+    let user_position_key
+    let index = 0
+    let user_wallet_key = userTransferAuthority.publicKey
+    if (new_position != 0 && user_mint_pubkey != null) {
+      result = this.getUserPositionIdx(user_mint_pubkey)
+      if (result.user_position_pubkey == null) {
+        console.log("deposite old user: %s, but can't find in user position", user_mint_pubkey?.toString())
+      }
+      user_position_key = result.user_position_pubkey
+      index = result.index
+    } else {
+      user_position_key = this.choosePosition()
+    }
+    let transaction = new Transaction()
+    let instruction
+    if (new_position === 0 && user_position_key != null) {
+      let { mintTrans, mintAccount } = await TokenSwap.createMintInstruction(
+        this.connection,
+        userTransferAuthority,
+        this.authority
+      )
+      let { nftAccountInstruction, nft_account } = await TokenSwap.createAccountInstruction(
+        this.connection,
+        user_wallet_key,
+        mintAccount.publicKey,
+        userTransferAuthority
+      )
+      user_mint_pubkey = mintAccount.publicKey
+      user_nft_pubkey = nft_account.publicKey
+      transaction.add(mintTrans)
+      transaction.add(nftAccountInstruction)
+      instruction = TokenSwap.depositAllTokenTypesInstruction(
+        this.tokenSwap,
+        this.authority,
+        userTransferAuthority.publicKey,
+        userAccountA,
+        userAccountB,
+        this.tokenAccountA,
+        this.tokenAccountB,
+        user_mint_pubkey,
+        user_nft_pubkey,
+        this.tick_detail_key,
+        user_position_key,
+        this.swapProgramId,
+        this.tokenProgramId,
+        new_position,
+        tick_lower,
+        tick_upper,
+        liquity_mount,
+        maximumTokenA,
+        maximumTokenB,
+        0
+      )
+      console.log(
+        'the tick_detail_key is ',
+        this.tick_detail_key.toString(),
+        'the user position key ',
+        user_position_key.toString()
+      )
+      transaction.add(instruction)
+      return await sendAndConfirmTransaction(
+        'depositAllTokenTypes',
+        this.connection,
+        transaction,
+        userTransferAuthority,
+        mintAccount,
+        nft_account,
+        userTransferAuthority
+      )
+    } else if (user_mint_pubkey != null && user_nft_pubkey != null && user_position_key != null) {
+      instruction = TokenSwap.depositAllTokenTypesInstruction(
+        this.tokenSwap,
+        this.authority,
+        userTransferAuthority.publicKey,
+        userAccountA,
+        userAccountB,
+        this.tokenAccountA,
+        this.tokenAccountB,
+        user_mint_pubkey,
+        user_nft_pubkey,
+        this.tick_detail_key,
+        user_position_key,
+        this.swapProgramId,
+        this.tokenProgramId,
+        new_position,
+        tick_lower,
+        tick_upper,
+        liquity_mount,
+        maximumTokenA,
+        maximumTokenB,
+        index
+      )
+      transaction.add(instruction)
+      return await sendAndConfirmTransaction(
+        'depositAllTokenTypes',
+        this.connection,
+        transaction,
+        userTransferAuthority
+      )
+    }
+    return null
+  }
+
+  static async createMintInstruction(
+    connection: Connection,
+    payer: Signer,
+    mintAuthority: PublicKey
+  ): Promise<{ mintTrans: Transaction; mintAccount: Keypair }> {
+    const mintAccount = Keypair.generate()
+    let transaction = new Transaction()
+    // Allocate memory for the account
+    const balanceNeeded = await Token.getMinBalanceRentForExemptMint(connection)
+    let instruction = SystemProgram.createAccount({
+      fromPubkey: payer.publicKey,
+      newAccountPubkey: mintAccount.publicKey,
+      lamports: balanceNeeded,
+      space: MintLayout.span,
+      programId: TOKEN_PROGRAM_ID
+    })
+    transaction.add(instruction)
+    let mintInstruction = Token.createInitMintInstruction(
+      TOKEN_PROGRAM_ID,
+      mintAccount.publicKey,
+      0,
+      mintAuthority,
+      null
     )
-    return await sendAndConfirmTransaction(
-      'depositAllTokenTypes',
-      this.connection,
-      new Transaction().add(
-        TokenSwap.depositAllTokenTypesInstruction(
-          this.tokenSwap,
-          this.authority,
-          userTransferAuthority.publicKey,
-          userAccountA,
-          userAccountB,
-          this.tokenAccountA,
-          this.tokenAccountB,
-          nft_mint_pubkey,
-          user_nft_pubkey,
-          this.tick_detail_key,
-          this.user_position_key,
-          this.swapProgramId,
-          this.tokenProgramId,
-          new_position,
-          tick_lower,
-          tick_upper,
-          liquity_mount,
-          maximumTokenA,
-          maximumTokenB,
-          user_position_index
-        )
-      ),
-      this.payer,
-      userTransferAuthority
+    transaction.add(mintInstruction)
+    return { mintTrans: transaction, mintAccount }
+  }
+
+  static async createAccountInstruction(
+    connection: Connection,
+    owner: PublicKey,
+    mintPublicKey: PublicKey,
+    payer: Signer
+  ): Promise<{ nftAccountInstruction: Transaction; nft_account: Keypair }> {
+    const balanceNeeded = await Token.getMinBalanceRentForExemptAccount(connection)
+
+    const newAccount = Keypair.generate()
+    const transaction = new Transaction()
+    transaction.add(
+      SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        newAccountPubkey: newAccount.publicKey,
+        lamports: balanceNeeded,
+        space: AccountLayout.span,
+        programId: TOKEN_PROGRAM_ID
+      })
     )
+
+    transaction.add(Token.createInitAccountInstruction(TOKEN_PROGRAM_ID, mintPublicKey, newAccount.publicKey, owner))
+    return { nftAccountInstruction: transaction, nft_account: newAccount }
   }
 
   static depositAllTokenTypesInstruction(
@@ -809,7 +957,7 @@ export class TokenSwap {
     new_position: number,
     tick_lower: number,
     tick_upper: number,
-    liquity_amount: number | Numberu64,
+    liquity_amount: number | Numberu128,
     maximumTokenA: number | Numberu64,
     maximumTokenB: number | Numberu64,
     user_position_index: number | Numberu64
@@ -817,7 +965,7 @@ export class TokenSwap {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8('instruction'),
       BufferLayout.u8('new_position'),
-      Layout.uint64('liquity_amount'),
+      Layout.uint128('liquity_amount'),
       BufferLayout.s32('tick_lower'),
       BufferLayout.s32('tick_upper'),
       Layout.uint64('maximumTokenA'),
@@ -829,13 +977,10 @@ export class TokenSwap {
     dataLayout.encode(
       {
         instruction: 2, // Deposit instruction
-        // eslint-disable-next-line object-shorthand
-        new_position: new_position,
-        liquity_amount: new Numberu64(liquity_amount).toBuffer(),
-        // eslint-disable-next-line object-shorthand
-        tick_lower: tick_lower,
-        // eslint-disable-next-line object-shorthand
-        tick_upper: tick_upper,
+        new_position,
+        liquity_amount: new Numberu128(liquity_amount).toBuffer(),
+        tick_lower,
+        tick_upper,
         maximumTokenA: new Numberu64(maximumTokenA).toBuffer(),
         maximumTokenB: new Numberu64(maximumTokenB).toBuffer(),
         user_position_index: new Numberu64(user_position_index).toBuffer()
@@ -878,19 +1023,24 @@ export class TokenSwap {
   async withdrawAllTokenTypes(
     userAccountA: PublicKey,
     userAccountB: PublicKey,
-    userTransferAuthority: Account,
+    userTransferAuthority: Signer,
     nft_mint_pubkey: PublicKey,
     user_nft_pubkey: PublicKey,
-    liquity_amount: number | Numberu64,
+    liquity_amount: number | Numberu128,
     minimumTokenA: number | Numberu64,
     minimumTokenB: number | Numberu64
-  ): Promise<TransactionSignature> {
-    let { index: user_position_index, new_flag: new_position } = await UserPosition.getUserPositionIdx(
-      this.connection,
-      this.user_position_key,
-      user_nft_pubkey,
-      this.swapProgramId,
-      this.user_postion_index
+  ): Promise<TransactionSignature | null> {
+    let { index: user_position_index, user_position_pubkey } = this.getUserPositionIdx(nft_mint_pubkey)
+    if (user_position_pubkey == null) {
+      console.log('withdraw a user: %s is not exist on user deposit position', nft_mint_pubkey.toString())
+      return null
+    }
+    console.log(
+      'the user position is %d, minimumTokenA is %d, minimumTokenB is %d and liquty amount is %d',
+      user_position_index,
+      minimumTokenA,
+      minimumTokenB,
+      liquity_amount
     )
     return await sendAndConfirmTransaction(
       'withdraw',
@@ -907,7 +1057,7 @@ export class TokenSwap {
           nft_mint_pubkey,
           user_nft_pubkey,
           this.tick_detail_key,
-          this.user_position_key,
+          user_position_pubkey,
           this.swapProgramId,
           this.tokenProgramId,
           liquity_amount,
@@ -916,7 +1066,6 @@ export class TokenSwap {
           user_position_index
         )
       ),
-      this.payer,
       userTransferAuthority
     )
   }
@@ -935,14 +1084,14 @@ export class TokenSwap {
     user_postion_key: PublicKey,
     swapProgramId: PublicKey,
     tokenProgramId: PublicKey,
-    liquity_amount: number | Numberu64,
+    liquityAmount: number | Numberu128,
     minimumTokenA: number | Numberu64,
     minimumTokenB: number | Numberu64,
     user_position_index: number | Numberu64
   ): TransactionInstruction {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8('instruction'),
-      Layout.uint64('liquity_amount'),
+      Layout.uint128('liquityAmount'),
       Layout.uint64('minimumTokenA'),
       Layout.uint64('minimumTokenB'),
       Layout.uint64('user_position_index')
@@ -952,7 +1101,7 @@ export class TokenSwap {
     dataLayout.encode(
       {
         instruction: 3, // Withdraw instruction]
-        liquity_amount: new Numberu64(liquity_amount).toBuffer(),
+        liquityAmount: new Numberu128(liquityAmount).toBuffer(),
         minimumTokenA: new Numberu64(minimumTokenA).toBuffer(),
         minimumTokenB: new Numberu64(minimumTokenB).toBuffer(),
         user_position_index: new Numberu64(user_position_index).toBuffer()
@@ -993,18 +1142,16 @@ export class TokenSwap {
    * @param minimumTokenB The minimum amount of token B to withdraw
    */
   async claim(
+    user_wallet_signer: Signer,
     userAccountA: PublicKey,
     userAccountB: PublicKey,
-    user_account: Account,
+    user_nft_mint_pubkey: PublicKey,
     user_nft_pubkey: PublicKey
-  ): Promise<TransactionSignature> {
-    let { index: user_position_index, new_flag: new_position } = await UserPosition.getUserPositionIdx(
-      this.connection,
-      this.user_position_key,
-      user_nft_pubkey,
-      this.swapProgramId,
-      this.user_postion_index
-    )
+  ): Promise<TransactionSignature | null> {
+    let { index: user_position_index, user_position_pubkey } = this.getUserPositionIdx(user_nft_mint_pubkey)
+    if (user_position_pubkey == null) {
+      return null
+    }
     return await sendAndConfirmTransaction(
       'claim',
       this.connection,
@@ -1012,21 +1159,21 @@ export class TokenSwap {
         TokenSwap.claimInstruction(
           this.tokenSwap,
           this.authority,
-          user_account.publicKey,
+          user_wallet_signer.publicKey,
           this.tokenAccountA,
           this.tokenAccountB,
           userAccountA,
           userAccountB,
+          user_nft_mint_pubkey,
           user_nft_pubkey,
           this.tick_detail_key,
-          this.user_position_key,
+          user_position_pubkey,
           this.swapProgramId,
           this.tokenProgramId,
           user_position_index
         )
       ),
-      this.payer,
-      user_account
+      user_wallet_signer
     )
   }
 
@@ -1038,6 +1185,7 @@ export class TokenSwap {
     fromB: PublicKey,
     userAccountA: PublicKey,
     userAccountB: PublicKey,
+    user_nft_mint_pubkey: PublicKey,
     user_nft_pubkey: PublicKey,
     tick_info_key: PublicKey,
     user_postion_key: PublicKey,
@@ -1060,6 +1208,7 @@ export class TokenSwap {
       { pubkey: tokenSwap, isSigner: false, isWritable: false },
       { pubkey: authority, isSigner: false, isWritable: false },
       { pubkey: user_account_key, isSigner: true, isWritable: false },
+      { pubkey: user_nft_mint_pubkey, isSigner: false, isWritable: false },
       { pubkey: user_nft_pubkey, isSigner: false, isWritable: false },
       { pubkey: fromA, isSigner: false, isWritable: true },
       { pubkey: fromB, isSigner: false, isWritable: true },
@@ -1067,6 +1216,145 @@ export class TokenSwap {
       { pubkey: userAccountB, isSigner: false, isWritable: true },
       { pubkey: tick_info_key, isSigner: false, isWritable: false },
       { pubkey: user_postion_key, isSigner: false, isWritable: true },
+      { pubkey: tokenProgramId, isSigner: false, isWritable: false }
+    ]
+    return new TransactionInstruction({
+      keys,
+      programId: swapProgramId,
+      data
+    })
+  }
+
+  /**
+   * claim tokens from the v3 pool
+   *
+   * @param userAccountA User account for token A
+   * @param userAccountB User account for token B
+   * @param poolAccount User account for pool token
+   * @param minimumTokenA The minimum amount of token A to withdraw
+   * @param minimumTokenB The minimum amount of token B to withdraw
+   */
+  async managerClaim(
+    user_wallet_signer: Signer,
+    userAccountA: PublicKey,
+    userAccountB: PublicKey
+  ): Promise<TransactionSignature | null> {
+    return await sendAndConfirmTransaction(
+      'ManagerClaim',
+      this.connection,
+      new Transaction().add(
+        TokenSwap.managerClaimInstruction(
+          this.tokenSwap,
+          this.authority,
+          user_wallet_signer.publicKey,
+          this.tokenAccountA,
+          this.tokenAccountB,
+          userAccountA,
+          userAccountB,
+          this.swapProgramId,
+          this.tokenProgramId
+        )
+      ),
+      user_wallet_signer
+    )
+  }
+
+  static managerClaimInstruction(
+    tokenSwap: PublicKey,
+    authority: PublicKey,
+    user_account_key: PublicKey,
+    fromA: PublicKey,
+    fromB: PublicKey,
+    userAccountA: PublicKey,
+    userAccountB: PublicKey,
+    swapProgramId: PublicKey,
+    tokenProgramId: PublicKey
+  ): TransactionInstruction {
+    const dataLayout = BufferLayout.struct([BufferLayout.u8('instruction')])
+
+    const data = Buffer.alloc(dataLayout.span)
+    dataLayout.encode(
+      {
+        instruction: 5 // Withdraw instruction]
+      },
+      data
+    )
+    const keys = [
+      { pubkey: tokenSwap, isSigner: false, isWritable: true },
+      { pubkey: authority, isSigner: false, isWritable: false },
+      { pubkey: user_account_key, isSigner: true, isWritable: false },
+      { pubkey: fromA, isSigner: false, isWritable: true },
+      { pubkey: fromB, isSigner: false, isWritable: true },
+      { pubkey: userAccountA, isSigner: false, isWritable: true },
+      { pubkey: userAccountB, isSigner: false, isWritable: true },
+      { pubkey: tokenProgramId, isSigner: false, isWritable: false }
+    ]
+    return new TransactionInstruction({
+      keys,
+      programId: swapProgramId,
+      data
+    })
+  }
+
+  /**
+   * claim tokens from the v3 pool
+   *
+   * @param userAccountA User account for token A
+   * @param userAccountB User account for token B
+   * @param poolAccount User account for pool token
+   * @param minimumTokenA The minimum amount of token A to withdraw
+   * @param minimumTokenB The minimum amount of token B to withdraw
+   */
+  async addUserPositionAccount(user_position_account: Account): Promise<TransactionSignature | null> {
+    let user_positon_length = USER_POSITION_LENGTH
+    let user_position_balance = await TokenSwap.getMinBalanceRentForExemptAccount(this.connection, user_positon_length)
+    let transaction = new Transaction()
+    transaction.add(
+      SystemProgram.createAccount({
+        fromPubkey: this.payer.publicKey,
+        newAccountPubkey: user_position_account.publicKey,
+        lamports: user_position_balance,
+        space: user_positon_length,
+        programId: this.swapProgramId
+      }),
+      TokenSwap.addUserPositionInstruction(
+        this.tokenSwap,
+        this.authority,
+        user_position_account.publicKey,
+        this.swapProgramId,
+        this.tokenProgramId
+      )
+    )
+    return await sendAndConfirmTransaction(
+      'AddUserPositionAccount',
+      this.connection,
+      transaction,
+      this.payer,
+      user_position_account
+    )
+  }
+
+  static addUserPositionInstruction(
+    tokenSwap: PublicKey,
+    authority: PublicKey,
+    user_position_key: PublicKey,
+    swapProgramId: PublicKey,
+    tokenProgramId: PublicKey
+  ): TransactionInstruction {
+    const dataLayout = BufferLayout.struct([BufferLayout.u8('instruction')])
+
+    const data = Buffer.alloc(dataLayout.span)
+    dataLayout.encode(
+      {
+        instruction: 6 // Withdraw instruction]
+      },
+      data
+    )
+
+    const keys = [
+      { pubkey: tokenSwap, isSigner: false, isWritable: false },
+      { pubkey: authority, isSigner: false, isWritable: false },
+      { pubkey: user_position_key, isSigner: false, isWritable: true },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false }
     ]
     return new TransactionInstruction({

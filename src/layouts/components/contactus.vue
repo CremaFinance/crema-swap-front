@@ -57,7 +57,7 @@ export default Vue.extend({
 .contactus-icon {
   width: 36px;
   height: 36px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   display: flex;
   align-items: center;

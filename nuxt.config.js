@@ -4,6 +4,10 @@ import path from 'path'
 const lessVariables = lessToJson('src/styles/variables.less')
 
 export default {
+  mode: 'spa',
+  router: {
+    mode: 'hash'
+  },
   server: {
     host: '0.0.0.0'
   },
@@ -48,7 +52,7 @@ export default {
       href: '/favicon.ico?t=5678'
     }],
     script: [{
-      src: '/js/iconfont.js?t=1234567'
+      src: '/js/iconfont.js?t=2345678111'
     }]
   },
 
@@ -79,9 +83,9 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: ['@/plugins/axios.ts', '@/plugins/api.ts', '@/plugins/web3.ts', '@/plugins/notify.ts'],
-  router: {
-    middleware: ['route']
-  },
+  // router: {
+  //   middleware: ['route']
+  // },
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,

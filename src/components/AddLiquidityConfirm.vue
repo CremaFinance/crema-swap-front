@@ -36,7 +36,7 @@
           <div class="coin-pair">
             <img :src="importIcon(`/coins/${secondConfirmData.fromCoin.symbol.toLowerCase()}.png`)" />
             <img :src="importIcon(`/coins/${secondConfirmData.toCoin.symbol.toLowerCase()}.png`)" />
-            <span>{{ secondConfirmData.fromCoin.symbol }} / {{ secondConfirmData.toCoin.symbol }}</span>
+            <span>{{ secondConfirmData.fromCoin.symbol }} - {{ secondConfirmData.toCoin.symbol }}</span>
           </div>
           <StatusBlock :current-status="secondConfirmData.currentStatus" />
           <!-- <div v-if="secondConfirmData.currentStatus === 'Closed'" class="status">Closed</div>
@@ -52,7 +52,7 @@
           </div> -->
         </div>
         <div class="info">
-          <div v-if="!secondConfirmData.showFromCoinLock" class="coin-info-block">
+          <!-- <div v-if="!secondConfirmData.showFromCoinLock" class="coin-info-block">
             <div class="left">
               <img :src="importIcon(`/coins/${secondConfirmData.fromCoin.symbol.toLowerCase()}.png`)" />
               <span>{{ secondConfirmData.fromCoin.symbol }}</span>
@@ -65,6 +65,14 @@
               <span>{{ secondConfirmData.toCoin.symbol }}</span>
             </div>
             <div class="right">{{ secondConfirmData.toCoinAmount }}</div>
+          </div> -->
+          <div class="fee-tier-block">
+            <span>{{ secondConfirmData.fromCoin.symbol }}</span>
+            <span>{{ secondConfirmData.fromCoinAmount || 0 }}</span>
+          </div>
+          <div class="fee-tier-block">
+            <span>{{ secondConfirmData.toCoin.symbol }}</span>
+            <span>{{ secondConfirmData.toCoinAmount || 0 }}</span>
           </div>
           <div class="fee-tier-block">
             <span>Fee Tier</span>
@@ -83,14 +91,28 @@
               }}</span>
             </div>
           </div>
+          <div class="current-price">
+            <!-- <span>Current price</span> -->
+            <div v-if="direct">
+              1 {{ secondConfirmData.fromCoin.symbol }} ≈
+              {{ fixD(secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
+              {{ secondConfirmData.toCoin.symbol }}
+            </div>
+            <div v-else>
+              1 {{ secondConfirmData.toCoin.symbol }} ≈
+              {{ fixD(1 / secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
+              {{ secondConfirmData.fromCoin.symbol }}
+            </div>
+          </div>
           <div class="price-range-block">
             <div class="price-item">
               <div class="title">Min Price</div>
-              <p class="price">{{ decimalFormat(secondConfirmData.minPrice, 6) }}</p>
-              <div class="text" v-if="direct">
+              <p v-if="direct" class="price">{{ decimalFormat(secondConfirmData.minPrice, 6) }}</p>
+              <p v-else class="price">{{ decimalFormat(1 / secondConfirmData.maxPrice, 6) }}</p>
+              <div v-if="direct" class="text">
                 {{ secondConfirmData.fromCoin.symbol }} per {{ secondConfirmData.toCoin.symbol }}
               </div>
-              <div class="text" v-else>
+              <div v-else class="text">
                 {{ secondConfirmData.toCoin.symbol }} per {{ secondConfirmData.fromCoin.symbol }}
               </div>
               <div class="note">
@@ -99,32 +121,24 @@
             </div>
             <div class="price-item">
               <div class="title">Max Price</div>
-              <p class="price">
-                {{ secondConfirmData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(secondConfirmData.maxPrice, 6) }}
+              <p v-if="direct" class="price">
+                {{ secondConfirmData.maxPrice.indexOf('∞') > -1 ? '∞' : decimalFormat(secondConfirmData.maxPrice, 6) }}
               </p>
-              <div class="text" v-if="!direct">
+              <p v-else class="price">
+                {{
+                  secondConfirmData.maxPrice.indexOf('∞') > -1 ? '∞' : decimalFormat(1 / secondConfirmData.minPrice, 6)
+                }}
+              </p>
+              <div v-if="!direct" class="text">
                 {{ secondConfirmData.fromCoin.symbol }} per {{ secondConfirmData.toCoin.symbol }}
               </div>
-              <div class="text" v-else>
+              <div v-else class="text">
                 {{ secondConfirmData.toCoin.symbol }} per {{ secondConfirmData.fromCoin.symbol }}
               </div>
               <div class="note">
                 Your position will be 100% composed of {{ secondConfirmData.toCoin.symbol }} at this price
               </div>
             </div>
-          </div>
-        </div>
-        <div class="current-price">
-          <span>Current price</span>
-          <div v-if="direct">
-            1 {{ secondConfirmData.fromCoin.symbol }} ≈
-            {{ fixD(secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
-            {{ secondConfirmData.toCoin.symbol }}
-          </div>
-          <div v-else>
-            1 {{ secondConfirmData.toCoin.symbol }} ≈
-            {{ fixD(1 / secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
-            {{ secondConfirmData.fromCoin.symbol }}
           </div>
         </div>
 
@@ -292,8 +306,8 @@ export default Vue.extend({
     .modal-header-left {
       display: flex;
       align-items: center;
-      font-size: 18px;
-      font-weight: 500;
+      font-size: 20px;
+      font-weight: 600;
       color: #fff;
       .icon {
         margin-right: 4px;
@@ -302,6 +316,9 @@ export default Vue.extend({
     .icon {
       width: 20px;
       height: 20px;
+      &:hover {
+        fill: rgba(#fff, 0.6);
+      }
     }
   }
   .top {
@@ -312,8 +329,8 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       img {
-        width: 30px;
-        height: 30px;
+        width: 36px;
+        height: 36px;
         border-radius: 100%;
         &:nth-of-type(2) {
           margin-left: -10px;
@@ -321,6 +338,7 @@ export default Vue.extend({
       }
       span {
         font-size: 16px;
+        font-weight: normal;
         margin-left: 10px;
       }
     }
@@ -355,10 +373,11 @@ export default Vue.extend({
 
   .info {
     width: 100%;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 10px;
-    padding: 0px 20px;
+    padding: 0 21px;
     margin-top: 20px;
+    box-shadow: 0px 4px 12px 0px #25282c;
+    border-radius: 10px;
+    border: 1px solid #3f434e;
     .coin-info-block {
       display: flex;
       align-items: center;
@@ -384,20 +403,33 @@ export default Vue.extend({
       }
     }
     .fee-tier-block {
-      margin-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      // margin-top: 14px;
+      // border-top: 1px solid rgba(255, 255, 255, 0.1);
+
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding-top: 16px;
       padding-bottom: 20px;
+      & + .fee-tier-block {
+        // margin-top: 15px;
+      }
+      &:last-child {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
       span {
         color: #fff;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         &:first-child {
-          font-size: 16px;
+          font-size: 14px;
+          font-weight: normal;
         }
         &:last-child {
-          font-size: 20px;
+          font-size: 14px;
+          font-weight: 800;
         }
       }
     }
@@ -415,7 +447,7 @@ export default Vue.extend({
         color: #fff;
       }
       .coin-tab {
-        width: 100px;
+        min-width: 100px;
         height: 28px;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 8px;
@@ -429,8 +461,10 @@ export default Vue.extend({
           color: rgba(255, 255, 255, 0.5);
           height: 100%;
           display: flex;
+          padding: 0 5px;
           align-items: center;
           justify-content: center;
+          cursor: pointer;
           &.active {
             background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
             color: #fff;
@@ -440,17 +474,22 @@ export default Vue.extend({
     }
     .price-range-block {
       display: flex;
-      margin-top: 16px;
+      margin-top: 28px;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0px 4px 12px 0px #25282c;
+      border-radius: 10px;
+      border: 1px solid #3f434e;
+      padding: 0 20px;
       .price-item {
         // width: 221px;
         // flex: 1;
         // height: 140px;
-        & + .price-item {
-          margin-left: 10px;
-        }
-        background: rgba(255, 255, 255, 0.04);
+
+        // & + .price-item {
+        // margin-left: 10px;
+        // }
+        // background: rgba(255, 255, 255, 0.04);
         border-radius: 10px;
         text-align: center;
         font-size: 12px;
@@ -458,7 +497,7 @@ export default Vue.extend({
         .title {
           font-size: 12px;
           color: rgba(255, 255, 255, 0.5);
-          padding-top: 8px;
+          padding-top: 15px;
         }
         .price {
           font-size: 14px;
@@ -488,13 +527,13 @@ export default Vue.extend({
   .current-price {
     display: flex;
     align-items: center;
-    margin-top: 10px;
+    justify-content: flex-end;
+    margin-top: 15px;
     span {
       font-size: 12px;
       color: rgba(255, 255, 255, 0.5);
     }
     div {
-      font-family: 'Arial Bold';
       font-weight: bold;
       font-size: 16px;
       background: linear-gradient(to right, #59bdad, #6676f5, #9a89f9, #eba7ff);

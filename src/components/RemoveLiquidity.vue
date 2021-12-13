@@ -173,6 +173,7 @@ export default Vue.extend({
     },
     setPercent(item: any, index: any) {
       this.amountPercentageIndex = index
+      this.sliderChangeFlag = false
       this.sliderValue = item.value * 100
       const { fromCoinAmount, toCoinAmount } = this.currentData
       if (fromCoinAmount && toCoinAmount) {

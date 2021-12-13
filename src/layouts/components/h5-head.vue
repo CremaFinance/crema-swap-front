@@ -24,13 +24,23 @@
           <img src="@/assets/images/icon-Trading@2x.png" alt="" />
           <span>Trading</span>
         </li>
-        <li :class="{ active: $route.name === 'swap' || $route.name === 'index' }" @click="goUrl('swap')">
+        <li :class="{ active: $route.name === 'swap' }" @click="goUrl('swap')">
           <img src="@/assets/images/icon-Swap@2x.png" alt="" />
           <span>Swap</span>
         </li>
         <li class="have-sub-menu" @click="goUrl('pool')">
           <div
-            :class="{ active: $route.name === 'liquidity' || $route.name === 'pool', title: true }"
+            :class="{
+              active:
+                $route.name === 'liquidity' ||
+                $route.name === 'pool' ||
+                $route.name === 'index' ||
+                $route.path === '/position' ||
+                $route.name === 'increase-id' ||
+                $route.name === 'remove-id' ||
+                $route.name === 'detail-id',
+              title: true
+            }"
             @click="liquiditySubMenuIsShow = !liquiditySubMenuIsShow"
           >
             <!-- <svg class="icon" aria-hidden="true">
@@ -139,11 +149,11 @@ export default {
 .h5-head-container {
   width: 100%;
   position: relative;
-  background: #071020;
+  // background: #071020;
   .top {
     width: 100%;
     height: 60px;
-    background: #071020;
+    // background: #071020;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -40,7 +40,7 @@ export default Vue.extend({
 .deta-block-status {
   // position: relative;
   cursor: pointer;
-  width: 100px;
+  // width: 100px;
   height: 28px;
   display: flex;
   align-items: center;
@@ -48,6 +48,7 @@ export default Vue.extend({
   background: rgba(#fff, 0.1);
   border-radius: 8px;
   text-align: center;
+  padding: 0 12px;
   div {
     display: flex;
     align-items: center;
@@ -62,14 +63,15 @@ export default Vue.extend({
   svg {
     width: 20px;
     height: 20px;
+    fill: #fff;
   }
   span {
-    width: 63px;
-    height: 28px;
-    line-height: 28px;
-    font-size: 15px;
-    font-family: 'Arial Bold';
+    // width: 63px;
+    // height: 28px;
+    // line-height: 28px;
+    font-size: 14px;
     font-weight: bold;
+    margin-left: 8px;
   }
 }
 

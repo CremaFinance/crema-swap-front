@@ -19,14 +19,13 @@
             </div>
           </div>
           <div class="symbol-right">
-            <div class="open-or-close" :class="index !== 0 ? 'open-or-close-disabled' : ''">
+            <div
+              class="open-or-close"
+              :class="index !== 0 ? 'open-or-close-disabled' : ''"
+              @click="updateIsShowTableTr(index)"
+            >
               Details
-              <svg
-                class="icon"
-                :class="isShowTableTr == index ? 'icon-open' : ''"
-                aria-hidden="true"
-                @click="updateIsShowTableTr(index)"
-              >
+              <svg class="icon" :class="isShowTableTr == index ? 'icon-open' : ''" aria-hidden="true">
                 <use xlink:href="#icon-icon-on"></use>
               </svg>
             </div>
@@ -35,7 +34,7 @@
         <div class="trade-info">
           <div class="trade-info-item">
             <div class="trade-info-title">APR</div>
-            <div class="trade-info-text">{{ item.apr }}%</div>
+            <div class="trade-info-text">{{ item.apr }}</div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Liquidity</div>

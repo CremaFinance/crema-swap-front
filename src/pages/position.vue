@@ -5,22 +5,13 @@
       <div class="btn-list">
         <button>
           <div @click="gotoPool">
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-a-icon-AddCustomMarket"></use>
-            </svg>
-            <span>New Position</span>
+            <span>Add Liquidity</span>
           </div>
         </button>
-        <!-- <button> -->
-        <!-- <div>
-          <CheckBox v-model="isShowClosedPositions">Show closed positions</CheckBox>
-        </div> -->
-        <!-- </button> -->
       </div>
     </div>
-    <div v-if="list.length > 0" class="position-list">
+    <div v-if="wallet.connected && list.length > 0" class="position-list">
       <PositionBlock v-for="(item, index) in list" :key="index" :p-item="item"></PositionBlock>
-      <!-- <PositionBlock btn-type="closed"></PositionBlock> -->
     </div>
     <div v-else class="no-data">
       <img src="../assets/images/icon_NoDate@2x.png" />
@@ -35,23 +26,30 @@ import { mapState } from 'vuex'
 export default Vue.extend({
   data() {
     return {
-      isShowClosedPositions: false
+      isShowClosedPositions: false,
+      list: [],
+      isLoading: true
     }
   },
   computed: {
-    ...mapState(['position']),
-    list() {
-      return this.$data && this.$data.isShowClosedPositions
-        ? this.position.myPositions
-        : this.position.myPositions.filter((posions: any) => {
-            return posions.liquity > 0
-          })
+    ...mapState(['wallet', 'liquidity'])
+  },
+  watch: {
+    'liquidity.myPositions': {
+      handler: 'watchMyPositions',
+      immediate: true
     }
+    // 'wallet.tokenAccount': {
+
+    // }
   },
   mounted() {},
   methods: {
     gotoPool() {
       this.$router.push('/pool')
+    },
+    watchMyPositions(list: any) {
+      this.list = list
     }
   }
 })
@@ -66,39 +64,25 @@ export default Vue.extend({
     align-items: center;
     justify-content: space-between;
     > span {
-      font-size: 24px;
+      font-size: 20px;
       color: #fff;
     }
     .btn-list {
       display: flex;
       align-items: center;
       button {
-        padding: 1px;
-        border-radius: 4px;
         background: none;
-        // margin-right: 11px;
         > div {
-          height: 28px;
-          padding: 0px 16px;
+          width: 118px;
+          height: 22px;
+          background: linear-gradient(270deg, #5fe6d0 0%, #60b2f1 33%, #9380ff 68%, #e590ff 100%);
+          border-radius: 7px;
           font-size: 14px;
           color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #33383b;
-          border: none;
-          position: relative;
-          z-index: 1;
-          border-radius: 4px;
-          > svg {
-            width: 16px;
-            height: 16px;
-            fill: rgba(255, 255, 255, 0.5);
-            margin-right: 4px;
+          font-weight: 600;
+          &:hover {
+            background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
           }
-        }
-        &:hover {
-          background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
         }
       }
     }
@@ -130,10 +114,8 @@ export default Vue.extend({
     padding: 20px 16px 0;
     .position-title {
       display: block;
-      span {
-        font-size: 16px;
-      }
       .btn-list {
+        justify-content: flex-end;
         margin-top: 20px;
       }
     }

@@ -10,13 +10,21 @@
           <img src="../../assets/images/icon-Trading@2x.png" />
           <span>Trading</span>
         </a>
-        <nuxt-link to="/swap">
+        <nuxt-link to="/swap" :class="$route.path === '/swap' ? 'nuxt-link-exact-active nuxt-link-active' : ''">
           <img src="../../assets/images/icon-Swap@2x.png" />
           <span>Swap</span>
         </nuxt-link>
         <nuxt-link
           to="/pool"
-          :class="$route.path === '/' || $route.path === '/pool' ? 'nuxt-link-exact-active nuxt-link-active' : ''"
+          :class="
+            $route.path === '/' ||
+            $route.path === '/position' ||
+            $route.name === 'increase-id' ||
+            $route.name === 'remove-id' ||
+            $route.name === 'detail-id'
+              ? 'nuxt-link-exact-active nuxt-link-active'
+              : ''
+          "
         >
           <img src="../../assets/images/icon-Pools@2x.png" />
           <span>Pools</span>
@@ -45,10 +53,33 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 import Contactus from './contactus.vue'
+import { checkNullObj } from '@/utils'
+
 export default Vue.extend({
   components: {
     Contactus
+  },
+  computed: {
+    ...mapState(['wallet', 'position', 'liquidity']),
+    liquidityInfosAndWalletTokenAccount() {
+      return {
+        infos: this.liquidity.infos,
+        tokenAccounts: this.wallet.tokenAccounts
+      }
+    }
+  },
+  watch: {
+    liquidityInfosAndWalletTokenAccount: {
+      handler(_newObj: any, _oldObj: any) {
+        const { infos, tokenAccounts } = _newObj
+        if (!checkNullObj(infos) && !checkNullObj(tokenAccounts)) {
+          this.$accessor.liquidity.getMyPositions(tokenAccounts)
+        }
+      },
+      deep: true
+    }
   },
   mounted() {
     console.log(this.$route.path, 'this.$route.path##')
@@ -66,8 +97,9 @@ console.log()
   height: 100px;
   // margin: 0px 40px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: #1b2023;
+  background: #22252b;
   > .left {
+    flex: 1;
     display: flex;
     align-items: center;
   }
@@ -83,8 +115,10 @@ console.log()
     }
   }
   nav {
+    flex: 1;
     display: flex;
     align-items: center;
+    justify-content: center;
     .nuxt-link-active {
       span {
         color: #fff !important;
@@ -94,13 +128,13 @@ console.log()
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 120px;
+      min-width: 94px;
       height: 36px;
       position: relative;
       z-index: 1;
-      background: #1b2023;
+      // background: #1b2023;
       border-radius: 8px;
-      margin-left: 10px;
+      margin: 0px 8px;
       span {
         color: rgba(255, 255, 255, 0.5);
         margin-left: 10px;
@@ -123,12 +157,16 @@ console.log()
       &::before {
         content: '';
         display: none;
-        width: 122px;
-        height: 38px;
-        background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
+        // width: 122px;
+        // height: 38px;
+        // background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
+        background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
+        box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+        border-radius: 10px;
+        border: 1px solid #3f434e;
         position: absolute;
         z-index: -2;
-        border-radius: 8px;
+        // border-radius: 8px;
       }
       &::before {
         width: 100%;

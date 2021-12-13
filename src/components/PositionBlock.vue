@@ -3,11 +3,14 @@
     <div class="left">
       <div class="pos-info">
         <div class="icon-box">
-          <img :src="importIcon(`/coins/${pItem.coin.symbol.toLowerCase()}.png`)" />
-          <img :src="importIcon(`/coins/${pItem.pc.symbol.toLowerCase()}.png`)" />
+          <img :src="importIcon(`/coins/${pItem.poolInfo.coin.symbol.toLowerCase()}.png`)" />
+          <img :src="importIcon(`/coins/${pItem.poolInfo.pc.symbol.toLowerCase()}.png`)" />
+          <div class="name">{{ pItem.poolInfo.name }}</div>
         </div>
-        <div class="name">{{ pItem.name }}</div>
-        <!-- <div class="fee">0.3%</div> -->
+        <div class="fee">{{ pItem.poolInfo.feeView }}%</div>
+      </div>
+      <div class="h5-right right">
+        <StatusBlock :current-status="getCurrentStatus(pItem)" />
       </div>
       <div class="min-and-max">
         <p>
@@ -23,8 +26,8 @@
         </p>
       </div>
     </div>
-    <div class="right">
-      <StatusBlock :current-status="getCurrentStatus(pItem)" />
+    <div class="pc-right right">
+      <StatusBlock :current-status="getCurrentStatus(pItem)" @click.stop="" />
     </div>
   </div>
 </template>
@@ -65,8 +68,8 @@ export default Vue.extend({
       if (!pItem.liquity) {
         return 'Closed'
       } else if (
-        (Number(pItem.currentPrice) >= Number(pItem.minPrice) &&
-          Number(pItem.currentPrice) <= Number(pItem.maxPrice)) ||
+        (Number(pItem.poolInfo.currentPriceView) >= Number(pItem.minPrice) &&
+          Number(pItem.poolInfo.currentPriceView) <= Number(pItem.maxPrice)) ||
         (!Number(pItem.minPrice) && isNaN(Number(pItem.maxPrice)))
       ) {
         return 'Active'
@@ -78,18 +81,26 @@ export default Vue.extend({
 })
 </script>
 <style lang="less" scoped>
+.pc-right {
+  display: block;
+}
+.h5-right {
+  display: none;
+}
 .position-block {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 20px;
-  // height: 104px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 30px;
-  padding: 23px 20px;
+  height: 110px;
+  background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+  border-radius: 20px;
+  border: 1px solid #565c6a;
+  padding: 20px;
+  padding-right: 40px;
   cursor: pointer;
+  margin-top: 20px;
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
   }
   // filter: blur(50px);
   > .left {
@@ -97,12 +108,14 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       .icon-box {
+        display: flex;
+        align-items: center;
         img {
           width: 30px;
           height: 30px;
           border-radius: 100%;
-          &:last-child {
-            margin-left: -14px;
+          & + img {
+            margin-left: -4px;
           }
         }
       }
@@ -129,7 +142,7 @@ export default Vue.extend({
       align-items: center;
       margin-top: 12px;
       p {
-        font-size: 14px;
+        font-size: 12px;
         color: #fff;
         margin: 0px;
         span {
@@ -191,10 +204,23 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 750px) {
+  .pc-right {
+    display: none;
+  }
+  .h5-right {
+    display: flex;
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
   .position-block {
-    padding: 14px 14px 20px;
+    padding: 14px;
+    height: 100%;
     > .left {
+      width: 100%;
       .pos-info {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
         .icon-box {
           img {
             width: 20px;
@@ -208,9 +234,12 @@ export default Vue.extend({
       .min-and-max {
         display: block;
         text-align: center;
+        p {
+          font-size: 14px;
+        }
         svg {
-          margin: 10px 0;
           transform: rotate(90deg);
+          margin: 20px 0;
         }
       }
     }

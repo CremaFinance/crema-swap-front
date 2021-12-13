@@ -1,8 +1,12 @@
 <template>
-  <Modal title="Select a token" centered :visible="true" :footer="null" @cancel="$emit('onClose')">
+  <Modal title="Select a token" :width="400" centered :visible="true" :footer="null" @cancel="$emit('onClose')">
     <div class="coin-select-modal">
       <div class="search-input">
-        <input v-model="keyword" placeholder="Enter the token symbol or address" />
+        <input
+          v-model="keyword"
+          onkeyup="value=value.replace(/[^A-Za-z0-9]+$/g,'')"
+          placeholder="Enter the token symbol or address"
+        />
       </div>
       <div class="coin-list-box">
         <ul v-if="tokenList && tokenList.length > 0" class="coin-list">
@@ -10,7 +14,7 @@
             v-for="(item, index) in tokenList"
             :key="index"
             :class="item.unusable ? 'unusable' : ''"
-            @click="$emit('onSelect', item)"
+            @click="toSelect(item)"
           >
             <div class="left">
               <img :src="importIconNew(`/coins/${item.symbol.toLowerCase()}.png`)" />
@@ -54,6 +58,10 @@ export default Vue.extend({
     existingCoins: {
       type: String,
       default: ''
+    },
+    lastSelectCoin: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -63,7 +71,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['wallet'])
+    ...mapState(['wallet', 'liquidity'])
   },
   watch: {
     keyword(newKeyword) {
@@ -74,12 +82,21 @@ export default Vue.extend({
         this.createTokenList()
       },
       deep: true
+    },
+    'liquidity.infos': {
+      handler(_newTokenAccounts: any, _oldTokenAccounts: any) {
+        this.createTokenList()
+      },
+      deep: true
     }
   },
   mounted() {
     this.createTokenList()
   },
   methods: {
+    toSelect(item: any, oldItem: any) {
+      this.$emit('onSelect', item)
+    },
     importIconNew(path: string) {
       try {
         return require(`../assets${path}`)
@@ -98,33 +115,36 @@ export default Vue.extend({
 
       let tokenObject: any = {}
       const usableTokenObject: any = {} // 可以配对的币种
-      if (this.existingCoins) {
-        for (const coinPair in LIQUIDITY_POOLS) {
-          const poolInfo = cloneDeep(LIQUIDITY_POOLS[coinPair])
-          if (poolInfo.coin.symbol === this.existingCoins) {
-            usableTokenObject[poolInfo.pc.symbol] = poolInfo.pc
-          }
+      // if (this.existingCoins) {
+      //   for (const coinPair in this.liquidity.infos) {
+      //     const poolInfo = cloneDeep(this.liquidity.infos[coinPair])
+      //     if (poolInfo.coin.symbol === this.existingCoins) {
+      //       usableTokenObject[poolInfo.pc.symbol] = poolInfo.pc
+      //     }
 
-          if (poolInfo.pc.symbol === this.existingCoins) {
-            usableTokenObject[poolInfo.coin.symbol] = poolInfo.coin
-          }
-        }
-      }
+      //     if (poolInfo.pc.symbol === this.existingCoins) {
+      //       usableTokenObject[poolInfo.coin.symbol] = poolInfo.coin
+      //     }
+      //   }
+      // }
+
       // else {
       //   tokenObject = cloneDeep(TOKENS)
       // }
       tokenObject = cloneDeep(TOKENS)
 
-      for (const symbol of Object.keys(tokenObject)) {
-        let tokenInfo: any = cloneDeep(tokenObject[symbol])
-
-        if (this.existingCoins && !usableTokenObject[symbol]) {
+      for (const address of Object.keys(tokenObject)) {
+        let tokenInfo: any = cloneDeep(tokenObject[address])
+        // if (this.existingCoins && !usableTokenObject[address]) {
+        //   tokenInfo.unusable = true
+        // }
+        if (this.lastSelectCoin && tokenInfo.symbol === this.lastSelectCoin) {
           tokenInfo.unusable = true
         }
 
         if (!tokenInfo.showDefault) continue
 
-        tokenInfo.symbol = symbol
+        // tokenInfo.symbol = symbol
 
         const tokenAccount = this.wallet.tokenAccounts[tokenInfo.mintAddress]
 
@@ -156,28 +176,25 @@ export default Vue.extend({
       // 暂时没有sol相关交易对，先注释了
       tokenList = [...hasBalance, ...noBalance]
 
+      // if (keyword) {
+      //   tokenList = tokenList.filter(
+      //     (token) => token.symbol.includes(keyword.toUpperCase()) || token.mintAddress.includes(keyword.toUpperCase())
+      //   )
+      // }
+
       if (keyword) {
-        tokenList = tokenList.filter((token) => token.symbol.includes(keyword.toUpperCase()))
+        tokenList = tokenList.filter((token: any) => {
+          return (
+            token.symbol.includes(keyword.toUpperCase()) ||
+            // eslint-disable-next-line unicorn/prefer-includes
+            token.mintAddress.toUpperCase().indexOf(keyword.toUpperCase()) >= 0
+          )
+        })
       }
 
+      console.log('new###CoinSelect###tokenList####', tokenList)
+
       this.tokenList = cloneDeep(tokenList)
-
-      // const resultObj: any = {}
-      // if (this.existingCoins) {
-      //   for (const coinPair in LIQUIDITY_POOLS) {
-      //     const poolInfo = cloneDeep(LIQUIDITY_POOLS[coinPair])
-      //     if (poolInfo.coin.symbol === this.existingCoins && tokenList.includes(poolInfo.pc)) {
-      //       resultObj[poolInfo.pc.symbol] = poolInfo.pc
-      //     }
-
-      //     if (poolInfo.pc.symbol === this.existingCoins && tokenList.includes(poolInfo.coin)) {
-      //       resultObj[poolInfo.coin.symbol] = poolInfo.coin
-      //     }
-      //   }
-      //   this.tokenList = cloneDeep(Object.values(resultObj))
-      // } else {
-      //   this.tokenList = cloneDeep(tokenList)
-      // }
     }
   }
 })
@@ -185,15 +202,16 @@ export default Vue.extend({
 <style lang="less" scoped>
 .coin-select-modal {
   .search-input {
-    background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
-    width: 100%;
-    height: 48px;
-    padding: 1px;
+    background: #23262b;
+    box-shadow: 0px 2px 3px 1px #1a1c1f;
     border-radius: 10px;
+    width: 100%;
+    height: 60px;
+    padding: 1px;
     input {
       width: 100%;
       height: 100%;
-      background: #1a1e21;
+      background: transparent;
       border-radius: 10px;
       font-size: 14px;
       border: none;
@@ -214,6 +232,7 @@ export default Vue.extend({
         justify-content: space-between;
         font-size: 14px;
         color: #fff;
+        cursor: pointer;
         .left {
           display: flex;
           align-items: center;

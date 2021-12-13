@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <Modal :visible="wallet.modalShow" :footer="null" centered @cancel="$accessor.wallet.closeModal">
+    <Modal :width="400" :visible="wallet.modalShow" :footer="null" centered @cancel="$accessor.wallet.closeModal">
       <template slot="closeIcon">
         <svg class="icon modal-icon-close" aria-hidden="true">
           <use xlink:href="#icon-icon-close"></use>
@@ -42,40 +42,53 @@
         <p v-if="!wallet.connected" class="wallet-sub-title">Please select a wallet to connect to this dapp:</p>
         <h3 v-if="wallet.connected" class="wallet-title">Account</h3>
       </template>
-      <ul v-if="!wallet.connected" class="select-wallet">
-        <li v-for="(providerUrl, name) in wallets" :key="name" class="wallet-item" ghost @click="connect(name)">
+      <div v-if="!wallet.connected" class="select-wallet">
+        <button
+          v-for="(info, name) in wallets"
+          :key="name"
+          :disabled="isLoading"
+          class="wallet-item"
+          ghost
+          @click="connect(name, info)"
+        >
           <!-- <div> -->
           <img :src="importIcon(`/wallets/${name.replace(' ', '-').toLowerCase()}.png`)" />
           <span>{{ name }}</span>
           <!-- </div> -->
-        </li>
-      </ul>
+        </button>
+      </div>
       <div v-else class="wallet-info">
         <div class="platform">Connected with {{ wallet.platform }}</div>
         <p class="address">
           {{ wallet.address && wallet.address.substr(0, 7) }}
           ...
           {{ wallet.address && wallet.address.substr(wallet.address.length - 4, 4) }}
+          <svg class="icon" aria-hidden="true" @click="$accessor.copy(wallet.address)">
+            <use xlink:href="#icon-icon_copy"></use>
+          </svg>
         </p>
         <div class="copy-and-view">
-          <a class="copy" @click="$accessor.copy(wallet.address)">
+          <!-- <a class="copy" @click="$accessor.copy(wallet.address)">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#iconicon_copy"></use>
             </svg>
             <span>Copy Address</span>
-          </a>
+          </a> -->
           <a class="view" target="_blank" :href="`https://explorer.solana.com//address/${wallet.address}`">
-            <svg class="icon" aria-hidden="true">
+            <!-- <svg class="icon" aria-hidden="true">
               <use xlink:href="#iconicon_The_top_right"></use>
-            </svg>
+            </svg> -->
             <span>View on explorer</span>
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-icon-Jump"></use>
+            </svg>
           </a>
         </div>
         <div class="btn-box">
-          <div class="disconnect-btn-box">
-            <Button class="disconnect-btn" ghost @click="disconnect"> DISCONNECT </Button>
+          <Button class="disconnect-btn" ghost @click="disconnect"> Disconnect </Button>
+          <div class="switch-wallet-btn-box">
+            <Button class="switch-wallet-btn" @click="disconnect"> Switch Wallet </Button>
           </div>
-          <Button class="switch-wallet-btn" ghost @click="disconnect"> Switch Wallet </Button>
         </div>
       </div>
     </Modal>
@@ -92,17 +105,46 @@ import SolanaWalletAdapter from '@project-serum/sol-wallet-adapter'
 import importIcon from '@/utils/import-icon'
 import logger from '@/utils/logger'
 import { web3Config, commitment } from '@/utils/web3'
-import {
-  WalletAdapter,
-  SolongWalletAdapter,
-  MathWalletAdapter,
-  PhantomWalletAdapter,
-  BloctoWalletAdapter,
-  LedgerWalletAdapter
-} from '@/wallets'
+// import {
+//   WalletAdapter,
+//   SolongWalletAdapter,
+//   MathWalletAdapter,
+//   PhantomWalletAdapter,
+//   BloctoWalletAdapter,
+//   LedgerWalletAdapter
+// } from '@/wallets'
+import { WalletAdapter } from '@solana/wallet-adapter-base'
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
+import { SolongWalletAdapter } from '@solana/wallet-adapter-solong'
+import { MathWalletWalletAdapter } from '@solana/wallet-adapter-mathwallet'
+import { SolletWalletAdapter } from '@solana/wallet-adapter-sollet'
+import { LedgerWalletAdapter, getDerivationPath } from '@solana/wallet-adapter-ledger'
+import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare'
+import { Coin98WalletAdapter } from '@solana/wallet-adapter-coin98'
+import { SlopeWalletAdapter } from '@solana/wallet-adapter-slope'
+import { SafePalWalletAdapter } from '@solana/wallet-adapter-safepal'
+import { BloctoWalletAdapter } from '@solana/wallet-adapter-blocto'
+import { BitpieWalletAdapter } from '@solana/wallet-adapter-bitpie'
+import LocalStorage from '@/utils/local-storage'
+import { getUnixTs } from '@/utils'
+
+import { debounce, throttle } from 'lodash-es'
 
 // fix: Failed to resolve directive: ant-portal
 Vue.use(Modal)
+
+interface WalletInfo {
+  // official website
+  website: string
+  // provider url for web wallet
+  providerUrl?: string
+  // chrome extension install url
+  chromeUrl?: string
+  // firefox extension install url
+  firefoxUrl?: string
+  // isExtension: boolean
+  getAdapter: (providerUrl?: string) => WalletAdapter
+}
 
 interface Wallets {
   [key: string]: string
@@ -117,21 +159,117 @@ interface Wallets {
 })
 export default class Wallet extends Vue {
   /* ========== DATA ========== */
-  wallets = {
-    Phantom: '',
-    Sollet: 'https://www.sollet.io',
-    'Sollet Extension': '',
-    Ledger: '',
-    Solong: '',
-    // TrustWallet: '',
-    MathWallet: '',
-    Blocto: '',
-    // Solflare: 'https://solflare.com/access-wallet',
-    Bonfida: 'https://bonfida.com/wallet'
-    // https://docs.coin98.app/coin98-extension/developer-guide
-    // Coin98: ''
-    // ezDeFi: '',
-  } as Wallets
+  // TrustWallet ezDeFi
+  wallets: { [key: string]: WalletInfo } = {
+    Phantom: {
+      website: 'https://phantom.app',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa',
+      getAdapter() {
+        return new PhantomWalletAdapter()
+      }
+    },
+    'Solflare Extension': {
+      website: 'https://solflare.com',
+      firefoxUrl: 'https://addons.mozilla.org/en-US/firefox/addon/solflare-wallet',
+      getAdapter() {
+        return new SolflareWalletAdapter()
+      }
+    },
+    'Sollet Web': {
+      website: 'https://www.sollet.io',
+      providerUrl: 'https://www.sollet.io',
+      getAdapter(providerUrl) {
+        return new SolletWalletAdapter({ provider: providerUrl })
+      }
+    },
+    'Sollet Extension': {
+      website: 'https://www.sollet.io',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/sollet/fhmfendgdocmcbmfikdcogofphimnkno',
+      getAdapter() {
+        return new SolletWalletAdapter({ provider: (window as any).sollet })
+      }
+    },
+    Ledger: {
+      website: 'https://www.ledger.com',
+      getAdapter() {
+        return new LedgerWalletAdapter({ derivationPath: getDerivationPath() })
+      }
+    },
+    // MathWallet: {
+    //   website: 'https://mathwallet.org',
+    //   chromeUrl: 'https://chrome.google.com/webstore/detail/math-wallet/afbcbjpbpfadlkmhmclhkeeodmamcflc',
+    //   getAdapter() {
+    //     return new MathWalletWalletAdapter()
+    //   }
+    // },
+    Solong: {
+      website: 'https://solongwallet.com',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/solong/memijejgibaodndkimcclfapfladdchj',
+      getAdapter() {
+        return new SolongWalletAdapter()
+      }
+    },
+    Coin98: {
+      website: 'https://www.coin98.com',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/coin98-wallet/aeachknmefphepccionboohckonoeemg',
+      getAdapter() {
+        return new Coin98WalletAdapter()
+      }
+    },
+    Blocto: {
+      website: 'https://blocto.portto.io',
+      getAdapter() {
+        return new BloctoWalletAdapter()
+      }
+    },
+    Safepal: {
+      website: 'https://safepal.io',
+      getAdapter() {
+        return new SafePalWalletAdapter()
+      }
+    },
+    Slope: {
+      website: 'https://slope.finance',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/slope-finance-wallet/pocmplpaccanhmnllbbkpgfliimjljgo',
+      getAdapter() {
+        return new SlopeWalletAdapter()
+      }
+    },
+    Bitpie: {
+      website: 'https://bitpie.com',
+      getAdapter() {
+        return new BitpieWalletAdapter()
+      }
+    },
+    // Torus: {
+    //   website: 'https://tor.us',
+    //   getAdapter() {
+    //     return new TorusWalletAdapter({
+    //       options: {
+    //         clientId: ''
+    //       }
+    //     })
+    //   }
+    // },
+    'Solflare Web': {
+      website: 'https://solflare.com',
+      providerUrl: 'https://solflare.com/access-wallet',
+      getAdapter(providerUrl) {
+        return new SolletWalletAdapter({ provider: providerUrl })
+      }
+    }
+  }
+
+  isDisConnect: boolean = false
+  isLoading: boolean = false
+
+  connectingWallet = {
+    name: null as string | null,
+    adapter: null as WalletAdapter | null
+  }
+
+  // autoConnect
+  lastWalletName = LocalStorage.get('WALLET_NAME')
 
   // auto refresh
   walletTimer: number | undefined = undefined
@@ -139,49 +277,70 @@ export default class Wallet extends Vue {
   liquidityTimer: number | undefined = undefined
   farmTimer: number | undefined = undefined
   idoTimer: number | undefined = undefined
+  fetchTransactionsTimer: number | undefined = undefined
   // web3 listener
   walletListenerId = null as number | null
+
+  debugCount = 0
 
   /* ========== COMPUTED ========== */
   get wallet() {
     return this.$accessor.wallet
   }
 
-  get price() {
-    return this.$accessor.price
-  }
+  // get price() {
+  //   return this.$accessor.price
+  // }
 
   get liquidity() {
     return this.$accessor.liquidity
   }
 
-  get farm() {
-    return this.$accessor.farm
-  }
+  // get farm() {
+  //   return this.$accessor.farm
+  // }
 
   // get ido() {
   //   return this.$accessor.ido
   // }
 
+  // // history
+  get historyList() {
+    const rawList = Object.entries(this.$accessor.transaction.history[this.$accessor.wallet.address] ?? {}).map(
+      ([txid, txInfo]) => ({
+        ...(txInfo as any),
+        txid
+      })
+    )
+    return rawList.sort((a, b) => {
+      return (b.time || b.t) - (a.time || a.t)
+    })
+  }
+
   /* ========== LIFECYCLE ========== */
   async beforeMount() {
-    await this.$accessor.price.requestPrices()
-    // await this.$accessor.swap.getMarkets()
+    // await this.$accessor.price.requestPrices()
     await this.$accessor.liquidity.requestInfos()
+    // await this.$accessor.swap.getMarkets()
     // await this.$accessor.farm.requestInfos()
-    // this.setWalletTimer()
+
+    this.setWalletTimer()
     // this.setPriceTimer()
-    // this.setLiquidityTimer()
+    this.setLiquidityTimer()
     // this.setFarmTimer()
     // this.setIdoTimer()
   }
 
+  mounted() {
+    this.autoConnect()
+  }
+
   beforeDestroy() {
     window.clearInterval(this.walletTimer)
-    window.clearInterval(this.priceTimer)
+    // window.clearInterval(this.priceTimer)
     window.clearInterval(this.liquidityTimer)
-    window.clearInterval(this.farmTimer)
-    window.clearInterval(this.idoTimer)
+    // window.clearInterval(this.farmTimer)
+    // window.clearInterval(this.idoTimer)
   }
 
   /* ========== WATCH ========== */
@@ -189,127 +348,66 @@ export default class Wallet extends Vue {
   /* ========== METHODS ========== */
   importIcon = importIcon
 
-  connect(walletName: string) {
-    let wallet: WalletAdapter
-    const { rpcs } = web3Config
-    const endpoint = rpcs[0]
-
-    switch (walletName) {
-      case 'Ledger': {
-        wallet = new LedgerWalletAdapter()
-        break
-      }
-      case 'Sollet Extension': {
-        if ((window as any).sollet === undefined) {
-          this.$notify.error({
-            message: 'Connect wallet failed',
-            description: 'Please install and initialize Sollet wallet extension first',
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-          })
-          return
-        }
-
-        wallet = new SolanaWalletAdapter((window as any).sollet, endpoint)
-        break
-      }
-      case 'Solong': {
-        if ((window as any).solong === undefined) {
-          this.$notify.error({
-            message: 'Connect wallet failed',
-            description: 'Please install and initialize Solong wallet extension first',
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-          })
-          return
-        }
-
-        wallet = new SolongWalletAdapter()
-        break
-      }
-      case 'MathWallet': {
-        if ((window as any).solana === undefined || !(window as any).solana.isMathWallet) {
-          this.$notify.error({
-            message: 'Connect wallet failed',
-            description: 'Please install and initialize Math wallet extension first',
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-          })
-          return
-        }
-
-        wallet = new MathWalletAdapter()
-        break
-      }
-      case 'Phantom': {
-        if ((window as any).solana === undefined || !(window as any).solana.isPhantom) {
-          this.$notify.error({
-            message: 'Connect wallet failed',
-            description: 'Please install and initialize Phantom wallet extension first',
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-          })
-          return
-        }
-
-        wallet = new PhantomWalletAdapter()
-        break
-      }
-      case 'Blocto': {
-        if ((window as any).solana === undefined || !(window as any).solana.isBlocto) {
-          this.$notify.error({
-            message: 'Connect wallet failed',
-            description: 'Please install and open Blocto app first',
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-          })
-          return
-        }
-
-        wallet = new BloctoWalletAdapter()
-        break
-      }
-      default: {
-        wallet = new SolanaWalletAdapter(this.wallets[walletName], endpoint)
-        break
+  autoConnect() {
+    console.log('进来了几次####autoConnect')
+    const name = this.lastWalletName
+    if (name && !this.$accessor.wallet.connected) {
+      const info = this.wallets[name]
+      if (info) {
+        this.connect(name, info)
       }
     }
+  }
 
-    wallet.on('connect', () => {
-      this.$accessor.wallet.closeModal().then(() => {
-        if (wallet.publicKey) {
-          Vue.prototype.$wallet = wallet
-          this.$accessor.wallet.setConnected({ address: wallet.publicKey.toBase58(), platform: walletName })
+  onConnect() {
+    const { name, adapter } = this.connectingWallet
+    this.isLoading = false
+    this.$accessor.wallet.closeModal().then(() => {
+      if (adapter && adapter.publicKey) {
+        // mock wallet
+        // const address = new PublicKey('')
+        // Vue.prototype.$wallet = {
+        //   connected: true,
+        //   publicKey: address,
+        //   signTransaction: (transaction: any) => {
+        //     console.log(transaction)
+        //   }
+        // }
+        // this.$accessor.wallet.setConnected(address.toBase58())
 
-          this.subWallet()
-          this.$notify.success({
-            message: 'Wallet connected',
-            description: '',
-            class: 'success',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Copied@2x.png' } })
-          })
-        }
-      })
+        Vue.prototype.$wallet = adapter
+        // this.$accessor.wallet.setConnected(adapter.publicKey.toBase58())
+        this.$accessor.wallet.setConnected({ address: adapter.publicKey.toBase58(), platform: name })
+
+        this.subWallet()
+        this.$notify.success({
+          message: 'Wallet connected',
+          description: `Connect to ${name}`
+        })
+
+        LocalStorage.set('WALLET_NAME', name)
+      }
     })
+  }
 
-    wallet.on('disconnect', () => {
+  onDisconnect() {
+    this.isLoading = false
+    if (!this.isDisConnect) {
       this.disconnect()
-    })
-
-    try {
-      wallet.connect()
-    } catch (error) {
-      this.$notify.error({
-        message: 'Connect wallet failed',
-        description: error && error.message,
-        class: 'error',
-        icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
-      })
     }
   }
 
   disconnect() {
-    Vue.prototype.$wallet.disconnect()
+    this.isDisConnect = true
+    this.connectingWallet = {
+      name: null,
+      adapter: null
+    }
+
+    try {
+      Vue.prototype.$wallet.disconnect()
+    } catch (error) {}
+
     Vue.prototype.$wallet = null
 
     this.unsubWallet()
@@ -317,9 +415,99 @@ export default class Wallet extends Vue {
     this.$accessor.wallet.setDisconnected()
     this.$notify.warning({
       message: 'Wallet disconnected',
-      description: '',
-      icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
+      description: ''
     })
+  }
+
+  onWalletError(error: Error) {
+    console.log('是走到这里了么###error####', error)
+    const { name } = this.connectingWallet
+    this.isLoading = false
+
+    if (name) {
+      const info = this.wallets[name]
+
+      if (info) {
+        const { website, chromeUrl, firefoxUrl } = info
+
+        if (['WalletNotFoundError', 'WalletNotInstalledError', 'WalletNotReadyError'].includes(error.name)) {
+          console.log('进到这里了吗34334###')
+          const errorName = error.name
+            .replace('Error', '')
+            .split(/(?=[A-Z])/g)
+            .join(' ')
+
+          this.$notify.error({
+            message: errorName,
+            description: (h: any) => {
+              const msg = [
+                `Please install and initialize ${name} wallet extension first, `,
+                h('a', { attrs: { href: website, target: '_blank' } }, 'click here to visit official website')
+              ]
+
+              if (chromeUrl || firefoxUrl) {
+                const installUrl = /Firefox/.test(navigator.userAgent) ? firefoxUrl : chromeUrl
+                if (installUrl) {
+                  msg.push(' or ')
+                  msg.push(h('a', { attrs: { href: installUrl, target: '_blank' } }, 'click here to install extension'))
+                }
+              }
+
+              return h('div', msg)
+            }
+          })
+
+          return
+        }
+      }
+    }
+
+    if (['SecurityError'].includes(error.name)) {
+      this.onConnect()
+      return
+    }
+
+    console.log('112231232131232')
+    // throttle(() => {
+    //   console.log('增加debounce后调到了几次#####')
+    this.$notify.error({
+      message: 'Connect wallet failed',
+      description: `${error.name}`
+    })
+    // }, 500)
+  }
+
+  connect(name: string, wallet: WalletInfo) {
+    this.isLoading = true
+    const { providerUrl } = wallet
+    console.log('providerUrl###', providerUrl)
+    const adapter = wallet.getAdapter(providerUrl)
+    console.log('adapter####', adapter)
+    if (adapter) {
+      // adapter.on('ready', onReady)
+      this.isDisConnect = false
+      adapter.on('connect', this.onConnect)
+      adapter.on('disconnect', this.onDisconnect)
+      adapter.on(
+        'error',
+        debounce((e) => {
+          this.onWalletError(e)
+        }, 500)
+      )
+      this.connectingWallet = {
+        name,
+        adapter
+      }
+
+      adapter.connect()
+
+      return () => {
+        // adapter.off('ready', onReady)
+        adapter.off('connect', this.onConnect)
+        adapter.off('disconnect', this.onDisconnect)
+        adapter.off('error', this.onWalletError)
+      }
+    }
   }
 
   onWalletChange(_accountInfo: AccountInfo<Buffer>, context: Context): void {
@@ -330,8 +518,8 @@ export default class Wallet extends Vue {
     if (slot !== this.wallet.lastSubBlock) {
       this.$accessor.wallet.setLastSubBlock(slot)
       this.$accessor.wallet.getTokenAccounts()
-      this.$accessor.farm.getStakeAccounts()
-      // this.$accessor.ido.getIdoAccounts()
+      // this.$accessor.farm.getStakeAccounts()
+      // this.$accessor.ido.requestInfos()
     }
   }
 
@@ -340,9 +528,10 @@ export default class Wallet extends Vue {
     if (wallet && wallet.publicKey) {
       this.walletListenerId = this.$web3.onAccountChange(wallet.publicKey, this.onWalletChange, commitment)
 
+      this.fetchTransactions()
       this.$accessor.wallet.getTokenAccounts()
-      this.$accessor.farm.getStakeAccounts()
-      // this.$accessor.ido.getIdoAccounts()
+      // this.$accessor.farm.getStakeAccounts()
+      // this.$accessor.ido.requestInfos()
     }
   }
 
@@ -352,10 +541,64 @@ export default class Wallet extends Vue {
     }
   }
 
+  debug() {
+    if (this.debugCount < 10) {
+      this.debugCount += 1
+    } else {
+      this.$router.push({ path: '/debug/' })
+      this.debugCount = 0
+    }
+  }
+
+  async fetchTransactions() {
+    const pendingTxs = []
+
+    for (const txInfo of this.historyList) {
+      const status = txInfo.status
+
+      if (status === 'pending') {
+        pendingTxs.push(txInfo)
+      }
+    }
+
+    if (pendingTxs.length > 0) {
+      const { value } = await this.$web3.getSignatureStatuses(
+        pendingTxs.map((tx) => tx.txid),
+        { searchTransactionHistory: true }
+      )
+      for (const index in value) {
+        const result = value[index]
+        const tx = pendingTxs[index]
+        if (!result && getUnixTs() - 60 * 5 * 1000 > tx.time) {
+          this.$accessor.transaction.setTxStatus({
+            txid: tx.txid,
+            status: 'droped',
+            block: 0,
+            walletAddress: this.$accessor.wallet.address
+          })
+        } else if (result && !result.err) {
+          this.$accessor.transaction.setTxStatus({
+            txid: tx.txid,
+            status: 'success',
+            block: result.slot,
+            walletAddress: this.$accessor.wallet.address
+          })
+        } else if (result && result.err) {
+          this.$accessor.transaction.setTxStatus({
+            txid: tx.txid,
+            status: 'fail',
+            block: result.slot,
+            walletAddress: this.$accessor.wallet.address
+          })
+        }
+      }
+    }
+  }
+
   setWalletTimer() {
     this.walletTimer = window.setInterval(async () => {
       if (this.wallet.connected && !this.wallet.loading) {
-        // vuex is connected but $wallet not, meaning window closed11
+        // vuex is connected but $wallet not, meaning window closed
         if (this.$wallet && this.$wallet.connected) {
           if (this.wallet.countdown < this.wallet.autoRefreshTime) {
             this.$accessor.wallet.setCountdown(this.$accessor.wallet.countdown + 1)
@@ -367,7 +610,7 @@ export default class Wallet extends Vue {
           this.disconnect()
         }
       }
-    }, 5000)
+    }, 1000)
   }
 
   // setPriceTimer() {
@@ -393,7 +636,7 @@ export default class Wallet extends Vue {
           }
         }
       }
-    }, 5000)
+    }, 1000)
   }
 
   // setFarmTimer() {
@@ -453,20 +696,27 @@ export default class Wallet extends Vue {
   align-items: center;
   justify-content: center;
   // padding: 0px 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   .wallet-icon-and-name {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    // background: rgba(255, 255, 255, 0.1);
+    // border-radius: 10px;
     height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0px 12px;
+    background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
+    box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+    border-radius: 10px;
+    border: 1px solid #3f434e;
     .wallet-icon {
       width: 25px;
       height: 25px;
       margin-right: 6px;
+    }
+    .platform {
+      font-size: 12px;
     }
   }
 
@@ -487,16 +737,22 @@ export default class Wallet extends Vue {
 }
 .wallet-sub-title {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  // color: rgba(255, 255, 255, 0.6);
+  color: #5f667c;
 }
 .select-wallet {
+  height: 300px;
+  overflow: auto;
   .wallet-item {
-    width: 390px;
+    width: 100%;
+    // width: 390px;
     height: 52px;
+    background: none;
     // background: #292535;
     // border: 2px solid #292535;
     border-radius: 10px;
     cursor: pointer;
+    border: 1px solid transparent;
     margin-top: 12px;
     display: flex;
     align-items: center;
@@ -506,8 +762,11 @@ export default class Wallet extends Vue {
     }
     &.active,
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
+      // background: rgba(255, 255, 255, 0.1);
+      // border-radius: 10px;
+      background: linear-gradient(214deg, #3e434e 0%, #23262b 100%) rgba(216, 216, 216, 0.1);
       border-radius: 10px;
+      border: 1px solid #565c6a;
     }
 
     img {
@@ -534,33 +793,46 @@ export default class Wallet extends Vue {
 </style>
 
 <style lang="less" scoped>
+@import '../styles/base.less';
+
 .wallet-info {
-  text-align: center;
+  // text-align: center;
   .platform {
-    font-size: 14px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.6);
+    margin-top: 30px;
   }
   .address {
-    font-size: 16px;
-    margin-top: 16px;
+    font-weight: 800;
+    color: #fff;
+    margin-top: 20px;
+    font-size: 30px;
+    .icon {
+      width: 14px;
+      height: 14px;
+      fill: white;
+      &:hover {
+        fill: #07ebad;
+      }
+    }
   }
   .copy-and-view {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0px 40px;
-    padding-bottom: 40px;
+    // padding: 0px 40px;
+    padding-bottom: 60px;
     a {
       display: flex;
       align-items: center;
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.6);
       cursor: pointer;
+      color: #07ebad;
       .icon {
-        width: 12px;
-        height: 12px;
-        fill: #fff;
-        margin-right: 14px;
+        width: 20px;
+        height: 20px;
+        fill: #07ebad;
+        margin-left: 10px;
       }
       &:hover {
         color: #07ebad;
@@ -581,31 +853,55 @@ export default class Wallet extends Vue {
     display: flex;
     justify-content: center;
   }
-  .disconnect-btn-box {
-    width: 168px;
+  // .disconnect-btn-box {
+  //   width: 168px;
+  //   height: 48px;
+  //   font-size: 16px;
+  //   border-radius: 10px;
+  //   padding: 2px;
+  //   background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
+  .disconnect-btn {
+    // width: 100%;
+    // height: 100%;
+    // border: none;
+    // background: #1b2023 !important;
+    // border-radius: 10px;
+    // color: #fff;
+    width: 180px;
     height: 48px;
+    box-shadow: 0px 4px 12px 0px #25282c;
+    border-radius: 12px;
+    border: 1px solid #3f434e;
+    color: #fff;
     font-size: 16px;
-    border-radius: 10px;
-    padding: 2px;
-    background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
-    .disconnect-btn {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #1b2023 !important;
-      border-radius: 10px;
-      color: #fff;
+    font-weight: 600;
+    &:hover {
+      background: rgba(255, 255, 255, 0.05) !important;
     }
   }
-  .switch-wallet-btn {
-    width: 168px;
-    height: 48px;
-    background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%) !important;
-    font-size: 16px;
+  // }
+  .switch-wallet-btn-box {
+    // .gradient-btn-large();
+    width: 180px;
+    height: 46px;
+    margin-top: 0;
     margin-left: 12px;
-    border-radius: 10px;
-    color: #fff;
-    border: none;
+    border-radius: 12px;
+    .switch-wallet-btn {
+      .gradient-btn-large();
+      // width: 100%;
+      height: 100%;
+      // color: #fff;
+      // border: none;
+      font-size: 16px;
+      // background: linear-gradient(268deg, #5fe6d0 0%, #597bff 38%, #9380ff 72%, #e590ff 100%);
+      // border-radius: 12px;
+      // line-height: 42px;
+      // font-weight: 600;
+      // &:hover {
+      //   background: linear-gradient(268deg, #74ffe8 0%, #7592ff 39%, #a08fff 74%, #e89aff 100%);
+      // }
+    }
   }
 }
 
@@ -616,7 +912,7 @@ export default class Wallet extends Vue {
   padding-top: 0px !important;
 }
 /deep/.ant-modal-header {
-  padding-bottom: 10px;
+  padding-bottom: 0px;
   padding-top: 20px;
 }
 
