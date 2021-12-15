@@ -20,6 +20,7 @@ import { AccountLayout, MintLayout, Token, TOKEN_PROGRAM_ID } from '@solana/spl-
 export const ORACLE_PRAGRAM_ID = new PublicKey('gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s')
 export const INIT_PUBKEY = new PublicKey('11111111111111111111111111111111')
 export const USER_POSITION_LENGTH = 360000
+export const MAX_USER_POSITION_COUNT = Math.floor((USER_POSITION_LENGTH - 38) / 120)
 export const TICK_INFO_LENGTH = 840000
 export const SWAPV3_PROGRAMID: PublicKey = new PublicKey(
   //'VenTxqaDv4Mj2krfs5Xahf23owM2MCVDQmTR1Qxj7J5',
@@ -445,7 +446,7 @@ export class TokenSwap {
   choosePosition(): PublicKey | null {
     for (let i = 0; i < this.user_position_account_array.length; i++) {
       let length = this.user_position_account_array[i].user_positions.length
-      if (length < USER_POSITION_LENGTH) {
+      if (length < MAX_USER_POSITION_COUNT) {
         let user_position_pubkey = this.user_position_account_array[i].pubkey
         return user_position_pubkey
       }

@@ -593,11 +593,14 @@ export default Vue.extend({
         this.showToCoinLock = false
         const decimal = this.toCoin?.decimals || 6
         if (this.fixedFromCoin) {
+          console.log('1111#####', dst)
           const toCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
           this.toCoinAmount = toCoinAmount === '--' ? '' : toCoinAmount
         } else {
+          console.log('2222#####', dst)
           const fromCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
-          this.fromCoinAmount = fromCoinAmount === '--' ? '' : '0'
+          console.log('fromCoinAmount#####', fromCoinAmount)
+          this.fromCoinAmount = fromCoinAmount === '--' ? '' : fromCoinAmount
         }
 
         this.deltaLiquity = delta_liquity

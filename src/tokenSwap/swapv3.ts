@@ -283,6 +283,11 @@ export function deposit_src_calulate_dst(
   current_price_n: Numberu128,
   direct: number
 ): { dst: number; delta_liquity: number } {
+  console.log('deposit_src_calulate_dst####tick_lower####', tick_lower)
+  console.log('deposit_src_calulate_dst####tick_upper####', tick_upper)
+  console.log('deposit_src_calulate_dst####src####', src)
+  console.log('deposit_src_calulate_dst####current_price_n####', current_price_n)
+  console.log('deposit_src_calulate_dst####direct####', direct)
   let lower_price = tick2price(tick_lower)
   let upper_price = tick2price(tick_upper)
   let current_price = current_price_n.toNumber() / PRICISE_DECIMAL
