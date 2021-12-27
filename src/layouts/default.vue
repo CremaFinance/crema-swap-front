@@ -46,10 +46,10 @@ export default Vue.extend({
     ...mapState(['transaction', 'url'])
   },
   mounted() {
-    const showNotice = localStorage.getItem('crema_show_notice')
+    const showNotice = sessionStorage.getItem('crema_show_notice')
     if (!showNotice) {
       this.showNotice = true
-      localStorage.setItem('crema_show_notice', '1')
+      sessionStorage.setItem('crema_show_notice', '1')
     }
 
     window.onresize = () => {
@@ -90,7 +90,8 @@ export default Vue.extend({
 .body-container {
   width: 100%;
   min-height: 100vh;
-  padding-top: 200px;
+  // padding-top: 200px;
+  padding-top: 120px;
   padding-bottom: 40px;
   .h5-wallet {
     display: none;
@@ -104,6 +105,16 @@ export default Vue.extend({
 .h5-header-container {
   display: none;
 }
+
+@media screen and (max-width: 980px) {
+  .pc-header-container {
+    position: static;
+  }
+  .body-container {
+    padding-top: 20px;
+  }
+}
+
 @media screen and (max-width: 750px) {
   .layout-container {
     min-width: 100%;

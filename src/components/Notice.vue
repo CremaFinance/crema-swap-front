@@ -10,8 +10,9 @@
   >
     <div class="notice-container">
       <p>
-        Please note that this product is a devnet beta version. It is only for early testing purpose and all tokens
-        displayed are testing faucets. The website might be updated frequently to improve overall user experience.
+        Please note that this product is on beta version, which is mainly for testing purpose. The swap and pools
+        sections are not connected yet. The liquidity you add might not be able to generate fees for you at the moment.
+        This beta will be updated soon to bring you more functionality.
       </p>
       <Button class="confirm-btn" @click="$emit('onClose')">Got it</Button>
     </div>

@@ -106,12 +106,12 @@ export default Vue.extend({
       }
     },
     createTokenList(keyword = '') {
-      let tokenList = []
+      let tokenList: any = []
 
       let nativeSol = cloneDeep(NATIVE_SOL)
 
-      let hasBalance = []
-      const noBalance = []
+      let hasBalance: any = []
+      const noBalance: any = []
 
       let tokenObject: any = {}
       const usableTokenObject: any = {} // 可以配对的币种

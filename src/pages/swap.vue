@@ -4,14 +4,14 @@
       <span>Swap</span>
       <div class="buttons">
         <!-- <Tooltip placement="bottomRight">
-          <template slot="title">
-            <span>
-              {{ fromCoin && fromCoin.mintAddress }}
-            </span>
-            <span>
-              {{ toCoin && toCoin.mintAddress }}
-            </span>
-          </template> -->
+            <template slot="title">
+              <span>
+                {{ fromCoin && fromCoin.mintAddress }}
+              </span>
+              <span>
+                {{ toCoin && toCoin.mintAddress }}
+              </span>
+            </template> -->
         <div class="icon-box">
           <svg class="icon" aria-hidden="true" @click="showAddress = true">
             <use xlink:href="#icon-a-bianzu181"></use>
@@ -78,14 +78,14 @@
       >
         <!-- Swap -->
         <!-- {{
-          Number(fromCoinAmount) == 0
-            ? 'Enter an amount'
-            : insufficientLiquidity
-            ? 'Insufficient Liquidity'
-            : gt(fromCoinAmount, fromCoin && fromCoin.balance ? fromCoin.balance.fixed() : '0')
-            ? 'Insufficient balance'
-            : 'Swap'
-        }} -->
+            Number(fromCoinAmount) == 0
+              ? 'Enter an amount'
+              : insufficientLiquidity
+              ? 'Insufficient Liquidity'
+              : gt(fromCoinAmount, fromCoin && fromCoin.balance ? fromCoin.balance.fixed() : '0')
+              ? 'Insufficient balance'
+              : 'Swap'
+          }} -->
         {{ swapBtnText }}
       </Button>
     </div>

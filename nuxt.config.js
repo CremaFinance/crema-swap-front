@@ -25,7 +25,8 @@ export default {
     htmlAttrs: {
       lang: 'en'
     },
-    meta: [{
+    meta: [
+      {
         charset: 'utf-8'
       },
       {
@@ -46,14 +47,18 @@ export default {
         content: "object-src 'none';child-src https:"
       }
     ],
-    link: [{
-      rel: 'icon',
-      type: 'image/x-icon',
-      href: '/favicon.ico?t=5678'
-    }],
-    script: [{
-      src: '/js/iconfont.js?t=2345678111'
-    }]
+    link: [
+      {
+        rel: 'icon',
+        type: 'image/x-icon',
+        href: '/favicon.ico?t=5678'
+      }
+    ],
+    script: [
+      {
+        src: '/js/iconfont.js?t=2345678111'
+      }
+    ]
   },
 
   loadingIndicator: {
@@ -67,7 +72,8 @@ export default {
 
   // loading: '@/components/Loading.vue',
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [{
+  css: [
+    {
       src: '@/styles/antd.less',
       lang: 'less'
     },
@@ -82,7 +88,14 @@ export default {
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['@/plugins/axios.ts', '@/plugins/api.ts', '@/plugins/web3.ts', '@/plugins/notify.ts'],
+  plugins: [
+    '@/plugins/axios.ts',
+    '@/plugins/api.ts',
+    '@/plugins/web3.ts',
+    '@/plugins/notify.ts',
+    '@/plugins/babel-polyfill',
+    '@/plugins/lazyload.ts'
+  ],
   // router: {
   //   middleware: ['route']
   // },
@@ -136,7 +149,7 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-    transpile: [/^ant-design-vue/],
+    transpile: [/^ant-design-vue/, '@jup-ag/core'],
 
     loaders: {
       less: {
@@ -159,8 +172,33 @@ export default {
       ]
     },
 
-    extend(config) {
+    // extend(config) {
+    //   config.resolve.alias['@ant-design/icons/lib/dist$'] = path.resolve(__dirname, './src/utils/antd-icons.ts')
+    // }
+
+    extend(config, { isDev, isClient }) {
       config.resolve.alias['@ant-design/icons/lib/dist$'] = path.resolve(__dirname, './src/utils/antd-icons.ts')
+      if (isClient) {
+        config.node = {
+          fs: 'empty',
+          child_process: 'empty'
+        }
+      }
+      // if (isDev && isClient) {
+      // config.module.rules.push({
+      //   test: /\.(js)$/,
+      //   loader: 'babel-loader'
+      // // exclude: /(node_modules)/
+      // include: /(node_modules)/
+      // use: {
+      //   loader: 'babel-loader',
+      //   options: {
+      //     // options选项里面配置的必须要写上
+      //     presets: ['@babel/preset-env'],
+      //     plugins: ['@babel/plugin-transform-runtime', '@babel/plugin-proposal-class-properties']
+      //   }
+      // }
+      // })
     }
   }
 }

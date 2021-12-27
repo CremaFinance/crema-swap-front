@@ -3,21 +3,23 @@
     <div class="left">
       <a class="logo" href="https://www.crema.finance/" target="_blank">
         <img src="../../assets/images/logo@2x@2x.png" />
-        <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" />
+        <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
       </a>
       <nav>
         <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
           <img src="../../assets/images/icon-Trading@2x.png" />
           <span>Trading</span>
         </a>
-        <nuxt-link to="/swap" :class="$route.path === '/swap' ? 'nuxt-link-exact-active nuxt-link-active' : ''">
+        <nuxt-link
+          to="/jupswap"
+          :class="$route.path === '/jupswap' || $route.path === '/' ? 'nuxt-link-exact-active nuxt-link-active' : ''"
+        >
           <img src="../../assets/images/icon-Swap@2x.png" />
           <span>Swap</span>
         </nuxt-link>
         <nuxt-link
           to="/pool"
           :class="
-            $route.path === '/' ||
             $route.path === '/position' ||
             $route.name === 'increase-id' ||
             $route.name === 'remove-id' ||
@@ -29,10 +31,10 @@
           <img src="../../assets/images/icon-Pools@2x.png" />
           <span>Pools</span>
         </nuxt-link>
-        <nuxt-link to="/farming">
+        <!-- <nuxt-link to="/farming">
           <img src="../../assets/images/icon-Farming@2x.png" />
           <span>Farming</span>
-        </nuxt-link>
+        </nuxt-link> -->
         <!-- <nuxt-link to="/staking">
           <img src="../../assets/images/icon-Staking@2x.png" />
           <span>Staking</span>
@@ -40,12 +42,12 @@
       </nav>
     </div>
     <div class="right">
-      <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
+      <!-- <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon_guide"></use>
         </svg>
         <span>Test Guide</span>
-      </a>
+      </a> -->
       <Wallet />
       <Contactus></Contactus>
     </div>
@@ -95,6 +97,7 @@ console.log()
   justify-content: space-between;
   align-items: center;
   height: 100px;
+  width: 100%;
   // margin: 0px 40px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: #22252b;

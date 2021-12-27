@@ -203,6 +203,13 @@ export function isOfficalMarket(marketAddress: string) {
 }
 
 export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
+  // main net start ********
+  // USDT-USDC
+  {
+    coinPair: 'USDT-USDC',
+    tokenSwapAccount: '8J3avAjuRfL2CYFKKDwhhceiRoajhrHv9kN5nUiEnuBG'
+  }
+  // main net end ********
   // HYSD-USDD
   // {
   //   // tokenSwapAccount: 'Ei9AknG73StHLYgFvobYGsSFVKxDUYnMmm7m5FPkG5dm'
@@ -210,15 +217,15 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   //   tokenSwapAccount: '2CQJoV8r4jYmtnAuj967pnSCbgDfe8w7gKuGKE8RSuPw'
   // },
   // csol-usdc
-  {
-    coinPair: 'CSOL-CUSDC',
-    tokenSwapAccount: 'Gz113eAqg5FPJr3mnB2EhmDrGkUBHfsaY4xtbExd53nv'
-  },
-  // usdt-usdc
-  {
-    coinPair: 'CUSDT-CUSDC',
-    tokenSwapAccount: '38ZpXbmvga78CFPR2YJbS3vDNHYsV67K1angDNLje3gA'
-  }
+  // {
+  //   coinPair: 'CSOL-CUSDC',
+  //   tokenSwapAccount: 'Gz113eAqg5FPJr3mnB2EhmDrGkUBHfsaY4xtbExd53nv'
+  // },
+  // // usdt-usdc
+  // {
+  //   coinPair: 'CUSDT-CUSDC',
+  //   tokenSwapAccount: '38ZpXbmvga78CFPR2YJbS3vDNHYsV67K1angDNLje3gA'
+  // }
   // {
   //   name: 'HYSD-USDD',
   //   coin: { ...TOKENS.HYSD },

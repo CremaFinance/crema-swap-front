@@ -22,6 +22,7 @@ export const state = () => ({
 
   connected: false,
   address: '',
+  originPub: null as any,
   platform: '',
 
   tokenAccounts: {},
@@ -39,6 +40,7 @@ export const mutations = mutationTree(state, {
     state.connected = true
     state.address = data.address
     state.platform = data.platform
+    state.originPub = data.originPub
   },
 
   setDisconnected(state) {

@@ -204,3 +204,21 @@ export function decimalFormat(num: string, d: number) {
 export function checkNullObj(obj: object) {
   return Object.keys(obj).length === 0
 }
+
+export const addCommom = (num, len) => {
+  if (isNaN(num) || !num) return num
+  num = String(num)
+  if (!isNaN(len)) {
+    if (len === 0) {
+      num = num.split('.')[0]
+    }
+    return num.replace(/(\d+)(\.\d+)?/, (a, b, c) => {
+      // console.log(b, c)
+      return b.replace(/(\d)(?=(?:\d{3})+$)/g, '$1,') + (c ? c.slice(0, len + 1) : '')
+    })
+  } else {
+    return num.replace(/^\d+/, (a) => {
+      return a.replace(/(\d)(?=(?:\d{3})+$)/g, '$1,')
+    })
+  }
+}

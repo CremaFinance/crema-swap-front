@@ -15,8 +15,8 @@
         </svg> -->
         <div class="wallet-icon-and-name">
           <img
+            v-lazy="importIcon(`/wallets/${wallet.platform.replace(' ', '-').toLowerCase()}.png`)"
             class="wallet-icon"
-            :src="importIcon(`/wallets/${wallet.platform.replace(' ', '-').toLowerCase()}.png`)"
           />
           <span v-if="wallet.platform" class="platform">{{ wallet.platform }}</span>
         </div>
@@ -52,7 +52,9 @@
           @click="connect(name, info)"
         >
           <!-- <div> -->
-          <img :src="importIcon(`/wallets/${name.replace(' ', '-').toLowerCase()}.png`)" />
+          <div class="icon-box">
+            <img v-lazy="importIcon(`/wallets/${name.replace(' ', '-').toLowerCase()}.png`)" />
+          </div>
           <span>{{ name }}</span>
           <!-- </div> -->
         </button>
@@ -324,7 +326,7 @@ export default class Wallet extends Vue {
   // }
 
   // // history
-  get historyList() {
+  get historyList(): any[] {
     const rawList = Object.entries(this.$accessor.transaction.history[this.$accessor.wallet.address] ?? {}).map(
       ([txid, txInfo]) => ({
         ...(txInfo as any),
@@ -395,7 +397,12 @@ export default class Wallet extends Vue {
 
         Vue.prototype.$wallet = adapter
         // this.$accessor.wallet.setConnected(adapter.publicKey.toBase58())
-        this.$accessor.wallet.setConnected({ address: adapter.publicKey.toBase58(), platform: name })
+        console.log('setConnected####', adapter)
+        this.$accessor.wallet.setConnected({
+          address: adapter.publicKey.toBase58(),
+          platform: name,
+          originPub: adapter.publicKey
+        })
 
         this.subWallet()
         this.$notify.success({
@@ -573,7 +580,7 @@ export default class Wallet extends Vue {
   }
 
   async fetchTransactions() {
-    const pendingTxs = []
+    const pendingTxs: any = []
 
     for (const txInfo of this.historyList) {
       const status = txInfo.status
@@ -791,10 +798,18 @@ export default class Wallet extends Vue {
       border: 1px solid #565c6a;
     }
 
+    .icon-box {
+      width: 32px;
+      height: 32px;
+      font-size: 0px;
+      border-radius: 8px;
+      // background: #5f667c;
+      margin-right: 16px;
+    }
+
     img {
       width: 32px;
       height: 32px;
-      margin-right: 16px;
     }
     span {
       font-size: 14px;

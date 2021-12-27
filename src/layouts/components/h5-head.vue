@@ -3,7 +3,7 @@
     <div class="top">
       <div class="left">
         <img src="@/assets/images/logo@2x@2x.png" />
-        <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" />
+        <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
       </div>
       <div class="right">
         <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
@@ -24,7 +24,7 @@
           <img src="@/assets/images/icon-Trading@2x.png" alt="" />
           <span>Trading</span>
         </li>
-        <li :class="{ active: $route.name === 'swap' }" @click="goUrl('swap')">
+        <li :class="{ active: $route.name === 'jupswap' }" @click="goUrl('jupswap')">
           <img src="@/assets/images/icon-Swap@2x.png" alt="" />
           <span>Swap</span>
         </li>
@@ -53,18 +53,18 @@
             </svg>
           </div>
         </li>
-        <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
+        <!-- <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
           <img src="@/assets/images/icon-Farming@2x.png" alt="" />
           <span>Farming</span>
-        </li>
-        <li>
+        </li> -->
+        <!-- <li>
           <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-icon_guide"></use>
             </svg>
             <span>Test Guide</span>
           </a>
-        </li>
+        </li> -->
 
         <!-- <li :class="{ active: $route.name === 'staking' }" @click="goUrl('staking')">
           <img src="@/assets/images/icon-Staking@2x.png" alt="" />

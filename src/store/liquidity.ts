@@ -122,7 +122,7 @@ export const actions = actionTree(
 
         liquidityPools[name] = newPool
       }
-      // console.log('liquidityPools#####', liquidityPools)
+      console.log('liquidityPools#####', liquidityPools)
 
       commit('setInfos', liquidityPools)
       logger('Liquidity pool infomations updated')

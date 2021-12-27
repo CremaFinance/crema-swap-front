@@ -221,13 +221,7 @@ export async function addLiquidityNew(
   }
   // let transaction = new Transaction()
   // let instruction
-  console.log('user_position_key#####', user_position_key)
-  console.log('user_mint_pubkey#####', user_mint_pubkey)
-  console.log('user_nft_pubkey#####', user_nft_pubkey)
-  console.log('new_position#####', new_position)
-  console.log('为啥没走到这里啊#####')
   if (new_position === 0 && user_position_key != null) {
-    console.log('进到这里11111')
     let { mintTrans, mintAccount } = await TokenSwap.createMintInstruction(connection, wallet, poolInfo.authority)
     let { nftAccountInstruction, nft_account } = await TokenSwap.createAccountInstruction(
       connection,

@@ -164,8 +164,8 @@ import {
 import { TokenAmount, gt } from '@/utils/safe-math'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
 
-const CUSDT = getTokenBySymbol('CUSDT')
-const CUSDC = getTokenBySymbol('CUSDC')
+const USDT = getTokenBySymbol('USDT')
+const USDC = getTokenBySymbol('USDC')
 
 export default Vue.extend({
   components: {
@@ -175,10 +175,10 @@ export default Vue.extend({
     return {
       showAddLiquidity: true,
       tokenList: [] as Array<TokenInfo>,
-      fromCoin: CUSDT as TokenInfo | null,
-      toCoin: CUSDC as TokenInfo | null,
-      defaultFromCoin: CUSDT as TokenInfo | null,
-      defaultToCoin: CUSDC as TokenInfo | null,
+      fromCoin: USDT as TokenInfo | null,
+      toCoin: USDC as TokenInfo | null,
+      defaultFromCoin: USDT as TokenInfo | null,
+      defaultToCoin: USDC as TokenInfo | null,
       showSetting: false,
       showWaitingHint: false,
       showSuccessHint: false,
@@ -351,14 +351,12 @@ export default Vue.extend({
     },
     minPrice(value: string) {
       // if ((Number(value) || Number(this.maxPrice)) && this.poolInfo) {
-      console.log('minPrice###watch####')
       if (value) {
         this.updateAmounts()
       }
     },
     maxPrice(value: string) {
       // if ((Number(value) || Number(this.minPrice)) && this.poolInfo) {
-      console.log('maxPrice###watch####')
       if (value) {
         this.updateAmounts()
       }
@@ -388,11 +386,7 @@ export default Vue.extend({
     decimalFormat,
     checkNullObj,
     poolInfoWatch(value: any, oldValue: any) {
-      console.log('poolInfoWatch####value####', value)
       if (value) {
-        console.log('pool-new-watch-poolInfo##handler###', value)
-        console.log('pool-new-watch-poolInfo##handleroldValue###', oldValue)
-
         // 第一次刷新或，替换交易对
         if (!oldValue || oldValue.name !== value.name) {
           let direction = true
@@ -415,9 +409,6 @@ export default Vue.extend({
           // const maxPrice = direction ? String(tick2price(maxTick)) : String(1 / tick2price(minTick))
           const minPrice = String(tick2price(minTick))
           const maxPrice = String(tick2price(maxTick))
-          console.log('pool.vue###poolInfo##watch##direction####', direction)
-          console.log('pool.vue###poolInfo##watch##minPrice####', minPrice)
-          console.log('pool.vue###poolInfo##watch##maxPrice####', maxPrice)
           this.minPrice = minPrice
           this.maxPrice = maxPrice
           this.defaultMinPrice = minPrice
@@ -437,21 +428,6 @@ export default Vue.extend({
 
         this.updateAmounts()
       } else {
-        // console.log('this.toCoin?.symbol###', this.toCoin?.symbol)
-        // console.log('this.defaultToCoin?.symbol###', this.defaultToCoin?.symbol)
-        // console.log('this.fromCoin?.symbol###', this.toCoin?.symbol)
-        // console.log('this.defaultFromCoin?.symbol###', this.defaultFromCoin?.symbol)
-        // if (
-        //   this.toCoin?.symbol !== this.defaultToCoin?.symbol ||
-        //   this.fromCoin?.symbol !== this.defaultFromCoin?.symbol
-        // ) {
-        //   if (this.fixedFromCoin && this.fromCoin) {
-        //     this.toCoin = null
-        //   } else if (!this.fixedFromCoin && this.toCoin) {
-        //     this.fromCoin = null
-        //   }
-        // }
-
         this.currentFeeTier = 100
         this.minPrice = ''
         this.maxPrice = ''
@@ -561,9 +537,6 @@ export default Vue.extend({
         return
       }
 
-      console.log('updateAmounts###currentPriceP###', currentPriceP)
-      console.log('updateAmounts###min###', min)
-      console.log('updateAmounts###max###', max)
       // 区间中包含当前价格, 一种资产返回另外一种资产，并且返回liquity
       if (max === '∞' || (currentPriceP >= Number(min) && currentPriceP <= Number(max))) {
         let coinAmount: any
@@ -593,13 +566,10 @@ export default Vue.extend({
         this.showToCoinLock = false
         const decimal = this.toCoin?.decimals || 6
         if (this.fixedFromCoin) {
-          console.log('1111#####', dst)
           const toCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
           this.toCoinAmount = toCoinAmount === '--' ? '' : toCoinAmount
         } else {
-          console.log('2222#####', dst)
           const fromCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
-          console.log('fromCoinAmount#####', fromCoinAmount)
           this.fromCoinAmount = fromCoinAmount === '--' ? '' : fromCoinAmount
         }
 

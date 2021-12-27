@@ -73,7 +73,7 @@ export default Vue.extend({
       height: 100%;
       font-size: 20px;
       background: linear-gradient(268deg, #5fe6d0 0%, #597bff 38%, #9380ff 72%, #e590ff 100%);
-      border-radius: 15px;
+      border-radius: 8px;
       line-height: 54px;
       &:hover {
         background: linear-gradient(270deg, #93ffed 0%, #84caff 34%, #a291ff 68%, #efb9ff 100%);

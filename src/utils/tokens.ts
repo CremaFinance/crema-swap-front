@@ -83,6 +83,58 @@ export const NATIVE_SOL: TokenInfo = {
 }
 
 export const TOKENS: Tokens = {
+  // main net start *************
+  Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB: {
+    symbol: 'USDT',
+    name: 'USDT',
+    mintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
+    symbol: 'USDC',
+    name: 'USDC',
+    mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
+  }
+
+  // main net end *************
+
+  // test net start ***************
+  // '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
+  //   symbol: 'CSOL',
+  //   name: 'CSOL',
+  //   mintAddress: '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK',
+  //   decimals: 8,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT: {
+  //   symbol: 'CUSDC',
+  //   name: 'CUSDC',
+  //   mintAddress: 'GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT',
+  //   decimals: 8,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q: {
+  //   symbol: 'CUSDT',
+  //   name: 'CUSDT',
+  //   mintAddress: 'Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q',
+  //   decimals: 8,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // }
+  // test net end ******************
+
   // CRM: {
   //   symbol: 'CRM',
   //   name: 'CRM',
@@ -146,33 +198,6 @@ export const TOKENS: Tokens = {
   //   official: true,
   //   showDefault: true
   // },
-  '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
-    symbol: 'CSOL',
-    name: 'CSOL',
-    mintAddress: '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK',
-    decimals: 8,
-    referrer: '',
-    official: true,
-    showDefault: true
-  },
-  GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT: {
-    symbol: 'CUSDC',
-    name: 'CUSDC',
-    mintAddress: 'GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT',
-    decimals: 8,
-    referrer: '',
-    official: true,
-    showDefault: true
-  },
-  Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q: {
-    symbol: 'CUSDT',
-    name: 'CUSDT',
-    mintAddress: 'Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q',
-    decimals: 8,
-    referrer: '',
-    official: true,
-    showDefault: true
-  }
   // CTA: {
   //   symbol: 'CTA',
   //   name: 'CTA',
