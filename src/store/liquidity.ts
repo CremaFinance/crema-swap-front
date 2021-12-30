@@ -122,7 +122,6 @@ export const actions = actionTree(
 
         liquidityPools[name] = newPool
       }
-      console.log('liquidityPools#####', liquidityPools)
 
       commit('setInfos', liquidityPools)
       logger('Liquidity pool infomations updated')
@@ -131,7 +130,6 @@ export const actions = actionTree(
       commit('setLoading', false)
     },
     getMyPositions({ state, commit }, tokenAccounts) {
-      console.log('store###getMyPositions###')
       const list: any = []
       const infos = state.infos
       if (checkNullObj(tokenAccounts)) {

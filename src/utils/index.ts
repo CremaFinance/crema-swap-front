@@ -187,6 +187,10 @@ export function decimalFormat(num: string, d: number) {
     return 0
   }
 
+  if (!String(num).includes('.')) {
+    return num
+  }
+
   const minimum = Math.pow(10, -d)
   if (Number(num) < minimum) {
     return removeEndingZero(num)

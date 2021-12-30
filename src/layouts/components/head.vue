@@ -1,10 +1,10 @@
 <template>
   <div class="header-container">
+    <a class="logo" href="https://www.crema.finance/" target="_blank">
+      <img src="../../assets/images/logo@2x@2x.png" />
+      <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
+    </a>
     <div class="left">
-      <a class="logo" href="https://www.crema.finance/" target="_blank">
-        <img src="../../assets/images/logo@2x@2x.png" />
-        <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
-      </a>
       <nav>
         <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
           <img src="../../assets/images/icon-Trading@2x.png" />
@@ -48,6 +48,12 @@
         </svg>
         <span>Test Guide</span>
       </a> -->
+      <a class="test-guide" href="https://gitbook.crema.finance/" target="_blank">
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-icon-Docs"></use>
+        </svg>
+        <span>Docs</span>
+      </a>
       <Wallet />
       <Contactus></Contactus>
     </div>
@@ -84,7 +90,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.$route.path, 'this.$route.path##')
     const slippage = localStorage.getItem('crema-slippage') || '1'
     this.$accessor.setSlippage(slippage)
   }
@@ -96,18 +101,23 @@ console.log()
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 100px;
+  height: 80px;
   width: 100%;
   // margin: 0px 40px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: #22252b;
+  position: relative;
   > .left {
     flex: 1;
     display: flex;
     align-items: center;
   }
   .logo {
-    padding-right: 20px;
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translate(0%, -50%);
+    // padding-right: 20px;
     img {
       height: 28px;
     }
@@ -191,6 +201,10 @@ console.log()
   }
 
   > .right {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translate(0%, -50%);
     display: flex;
     align-items: center;
     .test-guide {

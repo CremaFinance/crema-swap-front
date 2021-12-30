@@ -78,12 +78,12 @@
         </svg>
         <span>Test Guide</span>
       </a> -->
-      <!-- <a class="paper-guide" target="_blank">
+      <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
         <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-docs"></use>
+          <use xlink:href="#icon-icon-Docs"></use>
         </svg>
         <span>Docs</span>
-      </a> -->
+      </a>
 
       <div class="contact-list">
         <a href="https://twitter.com/Crema_Finance" target="_blank">

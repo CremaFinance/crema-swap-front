@@ -32,13 +32,14 @@
         </div>
         <input
           type="text"
+          step="0.0000000001"
           :value="pValue"
           autocomplete="off"
           autocorrect="off"
           placeholder="0.00"
           pattern="^[0-9]*[.,]?[0-9]*$"
           minlength="1"
-          maxlength="79"
+          max="999999999999"
           spellcheck="false"
           :disabled="disabled"
           @input="handleInput"
@@ -58,9 +59,13 @@ import importIcon from '@/utils/import-icon'
 import { lt } from '@/utils/safe-math'
 import { mapState } from 'vuex'
 import { cloneDeep, debounce } from 'lodash-es'
-import { addCommom } from '@/utils'
+import { addCommom, fixD } from '@/utils'
+// import { Input } from 'ant-design-vue'
 
 export default Vue.extend({
+  // components: {
+  //   Input
+  // },
   model: {
     prop: 'value',
     event: 'onInput'
@@ -117,22 +122,50 @@ export default Vue.extend({
   },
   watch: {
     value(newVal: string, oldVal: string) {
-      this.pValue = addCommom(newVal, 20)
+      // this.pValue = addCommom(newVal, 20)
+      this.pValue = newVal
     },
     pValue(newVal: string, oldVal: string) {
-      this.pValue = addCommom(newVal, 20)
+      const decimals = this.coinItem.decimals || 6
+      // console.log('pValue####newVal######', newVal)
+      // console.log('pValue####decimals######', decimals)
+      let result = newVal
+      if (Number(newVal.split(',').join('')) > 99999999999) {
+        // console.log('没进来么########%#$%#$%#$%#$%#$')
+        result = addCommom('99999999999', decimals)
+      } else {
+        result = addCommom(newVal, decimals)
+      }
+
+      // console.log('result######', result)
+      this.$nextTick(() => {
+        this.pValue = result
+      })
     }
+    // coinItem: {
+    //   handler: 'coinItemWatch',
+    //   immediate: true
+    // }
   },
   methods: {
     importIcon,
     lt,
+    // coinItemWatch(newVal: any) {
+    //   console.log('coinItemWatch###newVal###', newVal)
+    // },
     selectCoin() {
       if (!this.notSelect) this.$emit('onSelect')
     },
-    handleInput: debounce(function (e: any) {
+    // handleInput: debounce(function (e: any) {
+    //   const value = e.target.value.split(',').join('')
+    //   // :formatter="(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+    //   //     :parser="(value) => value.replace(/\$\s?|(,*)/g, '')"
+    //   this.$emit('onInput', value)
+    // }, 1000)
+    handleInput(e: any) {
       const value = e.target.value.split(',').join('')
       this.$emit('onInput', value)
-    }, 500)
+    }
   }
 })
 </script>

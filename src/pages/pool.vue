@@ -1,5 +1,14 @@
 <template>
   <div class="pool-container">
+    <div v-if="wallet.connected" class="link-block">
+      <nuxt-link to="/position">
+        <img src="../assets/images/icon-position@2x.png" />
+        <span>My Position</span>
+        <!-- <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-a-bianzu18"></use>
+        </svg> -->
+      </nuxt-link>
+    </div>
     <div class="pool-body">
       <div class="top">
         <div class="c-title"><span>Concentrated Liquidity</span></div>
@@ -112,14 +121,6 @@
           </Button>
         </div>
       </div>
-    </div>
-    <div v-if="wallet.connected" class="link-block">
-      <nuxt-link to="/position">
-        <span>My Position</span>
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-a-bianzu18"></use>
-        </svg>
-      </nuxt-link>
     </div>
 
     <CoinSelect
@@ -900,21 +901,20 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 40px;
+    margin-bottom: 20px;
     > a {
-      width: 140px;
-      height: 40px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      color: rgba(255, 255, 255, 0.5);
+      width: 150px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      svg {
-        width: 20px;
-        height: 20px;
-        fill: rgba(255, 255, 255, 0.5);
+      img {
+        width: 32px;
+        height: 32px;
       }
       &:hover {
         color: #fff;
@@ -927,6 +927,9 @@ export default Vue.extend({
 }
 @media screen and (max-width: 750px) {
   .pool-container {
+    .link-block {
+      margin-top: 20px;
+    }
     .pool-body {
       width: 100%;
       margin-top: 20px;

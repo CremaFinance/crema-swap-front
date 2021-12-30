@@ -91,7 +91,7 @@ export default Vue.extend({
   width: 100%;
   min-height: 100vh;
   // padding-top: 200px;
-  padding-top: 120px;
+  padding-top: 100px;
   padding-bottom: 40px;
   .h5-wallet {
     display: none;

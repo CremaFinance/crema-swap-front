@@ -148,7 +148,6 @@ export const actions = actionTree(
               balance: new TokenAmount(solBalance, NATIVE_SOL.decimals)
             }
 
-            console.log('走到这里了吗####tokenAccounts####', tokenAccounts)
             commit('setTokenAccounts', tokenAccounts)
             logger('Wallet TokenAccounts updated')
           })

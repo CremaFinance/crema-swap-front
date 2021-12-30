@@ -137,7 +137,7 @@ import bs58 from 'bs58'
 // import fetch from 'node-fetch'
 import { Connection, PublicKey, Keypair } from '@solana/web3.js'
 import { Jupiter, TOKEN_LIST_URL } from '@jup-ag/core'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, debounce } from 'lodash'
 import { inputRegex, escapeRegExp } from '@/utils/regex'
 import { decimalFormat, getUnixTs, checkNullObj } from '@/utils'
 import { TokenAmount, gt } from '@/utils/safe-math'
@@ -202,15 +202,11 @@ export default Vue.extend({
       handler: 'tokenAccountsWatch',
       immediate: true
     },
-    'swap.tokens': {
-      handler: 'swapTokensWatch',
-      immediate: true
-    },
     'swap.tokensObj': {
       handler: 'swapTokensObjWatch',
       immediate: true
     },
-    fromCoinAmount(newAmount: string, oldAmount: string) {
+    fromCoinAmount: debounce(function (newAmount: string, oldAmount: string) {
       this.$nextTick(() => {
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.fromCoinAmount = oldAmount
@@ -220,14 +216,12 @@ export default Vue.extend({
           }
         }
       })
-    },
+    }, 1000),
     async currentRoute(info: any) {
       if (info) {
         const route: any = cloneDeep(info)
-        console.log('route######', route)
         const depositAndFee = await route.getDepositAndFee()
         this.depositAndFee = cloneDeep(depositAndFee)
-        console.log('depositAndFee重新获取了####', depositAndFee)
       }
     },
     fromCoin(newVal: any, oldVal: any) {
@@ -242,15 +236,6 @@ export default Vue.extend({
     this.isLoading = true
     this.$accessor.swap.getTokens()
     this.updateAmounts()
-    // const connection = new Connection(SOLANA_RPC_ENDPOINT)
-    // const jupiter = await Jupiter.load({
-    //   connection,
-    //   cluster: 'mainnet-beta'
-    //   // user: USER_KEYPAIR // or public key
-    // })
-    // console.log('加载完了吗####jupiter###', jupiter)
-    // this.jupiter = jupiter
-    // console.log('TOKEN_LIST_URL####', TOKEN_LIST_URL)
   },
   methods: {
     checkNullObj,
@@ -307,7 +292,6 @@ export default Vue.extend({
       }
     },
     setPossiblePairs(value: any) {
-      // console.log('11111')
       if (!this.jupiter) {
         this.possiblePairsList = this.swap.tokens
         return
@@ -321,7 +305,6 @@ export default Vue.extend({
       const possiblePairsTokenInfo: any = {}
       let possiblePairsList: any = []
       const tokenAccounts: any = this.wallet.tokenAccounts
-      // console.log('possiblePairs#####', possiblePairs)
       possiblePairs.forEach((address: string) => {
         const item = this.swap.tokens.find((t: any) => {
           return t.address == address
@@ -344,11 +327,7 @@ export default Vue.extend({
         }
       }
       possiblePairsList = Object.values(possiblePairsTokenInfo).sort(compare())
-      // console.log('possiblePairsList####', possiblePairsList)
       this.possiblePairsList = possiblePairsList
-    },
-    swapTokensWatch(tokens: any) {
-      console.log('tokens#####', tokens)
     },
     async originPubWatch(originPub: any) {
       // if (originPub) {
@@ -370,23 +349,13 @@ export default Vue.extend({
       // eslint-disable-next-line no-useless-return
       if (!this.fromCoin || !this.toCoin || !Number(this.fromCoinAmount)) return
 
-      // const routeMap = this.jupiter.getRouteMap()
-      // console.log('routeMap####', routeMap)
       const slippagePercentage = Number(this.$accessor.slippage)
       const inputAmount = parseInt(String(Number(this.fromCoinAmount) * 10 ** this.fromCoin.decimals))
       const defaultInputAmount = parseInt(String(1 * 10 ** this.fromCoin.decimals))
-      console.log('inputAmount####', inputAmount)
       if (inputAmount) {
         this.isLoading = true
         this.routesIsLoading = true
         try {
-          // const connection = new Connection(SOLANA_RPC_ENDPOINT)
-          // const jupiter = await Jupiter.load({
-          //   connection,
-          //   cluster: 'mainnet-beta',
-          //   // user: USER_KEYPAIR // or public key
-          //   user: this.wallet.originPub // or public key
-          // })
           let jupiter: any = null
           if (!this.jupiter) {
             const connection = new Connection(SOLANA_RPC_ENDPOINT)
@@ -414,12 +383,6 @@ export default Vue.extend({
           this.swapRoutes = routesResult
           this.currentRoute = (routesResult && routesResult[0]) || {}
           this.routesIsLoading = false
-          console.log('routes#####', droutes)
-          // console.log('routes#####', routes[0])
-
-          // const depositAndFee = routesResult[0] && (await routesResult[0].getDepositAndFee())
-          // this.depositAndFee = cloneDeep(depositAndFee)
-          // console.log('fees####', depositAndFee)
           this.isLoading = false
         } catch (err) {
           console.log('computeRoutes##error###', err)
@@ -458,7 +421,6 @@ export default Vue.extend({
     onCoinSelect(item: any) {
       const token = cloneDeep(item)
       // eslint-disable-next-line no-console
-      console.log('onCoinSelect###token#####', token)
       token.balance = new TokenAmount(0)
       if (this.wallet.connected) {
         if (this.wallet.tokenAccounts && this.wallet.tokenAccounts[token.address]) {
@@ -498,7 +460,6 @@ export default Vue.extend({
       }
     },
     async placeOrder() {
-      console.log('进到##placeOrder####')
       this.swaping = true
       const jupiter = cloneDeep(this.jupiter)
       const { execute } = await jupiter.exchange({
@@ -527,20 +488,14 @@ export default Vue.extend({
         // },
         wallet,
         confirmationWaiterFactory: async (txid) => {
-          console.log('sending transaction')
           await connection.confirmTransaction(txid)
 
-          // await wallet.confirmTransaction(txid)
-          console.log('confirmed transaction')
-
           return await connection.getTransaction(txid, {
-            // return await wallet.getTransaction(txid, {
             commitment: 'confirmed'
           })
         }
       })
       if (swapResult.error) {
-        console.log('swapResult.error####', swapResult.error)
         this.$accessor.transaction.setShowWaiting(false)
         const key = getUnixTs().toString()
         this.$notify.error({
@@ -551,11 +506,6 @@ export default Vue.extend({
           icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
         })
       } else {
-        console.log(`https://explorer.solana.com/tx/${swapResult.txid}`)
-        console.log(
-          `inputAddress=${swapResult.inputAddress.toString()} outputAddress=${swapResult.outputAddress.toString()}`
-        )
-        console.log(`inputAmount=${swapResult.inputAmount} outputAmount=${swapResult.outputAmount}`)
         const description = `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${this.toCoinAmount} ${this.toCoin?.symbol}`
         this.$accessor.transaction.sub({ txid: swapResult.txid, description })
         this.$accessor.transaction.setShowSubmitted(true)

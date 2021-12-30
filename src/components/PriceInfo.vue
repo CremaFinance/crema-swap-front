@@ -21,10 +21,10 @@
       <li v-if="fromCoin && toCoin">
         <span>Exchange Rate</span>
         <div>
-          <span v-if="direction && from2toRate"
+          <span v-if="!direction && from2toRate"
             >1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(from2toRate, 6) }} {{ toCoin.symbol }}</span
           >
-          <span v-else-if="!direction && to2fromRate"
+          <span v-else-if="direction && to2fromRate"
             >1 {{ toCoin.symbol }} ≈ {{ decimalFormat(to2fromRate, 6) }} {{ fromCoin.symbol }}</span
           >
           <svg class="icon" aria-hidden="true" @click="direction = !direction">
@@ -40,9 +40,9 @@
         </div>
       </li> -->
       <li>
-        <span>Price Impact</span>
+        <span>Price Impact{{ priceImpact }}</span>
         <div v-if="priceImpact < 0.1">&lt; 0.1%</div>
-        <div v-else>~ {{ decimalFormat(priceImpact, 1) }} %</div>
+        <div v-else>~ {{ decimalFormat(priceImpact, 2) }} %</div>
       </li>
       <li v-if="toCoin">
         <span>Minimum Received</span>
@@ -54,7 +54,7 @@
         <div>
           {{ lpFee1.amount }}
           {{ lpFee1.symbol }}
-          ({{ lpFee1.pct }}%)
+          ({{ decimalFormat(lpFee1.pct, 2) }}%)
         </div>
       </li>
       <li v-if="fromCoinAmount && lpFee2">
@@ -164,7 +164,8 @@ export default Vue.extend({
     },
     priceImpact(): number {
       if (this.currentRoute && this.currentRoute.priceImpactPct) {
-        return this.currentRoute.priceImpactPct * 100
+        // return this.currentRoute.priceImpactPct * 100
+        return this.currentRoute.priceImpactPct > 1 ? 100 : this.currentRoute.priceImpactPct * 100
       }
       return 0
     },
@@ -240,8 +241,8 @@ export default Vue.extend({
       return 0
     },
     ataAccountLength(): number {
-      if (this.currentRoute && this.currentRoute.marketInfos) {
-        return this.currentRoute.marketInfos.length
+      if (this.depositAndFee) {
+        return this.depositAndFee.ataDepositLength
       }
       return 0
     },
@@ -276,27 +277,11 @@ export default Vue.extend({
     }
     // 'wallet.'
   },
-  watch: {
-    depositAndFee: {
-      handler: 'depositAndFeeWatch',
-      immediate: true
-    },
-    currentRoute: {
-      handler: 'currentRouteWatch',
-      immediate: true
-    }
-  },
   mounted() {
     this.setMarketTimer()
   },
   methods: {
     decimalFormat,
-    depositAndFeeWatch(value: any) {
-      console.log('depositAndFeeWatch###', value)
-    },
-    currentRouteWatch(value: any) {
-      console.log('currentRouteWatch#####', value)
-    },
     getOrderBooks() {
       this.countdown = 0
       this.$emit('updateAmounts')
