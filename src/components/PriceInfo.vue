@@ -40,7 +40,7 @@
         </div>
       </li> -->
       <li>
-        <span>Price Impact{{ priceImpact }}</span>
+        <span>Price Impact</span>
         <div v-if="priceImpact < 0.1">&lt; 0.1%</div>
         <div v-else>~ {{ decimalFormat(priceImpact, 2) }} %</div>
       </li>
