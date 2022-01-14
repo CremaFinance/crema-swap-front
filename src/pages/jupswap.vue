@@ -146,9 +146,9 @@ import { Button } from 'ant-design-vue'
 // const CUSDT = getTokenBySymbol('CUSDT')
 // const CUSDC = getTokenBySymbol('CUSDC')
 
-const SOLANA_RPC_ENDPOINT = 'https://solana-api.projectserum.com'
+// const SOLANA_RPC_ENDPOINT = 'https://solana-api.projectserum.com'
 // const SOLANA_RPC_ENDPOINT = 'https://connect.runnode.com/?apikey=PMkQIG6CxY0ybWmaHRHJ'
-// const SOLANA_RPC_ENDPOINT = 'https://mercurial.rpcpool.com'
+const SOLANA_RPC_ENDPOINT = 'https://mercurial.rpcpool.com'
 // const SOLANA_RPC_ENDPOINT = 'https://mainnet.rpcpool.com'
 /* *******************
  ** Wallet/Keypair of Swapper
@@ -358,18 +358,22 @@ export default Vue.extend({
         this.routesIsLoading = true
         try {
           let jupiter: any = null
-          if (!this.jupiter) {
-            const connection = new Connection(SOLANA_RPC_ENDPOINT)
-            jupiter = await Jupiter.load({
-              connection,
-              cluster: 'mainnet-beta'
-              // user: USER_KEYPAIR // or public key
-            })
-            this.jupiter = jupiter
-          } else {
-            jupiter = cloneDeep(this.jupiter)
-          }
-
+          // if (!this.jupiter) {
+          //   const connection = new Connection(SOLANA_RPC_ENDPOINT)
+          //   jupiter = await Jupiter.load({
+          //     connection,
+          //     cluster: 'mainnet-beta'
+          //     // user: USER_KEYPAIR // or public key
+          //   })
+          //   this.jupiter = jupiter
+          // } else {
+          //   jupiter = cloneDeep(this.jupiter)
+          // }
+          const connection = new Connection(SOLANA_RPC_ENDPOINT)
+          jupiter = await Jupiter.load({
+            connection,
+            cluster: 'mainnet-beta'
+          })
           const routes: any = await jupiter.computeRoutes(
             new PublicKey(this.fromCoin.address),
             new PublicKey(this.toCoin.address),
@@ -381,8 +385,15 @@ export default Vue.extend({
           // const routesResult = routes.routesInfos || routes
           const droutes = cloneDeep(routes)
           const routesResult = Array.isArray(droutes) ? droutes : droutes.routesInfos
-          this.swapRoutes = routesResult
-          this.currentRoute = (routesResult && routesResult[0]) || {}
+          const newRoutesResult = routesResult.filter((item) => {
+            return item.outAmount
+          })
+          // console.log('routesResult####', routesResult)
+          // console.log('newRoutesResult####', newRoutesResult)
+          // this.swapRoutes = routesResult
+          // this.currentRoute = (routesResult && routesResult[0]) || {}
+          this.swapRoutes = newRoutesResult
+          this.currentRoute = (newRoutesResult && newRoutesResult[0]) || {}
           this.routesIsLoading = false
           this.isLoading = false
         } catch (err) {

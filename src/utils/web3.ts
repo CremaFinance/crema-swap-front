@@ -22,9 +22,9 @@ export const web3Config = {
   rpcs: [
     // { url: 'https://free.rpcpool.com', weight: 10 },
     // { url: 'https://mainnet.rpcpool.com', weight: 50 }
-    // { url: 'https://mercurial.rpcpool.com', weight: 50 }
+    { url: 'https://mercurial.rpcpool.com', weight: 50 }
     // { url: 'https://api.rpcpool.com', weight: 10 },
-    { url: 'https://solana-api.projectserum.com', weight: 50 }
+    // { url: 'https://solana-api.projectserum.com', weight: 50 }
     // { url: 'https://raydium.rpcpool.com', weight: 50 },
     // { url: 'https://api.mainnet-beta.solana.com', weight: 10 }
     // { url: 'https://api.devnet.solana.com', weight: 50 }
