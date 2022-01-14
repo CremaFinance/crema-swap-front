@@ -121,6 +121,7 @@ export const actions = actionTree(
         }
 
         liquidityPools[name] = newPool
+        console.log('swapProgramId#####', tokenSwap.swapProgramId.toString())
       }
 
       commit('setInfos', liquidityPools)

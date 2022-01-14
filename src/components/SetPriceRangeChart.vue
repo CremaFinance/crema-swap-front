@@ -143,11 +143,22 @@ export default Vue.extend({
         const current_price = infos.currentPriceView
         const currentTick = price2tick(Math.sqrt(current_price))
 
-        const tickMax = price2tick(Math.sqrt(current_price * 3)) // 当前价格二倍
-        const tickMin = currentTick - (tickMax - currentTick)
+        // const tickMax = price2tick(Math.sqrt(current_price * 3)) // 当前价格二倍
+        // const tickMin = currentTick - (tickMax - currentTick)
+        const tickMax = 800
+        const tickMin = -800
 
         const currentLiquity = infos.current_liquity.toNumber()
         const tick_info_array = infos.tick_info_array
+
+        // console.log('current_price#####', current_price)
+        // console.log('currentTick#####', currentTick)
+        // console.log('tickMax#####', tickMax)
+        // console.log('tickMin#####', tickMin)
+        // console.log('currentLiquity#####', currentLiquity)
+
+        // console.log('tick_info_array########', tick_info_array)
+        // console.log('tick_info_array########', JSON.stringify(tick_info_array))
 
         // 测试
         // const tickMax = 10 // 当前价格二倍
@@ -198,6 +209,9 @@ export default Vue.extend({
           }
         }
 
+        console.log('leftArray######', leftArray)
+        console.log('rightArray######', rightArray)
+
         let leftData: any = []
         let preTickLeft = currentTick
         let nowLiquityLeft = currentLiquity
@@ -247,7 +261,7 @@ export default Vue.extend({
         // console.log('resultData####', resultData)
         this.currentChartData = chartData
         // this.currentChartData = resultData
-        // console.log('chartData####', chartData)
+        console.log('chartData####', chartData)
         this.drawChart(chartData)
         // this.drawChart(resultData)
       }

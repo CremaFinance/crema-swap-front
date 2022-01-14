@@ -56,7 +56,7 @@ export default {
     ],
     script: [
       {
-        src: '/js/iconfont.js?t=2345678111'
+        src: '/js/iconfont.js?t=123456'
       }
     ]
   },

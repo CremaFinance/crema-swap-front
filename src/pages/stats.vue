@@ -7,7 +7,7 @@
         <p class="num">$ <span>100,111.666</span></p>
       </div>
       <div class="volume-banner">
-        <h3 class="title">24 Volume</h3>
+        <h3 class="title">Volume 24H</h3>
         <p class="num">$ <span>100,111.666</span></p>
       </div>
     </div>
@@ -196,6 +196,10 @@ export default Vue.extend({})
       > div {
         width: 100%;
         height: 125px;
+        padding-left: 20px;
+        &:last-child {
+          margin-top: 20px;
+        }
         h3 {
           font-size: 16px;
         }
@@ -212,7 +216,7 @@ export default Vue.extend({})
       width: 100%;
       background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
       border-radius: 20px;
-      border: 1px solid #565c6a;
+      // border: 1px solid #565c6a;
       margin-top: 20px;
       li {
         padding: 20px;
@@ -262,6 +266,7 @@ export default Vue.extend({})
           p {
             font-size: 14px;
             color: #fff;
+            margin-bottom: 0px;
           }
         }
       }

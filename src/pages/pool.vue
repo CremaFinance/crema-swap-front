@@ -81,7 +81,7 @@
         </div>
         <div class="right">
           <div class="set-price-range-chart-box">
-            <SetPriceRangeChart
+            <!-- <SetPriceRangeChart
               v-if="poolInfo && !checkNullObj(poolInfo.userPositionAccountObj)"
               :pool-info="poolInfo"
               :min-price="minPrice"
@@ -89,7 +89,18 @@
               :direction="direction"
               @onChangeMinPrice="priceRangeChangeMin"
               @onChangeMaxPrice="priceRangeChangeMax"
-            ></SetPriceRangeChart>
+            ></SetPriceRangeChart> -->
+
+            <D3Chart
+              v-if="poolInfo && !checkNullObj(poolInfo.userPositionAccountObj)"
+              :pool-info="poolInfo"
+              :min-price="minPrice"
+              :max-price="maxPrice"
+              :direction="direction"
+              @onChangeMinPrice="priceRangeChangeMin"
+              @onChangeMaxPrice="priceRangeChangeMax"
+            ></D3Chart>
+
             <img v-else src="../assets/images/chart-nodata.png" />
           </div>
           <div class="set-price-block-box">

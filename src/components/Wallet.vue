@@ -118,7 +118,8 @@ import { web3Config, commitment } from '@/utils/web3'
 import { WalletAdapter } from '@solana/wallet-adapter-base'
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
 import { SolongWalletAdapter } from '@solana/wallet-adapter-solong'
-import { MathWalletWalletAdapter } from '@solana/wallet-adapter-mathwallet'
+// import { MathWalletWalletAdapter } from '@solana/wallet-adapter-mathwallet'
+// import { MathWalletAdapter } from '@solana/wallet-adapter-mathwallet'
 import { SolletWalletAdapter } from '@solana/wallet-adapter-sollet'
 import { LedgerWalletAdapter, getDerivationPath } from '@solana/wallet-adapter-ledger'
 import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare'
@@ -202,6 +203,13 @@ export default class Wallet extends Vue {
     //   chromeUrl: 'https://chrome.google.com/webstore/detail/math-wallet/afbcbjpbpfadlkmhmclhkeeodmamcflc',
     //   getAdapter() {
     //     return new MathWalletWalletAdapter()
+    //   }
+    // },
+    // MathWallet: {
+    //   website: 'https://mathwallet.org',
+    //   chromeUrl: 'https://chrome.google.com/webstore/detail/math-wallet/afbcbjpbpfadlkmhmclhkeeodmamcflc',
+    //   getAdapter() {
+    //     return new MathWalletAdapter()
     //   }
     // },
     Solong: {
@@ -289,6 +297,7 @@ export default class Wallet extends Vue {
     adapter: null as WalletAdapter | null
   }
 
+  currentWalletName: string = ''
   // autoConnect
   lastWalletName = LocalStorage.get('WALLET_NAME')
 
@@ -380,6 +389,7 @@ export default class Wallet extends Vue {
   }
 
   onConnect() {
+    console.log('1212121212')
     const { name, adapter } = this.connectingWallet
     this.isLoading = false
     this.$accessor.wallet.closeModal().then(() => {
@@ -507,14 +517,17 @@ export default class Wallet extends Vue {
   }
 
   connect(name: string, wallet: WalletInfo) {
-    this.isLoading = true
+    console.log('没进来了吗connect22222#####')
+    if (this.currentWalletName === name) {
+      // this.isLoading = true
+      return
+    }
+    this.currentWalletName = name
     const { providerUrl } = wallet
-    console.log('providerUrl###', providerUrl)
     const adapter = wallet.getAdapter(providerUrl)
-    console.log('adapter####', adapter)
     if (adapter) {
       // adapter.on('ready', onReady)
-      this.isDisConnect = false
+      // this.isDisConnect = false
       adapter.on('connect', this.onConnect)
       adapter.on('disconnect', this.onDisconnect)
       adapter.on(
@@ -523,6 +536,8 @@ export default class Wallet extends Vue {
           this.onWalletError(e)
         }, 500)
       )
+      // adapter.on('error', this.onWalletError)
+
       this.connectingWallet = {
         name,
         adapter
