@@ -191,18 +191,29 @@ export function decimalFormat(num: string, d: number) {
     return num
   }
 
+  const arr = num.split('.')
+
   const minimum = Math.pow(10, -d)
   if (Number(num) < minimum) {
-    return removeEndingZero(num)
+    if (removeEndingZero(arr[1])) {
+      return arr[0] + '.' + removeEndingZero(arr[1])
+    } else {
+      return arr[0]
+    }
   }
 
   const result = fixD(num, d)
+  const arr2 = String(result).split('.')
 
   if (result === '--') {
     return '--'
   }
 
-  return removeEndingZero(String(result))
+  if (removeEndingZero(String(arr2[1]))) {
+    return arr2[0] + '.' + removeEndingZero(String(arr2[1]))
+  } else {
+    return arr2[0]
+  }
 }
 
 export function checkNullObj(obj: object) {

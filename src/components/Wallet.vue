@@ -460,6 +460,7 @@ export default class Wallet extends Vue {
   onWalletError(error: Error) {
     const { name } = this.connectingWallet
     this.isLoading = false
+    this.currentWalletName = ''
 
     if (name) {
       const info = this.wallets[name]
