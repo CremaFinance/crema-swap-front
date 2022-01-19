@@ -24,7 +24,7 @@
           <img src="@/assets/images/icon-Trading@2x.png" alt="" />
           <span>Trading</span>
         </li>
-        <li :class="{ active: $route.name === 'jupswap' }" @click="goUrl('jupswap')">
+        <li :class="{ active: $route.name === 'swap' }" @click="goUrl('swap')">
           <img src="@/assets/images/icon-Swap@2x.png" alt="" />
           <span>Swap</span>
         </li>

@@ -191,7 +191,7 @@ export function decimalFormat(num: string, d: number) {
     return num
   }
 
-  const arr = num.split('.')
+  const arr = String(num).split('.')
 
   const minimum = Math.pow(10, -d)
   if (Number(num) < minimum) {

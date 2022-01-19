@@ -1,9 +1,11 @@
 <template>
-  <div class="container swap-container">
-    <div class="c-title">
-      <span>Swap</span>
-      <div class="buttons">
-        <!-- <Tooltip placement="bottomRight">
+  <div>
+    <SwapTab></SwapTab>
+    <div class="container swap-container">
+      <div class="c-title">
+        <span>Swap</span>
+        <div class="buttons">
+          <!-- <Tooltip placement="bottomRight">
             <template slot="title">
               <span>
                 {{ fromCoin && fromCoin.mintAddress }}
@@ -12,72 +14,72 @@
                 {{ toCoin && toCoin.mintAddress }}
               </span>
             </template> -->
-        <div class="icon-box">
-          <svg class="icon" aria-hidden="true" @click="showAddress = true">
-            <use xlink:href="#icon-a-bianzu181"></use>
-          </svg>
+          <div class="icon-box">
+            <svg class="icon" aria-hidden="true" @click="showAddress = true">
+              <use xlink:href="#icon-a-bianzu181"></use>
+            </svg>
+          </div>
+          <!-- </Tooltip> -->
+          <div style="width: 8px"></div>
+          <SetIcon></SetIcon>
         </div>
-        <!-- </Tooltip> -->
-        <div style="width: 8px"></div>
-        <SetIcon></SetIcon>
       </div>
-    </div>
-    <div class="form-block">
-      <CoinBlock
-        v-model="fromCoinAmount"
-        :coin-name="fromCoin ? fromCoin.symbol : null"
-        :balance="fromCoin ? fromCoin.balance : null"
-        :swap-direction="'From'"
-        @onInput="(amount) => (fromCoinAmount = amount)"
-        @onFocus="
-          () => {
-            fixedFromCoin = true
-          }
-        "
-        @onMax="maxBtnSelect('fromCoin')"
-        @onSelect="openCoinSelect('fromCoin')"
-      ></CoinBlock>
-      <div class="change-icon">
-        <a @click="changeCoinPosition"></a>
+      <div class="form-block">
+        <CoinBlock
+          v-model="fromCoinAmount"
+          :coin-name="fromCoin ? fromCoin.symbol : null"
+          :balance="fromCoin ? fromCoin.balance : null"
+          :swap-direction="'From'"
+          @onInput="(amount) => (fromCoinAmount = amount)"
+          @onFocus="
+            () => {
+              fixedFromCoin = true
+            }
+          "
+          @onMax="maxBtnSelect('fromCoin')"
+          @onSelect="openCoinSelect('fromCoin')"
+        ></CoinBlock>
+        <div class="change-icon">
+          <a @click="changeCoinPosition"></a>
+        </div>
+        <CoinBlock
+          v-model="toCoinAmount"
+          :coin-name="toCoin ? toCoin.symbol : ''"
+          :balance="toCoin ? toCoin.balance : null"
+          :swap-direction="'To'"
+          :disabled="false"
+          :show-max="false"
+          @onInput="(amount) => (toCoinAmount = amount)"
+          @onFocus="
+            () => {
+              fixedFromCoin = false
+            }
+          "
+          @onMax="maxBtnSelect('toCoin')"
+          @onSelect="openCoinSelect('toCoin')"
+        ></CoinBlock>
       </div>
-      <CoinBlock
-        v-model="toCoinAmount"
-        :coin-name="toCoin ? toCoin.symbol : ''"
-        :balance="toCoin ? toCoin.balance : null"
-        :swap-direction="'To'"
-        :disabled="false"
-        :show-max="false"
-        @onInput="(amount) => (toCoinAmount = amount)"
-        @onFocus="
-          () => {
-            fixedFromCoin = false
-          }
-        "
-        @onMax="maxBtnSelect('toCoin')"
-        @onSelect="openCoinSelect('toCoin')"
-      ></CoinBlock>
-    </div>
-    <div v-if="!wallet.connected" class="swap-btn-content">
-      <Button class="swap-btn" @click="$accessor.wallet.openModal"> Connect Wallet </Button>
-    </div>
-    <div v-else class="swap-btn-content">
-      <Button
-        class="swap-btn"
-        :loading="loading"
-        :disabled="
-          !poolInfo ||
-          insufficientLiquidity ||
-          loading ||
-          !fromCoin ||
-          !toCoin ||
-          !Number(fromCoinAmount) ||
-          swaping ||
-          gt(fromCoinAmount, fromCoin && fromCoin.balance ? fromCoin.balance.fixed() : '0')
-        "
-        @click="placeOrder"
-      >
-        <!-- Swap -->
-        <!-- {{
+      <div v-if="!wallet.connected" class="swap-btn-content">
+        <Button class="swap-btn" @click="$accessor.wallet.openModal"> Connect Wallet </Button>
+      </div>
+      <div v-else class="swap-btn-content">
+        <Button
+          class="swap-btn"
+          :loading="loading"
+          :disabled="
+            !poolInfo ||
+            insufficientLiquidity ||
+            loading ||
+            !fromCoin ||
+            !toCoin ||
+            !Number(fromCoinAmount) ||
+            swaping ||
+            gt(fromCoinAmount, fromCoin && fromCoin.balance ? fromCoin.balance.fixed() : '0')
+          "
+          @click="placeOrder"
+        >
+          <!-- Swap -->
+          <!-- {{
             Number(fromCoinAmount) == 0
               ? 'Enter an amount'
               : insufficientLiquidity
@@ -86,31 +88,32 @@
               ? 'Insufficient balance'
               : 'Swap'
           }} -->
-        {{ swapBtnText }}
-      </Button>
+          {{ swapBtnText }}
+        </Button>
+      </div>
+      <SwapInfo
+        v-show="fromCoin && toCoin && poolInfo"
+        :from-coin="fromCoin"
+        :to-coin="toCoin"
+        :from-coin-amount="fromCoinAmount"
+        :to-coin-amount="toCoinAmount"
+        :pool-info="poolInfo"
+        :fixed-from-coin="fixedFromCoin"
+      ></SwapInfo>
+      <CoinSelect
+        v-if="showCoinSelect"
+        :existing-coins="existingCoins"
+        :last-select-coin="lastSelectCoin"
+        @onClose="() => (showCoinSelect = false)"
+        @onSelect="onCoinSelect"
+      ></CoinSelect>
+      <MintAddress
+        v-if="showAddress"
+        :from-coin="fromCoin"
+        :to-coin="toCoin"
+        @onClose="() => (showAddress = false)"
+      ></MintAddress>
     </div>
-    <SwapInfo
-      v-show="fromCoin && toCoin && poolInfo"
-      :from-coin="fromCoin"
-      :to-coin="toCoin"
-      :from-coin-amount="fromCoinAmount"
-      :to-coin-amount="toCoinAmount"
-      :pool-info="poolInfo"
-      :fixed-from-coin="fixedFromCoin"
-    ></SwapInfo>
-    <CoinSelect
-      v-if="showCoinSelect"
-      :existing-coins="existingCoins"
-      :last-select-coin="lastSelectCoin"
-      @onClose="() => (showCoinSelect = false)"
-      @onSelect="onCoinSelect"
-    ></CoinSelect>
-    <MintAddress
-      v-if="showAddress"
-      :from-coin="fromCoin"
-      :to-coin="toCoin"
-      @onClose="() => (showAddress = false)"
-    ></MintAddress>
   </div>
 </template>
 <script lang="ts">
@@ -126,8 +129,8 @@ import { TokenAmount, gt } from '@/utils/safe-math'
 import { Button } from 'ant-design-vue'
 import { Numberu64, Numberu128, TokenSwap } from '@/tokenSwap'
 
-const CUSDT = getTokenBySymbol('CUSDT')
-const CUSDC = getTokenBySymbol('CUSDC')
+const USDT = getTokenBySymbol('USDT')
+const USDC = getTokenBySymbol('USDC')
 
 export default Vue.extend({
   components: {
@@ -136,8 +139,8 @@ export default Vue.extend({
   data() {
     return {
       showCoinSelect: false,
-      fromCoin: CUSDT as TokenInfo | null,
-      toCoin: CUSDC as TokenInfo | null,
+      fromCoin: USDT as TokenInfo | null,
+      toCoin: USDC as TokenInfo | null,
       fromCoinAmount: '',
       toCoinAmount: '',
       currentCoinKey: 'fromCoin',
@@ -246,12 +249,6 @@ export default Vue.extend({
   },
   mounted() {
     this.updateCoinInfo(this.wallet.tokenAccounts)
-
-    const test1 = new Numberu128(10)
-    const test2 = new Numberu128(-10)
-
-    console.log('test1#####', test1.toBuffer())
-    console.log('test2#####', test2.toBuffer())
   },
   methods: {
     gt,

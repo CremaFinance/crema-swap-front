@@ -1,10 +1,11 @@
 <template>
   <div class="swap-wrapper">
-    <div class="powerd">
+    <!-- <div class="powerd">
       <span>Powered by</span>
       <img src="../assets/images/jupiter-logo.png" />
       <span>Jupiter</span>
-    </div>
+    </div> -->
+    <SwapTab></SwapTab>
 
     <!-- <div class="error-note">
       <svg class="icon" aria-hidden="true">

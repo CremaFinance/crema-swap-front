@@ -10,9 +10,9 @@
   >
     <div class="notice-container">
       <p>
-        Please note that this product is on beta version, which is mainly for testing purpose. The swap and pools
-        sections are not connected yet. The liquidity you add might not be able to generate fees for you at the moment.
-        This beta will be updated soon to bring you more functionality.
+        Please note that this product is on beta version, which is mainly for testing purposes. The swap and pools
+        sections are only connected under lite mode currently. This beta will be updated soon to bring you more
+        functionality.
       </p>
       <Button class="confirm-btn" @click="$emit('onClose')">Got it</Button>
     </div>

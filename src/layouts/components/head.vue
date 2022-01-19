@@ -11,8 +11,8 @@
           <span>Trading</span>
         </a>
         <nuxt-link
-          to="/jupswap"
-          :class="$route.path === '/jupswap' || $route.path === '/' ? 'nuxt-link-exact-active nuxt-link-active' : ''"
+          to="/swap"
+          :class="$route.path === '/swap' || $route.path === '/' ? 'nuxt-link-exact-active nuxt-link-active' : ''"
         >
           <img src="../../assets/images/icon-Swap@2x.png" />
           <span>Swap</span>
