@@ -6,10 +6,10 @@
     </a>
     <div class="left">
       <nav>
-        <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
+        <!-- <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
           <img src="../../assets/images/icon-Trading@2x.png" />
           <span>Trading</span>
-        </a>
+        </a> -->
         <nuxt-link
           to="/swap"
           :class="$route.path === '/swap' || $route.path === '/' ? 'nuxt-link-exact-active nuxt-link-active' : ''"

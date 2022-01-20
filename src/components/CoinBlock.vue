@@ -119,7 +119,7 @@ export default Vue.extend({
 .coin-block {
   position: relative;
   width: 460px;
-  height: 100px;
+  height: 80px;
   background: #23262b;
   box-shadow: 0px 0px 2px 0px #535966, 0px 2px 3px 1px #1a1c1f;
   border-radius: 20px;
@@ -127,11 +127,11 @@ export default Vue.extend({
   .coin-box {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 8px;
     padding-right: 20px;
     .coin-name {
       width: 148px;
-      height: 80px;
+      height: 64px;
       border-radius: 12px;
       border: 1px solid #3f434e;
       display: flex;
@@ -140,8 +140,8 @@ export default Vue.extend({
       background: linear-gradient(270deg, #3e434e 0%, #2f333b 100%);
       box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
       img {
-        width: 30px;
-        height: 30px;
+        width: 36px;
+        height: 36px;
         border-radius: 100%;
         margin-right: 6px;
       }
@@ -163,7 +163,7 @@ export default Vue.extend({
       }
     }
     .right {
-      height: 80px;
+      height: 64px;
       flex: 1;
       .balance-box {
         display: flex;

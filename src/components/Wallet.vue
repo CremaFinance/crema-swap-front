@@ -435,6 +435,7 @@ export default class Wallet extends Vue {
   }
 
   disconnect() {
+    this.currentWalletName = ''
     this.isDisConnect = true
     this.connectingWallet = {
       name: null,

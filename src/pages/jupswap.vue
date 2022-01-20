@@ -222,7 +222,9 @@ export default Vue.extend({
     async currentRoute(info: any) {
       if (info) {
         const route: any = cloneDeep(info)
+        // console.log('route####', route)
         const depositAndFee = await route.getDepositAndFee()
+        // console.log('depositAndFee####', depositAndFee)
         this.depositAndFee = cloneDeep(depositAndFee)
       }
     },
@@ -371,10 +373,19 @@ export default Vue.extend({
           //   jupiter = cloneDeep(this.jupiter)
           // }
           const connection = new Connection(SOLANA_RPC_ENDPOINT)
-          jupiter = await Jupiter.load({
-            connection,
-            cluster: 'mainnet-beta'
-          })
+          if (!this.wallet.originPub) {
+            jupiter = await Jupiter.load({
+              connection,
+              cluster: 'mainnet-beta'
+            })
+          } else {
+            jupiter = await Jupiter.load({
+              connection,
+              cluster: 'mainnet-beta',
+              user: this.wallet.originPub
+            })
+          }
+
           const routes: any = await jupiter.computeRoutes(
             new PublicKey(this.fromCoin.address),
             new PublicKey(this.toCoin.address),
@@ -487,6 +498,8 @@ export default Vue.extend({
         this.toCoin.decimals
       )
 
+      console.log('toCoinAmount####', toCoinAmount)
+
       this.$accessor.transaction.setTransactionDesc(
         `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${toCoinAmount} ${this.toCoin?.symbol}`
       )
@@ -519,7 +532,7 @@ export default Vue.extend({
           icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
         })
       } else {
-        const description = `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${this.toCoinAmount} ${this.toCoin?.symbol}`
+        const description = `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${toCoinAmount} ${this.toCoin?.symbol}`
         this.$accessor.transaction.sub({ txid: swapResult.txid, description })
         this.$accessor.transaction.setShowSubmitted(true)
       }

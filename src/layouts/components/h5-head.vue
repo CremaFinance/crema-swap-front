@@ -17,13 +17,13 @@
     </div>
     <div v-show="showMenu" class="menu-list-box">
       <ul class="menu-list">
-        <li @click="goToTrade()">
-          <!-- <svg class="icon" aria-hidden="true">
+        <!-- <li @click="goToTrade()">
+          <svg class="icon" aria-hidden="true">
             <use xlink:href="#iconicon-Trading"></use>
-          </svg> -->
+          </svg>
           <img src="@/assets/images/icon-Trading@2x.png" alt="" />
           <span>Trading</span>
-        </li>
+        </li> -->
         <li :class="{ active: $route.name === 'swap' }" @click="goUrl('swap')">
           <img src="@/assets/images/icon-Swap@2x.png" alt="" />
           <span>Swap</span>
