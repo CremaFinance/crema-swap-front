@@ -35,9 +35,9 @@ export default Vue.extend({
     return {
       list: [
         {
-          fee: '0.05% fee',
+          fee: '0.01% fee',
           text: 'Best for stable pairs',
-          value: '0.05%'
+          value: '0.01%'
         },
         {
           fee: '0.3% fee',

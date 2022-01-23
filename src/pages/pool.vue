@@ -427,7 +427,7 @@ export default Vue.extend({
           this.defaultMaxPrice = maxPrice
 
           // 设置当前fee tier
-          if (value.feeView === 0.05) {
+          if (value.feeView === 0.01) {
             this.currentFeeTier = 0
           } else if (value.feeView === 0.3) {
             this.currentFeeTier = 1
