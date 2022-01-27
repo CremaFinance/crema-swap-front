@@ -4,11 +4,15 @@
     <div class="banner-box">
       <div class="tvl-banner">
         <h3 class="title">TVL</h3>
-        <p class="num">$ <span>100,111.666</span></p>
+        <p class="num">
+          $ <span>{{ decimalFormat(TVL, 2) }}</span>
+        </p>
       </div>
       <div class="volume-banner">
         <h3 class="title">Volume 24H</h3>
-        <p class="num">$ <span>100,111.666</span></p>
+        <p class="num">
+          $ <span>{{ decimalFormat(Volume, 2) }}</span>
+        </p>
       </div>
     </div>
     <table class="data-table">
@@ -27,34 +31,34 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="i in 4" :key="i">
+        <tr v-for="(item, index) in list" :key="index">
           <td>
             <img src="../assets/coins/usdt.png" />
             <img src="../assets/coins/usdc.png" />
-            <span>USDT-USDC</span>
-            <i>0.5%</i>
+            <span>{{ item.name }}</span>
+            <i>0.01%</i>
           </td>
-          <td>$3,626.01m</td>
-          <td>$31.01m</td>
+          <td>${{ decimalFormat(item.tvl_in_usd, 2) }}</td>
+          <td>${{ decimalFormat(item.vol_in_usd, 2) }}</td>
         </tr>
       </tbody>
     </table>
     <ul class="h5-data-list">
-      <li v-for="i in 4" :key="i">
+      <li v-for="(item, index) in list" :key="index">
         <div class="top">
           <img src="../assets/coins/usdt.png" />
           <img class="last" src="../assets/coins/usdc.png" />
-          <span>USDT-USDC</span>
-          <i>0.5%</i>
+          <span>{{ item.name }}</span>
+          <i>0.01%</i>
         </div>
         <div class="block">
           <div class="left">
             <h3>TVL</h3>
-            <p>$3,626.01m</p>
+            <p>${{ decimalFormat(item.tvl_in_usd, 2) }}</p>
           </div>
           <div class="right">
             <h3>Volume(24H)</h3>
-            <p>$31.01m</p>
+            <p>${{ decimalFormat(item.vol_in_usd, 2) }}</p>
           </div>
         </div>
       </li>
@@ -63,7 +67,32 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-export default Vue.extend({})
+import { LIQUIDITY_POOLS } from '@/utils/pools'
+import { number } from 'echarts'
+import { decimalFormat } from '@/utils'
+export default Vue.extend({
+  data() {
+    return {
+      list: [],
+      TVL: 0,
+      Volume: 0
+    }
+  },
+  watch: {},
+  mounted() {
+    this.getUct()
+  },
+  methods: {
+    decimalFormat,
+    getUct() {
+      this.$axios.get(`https://api.crema.finance/tvl/24hour`).then((res) => {
+        this.list = res.data.pairs
+        this.TVL = res.data.total_tvl_in_usd
+        this.Volume = res.data.total_vol_in_usd
+      })
+    }
+  }
+})
 </script>
 <style lang="less" scoped>
 .stats-container {

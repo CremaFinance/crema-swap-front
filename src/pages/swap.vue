@@ -121,13 +121,17 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 // import { Tooltip } from 'ant-design-vue'
 import { TokenInfo, getTokenBySymbol } from '@/utils/tokens'
-import { getUnixTs, checkNullObj } from '@/utils'
+import { getUnixTs, checkNullObj, decimalFormat } from '@/utils'
 import { get, cloneDeep, clone } from 'lodash-es'
 import { swap, getOutAmount } from '@/utils/swap'
 import { inputRegex, escapeRegExp } from '@/utils/regex'
 import { TokenAmount, gt } from '@/utils/safe-math'
 import { Button } from 'ant-design-vue'
-import { Numberu64, Numberu128, TokenSwap } from '@/tokenSwap'
+// import { Numberu64, Numberu128, TokenSwap } from '@/tokenSwap'
+
+import { TokenSwap } from '@cremafinance/crema-sdk'
+import { Connection, PublicKey, Keypair, Account } from '@solana/web3.js'
+import Decimal from 'decimal.js'
 
 const USDT = getTokenBySymbol('USDT')
 const USDC = getTokenBySymbol('USDC')
@@ -153,7 +157,9 @@ export default Vue.extend({
       existingCoins: '', // 已选择的一边币种
       lastSelectCoin: '', // 当前位置上次选择的币种
       // Insufficient liquidity
-      insufficientLiquidity: false
+      insufficientLiquidity: false,
+      // 新sdk测试部分
+      swapSdk: null as any
     }
   },
   head: {
@@ -209,8 +215,11 @@ export default Vue.extend({
       deep: true
     },
     poolInfo: {
-      handler(value: any) {
+      async handler(value: any) {
         if (value) {
+          const swap = await new TokenSwap(this.$web3, value.swapProgramId, value.tokenSwap, null)
+          this.swapSdk = swap
+          this.updateAmounts()
           this.updateAmounts()
         } else {
           // if (this.fixedFromCoin) {
@@ -272,22 +281,46 @@ export default Vue.extend({
     async updateAmounts() {
       if (!this.poolInfo) return
       const slippage = Number(this.$accessor.slippage) // 滑点
+      const direct =
+        this.fromCoin?.mintAddress === this.poolInfo.coin.mintAddress &&
+        this.toCoin?.mintAddress === this.poolInfo.pc.mintAddress
+          ? 0
+          : 1
       if (this.fromCoin && this.toCoin && (this.fromCoinAmount || this.toCoinAmount)) {
         this.loading = true
+        let swap: any = this.swapSdk
+        if (this.swapSdk) {
+          swap = await this.swapSdk.load()
+        } else {
+          const swapSdk: any = new TokenSwap(this.$web3, this.poolInfo.swapProgramId, this.poolInfo.tokenSwap, null)
+          this.swapSdk = swapSdk
+          swap = await swapSdk.load()
+        }
         if (this.fixedFromCoin) {
           const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
-          const { amountOut, amountOutWithSlippage } = await getOutAmount(
-            this.$web3,
-            this.poolInfo,
-            this.fromCoin?.mintAddress,
-            this.toCoin?.mintAddress,
-            source_amount,
-            slippage
-          )
-
-          if (Number(amountOut.fixed())) {
+          // const { amountOut, amountOutWithSlippage, dst } = await getOutAmount(
+          //   this.$web3,
+          //   this.poolInfo,
+          //   this.fromCoin?.mintAddress,
+          //   this.toCoin?.mintAddress,
+          //   source_amount,
+          //   slippage
+          // )
+          // if (Number(amountOut.fixed())) {
+          //   this.insufficientLiquidity = false
+          //   this.toCoinAmount = amountOut.fixed()
+          // } else {
+          //   this.insufficientLiquidity = true
+          //   this.toCoinAmount = '0'
+          // }
+          // this.loading = false
+          // console.log('amountOut####', amountOut.fixed())
+          const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
+          console.log('amountOut#####', amountOut)
+          if (amountOut) {
             this.insufficientLiquidity = false
-            this.toCoinAmount = amountOut.fixed()
+            const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimals)
+            this.toCoinAmount = decimalFormat(String(toCoinAmount), this.toCoin?.decimals)
           } else {
             this.insufficientLiquidity = true
             this.toCoinAmount = '0'
@@ -295,18 +328,28 @@ export default Vue.extend({
           this.loading = false
         } else {
           const source_amount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
-
-          const { amountOut, amountOutWithSlippage } = await getOutAmount(
-            this.$web3,
-            this.poolInfo,
-            this.toCoin?.mintAddress,
-            this.fromCoin?.mintAddress,
-            source_amount,
-            slippage
-          )
-          if (Number(amountOut.fixed())) {
+          // const { amountOut, amountOutWithSlippage } = await getOutAmount(
+          //   this.$web3,
+          //   this.poolInfo,
+          //   this.toCoin?.mintAddress,
+          //   this.fromCoin?.mintAddress,
+          //   source_amount,
+          //   slippage
+          // )
+          // if (Number(amountOut.fixed())) {
+          //   this.insufficientLiquidity = false
+          //   this.fromCoinAmount = amountOut.fixed()
+          // } else {
+          //   this.insufficientLiquidity = true
+          //   this.fromCoinAmount = '0'
+          // }
+          // this.loading = false
+          const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
+          console.log('amountOut#####', amountOut)
+          if (amountOut) {
             this.insufficientLiquidity = false
-            this.fromCoinAmount = amountOut.fixed()
+            const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimals)
+            this.fromCoinAmount = decimalFormat(String(fromCoinAmount), this.fromCoin?.decimals)
           } else {
             this.insufficientLiquidity = true
             this.fromCoinAmount = '0'

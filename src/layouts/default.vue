@@ -99,7 +99,7 @@ export default Vue.extend({
 }
 @media screen and (max-width: 1366px) {
   .body-container {
-    padding-top: 150px;
+    padding-top: 120px;
   }
 }
 .h5-header-container {

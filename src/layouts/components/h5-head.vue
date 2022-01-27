@@ -53,6 +53,10 @@
             </svg>
           </div>
         </li>
+        <li :class="{ active: $route.name === 'stats' }" @click="goUrl('stats')">
+          <img src="@/assets/images/stats.png" alt="" />
+          <span>Stats</span>
+        </li>
         <!-- <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
           <img src="@/assets/images/icon-Farming@2x.png" alt="" />
           <span>Farming</span>
