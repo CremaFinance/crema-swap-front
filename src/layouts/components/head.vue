@@ -39,10 +39,10 @@
           <img src="../../assets/images/icon-Staking@2x.png" />
           <span>Staking</span>
         </nuxt-link> -->
-        <nuxt-link to="/stats">
+        <!-- <nuxt-link to="/stats">
           <img src="../../assets/images/stats.png" />
           <span>Stats</span>
-        </nuxt-link>
+        </nuxt-link> -->
       </nav>
     </div>
     <div class="right">
