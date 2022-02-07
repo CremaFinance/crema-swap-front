@@ -171,6 +171,19 @@ export default class Wallet extends Vue {
         return new PhantomWalletAdapter()
       }
     },
+    Blocto: {
+      website: 'https://blocto.portto.io',
+      getAdapter() {
+        return new BloctoWalletAdapter()
+      }
+    },
+    Slope: {
+      website: 'https://slope.finance',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/slope-finance-wallet/pocmplpaccanhmnllbbkpgfliimjljgo',
+      getAdapter() {
+        return new SlopeWalletAdapter()
+      }
+    },
     'Solflare Extension': {
       website: 'https://solflare.com',
       firefoxUrl: 'https://addons.mozilla.org/en-US/firefox/addon/solflare-wallet',
@@ -226,23 +239,11 @@ export default class Wallet extends Vue {
         return new Coin98WalletAdapter()
       }
     },
-    Blocto: {
-      website: 'https://blocto.portto.io',
-      getAdapter() {
-        return new BloctoWalletAdapter()
-      }
-    },
+
     Safepal: {
       website: 'https://safepal.io',
       getAdapter() {
         return new SafePalWalletAdapter()
-      }
-    },
-    Slope: {
-      website: 'https://slope.finance',
-      chromeUrl: 'https://chrome.google.com/webstore/detail/slope-finance-wallet/pocmplpaccanhmnllbbkpgfliimjljgo',
-      getAdapter() {
-        return new SlopeWalletAdapter()
       }
     },
     Bitpie: {
@@ -389,7 +390,6 @@ export default class Wallet extends Vue {
   }
 
   onConnect() {
-    console.log('1212121212')
     const { name, adapter } = this.connectingWallet
     this.isLoading = false
     this.$accessor.wallet.closeModal().then(() => {

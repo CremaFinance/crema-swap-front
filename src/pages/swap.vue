@@ -315,8 +315,13 @@ export default Vue.extend({
           // }
           // this.loading = false
           // console.log('amountOut####', amountOut.fixed())
-          const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
-          console.log('amountOut#####', amountOut)
+          // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
+          const res: any =
+            direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
+
+          const amountOut = (res && res.amountOut.toNumber()) || 0
+          // console.log('amountOut#####', amountOut)
+
           if (amountOut) {
             this.insufficientLiquidity = false
             const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimals)
@@ -344,8 +349,13 @@ export default Vue.extend({
           //   this.fromCoinAmount = '0'
           // }
           // this.loading = false
-          const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
-          console.log('amountOut#####', amountOut)
+          // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
+          const res: any =
+            direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
+
+          const amountOut = (res && res.amountOut.toNumber()) || 0
+          // console.log('amountOut#####', amountOut)
+
           if (amountOut) {
             this.insufficientLiquidity = false
             const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimals)
