@@ -216,8 +216,13 @@ export default Vue.extend({
     },
     poolInfo: {
       async handler(value: any) {
-        if (value) {
+        if (value && value.swapProgramId && value.tokenSwap) {
+          // console.log('value.swapProgramId###', value.swapProgramId.toString())
+          // console.log('value.tokenSwap###', value.tokenSwap.toString())
           const swap = await new TokenSwap(this.$web3, value.swapProgramId, value.tokenSwap, null)
+          // let url = 'https://mercurial.rpcpool.com'
+          // let conn = new Connection(url, 'recent')
+          // const swap = await new TokenSwap(conn, value.swapProgramId, value.tokenSwap, null)
           this.swapSdk = swap
           this.updateAmounts()
           this.updateAmounts()
@@ -234,6 +239,10 @@ export default Vue.extend({
       deep: true
     },
     fromCoinAmount(newAmount: string, oldAmount: string) {
+      if (!newAmount || !Number(newAmount)) {
+        this.toCoinAmount = ''
+        return
+      }
       this.$nextTick(() => {
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.fromCoinAmount = oldAmount
@@ -245,6 +254,10 @@ export default Vue.extend({
       })
     },
     toCoinAmount(newAmount: string, oldAmount: string) {
+      if (!newAmount || !Number(newAmount)) {
+        this.fromCoinAmount = ''
+        return
+      }
       this.$nextTick(() => {
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.toCoinAmount = oldAmount
@@ -296,8 +309,12 @@ export default Vue.extend({
           this.swapSdk = swapSdk
           swap = await swapSdk.load()
         }
+
         if (this.fixedFromCoin) {
-          const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+          // const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toString()
+          // console.log('this.fromCoin?.decimals####', this.fromCoin?.decimals)
+          const decimal = new Decimal(Math.pow(10, this.fromCoin?.decimals))
+          const source_amount = new Decimal(this.fromCoinAmount).mul(decimal)
           // const { amountOut, amountOutWithSlippage, dst } = await getOutAmount(
           //   this.$web3,
           //   this.poolInfo,
@@ -318,9 +335,11 @@ export default Vue.extend({
           // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
-
+          // console.log('1111source_amount####', source_amount)
+          // const DECIMALS = new Decimal(1000000)
+          // console.log('res.amountOut.div(DECIMALS).toString()####', res.amountOut.div(DECIMALS).toString())
           const amountOut = (res && res.amountOut.toNumber()) || 0
-          // console.log('amountOut#####', amountOut)
+          // console.log('1111amountOut#####', amountOut, '####direct####', direct)
 
           if (amountOut) {
             this.insufficientLiquidity = false
@@ -331,8 +350,19 @@ export default Vue.extend({
             this.toCoinAmount = '0'
           }
           this.loading = false
+
+          // let url = 'https://mercurial.rpcpool.com'
+          // let conn = new Connection(url, 'recent')
+          // let programID = new PublicKey('6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319')
+          // let swapKey = new PublicKey('8J3avAjuRfL2CYFKKDwhhceiRoajhrHv9kN5nUiEnuBG') //CUSDT-CUSDC
+          // const testswap = await new TokenSwap(conn, programID, swapKey, null).load()
+
+          // let testres = testswap.preSwapB(new Decimal(1000000000000000000000000))
+          // console.log('amountOut          :', testres.amountOut.toString())
         } else {
-          const source_amount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+          // const source_amount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toString()
+          const decimal = new Decimal(Math.pow(10, this.toCoin?.decimals))
+          const source_amount = new Decimal(this.toCoinAmount).mul(decimal)
           // const { amountOut, amountOutWithSlippage } = await getOutAmount(
           //   this.$web3,
           //   this.poolInfo,
@@ -350,11 +380,12 @@ export default Vue.extend({
           // }
           // this.loading = false
           // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
+          // console.log('2222source_amount####', source_amount)
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
 
           const amountOut = (res && res.amountOut.toNumber()) || 0
-          // console.log('amountOut#####', amountOut)
+          // console.log('22222amountOut#####', amountOut, '###direct###', direct)
 
           if (amountOut) {
             this.insufficientLiquidity = false
