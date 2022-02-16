@@ -22,7 +22,9 @@ export const web3Config = {
   rpcs: [
     // { url: 'https://free.rpcpool.com', weight: 10 },
     // { url: 'https://mainnet.rpcpool.com', weight: 50 }
-    { url: 'https://mercurial.rpcpool.com', weight: 50 }
+    // { url: 'https://mercurial.rpcpool.com', weight: 50 }
+    // { url: 'https://stage.mainnet.rpcpool.com/2ee3d7c0b48f6c361a06459b1d77', weight: 50 }
+    { url: 'https://crema.rpcpool.com', weight: 50 }
     // { url: 'https://api.rpcpool.com', weight: 10 },
     // { url: 'https://solana-api.projectserum.com', weight: 50 }
     // { url: 'https://raydium.rpcpool.com', weight: 50 },
