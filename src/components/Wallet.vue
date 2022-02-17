@@ -246,12 +246,12 @@ export default class Wallet extends Vue {
         return new SafePalWalletAdapter()
       }
     },
-    Bitpie: {
-      website: 'https://bitpie.com',
-      getAdapter() {
-        return new BitpieWalletAdapter()
-      }
-    },
+    // Bitpie: {
+    //   website: 'https://bitpie.com',
+    //   getAdapter() {
+    //     return new BitpieWalletAdapter()
+    //   }
+    // },
     // Torus: {
     //   website: 'https://tor.us',
     //   getAdapter() {

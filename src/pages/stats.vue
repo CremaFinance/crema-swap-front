@@ -39,7 +39,8 @@
             <i>0.01%</i>
           </td>
           <td>${{ decimalFormat(item.tvl_in_usd, 2) }}</td>
-          <td>${{ decimalFormat(item.vol_in_usd, 2) }}</td>
+          <!-- <td>${{ decimalFormat(item.vol_in_usd, 2) }}</td> -->
+          <td>${{ decimalFormat(Volume, 2) }}</td>
         </tr>
       </tbody>
     </table>
@@ -58,7 +59,8 @@
           </div>
           <div class="right">
             <h3>Volume(24H)</h3>
-            <p>${{ decimalFormat(item.vol_in_usd, 2) }}</p>
+            <!-- <p>${{ decimalFormat(item.vol_in_usd, 2) }}</p> -->
+            <p>${{ decimalFormat(Volume, 2) }}</p>
           </div>
         </div>
       </li>
@@ -81,6 +83,7 @@ export default Vue.extend({
   watch: {},
   mounted() {
     this.getUct()
+    this.getJupiterDay()
   },
   methods: {
     decimalFormat,
@@ -88,7 +91,21 @@ export default Vue.extend({
       this.$axios.get(`https://api.crema.finance/tvl/24hour`).then((res) => {
         this.list = res.data.pairs
         this.TVL = res.data.total_tvl_in_usd
-        this.Volume = res.data.total_vol_in_usd
+        // this.Volume = res.data.total_vol_in_usd
+      })
+    },
+    getJupiterDay() {
+      this.$axios.get(`https://stats.jup.ag/info/day`).then((res) => {
+        console.log('getJupiterDay####res####', res)
+        if (res && res.lastXVolumeByAMMs) {
+          const cremaAmount = res.lastXVolumeByAMMs.filter((item) => item.amm === 'Crema')
+          if (cremaAmount && cremaAmount[0] && cremaAmount[0].amount) {
+            this.Volume = cremaAmount[0].amount
+          }
+        }
+        // this.list = res.data.pairs
+        // this.TVL = res.data.total_tvl_in_usd
+        // this.Volume = res.data.total_vol_in_usd
       })
     }
   }
