@@ -310,6 +310,14 @@ export default Vue.extend({
           swap = await swapSdk.load()
         }
 
+        if (swap && swap.ticks && swap.ticks.length > 1) {
+          this.insufficientLiquidity = false
+        } else {
+          this.insufficientLiquidity = true
+          this.loading = false
+          return
+        }
+
         if (this.fixedFromCoin) {
           // const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toString()
           // console.log('this.fromCoin?.decimals####', this.fromCoin?.decimals)

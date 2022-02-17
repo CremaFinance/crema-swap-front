@@ -33,22 +33,24 @@
       <tbody>
         <tr v-for="(item, index) in list" :key="index">
           <td>
-            <img src="../assets/coins/usdt.png" />
-            <img src="../assets/coins/usdc.png" />
+            <!-- <img src="../assets/coins/usdt.png" />
+            <img src="../assets/coins/usdc.png" /> -->
+            <img :src="importIcon(`/coins/${item.name.split('-')[0].toLowerCase()}.png`)" />
+            <img class="last" :src="importIcon(`/coins/${item.name.split('-')[1].toLowerCase()}.png`)" />
             <span>{{ item.name }}</span>
             <i>0.01%</i>
           </td>
           <td>${{ decimalFormat(item.tvl_in_usd, 2) }}</td>
-          <!-- <td>${{ decimalFormat(item.vol_in_usd, 2) }}</td> -->
-          <td>${{ decimalFormat(Volume, 2) }}</td>
+          <td>${{ decimalFormat(item.vol_in_usd, 2) }}</td>
         </tr>
       </tbody>
     </table>
     <ul class="h5-data-list">
       <li v-for="(item, index) in list" :key="index">
         <div class="top">
-          <img src="../assets/coins/usdt.png" />
-          <img class="last" src="../assets/coins/usdc.png" />
+          <img :src="importIcon(`/coins/${item.name.split('-')[0].toLowerCase()}.png`)" />
+          <img class="last" :src="importIcon(`/coins/${item.name.split('-')[1].toLowerCase()}.png`)" />
+          <!-- <img class="last" src="../assets/coins/usdc.png" /> -->
           <span>{{ item.name }}</span>
           <i>0.01%</i>
         </div>
@@ -59,8 +61,7 @@
           </div>
           <div class="right">
             <h3>Volume(24H)</h3>
-            <!-- <p>${{ decimalFormat(item.vol_in_usd, 2) }}</p> -->
-            <p>${{ decimalFormat(Volume, 2) }}</p>
+            <p>${{ decimalFormat(item.vol_in_usd, 2) }}</p>
           </div>
         </div>
       </li>
@@ -72,6 +73,7 @@ import Vue from 'vue'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
 import { number } from 'echarts'
 import { decimalFormat } from '@/utils'
+import importIcon from '@/utils/import-icon'
 export default Vue.extend({
   data() {
     return {
@@ -83,31 +85,32 @@ export default Vue.extend({
   watch: {},
   mounted() {
     this.getUct()
-    this.getJupiterDay()
+    // this.getJupiterDay()
   },
   methods: {
+    importIcon,
     decimalFormat,
     getUct() {
       this.$axios.get(`https://api.crema.finance/tvl/24hour`).then((res) => {
         this.list = res.data.pairs
         this.TVL = res.data.total_tvl_in_usd
-        // this.Volume = res.data.total_vol_in_usd
-      })
-    },
-    getJupiterDay() {
-      this.$axios.get(`https://stats.jup.ag/info/day`).then((res) => {
-        console.log('getJupiterDay####res####', res)
-        if (res && res.lastXVolumeByAMMs) {
-          const cremaAmount = res.lastXVolumeByAMMs.filter((item) => item.amm === 'Crema')
-          if (cremaAmount && cremaAmount[0] && cremaAmount[0].amount) {
-            this.Volume = cremaAmount[0].amount
-          }
-        }
-        // this.list = res.data.pairs
-        // this.TVL = res.data.total_tvl_in_usd
-        // this.Volume = res.data.total_vol_in_usd
+        this.Volume = res.data.total_vol_in_usd
       })
     }
+    // getJupiterDay() {
+    //   this.$axios.get(`https://stats.jup.ag/info/day`).then((res) => {
+    //     console.log('getJupiterDay####res####', res)
+    //     if (res && res.lastXVolumeByAMMs) {
+    //       const cremaAmount = res.lastXVolumeByAMMs.filter((item) => item.amm === 'Crema')
+    //       if (cremaAmount && cremaAmount[0] && cremaAmount[0].amount) {
+    //         this.Volume = cremaAmount[0].amount
+    //       }
+    //     }
+    //     // this.list = res.data.pairs
+    //     // this.TVL = res.data.total_tvl_in_usd
+    //     // this.Volume = res.data.total_vol_in_usd
+    //   })
+    // }
   }
 })
 </script>

@@ -46,11 +46,11 @@ export default Vue.extend({
     ...mapState(['transaction', 'url'])
   },
   mounted() {
-    const showNotice = sessionStorage.getItem('crema_show_notice')
-    if (!showNotice) {
-      this.showNotice = true
-      sessionStorage.setItem('crema_show_notice', '1')
-    }
+    // const showNotice = sessionStorage.getItem('crema_show_notice')
+    // if (!showNotice) {
+    //   this.showNotice = true
+    //   sessionStorage.setItem('crema_show_notice', '1')
+    // }
 
     window.onresize = () => {
       const screenWidth = document.body.clientWidth
