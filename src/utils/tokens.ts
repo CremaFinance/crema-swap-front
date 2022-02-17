@@ -101,16 +101,16 @@ export const TOKENS: Tokens = {
     referrer: '',
     official: true,
     showDefault: true
+  },
+  '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i': {
+    symbol: 'UST',
+    name: 'UST',
+    mintAddress: '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
   }
-  // '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i': {
-  //   symbol: 'UST',
-  //   name: 'UST',
-  //   mintAddress: '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i',
-  //   decimals: 6,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // }
 
   // main net end *************
 
