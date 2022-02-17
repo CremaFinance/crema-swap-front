@@ -22,9 +22,9 @@
           <th>
             <div class="middle">
               <span>TVL</span>
-              <svg class="icon" aria-hidden="true">
+              <!-- <svg class="icon" aria-hidden="true">
                 <use xlink:href="#icon-contract_chevronupbeifen"></use>
-              </svg>
+              </svg> -->
             </div>
           </th>
           <th>Volume (24H)</th>
