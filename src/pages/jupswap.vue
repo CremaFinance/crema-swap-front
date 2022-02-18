@@ -386,14 +386,14 @@ export default Vue.extend({
             })
           }
 
-          const routes: any = await jupiter.computeRoutes(
-            new PublicKey(this.fromCoin.address),
-            new PublicKey(this.toCoin.address),
+          const routes: any = await jupiter.computeRoutes({
+            inputMint: new PublicKey(this.fromCoin.address),
+            outputMint: new PublicKey(this.toCoin.address),
             // inputAmount || defaultInputAmount,
             inputAmount,
-            slippagePercentage,
-            true
-          )
+            slippage: slippagePercentage,
+            forceFetch: true
+          })
           // const routesResult = routes.routesInfos || routes
           const droutes = cloneDeep(routes)
           const routesResult = Array.isArray(droutes) ? droutes : droutes.routesInfos
