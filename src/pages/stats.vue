@@ -5,13 +5,13 @@
       <div class="tvl-banner">
         <h3 class="title">TVL</h3>
         <p class="num">
-          $ <span>{{ decimalFormat(TVL, 2) }}</span>
+          $ <span>{{ addCommom(TVL, 2) }}</span>
         </p>
       </div>
       <div class="volume-banner">
         <h3 class="title">Volume 24H</h3>
         <p class="num">
-          $ <span>{{ decimalFormat(Volume, 2) }}</span>
+          $ <span>{{ addCommom(Volume, 2) }}</span>
         </p>
       </div>
     </div>
@@ -40,8 +40,8 @@
             <span>{{ item.name }}</span>
             <i>0.01%</i>
           </td>
-          <td>${{ decimalFormat(item.tvl_in_usd, 2) }}</td>
-          <td>${{ decimalFormat(item.vol_in_usd, 2) }}</td>
+          <td>${{ addCommom(item.tvl_in_usd, 2) }}</td>
+          <td>${{ addCommom(item.vol_in_usd, 2) }}</td>
         </tr>
       </tbody>
     </table>
@@ -57,11 +57,11 @@
         <div class="block">
           <div class="left">
             <h3>TVL</h3>
-            <p>${{ decimalFormat(item.tvl_in_usd, 2) }}</p>
+            <p>${{ addCommom(item.tvl_in_usd, 2) }}</p>
           </div>
           <div class="right">
             <h3>Volume(24H)</h3>
-            <p>${{ decimalFormat(item.vol_in_usd, 2) }}</p>
+            <p>${{ addCommom(item.vol_in_usd, 2) }}</p>
           </div>
         </div>
       </li>
@@ -72,7 +72,7 @@
 import Vue from 'vue'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
 import { number } from 'echarts'
-import { decimalFormat } from '@/utils'
+import { decimalFormat, addCommom } from '@/utils'
 import importIcon from '@/utils/import-icon'
 export default Vue.extend({
   data() {
@@ -90,6 +90,7 @@ export default Vue.extend({
   methods: {
     importIcon,
     decimalFormat,
+    addCommom,
     getUct() {
       this.$axios.get(`https://api.crema.finance/tvl/24hour`).then((res) => {
         this.list = res.data.pairs
