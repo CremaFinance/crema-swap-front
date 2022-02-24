@@ -1,4 +1,4 @@
-import { TokenSwap, TickInfo, TickInfoLayout, UserPosition, Numberu128 } from './index'
+import { TokenSwap, TickInfo, TickInfoLayout, UserPosition, Numberu128, Numberu256 } from './index'
 
 const LIQUITY_FEE_DECIMAL = 10000_0000_0000_0000
 const PRICISE_DECIMAL = 10000_0000_0000
@@ -83,7 +83,7 @@ export class TickWord {
     return null
   }
 
-  public find_nearest_boudary_tick(tick: number, direct: number): number {
+  public find_nearest_boudary_tick(tick_price: Numberu128, direct: number): number {
     if (this.tick_append_index == 0) {
       return 0
     }
@@ -92,11 +92,11 @@ export class TickWord {
     let insert_start = 0
     let insert_index = this.tick_append_index >> 1
     while (true) {
-      let tick_iter = this.tick_infos[insert_index].tick
-      if (tick > tick_iter) {
+      let tick_iter = this.tick_infos[insert_index].tick_price
+      if (tick_price > tick_iter) {
         insert_start = insert_index + 1
         insert_index = (insert_start + insert_end) >> 1
-      } else if (tick < tick_iter) {
+      } else if (tick_price < tick_iter) {
         insert_end = insert_index
         insert_index = (insert_start + insert_end) >> 1
       } else {
@@ -313,15 +313,21 @@ export function deposit_only_token_a(tick_lower: number, tick_upper: number, src
   let delta_liquity = src / (1 / lower_price - 1 / upper_price)
   return delta_liquity
 }
-
+export function multiplez_div(mul1: Numberu128, mul2: Numberu128, div1: Numberu128): Numberu128 {
+  let mul1_u256 = new Numberu256(mul1)
+  let mul2_u256 = new Numberu256(mul2)
+  let div1_u256 = new Numberu256(div1)
+  let result = mul1_u256.mul(mul2_u256).div(div1_u256)
+  return new Numberu128(result)
+}
 //test_deposit();
 export function preswap(source_amount: number, direct: number, account: TokenSwap, tick_word: TickWord): number {
   //direct is swap dirction, 0 -> x swap y  1 -> y swap x
   let dst_amount = new Numberu128(0)
   let current_price = account.current_price
   let n_pricise_decimal = new Numberu128(PRICISE_DECIMAL)
-  let current_tick = price2tick(current_price.toNumber() / PRICISE_DECIMAL)
-  let current_nearest_boundary_tick = tick_word.find_nearest_boudary_tick(current_tick, direct)
+  //let current_tick = price2tick(current_price.toNumber()/PRICISE_DECIMAL);
+  let current_nearest_boundary_tick = tick_word.find_nearest_boudary_tick(current_price, direct)
   let liquity = account.current_liquity
   let remind = new Numberu128(source_amount)
   let remind_with_fee = new Numberu128(0)
@@ -360,31 +366,26 @@ export function preswap(source_amount: number, direct: number, account: TokenSwa
         remind = remind_with_fee.sub(delta_amount)
         // 需要穿越流动性分区了, 这个需要区分方向
         liquity = liquity.sub(next_tick_info.liquity_net)
+        current_price = next_tick_info.tick_price.sub(new Numberu128(1))
       } else {
-        let delta_dst = liquity
-          .mul(n_pricise_decimal)
-          .mul(next_price.sub(current_price))
-          .div(next_price.mul(current_price))
+        let delta_dst = multiplez_div(liquity, n_pricise_decimal, current_price).sub(
+          multiplez_div(liquity, n_pricise_decimal, next_price)
+        )
         dst_amount = dst_amount.add(delta_dst)
         remind = remind_with_fee.sub(delta_amount)
         current_price = next_price
         liquity = liquity.add(next_tick_info.liquity_net)
+        current_price = next_tick_info.tick_price.add(new Numberu128(1))
       }
     } else {
       let step_fee = remind.mul(fee_rate).div(n_pricise_decimal)
       let remind_with_fee = remind.sub(step_fee)
       if (direct == 0) {
-        let liquity_precise = liquity.mul(n_pricise_decimal)
-        let mutiple = new Numberu128(1)
-        if (liquity_precise.lt(new Numberu128('34028236692093846346337460743176821'))) {
-          mutiple = new Numberu128(10000)
-        } else if (liquity_precise.lt(new Numberu128('3402823669209384634633746074317'))) {
-          mutiple = new Numberu128(100000000)
-        }
-        next_price = liquity_precise
-          .mul(mutiple)
-          .div(remind_with_fee.mul(mutiple).add(liquity.mul(mutiple).mul(n_pricise_decimal).div(current_price)))
-        let delta_dst = liquity.mul(current_price.sub(next_price)).div(n_pricise_decimal)
+        let delta_increase = remind_with_fee.add(multiplez_div(liquity, n_pricise_decimal, current_price))
+        next_price = multiplez_div(liquity, n_pricise_decimal, delta_increase)
+        let delta_dst = multiplez_div(liquity, current_price, n_pricise_decimal).sub(
+          multiplez_div(liquity, liquity, delta_increase)
+        )
         dst_amount = dst_amount.add(delta_dst)
         console.log(
           'next_price: %s, delta_price: %s delta_dst: %s',
@@ -394,16 +395,21 @@ export function preswap(source_amount: number, direct: number, account: TokenSwa
         )
       } else {
         next_price = remind_with_fee.mul(n_pricise_decimal).div(liquity).add(current_price)
-        let delta_dst = liquity
-          .mul(n_pricise_decimal)
-          .mul(next_price.sub(current_price))
-          .div(next_price.mul(current_price))
+        let price_liquity = multiplez_div(current_price, liquity, n_pricise_decimal)
+        let delta_dst = multiplez_div(liquity, n_pricise_decimal, current_price).sub(
+          multiplez_div(liquity, liquity, remind_with_fee.add(price_liquity))
+        )
         dst_amount = dst_amount.add(delta_dst)
+        console.log(
+          'next_price: %s, delta_price: %s delta_dst: %s',
+          next_price.toString(),
+          current_price.sub(next_price),
+          dst_amount.toString()
+        )
       }
       current_price = next_price
       break
     }
-    current_tick = next_tick_info.tick
   }
   return dst_amount.toNumber()
 }
@@ -423,7 +429,7 @@ export function preclaim(tick_word: TickWord, user_position: UserPosition, accou
   let upper_tick = user_position.upper_tick
   let lowerFeeGrowthOutside0
   let lowerFeeGrowthOutside1
-  if (lower_tick < current_tick) {
+  if (lower_tick_info.tick_price.lt(account.current_price)) {
     lowerFeeGrowthOutside0 = lower_tick_info.feeGrowthOutside0
     lowerFeeGrowthOutside1 = lower_tick_info.feeGrowthOutside1
   } else {
@@ -433,7 +439,7 @@ export function preclaim(tick_word: TickWord, user_position: UserPosition, accou
 
   let upperFeeGrowthOutside0
   let upperFeeGrowthOutside1
-  if (upper_tick < current_tick) {
+  if (upper_tick_info.tick_price.lt(account.current_price)) {
     upperFeeGrowthOutside0 = account.fee_growth_global0.sub(upper_tick_info.feeGrowthOutside0)
     upperFeeGrowthOutside1 = account.fee_growth_global1.sub(upper_tick_info.feeGrowthOutside1)
   } else {
@@ -449,16 +455,6 @@ export function preclaim(tick_word: TickWord, user_position: UserPosition, accou
   let new_fee_a = account.fee_growth_global0.sub(lowerFeeGrowthOutside0).sub(upperFeeGrowthOutside0)
   let new_fee_b = account.fee_growth_global1.sub(lowerFeeGrowthOutside1).sub(upperFeeGrowthOutside1)
   console.log('the new token_a fee is ', new_fee_a.toString())
-  // user_position.token_a_fee = new_fee_a
-  //   .sub(user_position.fee_growth_inside_a_last)
-  //   .mul(user_position.liquity)
-  //   .div(n_liquity_fee_decimal)
-  //   .add(user_position.token_a_fee)
-  // user_position.token_b_fee = new_fee_b
-  //   .sub(user_position.fee_growth_inside_b_last)
-  //   .mul(user_position.liquity)
-  //   .div(n_liquity_fee_decimal)
-  //   .add(user_position.token_b_fee)
   const token_a_fee = new_fee_a
     .sub(user_position.fee_growth_inside_a_last)
     .mul(user_position.liquity)

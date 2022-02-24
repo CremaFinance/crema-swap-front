@@ -149,6 +149,38 @@ export class Numberu128 extends BN {
   }
 }
 
+export class Numberu256 extends BN {
+  /**
+   * Convert to Buffer representation
+   */
+  toBuffer(): Buffer {
+    const a = super.toArray().reverse()
+    const b = Buffer.from(a)
+    if (b.length === 32) {
+      return b
+    }
+    assert(b.length < 32, 'Numberu256 too large')
+
+    const zeroPad = Buffer.alloc(32)
+    b.copy(zeroPad)
+    return zeroPad
+  }
+
+  /**
+   * Construct a Numberu64 from Buffer representation
+   */
+  static fromBuffer(buffer: Buffer): Numberu256 {
+    assert(buffer.length === 32, `Invalid buffer length: ${buffer.length}`)
+    return new Numberu256(
+      [...buffer]
+        .reverse()
+        .map((i) => `00${i.toString(16)}`.slice(-2))
+        .join(''),
+      32
+    )
+  }
+}
+
 export const TokenSwapLayout = BufferLayout.struct([
   Layout.publicKey('swapTokenPubkey'),
   BufferLayout.u8('accountType'),
@@ -339,7 +371,7 @@ export class TokenSwap {
         tick_info.tick.toString(),
         tick_info.liquity_gross,
         tick_info.liquity_net,
-        tick_info.feeGrowthOutside1,
+        tick_info.feeGrowthOutside0,
         tick_info.feeGrowthOutside1
       )
     }
@@ -419,6 +451,7 @@ export class TokenSwap {
       Layout.uint128('manager_fee_b')
     ])
     const data = Buffer.alloc(commandDataLayout.span)
+    // {
     commandDataLayout.encode(
       {
         instruction: 0, // InitializeSwap instruction
@@ -436,6 +469,7 @@ export class TokenSwap {
       },
       data
     )
+    // }
     return new TransactionInstruction({
       keys,
       programId: swapProgramId,
@@ -1357,6 +1391,55 @@ export class TokenSwap {
       { pubkey: authority, isSigner: false, isWritable: false },
       { pubkey: user_position_key, isSigner: false, isWritable: true },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false }
+    ]
+    return new TransactionInstruction({
+      keys,
+      programId: swapProgramId,
+      data
+    })
+  }
+
+  async updateFee(
+    tokenSwapAccount: Account,
+    new_fee: number | Numberu64,
+    new_manager_fee: number | Numberu64
+  ): Promise<TransactionSignature> {
+    return await sendAndConfirmTransaction(
+      'swap',
+      this.connection,
+      new Transaction().add(
+        TokenSwap.updateFeeInstruction(this.tokenSwap, this.authority, this.swapProgramId, new_fee, new_manager_fee)
+      ),
+      this.payer,
+      tokenSwapAccount
+    )
+  }
+
+  static updateFeeInstruction(
+    tokenSwap: PublicKey,
+    authority: PublicKey,
+    swapProgramId: PublicKey,
+    new_fee: number | Numberu64,
+    new_manager_fee: number | Numberu64
+  ): TransactionInstruction {
+    const dataLayout = BufferLayout.struct([
+      BufferLayout.u8('instruction'),
+      Layout.uint64('new_fee'),
+      Layout.uint64('new_manager_fee')
+    ])
+
+    const data = Buffer.alloc(dataLayout.span)
+    dataLayout.encode(
+      {
+        instruction: 7, // Swap instruction
+        new_fee: new Numberu64(new_fee).toBuffer(),
+        new_manager_fee: new Numberu64(new_manager_fee).toBuffer()
+      },
+      data
+    )
+    const keys = [
+      { pubkey: tokenSwap, isSigner: false, isWritable: true },
+      { pubkey: authority, isSigner: false, isWritable: false }
     ]
     return new TransactionInstruction({
       keys,
