@@ -28,6 +28,20 @@
             </div>
           </th>
           <th>Volume (24H)</th>
+          <th>
+            <div class="middle left-adr">
+              <span>APR</span>
+              <svg
+                class="icon"
+                aria-hidden="true"
+                @mouseenter="isShowPop = !isShowPop"
+                @mouseleave="isShowPop = !isShowPop"
+              >
+                <use xlink:href="#icon-a-icon-MarketAdress"></use>
+              </svg>
+              <div v-if="isShowPop">Assuming all liquidity is in active price ranges</div>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -42,6 +56,7 @@
           </td>
           <td>${{ addCommom(item.tvl_in_usd, 2) }}</td>
           <td>${{ addCommom(item.vol_in_usd, 2) }}</td>
+          <td>{{ item.apr }}</td>
         </tr>
       </tbody>
     </table>
@@ -63,6 +78,21 @@
             <h3>Volume(24H)</h3>
             <p>${{ addCommom(item.vol_in_usd, 2) }}</p>
           </div>
+          <div class="right">
+            <h3>
+              APR
+              <svg
+                class="icon"
+                aria-hidden="true"
+                @mouseenter="item.isShowPop = !item.isShowPop"
+                @mouseleave="item.isShowPop = !item.isShowPop"
+              >
+                <use xlink:href="#icon-a-icon-MarketAdress"></use>
+              </svg>
+            </h3>
+            <p>{{ item.apr }}</p>
+            <div v-if="item.isShowPop">Assuming all liquidity is in active price ranges</div>
+          </div>
         </div>
       </li>
     </ul>
@@ -79,7 +109,9 @@ export default Vue.extend({
     return {
       list: [],
       TVL: 0,
-      Volume: 0
+      Volume: 0,
+      APR: 0,
+      isShowPop: false
     }
   },
   watch: {},
@@ -93,9 +125,25 @@ export default Vue.extend({
     addCommom,
     getUct() {
       this.$axios.get(`https://api.crema.finance/tvl/24hour`).then((res) => {
-        this.list = res.data.pairs
+        const list = res.data.pairs
+        const result: any = []
+        if (list) {
+          list.forEach((item) => {
+            result.push({
+              name: item.name,
+              tvl_in_usd: item.tvl_in_usd,
+              vol_in_usd: item.vol_in_usd,
+              tx_num: item.tx_num,
+              apr: item.apr,
+              swap_account: item.swap_account,
+              isShowPop: false
+            })
+          })
+        }
+        this.list = result
         this.TVL = res.data.total_tvl_in_usd
         this.Volume = res.data.total_vol_in_usd
+        this.APR = res.data.apr
       })
     }
     // getJupiterDay() {
@@ -119,6 +167,7 @@ export default Vue.extend({
 .stats-container {
   width: 1000px;
   margin: 0 auto;
+  position: relative;
   > .title {
     font-size: 20px;
     color: #fff;
@@ -154,18 +203,18 @@ export default Vue.extend({
       }
       p {
         font-family: 'HelveticaBlkObl';
-        height: 24px;
+        height: 28px;
         font-size: 16px;
         font-weight: 700;
         color: #fff;
-        line-height: 24px;
+        line-height: 28px;
         background: linear-gradient(267deg, #6676f5 0%, #4cffdf 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0px;
         span {
           font-size: 28px;
-          font-family: 'HelveticaBlkObl';
+          font-family: 'Helvetica-NeueBd';
         }
       }
     }
@@ -223,7 +272,27 @@ export default Vue.extend({
         svg {
           width: 16px;
           height: 16px;
-          fill: #fff;
+          fill: #b5b8c2;
+          &:hover {
+            fill: #fff;
+          }
+        }
+      }
+      .left-adr {
+        justify-content: flex-end;
+        svg {
+          width: 20px;
+          height: 20px;
+          margin-left: 2px;
+          cursor: pointer;
+        }
+        > div {
+          position: absolute;
+          padding: 10px 15px;
+          background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+          border-radius: 10px;
+          top: 260px;
+          right: 40px;
         }
       }
     }
@@ -270,8 +339,10 @@ export default Vue.extend({
       margin-top: 20px;
       li {
         padding: 20px;
+        position: relative;
         &:nth-of-type(2n) {
           background: rgba(#696969, 0.1);
+          border-radius: 0 0 20px 20px;
         }
         .top {
           display: flex;
@@ -308,15 +379,35 @@ export default Vue.extend({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-top: 20px;
+          margin-top: 40px;
           h3 {
             font-size: 12px;
             color: #b5b8c2;
+            display: flex;
+            align-items: center;
           }
           p {
             font-size: 14px;
             color: #fff;
             margin-bottom: 0px;
+          }
+          > div > div {
+            position: absolute;
+            padding: 8px;
+            background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+            border-radius: 10px;
+            font-size: 10px;
+            top: 60px;
+            right: 20px;
+          }
+          svg {
+            width: 20px;
+            height: 20px;
+            margin-left: 2px;
+            fill: #b5b8c2;
+            &:hover {
+              fill: #fff;
+            }
           }
         }
       }

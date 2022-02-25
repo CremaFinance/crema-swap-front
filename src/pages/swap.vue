@@ -426,6 +426,8 @@ export default Vue.extend({
       // } else {
       //   this.toCoin = token
       // }
+      console.log(token);
+      
       if (this.currentCoinKey === 'fromCoin') {
         if (token.symbol === this.toCoin?.symbol) {
           this.toCoin = null
