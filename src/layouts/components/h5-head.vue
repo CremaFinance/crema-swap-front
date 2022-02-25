@@ -110,7 +110,7 @@
             <use xlink:href="#icon-medium"></use>
           </svg>
         </a>
-        <a href="https://discord.gg/hCaFmvvPYH" target="_blank">
+        <a href="https://discord.gg/cremafinance" target="_blank">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-discord"></use>
           </svg>
