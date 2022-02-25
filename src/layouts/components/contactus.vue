@@ -31,7 +31,7 @@
           </svg>
           <span>Medium</span>
         </a>
-        <a href="https://discord.gg/hCaFmvvPYH" target="_blank" rel="noopener noreferrer">
+        <a href="https://discord.gg/cremafinance" target="_blank" rel="noopener noreferrer">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-discord"></use>
           </svg>
