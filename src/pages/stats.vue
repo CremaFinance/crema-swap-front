@@ -39,7 +39,10 @@
               >
                 <use xlink:href="#icon-a-icon-MarketAdress"></use>
               </svg>
-              <div v-if="isShowPop">Assuming all liquidity is in active price ranges</div>
+              <div v-if="isShowPop">
+                Estimated by the pool’s current total data. Actual performance depends on each user’s own liquidity
+                settings.
+              </div>
             </div>
           </th>
         </tr>
@@ -91,7 +94,10 @@
               </svg>
             </h3>
             <p>{{ item.apr }}</p>
-            <div v-if="item.isShowPop">Assuming all liquidity is in active price ranges</div>
+            <div v-if="item.isShowPop">
+              Estimated by the pool’s current total data. Actual performance depends on each user’s own liquidity
+              settings.
+            </div>
           </div>
         </div>
       </li>
@@ -287,11 +293,13 @@ export default Vue.extend({
           cursor: pointer;
         }
         > div {
+          width: 420px;
           position: absolute;
+          text-align: left;
           padding: 10px 15px;
           background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
           border-radius: 10px;
-          top: 260px;
+          top: 240px;
           right: 40px;
         }
       }
@@ -393,12 +401,13 @@ export default Vue.extend({
           }
           > div > div {
             position: absolute;
+            width: 90%;
             padding: 8px;
             background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
             border-radius: 10px;
             font-size: 10px;
-            top: 60px;
-            right: 20px;
+            top: 20px;
+            right: 0px;
           }
           svg {
             width: 20px;
