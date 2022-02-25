@@ -11,7 +11,7 @@
       <Wallet v-if="!isPc" class="h5-wallet"></Wallet>
     </div>
 
-    <NoticeModal v-if="showNotice" @onClose="showNotice = false"></NoticeModal>
+    <!-- <NoticeModal v-if="showNotice" @onClose="showNotice = false"></NoticeModal> -->
     <Waiting
       v-show="$accessor.transaction.showWaiting"
       @onClose="$accessor.transaction.setShowWaiting(false)"
@@ -28,13 +28,13 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 import Head from './components/head.vue'
 import H5Head from './components/h5-head.vue'
-import NoticeModal from '@/components/Notice.vue'
+// import NoticeModal from '@/components/Notice.vue'
 
 export default Vue.extend({
   components: {
     Head,
     H5Head,
-    NoticeModal
+    // NoticeModal
   },
   data() {
     return {
