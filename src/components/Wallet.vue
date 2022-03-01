@@ -822,6 +822,8 @@ export default class Wallet extends Vue {
       border-radius: 8px;
       // background: #5f667c;
       margin-right: 16px;
+      display: flex;
+      align-items: center;
     }
 
     img {

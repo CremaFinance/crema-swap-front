@@ -565,7 +565,7 @@ export default Vue.extend({
   // background: rgba(255, 255, 255, 0.06);
   // border-radius: 30px;
   background: linear-gradient(270deg, #3e434e 0%, #292d33 100%);
-  border-radius: 30px;
+  border-radius: 20px;
   border: 1px solid #3f434e;
   padding: 20px 16px;
   .form-block {
@@ -573,11 +573,11 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 11px 0px;
+      padding: 12px 0px;
       a {
         display: block;
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         background-position: center center;
         background-repeat: no-repeat;
         background-size: 100% 100%;

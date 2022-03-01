@@ -119,6 +119,15 @@ export const TOKENS: Tokens = {
   //   referrer: '',
   //   official: true,
   //   showDefault: true
+  // },
+  // USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX: {
+  //   symbol: 'USDH',
+  //   name: 'USDH',
+  //   mintAddress: 'USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
   // }
 
   // main net end *************

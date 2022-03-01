@@ -151,7 +151,8 @@ export default Vue.extend({
   padding: 8px;
   .to-coin {
     width: 100%;
-    height: 76px;
+    // height: 76px;
+    height: 64px;
     background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
     box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
     border-radius: 12px;

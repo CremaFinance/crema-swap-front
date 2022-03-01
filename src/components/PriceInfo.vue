@@ -306,7 +306,7 @@ export default Vue.extend({
 .price-info {
   width: 492px;
   background: linear-gradient(270deg, #3e434e 0%, #292d33 100%);
-  border-radius: 30px;
+  border-radius: 20px;
   border: 1px solid #3f434e;
   padding: 20px;
   margin: 0 auto;
