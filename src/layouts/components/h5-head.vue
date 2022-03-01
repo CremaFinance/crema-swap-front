@@ -57,6 +57,10 @@
           <img src="@/assets/images/stats.png" alt="" />
           <span>Stats</span>
         </li>
+        <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
+          <img src="@/assets/images/icon-Docs.png" alt="" />
+          <span>Docs</span>
+        </a>
         <!-- <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
           <img src="@/assets/images/icon-Farming@2x.png" alt="" />
           <span>Farming</span>
@@ -82,12 +86,13 @@
         </svg>
         <span>Test Guide</span>
       </a> -->
-      <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
+      
+      <!-- <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-Docs"></use>
         </svg>
         <span>Docs</span>
-      </a>
+      </a> -->
 
       <div class="contact-list">
         <a href="https://twitter.com/Crema_Finance" target="_blank">
@@ -311,6 +316,11 @@ export default {
         width: 20px;
         height: 20px;
         fill: #fff;
+        margin-right: 8px;
+      }
+      img{
+        width: 26px;
+        height: 26px;
         margin-right: 8px;
       }
     }

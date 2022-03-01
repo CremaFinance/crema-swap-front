@@ -216,6 +216,10 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   // {
   //   coinPair: 'PAI-USDC',
   //   tokenSwapAccount: 'CYnnubJbqfeMcAiZE6cTMCfvuoWJiRrMKQANE7s3wLSK'
+  // },
+  // {
+  //   coinPair: 'USDH-USDC',
+  //   tokenSwapAccount: 'B1eNrQEExnPPmVbM3jiEAd89nW7tXUiArrk81JtUz6H8'
   // }
   // main net end ********
   // HYSD-USDD

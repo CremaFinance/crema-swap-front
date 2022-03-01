@@ -43,6 +43,10 @@
           <img src="../../assets/images/stats.png" />
           <span>Stats</span>
         </nuxt-link>
+        <a href="https://gitbook.crema.finance/" target="_blank">
+          <img class="docs-img" src="../../assets/images/icon-Docs.png" />
+          <span>Docs</span>
+        </a>
       </nav>
     </div>
     <div class="right">
@@ -52,12 +56,12 @@
         </svg>
         <span>Test Guide</span>
       </a> -->
-      <a class="test-guide" href="https://gitbook.crema.finance/" target="_blank">
+      <!-- <a class="test-guide" href="https://gitbook.crema.finance/" target="_blank">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-Docs"></use>
         </svg>
         <span>Docs</span>
-      </a>
+      </a> -->
       <Wallet />
       <Contactus></Contactus>
     </div>
@@ -201,6 +205,10 @@ console.log()
           display: none;
         }
       }
+    }
+    .docs-img{
+      width: 18px !important;
+      height: 18px !important;
     }
   }
 

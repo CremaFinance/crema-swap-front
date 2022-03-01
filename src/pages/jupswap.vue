@@ -595,7 +595,7 @@ export default Vue.extend({
   width: 492px;
   // height: 682px;
   background: linear-gradient(270deg, #3e434e 0%, #292d33 100%);
-  border-radius: 28px;
+  border-radius: 20px;
   border: 1px solid #3f434e;
   margin: 0 auto;
   padding: 20px 16px;
@@ -711,6 +711,7 @@ export default Vue.extend({
   }
   .swap-content {
     width: 100%;
+    padding: 20px 10px;
   }
   // }
 }

@@ -220,7 +220,7 @@ export default Vue.extend({
   }
   .coin-list-box {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    max-height: 280px;
+    max-height: 282px;
     overflow-y: auto;
     margin-top: 20px;
     .coin-list {
