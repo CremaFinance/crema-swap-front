@@ -488,7 +488,7 @@ export default Vue.extend({
       const jupiter = cloneDeep(this.jupiter)
       const { execute } = await jupiter.exchange({
         // route: this.swapRoutes[0]
-        route: this.currentRoute
+        routeInfo: this.currentRoute
       })
       const connection = new Connection(SOLANA_RPC_ENDPOINT)
       const wallet: any = this.$wallet
