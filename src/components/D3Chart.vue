@@ -120,8 +120,8 @@ export default Vue.extend({
         const minPriceTick = price2tick(this.minPrice)
         const maxPriceTick = price2tick(this.maxPrice)
 
-        console.log('tickMax#####', tickMax)
-        console.log('tickMin#####', tickMin)
+        // console.log('tickMax#####', tickMax)
+        // console.log('tickMin#####', tickMin)
 
         const currentLiquity = infos.current_liquity.toNumber()
         const tick_info_array = infos.tick_info_array
@@ -151,8 +151,8 @@ export default Vue.extend({
           nowLiquityRight = nowLiquityRight + rightArray[r].liquity_net.toNumber()
         }
 
-        console.log('d3####leftArray#####', leftArray)
-        console.log('d3####rightArray#####', rightArray)
+        // console.log('d3####leftArray#####', leftArray)
+        // console.log('d3####rightArray#####', rightArray)
 
         let chartData: any = []
         chartData = [...leftArray.reverse(), { tick: currentTick, liquityAmount: currentLiquity }, ...rightArray]
@@ -161,7 +161,7 @@ export default Vue.extend({
           chartData = chartData.reverse()
         }
 
-        console.log('d3##chartData#####', chartData)
+        // console.log('d3##chartData#####', chartData)
 
         this.drawChart(chartData, tickMin, tickMax, minPriceTick, maxPriceTick, currentTick)
       }
@@ -174,7 +174,7 @@ export default Vue.extend({
       maxPriceTick: number,
       currentTick: number
     ) {
-      console.log('进来了吗####d3###drawChart')
+      // console.log('进来了吗####d3###drawChart')
       const _this = this
       const margin = {
         top: 20,
@@ -188,7 +188,7 @@ export default Vue.extend({
 
       const unit = width / (tickMax - tickMin)
 
-      console.log('unit####', unit)
+      // console.log('unit####', unit)
 
       d3.select('#chart').selectAll('*').remove()
       const svg = d3
@@ -204,7 +204,7 @@ export default Vue.extend({
           return Number(d.liquityAmount)
         }) || 0
 
-      console.log('d3######', maxHeight)
+      // console.log('d3######', maxHeight)
       // const minHeight: number = d3.min(chartData, function (d: any) {
       //   return Number(d.liquityAmount)
       // })

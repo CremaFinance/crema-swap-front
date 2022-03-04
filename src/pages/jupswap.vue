@@ -498,8 +498,6 @@ export default Vue.extend({
         this.toCoin.decimals
       )
 
-      console.log('toCoinAmount####', toCoinAmount)
-
       this.$accessor.transaction.setTransactionDesc(
         `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${toCoinAmount} ${this.toCoin?.symbol}`
       )
