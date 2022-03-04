@@ -179,6 +179,7 @@ import { LIQUIDITY_POOLS } from '@/utils/pools'
 import {
   getNearestTickByPrice,
   tick2Price,
+  price2Tick,
   calculateLiquityOnlyA,
   calculateLiquityOnlyB,
   calculateLiquity
@@ -423,9 +424,7 @@ export default Vue.extend({
           // const tick = direction
           //   ? price2tick(Number(value.currentPriceView))
           //   : price2tick(Number(value.currentPriceViewReverse))
-          console.log('poolInfoWatch###currentPriceView####', value.currentPriceView)
           const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
-          console.log('poolInfoWatch###tick#####', tick)
           const minTick = tick - value.tick_space
           const maxTick = tick + value.tick_space
           // const minPrice = direction ? String(tick2price(minTick)) : String(1 / tick2price(maxTick))
@@ -529,7 +528,7 @@ export default Vue.extend({
 
       // 处理过的current price , 与前端价格区间比较时用
       const currentPriceP = this.direction ? this.poolInfo.currentPriceView : this.poolInfo.currentPriceViewReverse
-      const currentPriceTick = getNearestTickByPrice(new Decimal(currentPriceP), this.poolInfo.tick_space)
+      const currentPriceTick = price2Tick(new Decimal(currentPriceP))
       const min = this.minPrice
       const max = this.maxPrice
       let minPrice = 0
@@ -616,7 +615,7 @@ export default Vue.extend({
         }
 
         this.deltaLiquity = delta_liquity
-      } else if (currentPriceTick > tick_upper) {
+      } else if (currentPriceTick >= tick_upper) {
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
         // const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
@@ -625,7 +624,7 @@ export default Vue.extend({
         this.fromCoinAmount = ''
         this.showToCoinLock = false
         this.deltaLiquity = delta_liquity.toString()
-      } else if (currentPriceTick < tick_lower) {
+      } else if (currentPriceTick <= tick_lower) {
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
         // const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
@@ -751,20 +750,22 @@ export default Vue.extend({
 
       let fromCoinAmount: any
       if (this.fromCoinAmount) {
-        fromCoinAmount = !this.fixedFromCoin
-          ? Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
-          : Number(this.fromCoinAmount)
+        // fromCoinAmount = !this.fixedFromCoin
+        //   ? Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        //   : Number(this.fromCoinAmount)
+        fromCoinAmount = Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
       }
 
       let toCoinAmount: any
       if (this.toCoinAmount) {
-        toCoinAmount = this.fixedFromCoin
-          ? Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
-          : Number(this.toCoinAmount)
+        // toCoinAmount = this.fixedFromCoin
+        //   ? Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        //   : Number(this.toCoinAmount)
 
-        if (!fromCoinAmount) {
-          toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
-        }
+        // if (!fromCoinAmount) {
+        //   toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        // }
+        toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
       }
 
       this.$accessor.transaction.setTransactionDesc(
@@ -773,6 +774,7 @@ export default Vue.extend({
         } ${this.toCoinAmount && this.toCoinAmount} ${this.toCoinAmount && this.toCoin?.symbol}`
       )
       this.$accessor.transaction.setShowWaiting(true)
+      const deltaLiquity = fixD(this.deltaLiquity, 0)
 
       addLiquidityNew(
         conn,
@@ -786,7 +788,7 @@ export default Vue.extend({
         null,
         tick_lower,
         tick_upper,
-        this.deltaLiquity,
+        Number(deltaLiquity),
         this.direction ? fromCoinAmount : toCoinAmount,
         this.direction ? toCoinAmount : fromCoinAmount,
         0

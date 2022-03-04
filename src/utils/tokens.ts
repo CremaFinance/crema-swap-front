@@ -110,16 +110,16 @@ export const TOKENS: Tokens = {
     referrer: '',
     official: true,
     showDefault: true
+  },
+  Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS: {
+    symbol: 'PAI',
+    name: 'PAI',
+    mintAddress: 'Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
   }
-  // Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS: {
-  //   symbol: 'PAI',
-  //   name: 'PAI',
-  //   mintAddress: 'Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS',
-  //   decimals: 6,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // },
   // USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX: {
   //   symbol: 'USDH',
   //   name: 'USDH',
