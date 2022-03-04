@@ -751,20 +751,22 @@ export default Vue.extend({
 
       let fromCoinAmount: any
       if (this.fromCoinAmount) {
-        fromCoinAmount = !this.fixedFromCoin
-          ? Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
-          : Number(this.fromCoinAmount)
+        // fromCoinAmount = !this.fixedFromCoin
+        //   ? Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        //   : Number(this.fromCoinAmount)
+        fromCoinAmount = Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
       }
 
       let toCoinAmount: any
       if (this.toCoinAmount) {
-        toCoinAmount = this.fixedFromCoin
-          ? Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
-          : Number(this.toCoinAmount)
+        // toCoinAmount = this.fixedFromCoin
+        //   ? Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        //   : Number(this.toCoinAmount)
 
-        if (!fromCoinAmount) {
-          toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
-        }
+        // if (!fromCoinAmount) {
+        //   toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        // }
+        toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
       }
 
       this.$accessor.transaction.setTransactionDesc(
@@ -773,6 +775,7 @@ export default Vue.extend({
         } ${this.toCoinAmount && this.toCoinAmount} ${this.toCoinAmount && this.toCoin?.symbol}`
       )
       this.$accessor.transaction.setShowWaiting(true)
+      const deltaLiquity = fixD(this.deltaLiquity, 0)
 
       addLiquidityNew(
         conn,
@@ -786,7 +789,7 @@ export default Vue.extend({
         null,
         tick_lower,
         tick_upper,
-        this.deltaLiquity,
+        Number(deltaLiquity),
         this.direction ? fromCoinAmount : toCoinAmount,
         this.direction ? toCoinAmount : fromCoinAmount,
         0
