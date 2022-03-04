@@ -25,8 +25,10 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { tick2price, price2tick } from '@/tokenSwap/swapv3'
+import { price2tick } from '@/tokenSwap/swapv3'
+import { getNearestTickByPrice, tick2Price } from '@cremafinance/crema-sdk'
 import { decimalFormat } from '@/utils'
+import Decimal from 'decimal.js'
 
 export default Vue.extend({
   props: {
@@ -57,6 +59,10 @@ export default Vue.extend({
     defaultMaxPrice: {
       type: String,
       default: ''
+    },
+    tickSpace: {
+      type: Number,
+      default: 10
     }
   },
   data() {
@@ -91,16 +97,20 @@ export default Vue.extend({
   },
   methods: {
     addPrice() {
-      const tick = price2tick(this.oValue)
-      const price = tick2price(tick + 60)
+      const tick = getNearestTickByPrice(new Decimal(this.oValue), this.tickSpace)
+      console.log('addPrice####tick####', tick)
+      const price = tick2Price(tick + this.tickSpace)
+      console.log('addPrice####price####', price)
       this.oValue = price
       const value = String(decimalFormat(String(price), 6))
       this.pValue = value
       this.$emit('input', value)
     },
     minusPrice() {
-      const tick = price2tick(this.oValue)
-      const price = tick2price(tick - 60)
+      const tick = getNearestTickByPrice(new Decimal(this.oValue), this.tickSpace)
+      console.log('minusPrice####tick####', tick)
+      const price = tick2Price(tick - this.tickSpace)
+      console.log('minusPrice####price####', price)
       this.oValue = price
       const value = String(decimalFormat(String(price), 6))
       this.pValue = value
@@ -108,8 +118,12 @@ export default Vue.extend({
     },
     onBlur() {
       if (this.pValue !== '∞' && this.pValue !== '0') {
-        const tick = price2tick(Number(this.pValue))
-        const price = tick2price(tick)
+        console.log('onBlur###this.pValue####', this.pValue)
+        console.log('this.tickSpace######', this.tickSpace)
+        const tick = getNearestTickByPrice(new Decimal(this.pValue), this.tickSpace)
+        console.log('onBlur###tick####', tick)
+        const price = tick2Price(tick)
+        console.log('onBlur###price####', price)
         this.oValue = price // 存储没有处理精度的数据，以避免增加消耗精度导致增减每次数据展示不一致
         const value = String(decimalFormat(String(price), 6))
         this.pValue = value
