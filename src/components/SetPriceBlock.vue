@@ -77,6 +77,10 @@ export default Vue.extend({
     invalidPriceRange: {
       type: Boolean,
       default: false
+    },
+    tickSpace: {
+      type: Number,
+      default: 10
     }
   },
   data() {

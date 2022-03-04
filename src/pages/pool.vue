@@ -103,7 +103,7 @@
 
             <img v-else src="../assets/images/chart-nodata.png" />
           </div>
-          <div class="set-price-block-box">
+          <div v-if="poolInfo" class="set-price-block-box">
             <SetPriceBlock
               :min="minPrice"
               :max="maxPrice"
@@ -112,6 +112,7 @@
               :direction="direction"
               :invalid-price-range="invalidPriceRange"
               :default-max-price="defaultMaxPrice"
+              :tick-space="poolInfo.tick_space"
               @onChangeMinPrice="priceRangeChangeMin"
               @onChangeMaxPrice="priceRangeChangeMax"
             ></SetPriceBlock>
@@ -175,6 +176,14 @@ import {
 } from '@/tokenSwap/swapv3'
 import { TokenAmount, gt } from '@/utils/safe-math'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
+import {
+  getNearestTickByPrice,
+  tick2Price,
+  calculateLiquityOnlyA,
+  calculateLiquityOnlyB,
+  calculateLiquity
+} from '@cremafinance/crema-sdk'
+import Decimal from 'decimal.js'
 
 const USDT = getTokenBySymbol('USDT')
 const USDC = getTokenBySymbol('USDC')
@@ -414,13 +423,15 @@ export default Vue.extend({
           // const tick = direction
           //   ? price2tick(Number(value.currentPriceView))
           //   : price2tick(Number(value.currentPriceViewReverse))
-          const tick = price2tick(Number(value.currentPriceView))
-          const minTick = tick - 60
-          const maxTick = tick + 60
+          console.log('poolInfoWatch###currentPriceView####', value.currentPriceView)
+          const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
+          console.log('poolInfoWatch###tick#####', tick)
+          const minTick = tick - value.tick_space
+          const maxTick = tick + value.tick_space
           // const minPrice = direction ? String(tick2price(minTick)) : String(1 / tick2price(maxTick))
           // const maxPrice = direction ? String(tick2price(maxTick)) : String(1 / tick2price(minTick))
-          const minPrice = String(tick2price(minTick))
-          const maxPrice = String(tick2price(maxTick))
+          const minPrice = tick2Price(minTick).toString()
+          const maxPrice = tick2Price(maxTick).toString()
           this.minPrice = minPrice
           this.maxPrice = maxPrice
           this.defaultMinPrice = minPrice
@@ -518,6 +529,7 @@ export default Vue.extend({
 
       // 处理过的current price , 与前端价格区间比较时用
       const currentPriceP = this.direction ? this.poolInfo.currentPriceView : this.poolInfo.currentPriceViewReverse
+      const currentPriceTick = getNearestTickByPrice(new Decimal(currentPriceP), this.poolInfo.tick_space)
       const min = this.minPrice
       const max = this.maxPrice
       let minPrice = 0
@@ -537,11 +549,18 @@ export default Vue.extend({
           maxPrice = 1 / Number(min)
         }
 
-        tick_lower = getNearestTick(Math.sqrt(minPrice), this.poolInfo.tick_space, true)
-        tick_upper = getNearestTick(Math.sqrt(maxPrice), this.poolInfo.tick_space, false)
+        // tick_lower = getNearestTick(Math.sqrt(minPrice), this.poolInfo.tick_space, true)
+        // tick_upper = getNearestTick(Math.sqrt(maxPrice), this.poolInfo.tick_space, false)
+        tick_lower = getNearestTickByPrice(new Decimal(minPrice), this.poolInfo.tick_space)
+        tick_upper = getNearestTickByPrice(new Decimal(maxPrice), this.poolInfo.tick_space)
       }
 
-      if (max !== '∞' && Number(max) <= Number(min)) {
+      // console.log('updateAmounts####currentPriceP#####', currentPriceP)
+      // console.log('updateAmounts####currentPriceTick#####', currentPriceTick)
+      // console.log('updateAmounts####tick_lower#####', tick_lower)
+      // console.log('updateAmounts####tick_upper#####', tick_upper)
+
+      if (max !== '∞' && tick_lower >= tick_upper) {
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
         this.showToCoinLock = true
@@ -549,8 +568,10 @@ export default Vue.extend({
         return
       }
 
+      // console.log('this.fromCoinAmount######', this.fromCoinAmount)
+      // console.log('this.toCoinAmount######', this.toCoinAmount)
       // 区间中包含当前价格, 一种资产返回另外一种资产，并且返回liquity
-      if (max === '∞' || (currentPriceP >= Number(min) && currentPriceP <= Number(max))) {
+      if (max === '∞' || (currentPriceTick > tick_lower && currentPriceTick < tick_upper)) {
         let coinAmount: any
         let direction: any
         if (this.fixedFromCoin) {
@@ -567,13 +588,22 @@ export default Vue.extend({
               : 1
         }
 
-        const { dst, delta_liquity } = deposit_src_calulate_dst(
+        // console.log('calculateLiquity##之前###tick_lower####', tick_lower)
+        // console.log('calculateLiquity##之前###tick_upper####', tick_upper)
+        // console.log('calculateLiquity##之前###coinAmount####', coinAmount)
+        // console.log('calculateLiquity##之前###this.poolInfo.current_price####', this.poolInfo.currentPriceView)
+        // console.log('calculateLiquity##之前###direction####', direction)
+
+        const { desiredAmountDst, deltaLiquity } = calculateLiquity(
           tick_lower,
           tick_upper,
-          coinAmount,
-          this.poolInfo.current_price,
+          new Decimal(coinAmount),
+          new Decimal(Math.sqrt(this.poolInfo.currentPriceView)),
           direction
         )
+        const dst = desiredAmountDst.toNumber()
+        const delta_liquity = deltaLiquity.toNumber()
+
         this.showFromCoinLock = false
         this.showToCoinLock = false
         const decimal = this.toCoin?.decimals || 6
@@ -586,25 +616,33 @@ export default Vue.extend({
         }
 
         this.deltaLiquity = delta_liquity
-      } else if (currentPriceP > Number(max)) {
+      } else if (currentPriceTick > tick_upper) {
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
-        const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
+        // const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
+        const delta_liquity = calculateLiquityOnlyA(tick_lower, tick_upper, new Decimal(coinAmount))
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
         this.showToCoinLock = false
-        this.deltaLiquity = delta_liquity
-      } else if (currentPriceP < Number(min)) {
+        this.deltaLiquity = delta_liquity.toString()
+      } else if (currentPriceTick < tick_lower) {
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
-        const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
+        // const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
+        const delta_liquity = calculateLiquityOnlyB(tick_lower, tick_upper, new Decimal(coinAmount))
 
         // const coinAmount = 1000000000
         // const delta_liquity = deposit_only_token_a(50112, 50752, coinAmount)
         this.showFromCoinLock = false
         this.showToCoinLock = true
         this.toCoinAmount = ''
-        this.deltaLiquity = delta_liquity
+        this.deltaLiquity = delta_liquity.toString()
+      } else {
+        // 重叠的情况
+        this.showFromCoinLock = true
+        this.fromCoinAmount = ''
+        this.showToCoinLock = true
+        this.toCoinAmount = ''
       }
     },
     openCoinSelect(key: string) {
@@ -703,11 +741,11 @@ export default Vue.extend({
         tick_upper = 443632
       } else {
         if (this.direction) {
-          tick_lower = getNearestTick(Math.sqrt(Number(this.minPrice)), poolInfo.tick_space, true)
-          tick_upper = getNearestTick(Math.sqrt(Number(this.maxPrice)), poolInfo.tick_space, false)
+          tick_lower = getNearestTickByPrice(new Decimal(this.minPrice), poolInfo.tick_space)
+          tick_upper = getNearestTickByPrice(new Decimal(this.maxPrice), poolInfo.tick_space)
         } else {
-          tick_lower = getNearestTick(Math.sqrt(1 / Number(this.maxPrice)), poolInfo.tick_space, true)
-          tick_upper = getNearestTick(Math.sqrt(1 / Number(this.minPrice)), poolInfo.tick_space, false)
+          tick_lower = getNearestTickByPrice(new Decimal(1 / Number(this.maxPrice)), poolInfo.tick_space)
+          tick_upper = getNearestTickByPrice(new Decimal(1 / Number(this.minPrice)), poolInfo.tick_space)
         }
       }
 
