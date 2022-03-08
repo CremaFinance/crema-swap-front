@@ -149,6 +149,17 @@ import {
 } from '@/tokenSwap/swapv3'
 import { addLiquidityNew } from '@/utils/liquidity'
 import { cloneDeep, get } from 'lodash-es'
+import {
+  getNearestTickByPrice,
+  tick2Price,
+  price2Tick,
+  calculateLiquityOnlyA,
+  calculateLiquityOnlyB,
+  calculateLiquity
+} from '@cremafinance/crema-sdk'
+import { PublicKey } from '@solana/web3.js'
+import Decimal from 'decimal.js'
+import { inputRegex, escapeRegExp } from '@/utils/regex'
 
 export default Vue.extend({
   components: {
@@ -246,6 +257,31 @@ export default Vue.extend({
       } else {
         this.currentCoin = this.coinTabList[1]
       }
+    },
+    fromCoinAmount(newAmount: string, oldAmount: string) {
+      this.$nextTick(() => {
+        if (!inputRegex.test(escapeRegExp(newAmount))) {
+          this.fromCoinAmount = oldAmount
+        } else {
+          if (!newAmount) {
+            this.toCoinAmount = ''
+          } else if (this.fixedFromCoin && this.poolInfo) {
+            this.updateAmounts()
+          }
+        }
+      })
+    },
+
+    toCoinAmount(newAmount: string, oldAmount: string) {
+      this.$nextTick(() => {
+        if (!inputRegex.test(escapeRegExp(newAmount))) {
+          this.toCoinAmount = oldAmount
+        } else {
+          if (!this.fixedFromCoin && this.poolInfo) {
+            this.updateAmounts()
+          }
+        }
+      })
     }
   },
   methods: {
@@ -269,13 +305,23 @@ export default Vue.extend({
       }
 
       if (!this.showFromCoinLock && !this.showToCoinLock) {
-        const { dst, delta_liquity } = deposit_src_calulate_dst(
+        // const { dst, delta_liquity } = deposit_src_calulate_dst(
+        //   tick_lower,
+        //   tick_upper,
+        //   coinAmount,
+        //   this.poolInfo.current_price,
+        //   direction
+        // )
+        const { desiredAmountDst, deltaLiquity } = calculateLiquity(
           tick_lower,
           tick_upper,
-          coinAmount,
-          this.poolInfo.current_price,
+          new Decimal(coinAmount),
+          new Decimal(Math.sqrt(this.poolInfo.currentPriceView)),
           direction
         )
+        const dst = desiredAmountDst.toNumber()
+        const delta_liquity = deltaLiquity.toNumber()
+
         const decimal = this.toCoin?.decimals || 6
         this.deltaLiquity = delta_liquity
 
@@ -289,12 +335,14 @@ export default Vue.extend({
       } else if (!this.showToCoinLock) {
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
-        const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
+        // const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
+        const delta_liquity = calculateLiquityOnlyA(tick_lower, tick_upper, new Decimal(coinAmount))
         this.deltaLiquity = delta_liquity
       } else if (!this.showFromCoinLock) {
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
-        const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
+        // const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
+        const delta_liquity = calculateLiquityOnlyB(tick_lower, tick_upper, new Decimal(coinAmount))
         this.deltaLiquity = delta_liquity
       }
     },
@@ -396,6 +444,10 @@ export default Vue.extend({
       // @ts-ignore
       const toCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.pc.mintAddress}.tokenAccountAddress`)
 
+      const processedFromCoinAccount =
+        typeof fromCoinAccount === 'string' ? new PublicKey(fromCoinAccount) : fromCoinAccount
+      const processedToCoinAccount = typeof fromCoinAccount === 'string' ? new PublicKey(toCoinAccount) : toCoinAccount
+
       const nftAccount = get(this.wallet.tokenAccounts, `${currentData.nft_token_id}.tokenAccountAddress`)
 
       const key = getUnixTs().toString()
@@ -422,8 +474,8 @@ export default Vue.extend({
         poolInfo,
         poolInfo.coin,
         poolInfo.pc,
-        fromCoinAccount,
-        toCoinAccount,
+        processedFromCoinAccount,
+        processedToCoinAccount,
         currentData.nft_token_id,
         nftAccount,
         currentData.lower_tick,

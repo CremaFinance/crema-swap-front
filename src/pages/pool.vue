@@ -185,6 +185,7 @@ import {
   calculateLiquity
 } from '@cremafinance/crema-sdk'
 import Decimal from 'decimal.js'
+import { PublicKey } from '@solana/web3.js'
 
 const USDT = getTokenBySymbol('USDT')
 const USDC = getTokenBySymbol('USDC')
@@ -724,6 +725,10 @@ export default Vue.extend({
       // @ts-ignore
       const toCoinAccount = get(this.wallet.tokenAccounts, `${this.toCoin.mintAddress}.tokenAccountAddress`)
 
+      const processedFromCoinAccount =
+        typeof fromCoinAccount === 'string' ? new PublicKey(fromCoinAccount) : fromCoinAccount
+      const processedToCoinAccount = typeof fromCoinAccount === 'string' ? new PublicKey(toCoinAccount) : toCoinAccount
+
       const key = getUnixTs().toString()
       // this.$notify.info({
       //   key,
@@ -782,8 +787,8 @@ export default Vue.extend({
         poolInfo,
         this.direction ? this.fromCoin : this.toCoin,
         this.direction ? this.toCoin : this.fromCoin,
-        this.direction ? fromCoinAccount : toCoinAccount,
-        this.direction ? toCoinAccount : fromCoinAccount,
+        this.direction ? processedFromCoinAccount : processedToCoinAccount,
+        this.direction ? processedToCoinAccount : processedFromCoinAccount,
         null,
         null,
         tick_lower,
