@@ -5,13 +5,13 @@
       <div class="tvl-banner">
         <h3 class="title">TVL</h3>
         <p class="num">
-          $ <Spin v-if="!TVL"/><span>{{ TVL ? addCommom(TVL, 2) : '' }}</span>
+          $ <Spin v-if="!TVL" /><span>{{ TVL ? addCommom(TVL, 2) : '' }}</span>
         </p>
       </div>
       <div class="volume-banner">
         <h3 class="title">Volume 24H</h3>
         <p class="num">
-          $ <Spin v-if="!Volume"/><span>{{ TVL ? addCommom(Volume, 2) : '' }}</span>
+          $ <Spin v-if="!Volume" /><span>{{ TVL ? addCommom(Volume, 2) : '' }}</span>
         </p>
       </div>
     </div>
@@ -110,10 +110,10 @@ import { LIQUIDITY_POOLS } from '@/utils/pools'
 import { number } from 'echarts'
 import { decimalFormat, addCommom } from '@/utils'
 import importIcon from '@/utils/import-icon'
-import { Spin } from 'ant-design-vue';
+import { Spin } from 'ant-design-vue'
 Vue.use(Spin)
 export default Vue.extend({
-  components:{
+  components: {
     Spin
   },
   data() {
@@ -137,8 +137,8 @@ export default Vue.extend({
     addCommom,
     getDatum() {
       this.timer = setInterval(() => {
-        this.getUct();
-      }, 60000);
+        this.getUct()
+      }, 60000)
     },
     getUct() {
       this.$axios.get(`https://api.crema.finance/tvl/24hour`).then((res) => {
