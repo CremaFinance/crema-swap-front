@@ -555,10 +555,10 @@ export default Vue.extend({
         tick_upper = getNearestTickByPrice(new Decimal(maxPrice), this.poolInfo.tick_space)
       }
 
-      console.log('updateAmounts####currentPriceP#####', currentPriceP)
-      console.log('updateAmounts####currentPriceTick#####', currentPriceTick)
-      console.log('updateAmounts####tick_lower#####', tick_lower)
-      console.log('updateAmounts####tick_upper#####', tick_upper)
+      // console.log('updateAmounts####currentPriceP#####', currentPriceP)
+      // console.log('updateAmounts####currentPriceTick#####', currentPriceTick)
+      // console.log('updateAmounts####tick_lower#####', tick_lower)
+      // console.log('updateAmounts####tick_upper#####', tick_upper)
 
       if (max !== '∞' && tick_lower >= tick_upper) {
         this.showFromCoinLock = true
