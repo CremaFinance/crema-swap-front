@@ -9,7 +9,9 @@ export const RATES: any = {
   CUSDC: 1,
   CSOL: 1,
   CTA: 1,
-  CTB: 1
+  CTB: 1,
+  pUSDT: 1,
+  pUSDC: 1
 }
 export interface TokenInfo {
   symbol: string
@@ -124,6 +126,24 @@ export const TOKENS: Tokens = {
     symbol: 'USDH',
     name: 'USDH',
     mintAddress: 'USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
+  '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ': {
+    symbol: 'pUSDT',
+    name: 'pUSDT',
+    mintAddress: '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
+  FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58: {
+    symbol: 'pUSDC',
+    name: 'pUSDC',
+    mintAddress: 'FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58',
     decimals: 6,
     referrer: '',
     official: true,

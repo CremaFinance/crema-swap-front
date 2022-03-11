@@ -109,7 +109,7 @@
               <div class="title">Min Price</div>
               <p v-if="direct" class="price">{{ decimalFormat(secondConfirmData.minPrice, 6) }}</p>
               <p v-else class="price">{{ decimalFormat(1 / secondConfirmData.maxPrice, 6) }}</p>
-              <div v-if="direct" class="text">
+              <div v-if="!direct" class="text">
                 {{ secondConfirmData.fromCoin.symbol }} per {{ secondConfirmData.toCoin.symbol }}
               </div>
               <div v-else class="text">

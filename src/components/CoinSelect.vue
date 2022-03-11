@@ -8,6 +8,7 @@
           placeholder="Enter the token symbol or address"
         />
       </div>
+      <!-- <vue-scroll> -->
       <div class="coin-list-box">
         <ul v-if="tokenList && tokenList.length > 0" class="coin-list">
           <li
@@ -36,6 +37,7 @@
           <p>No Data</p>
         </div>
       </div>
+      <!-- </vue-scroll> -->
     </div>
   </Modal>
 </template>
@@ -185,7 +187,7 @@ export default Vue.extend({
       if (keyword) {
         tokenList = tokenList.filter((token: any) => {
           return (
-            token.symbol.includes(keyword.toUpperCase()) ||
+            token.symbol.toUpperCase().includes(keyword.toUpperCase()) ||
             // eslint-disable-next-line unicorn/prefer-includes
             token.mintAddress.toUpperCase().indexOf(keyword.toUpperCase()) >= 0
           )
@@ -220,7 +222,8 @@ export default Vue.extend({
   }
   .coin-list-box {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    max-height: 282px;
+    // max-height: 282px;
+    max-height: 310px;
     overflow-y: auto;
     margin-top: 20px;
     .coin-list {
