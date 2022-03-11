@@ -32,7 +32,7 @@
         </ul> -->
         <div v-if="list && list.length > 0" class="coin-list">
           <virtual-list
-            style="height: 280px; overflow-y: auto"
+            style="height: 280px; overflow-y: scroll"
             :data-key="'address'"
             :data-sources="list"
             :data-component="coinItemComponent"
@@ -147,11 +147,17 @@ export default Vue.extend({
       if (e.target.value !== '') {
         if (this.sList && this.sList.length > 0) {
           this.searchList = this.sList.filter((token) => {
-            return token.symbol.includes(e.target.value) || token.symbol.includes(e.target.value.toUpperCase())
+            return (
+              // token.symbol.toUpperCase().includes(e.target.value) ||
+              token.symbol.toUpperCase().includes(e.target.value.toUpperCase())
+            )
           })
         } else {
           this.searchList = this.swap.tokens.filter((token) => {
-            return token.symbol.includes(e.target.value) || token.symbol.includes(e.target.value.toUpperCase())
+            return (
+              // token.symbol.toUpperCase().includes(e.target.value) ||
+              token.symbol.toUpperCase().includes(e.target.value.toUpperCase())
+            )
           })
         }
       }
@@ -304,12 +310,13 @@ export default Vue.extend({
   }
   .coin-list-box {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    max-height: 280px;
+    height: 280px;
     margin-top: 20px;
     // overflow: hidden;
     // overflow-y: auto;
-    // .coin-list {
-    // }
+    .coin-list {
+      min-height: 300px;
+    }
   }
   .no-data {
     width: 100%;
