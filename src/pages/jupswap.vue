@@ -147,9 +147,9 @@ import { Button } from 'ant-design-vue'
 // const CUSDT = getTokenBySymbol('CUSDT')
 // const CUSDC = getTokenBySymbol('CUSDC')
 
-// const SOLANA_RPC_ENDPOINT = 'https://solana-api.projectserum.com'
+const SOLANA_RPC_ENDPOINT = 'https://solana-api.projectserum.com'
 // const SOLANA_RPC_ENDPOINT = 'https://connect.runnode.com/?apikey=PMkQIG6CxY0ybWmaHRHJ'
-const SOLANA_RPC_ENDPOINT = 'https://crema.rpcpool.com'
+// const SOLANA_RPC_ENDPOINT = 'https://mercurial.rpcpool.com'
 // const SOLANA_RPC_ENDPOINT = 'https://mainnet.rpcpool.com'
 /* *******************
  ** Wallet/Keypair of Swapper
