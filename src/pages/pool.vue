@@ -409,6 +409,7 @@ export default Vue.extend({
     decimalFormat,
     checkNullObj,
     poolInfoWatch(value: any, oldValue: any) {
+      console.log('111111')
       if (value) {
         // 第一次刷新或，替换交易对
         if (!oldValue || oldValue.name !== value.name) {
@@ -426,6 +427,7 @@ export default Vue.extend({
           //   ? price2tick(Number(value.currentPriceView))
           //   : price2tick(Number(value.currentPriceViewReverse))
           const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
+          console.log('value.tick_space#####', value.tick_space)
           const minTick = tick - value.tick_space
           const maxTick = tick + value.tick_space
           // const minPrice = direction ? String(tick2price(minTick)) : String(1 / tick2price(maxTick))
