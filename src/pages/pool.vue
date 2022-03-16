@@ -409,6 +409,7 @@ export default Vue.extend({
     decimalFormat,
     checkNullObj,
     poolInfoWatch(value: any, oldValue: any) {
+      console.log('111111')
       if (value) {
         // 第一次刷新或，替换交易对
         if (!oldValue || oldValue.name !== value.name) {
@@ -426,6 +427,7 @@ export default Vue.extend({
           //   ? price2tick(Number(value.currentPriceView))
           //   : price2tick(Number(value.currentPriceViewReverse))
           const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
+          console.log('value.tick_space#####', value.tick_space)
           const minTick = tick - value.tick_space
           const maxTick = tick + value.tick_space
           // const minPrice = direction ? String(tick2price(minTick)) : String(1 / tick2price(maxTick))
@@ -620,7 +622,7 @@ export default Vue.extend({
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
         // const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
-        const delta_liquity = calculateLiquityOnlyA(tick_lower, tick_upper, new Decimal(coinAmount))
+        const delta_liquity = calculateLiquityOnlyB(tick_lower, tick_upper, new Decimal(coinAmount))
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
         this.showToCoinLock = false
@@ -629,7 +631,7 @@ export default Vue.extend({
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
         const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
         // const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
-        const delta_liquity = calculateLiquityOnlyB(tick_lower, tick_upper, new Decimal(coinAmount))
+        const delta_liquity = calculateLiquityOnlyA(tick_lower, tick_upper, new Decimal(coinAmount))
 
         // const coinAmount = 1000000000
         // const delta_liquity = deposit_only_token_a(50112, 50752, coinAmount)
