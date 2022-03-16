@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div v-for="(item, index) in tableDataArr" :key="index" class="farming-pool-table-container">
+    <div class="farming-pool-table-container" v-for="(item, index) in tableDataArr" :key="index">
       <div
-        v-if="isStaked === 'All' || isStaked === item.isStaked"
         class="farming-pool-table"
         :class="isShowTableTr == index && index == 0 ? 'is-open' : ''"
+        v-if="isStaked === 'All' || isStaked === item.isStaked"
       >
         <table>
           <tbody>
@@ -12,7 +12,7 @@
               <td width="25%">
                 <div class="symbol-info">
                   <div class="symbol-left">
-                    <img class="coin-before" :src="importIcon(`/coins/${item.coinA.toLowerCase()}.png`)" alt="" ><img
+                    <img class="coin-before" :src="importIcon(`/coins/${item.coinA.toLowerCase()}.png`)" alt="" /><img
                       class="coin-after"
                       :src="importIcon(`/coins/${item.coinB.toLowerCase()}.png`)"
                       alt=""
@@ -47,9 +47,9 @@
                   -- CRM
                   <img
                     v-if="index == 0"
+                    @click="showStakeConfirm('Harvest All')"
                     src="@/assets/images/farming-earned-icon.png"
                     alt=""
-                    @click="showStakeConfirm('Harvest All')"
                   />
                 </div>
               </td>
@@ -126,8 +126,8 @@
                 <div class="td-text">
                   106.01CRM<img
                     src="@/assets/images/farming-earned-icon.png"
-                    alt=""
                     @click="showStakeConfirm('Harvest')"
+                    alt=""
                   />
                 </div>
               </td>
@@ -142,7 +142,7 @@
         </table>
       </div>
     </div>
-    <Stake v-if="showStake" :title="stakeTitle" @onClose="() => (showStake = false)"></Stake>
+    <Stake :title="stakeTitle" v-if="showStake" @onClose="() => (showStake = false)"></Stake>
   </div>
 </template>
 <script lang="ts">

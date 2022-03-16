@@ -18,8 +18,8 @@
         <div class="rewards-balance">106.01CRM</div>
       </div>
     </div>
-    <div v-else class="stake-confirm-container">
-      <div v-if="title === 'Stake'" class="get-lp">
+    <div class="stake-confirm-container" v-else>
+      <div class="get-lp" v-if="title === 'Stake'">
         Get {{ 'USDT / USDC' }} LPT
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-Jump"></use>

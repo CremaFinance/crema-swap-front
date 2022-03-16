@@ -57,10 +57,14 @@
           <img src="@/assets/images/stats.png" alt="" />
           <span>Stats</span>
         </li>
-        <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
+        <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
+          <img src="@/assets/images/icon-Docs.png" alt="" />
+          <span>Docs</span>
+        </a>
+        <!-- <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
           <img src="@/assets/images/icon-Farming@2x.png" alt="" />
           <span>Farming</span>
-        </li>
+        </li> -->
         <!-- <li>
           <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
             <svg class="icon" aria-hidden="true">
@@ -82,7 +86,7 @@
         </svg>
         <span>Test Guide</span>
       </a> -->
-
+      
       <!-- <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-Docs"></use>
@@ -314,7 +318,7 @@ export default {
         fill: #fff;
         margin-right: 8px;
       }
-      img {
+      img{
         width: 26px;
         height: 26px;
         margin-right: 8px;

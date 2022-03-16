@@ -9,7 +9,9 @@ export const RATES: any = {
   CUSDC: 1,
   CSOL: 1,
   CTA: 1,
-  CTB: 1
+  CTB: 1,
+  pUSDT: 1,
+  pUSDC: 1
 }
 export interface TokenInfo {
   symbol: string
@@ -84,100 +86,100 @@ export const NATIVE_SOL: TokenInfo = {
 
 export const TOKENS: Tokens = {
   // main net start *************
-  // Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB: {
-  //   symbol: 'USDT',
-  //   name: 'USDT',
-  //   mintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
-  //   decimals: 6,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // },
-  // EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
-  //   symbol: 'USDC',
-  //   name: 'USDC',
-  //   mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-  //   decimals: 6,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // },
-  // '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i': {
-  //   symbol: 'UST',
-  //   name: 'UST',
-  //   mintAddress: '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i',
-  //   decimals: 6,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // },
-  // Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS: {
-  //   symbol: 'PAI',
-  //   name: 'PAI',
-  //   mintAddress: 'Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS',
-  //   decimals: 6,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // },
-  // USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX: {
-  //   symbol: 'USDH',
-  //   name: 'USDH',
-  //   mintAddress: 'USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX',
-  //   decimals: 6,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // }
-
-  // main net end *************
-
-  // test net start ***************
-  '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
-    symbol: 'CSOL',
-    name: 'CSOL',
-    mintAddress: '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK',
-    decimals: 8,
+  Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB: {
+    symbol: 'USDT',
+    name: 'USDT',
+    mintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+    decimals: 6,
     referrer: '',
     official: true,
     showDefault: true
   },
-  GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT: {
-    symbol: 'CUSDC',
-    name: 'CUSDC',
-    mintAddress: 'GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT',
-    decimals: 8,
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
+    symbol: 'USDC',
+    name: 'USDC',
+    mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    decimals: 6,
     referrer: '',
     official: true,
     showDefault: true
   },
-  Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q: {
-    symbol: 'CUSDT',
-    name: 'CUSDT',
-    mintAddress: 'Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q',
-    decimals: 8,
+  '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i': {
+    symbol: 'UST',
+    name: 'UST',
+    mintAddress: '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i',
+    decimals: 6,
     referrer: '',
     official: true,
     showDefault: true
   },
-  '8CZUSdQu5A6jE4oWMVYRZ29QVpYXigostjnYbWjXuCYs': {
-    symbol: 'CNSOL',
-    name: 'CNSOL',
-    mintAddress: '8CZUSdQu5A6jE4oWMVYRZ29QVpYXigostjnYbWjXuCYs',
-    decimals: 9,
+  Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS: {
+    symbol: 'PAI',
+    name: 'PAI',
+    mintAddress: 'Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS',
+    decimals: 6,
     referrer: '',
     official: true,
     showDefault: true
   },
-  BVwhuJSmKCTXVCP6y1Vyso46Z8tktD3LBBkBGtcESvji: {
-    symbol: 'CNUSDC',
-    name: 'CNUSDC',
-    mintAddress: 'BVwhuJSmKCTXVCP6y1Vyso46Z8tktD3LBBkBGtcESvji',
+  USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX: {
+    symbol: 'USDH',
+    name: 'USDH',
+    mintAddress: 'USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
+  '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ': {
+    symbol: 'pUSDT',
+    name: 'pUSDT',
+    mintAddress: '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
+  FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58: {
+    symbol: 'pUSDC',
+    name: 'pUSDC',
+    mintAddress: 'FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58',
     decimals: 6,
     referrer: '',
     official: true,
     showDefault: true
   }
+
+  // main net end *************
+
+  // test net start ***************
+  // '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
+  //   symbol: 'CSOL',
+  //   name: 'CSOL',
+  //   mintAddress: '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK',
+  //   decimals: 8,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT: {
+  //   symbol: 'CUSDC',
+  //   name: 'CUSDC',
+  //   mintAddress: 'GHStiPQDe4HEQxtDzyFFuNjP6Z6GqYhbPqJ6oiRFmGWT',
+  //   decimals: 8,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q: {
+  //   symbol: 'CUSDT',
+  //   name: 'CUSDT',
+  //   mintAddress: 'Gcu9zjxrjez4xWGj8bi2gTLXYN8hD8Avu2tN8xfnV65Q',
+  //   decimals: 8,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // }
   // test net end ******************
 
   // CRM: {

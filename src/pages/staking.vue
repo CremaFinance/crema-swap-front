@@ -2,12 +2,14 @@
   <div class="staking-container-box">
     <div class="staking-container">
       <div class="banner-top">
-        <div class="banner-logo-titile">
-          <div class="banner-img-vessel">
-            <img src="../assets/images/icon_coins.png" alt="" />
+          <div class="banner-logo-titile">
+             <div class="banner-img-vessel">
+                <img src="../assets/images/icon_coins.png" alt="">
+             </div>
           </div>
-        </div>
-        <div class="banner-detail-info"></div>
+          <div class="banner-detail-info">
+
+          </div>
       </div>
       <!-- 底部组件位置 -->
       <div class="banner-ikego-info"></div>

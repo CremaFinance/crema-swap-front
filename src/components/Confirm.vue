@@ -53,16 +53,16 @@
       </div>
       <!-- .message-box -->
       <div class="confirm-message-box">
-        <ConfirmPopup popup-num="0.000258965" popup-name="Min Price" />
-        <ConfirmPopup popup-num="0.00066479" popup-name="Max Price" />
+        <ConfirmPopup popupNum="0.000258965" popupName="Min Price" />
+        <ConfirmPopup popupNum="0.00066479" popupName="Max Price" />
       </div>
       <div class="confirm-matrixing">
         <p>Current price</p>
         <span>1 CRM ≈ 71.1234 USDT</span>
       </div>
       <div class="confirm-balance">
-        <ConfirmLiquidity liquidity-title="Add more liquidity" liquidity-name="CRM" />
-        <ConfirmLiquidity liquidity-name="USDT" />
+        <ConfirmLiquidity liquidityTitle="Add more liquidity" liquidityName="CRM" />
+        <ConfirmLiquidity liquidityName="USDT" />
       </div>
       <div class="confirm-add">Add</div>
     </div>

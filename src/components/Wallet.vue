@@ -407,8 +407,7 @@ export default class Wallet extends Vue {
 
         Vue.prototype.$wallet = adapter
         // this.$accessor.wallet.setConnected(adapter.publicKey.toBase58())
-        // -
-        // console.log('setConnected####', adapter)
+        console.log('setConnected####', adapter)
         this.$accessor.wallet.setConnected({
           address: adapter.publicKey.toBase58(),
           platform: name,
@@ -520,18 +519,14 @@ export default class Wallet extends Vue {
   }
 
   connect(name: string, wallet: WalletInfo) {
-    // -
-    // console.log('没进来了吗connect22222#####')
+    console.log('没进来了吗connect22222#####')
     if (this.currentWalletName === name) {
       // this.isLoading = true
       return
     }
-    console.log('name123#####', name)
     this.currentWalletName = name
     const { providerUrl } = wallet
-    console.log('providerUrl123#####', providerUrl)
     const adapter = wallet.getAdapter(providerUrl)
-    console.log('adapter123###', adapter)
     if (adapter) {
       // adapter.on('ready', onReady)
       // this.isDisConnect = false
@@ -792,7 +787,7 @@ export default class Wallet extends Vue {
   color: #5f667c;
 }
 .select-wallet {
-  height: 350px;
+  height: 300px;
   overflow: auto;
   .wallet-item {
     width: 100%;

@@ -9,7 +9,7 @@
           </svg>
         </span>
       </a>
-      <input id="pValu" v-model="pValue" autocomplete="off" @blur="onBlur" />
+      <input id="pValu" v-model="pValue" @blur="onBlur" autocomplete="off" />
       <a class="minus-btn" :disabled="!fromCoin && !toCoin" @click="addPrice">
         <span>
           <svg class="icon" aria-hidden="true">
@@ -74,7 +74,6 @@ export default Vue.extend({
   },
   watch: {
     value(newVal: string, oldVal: string) {
-      console.log('&&&&&&SetPriceItem###value####', newVal)
       const arr = newVal.split('.')
       if (arr && arr[1] && arr[1].length > 6) {
         this.pValue = String(decimalFormat(newVal, 6))

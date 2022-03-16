@@ -5,7 +5,7 @@
         <img v-if="coinName" :src="importIcon(`/coins/${coinName.toLowerCase()}.png`)" />
         <img v-else src="../assets/images/icon_missing.png" />
         <span>{{ coinName || 'Select' }}</span>
-        <svg v-if="!notSelect" class="icon" aria-hidden="true">
+        <svg class="icon" v-if="!notSelect" aria-hidden="true">
           <use xlink:href="#icon-icon-on"></use>
         </svg>
       </div>

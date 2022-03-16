@@ -8,33 +8,36 @@
           placeholder="Enter the token symbol or address"
         />
       </div>
+
       <div class="coin-list-box">
-        <ul v-if="tokenList && tokenList.length > 0" class="coin-list">
-          <li
-            v-for="(item, index) in tokenList"
-            :key="index"
-            :class="item.unusable ? 'unusable' : ''"
-            @click="toSelect(item)"
-          >
-            <div class="left">
-              <img :src="importIconNew(`/coins/${item.symbol.toLowerCase()}.png`)" />
-              <span>{{ item.symbol }}</span>
-            </div>
-            <div class="balance">
-              <div v-if="wallet.loading">
-                <Icon type="loading" />
+        <vue-scroll>
+          <ul v-if="tokenList && tokenList.length > 0" class="coin-list">
+            <li
+              v-for="(item, index) in tokenList"
+              :key="index"
+              :class="item.unusable ? 'unusable' : ''"
+              @click="toSelect(item)"
+            >
+              <div class="left">
+                <img :src="importIconNew(`/coins/${item.symbol.toLowerCase()}.png`)" />
+                <span>{{ item.symbol }}</span>
               </div>
-              <div v-else-if="item.tokenAccountAddress">
-                {{ item.balance.toEther() }}
+              <div class="balance">
+                <div v-if="wallet.loading">
+                  <Icon type="loading" />
+                </div>
+                <div v-else-if="item.tokenAccountAddress">
+                  {{ item.balance.toEther() }}
+                </div>
+                <div v-else></div>
               </div>
-              <div v-else></div>
-            </div>
-          </li>
-        </ul>
-        <div v-else class="no-data">
-          <img src="../assets/images/icon_NoDate@2x.png" />
-          <p>No Data</p>
-        </div>
+            </li>
+          </ul>
+          <div v-else class="no-data">
+            <img src="../assets/images/icon_NoDate@2x.png" />
+            <p>No Data</p>
+          </div>
+        </vue-scroll>
       </div>
     </div>
   </Modal>
@@ -185,7 +188,7 @@ export default Vue.extend({
       if (keyword) {
         tokenList = tokenList.filter((token: any) => {
           return (
-            token.symbol.includes(keyword.toUpperCase()) ||
+            token.symbol.toUpperCase().includes(keyword.toUpperCase()) ||
             // eslint-disable-next-line unicorn/prefer-includes
             token.mintAddress.toUpperCase().indexOf(keyword.toUpperCase()) >= 0
           )
@@ -220,10 +223,14 @@ export default Vue.extend({
   }
   .coin-list-box {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    max-height: 282px;
+    // max-height: 282px;
+    // max-height: 310px;
+    height: 282px;
     overflow-y: auto;
     margin-top: 20px;
     .coin-list {
+      min-height: 300px;
+      // background: red;
       li {
         display: flex;
         height: 48px;

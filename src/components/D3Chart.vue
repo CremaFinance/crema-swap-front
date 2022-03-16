@@ -87,18 +87,16 @@ export default Vue.extend({
     },
     minPriceWatch(newVal: string) {
       if (this.currentChartData && this.currentChartData.length > 0) {
-        // this.updateChartRange(newVal, this.maxPrice)
-        this.dataProcessing(this.poolInfo, this.zoom)
+        this.updateChartRange(newVal, this.maxPrice)
       }
     },
     maxPriceWatch(newVal: string) {
       if (this.currentChartData && this.currentChartData.length > 0) {
-        this.dataProcessing(this.poolInfo, this.zoom)
-        // if (newVal !== '∞') {
-        //   this.updateChartRange(this.minPrice, newVal)
-        // } else {
-        //   this.updateChartRange(this.minPrice, String(this.currentChartData[this.currentChartData.length - 1][0]))
-        // }
+        if (newVal !== '∞') {
+          this.updateChartRange(this.minPrice, newVal)
+        } else {
+          this.updateChartRange(this.minPrice, String(this.currentChartData[this.currentChartData.length - 1][0]))
+        }
       }
     },
     zoomOut() {
@@ -114,15 +112,10 @@ export default Vue.extend({
     dataProcessing(infos: any, zoom: number = 1) {
       if (infos && infos.coin) {
         const current_price = infos.currentPriceView
-        console.log('dataProcessing####current_price#####', current_price)
         const currentTick = price2tick(Math.sqrt(current_price))
-        console.log('这里this.minPrice####', this.minPrice)
-        console.log('这里this.maxPrice####', this.maxPrice)
 
         const tickMax = (currentTick + 1000) * zoom
         const tickMin = (currentTick - 1000) * zoom
-
-        console.log('这里currentTick####', currentTick)
 
         const minPriceTick = price2tick(this.minPrice)
         const maxPriceTick = price2tick(this.maxPrice)
@@ -132,8 +125,6 @@ export default Vue.extend({
 
         const currentLiquity = infos.current_liquity.toNumber()
         const tick_info_array = infos.tick_info_array
-
-        console.log('tick_info_array######', tick_info_array)
 
         const leftArray: any = []
         const rightArray: any = []
@@ -160,8 +151,8 @@ export default Vue.extend({
           nowLiquityRight = nowLiquityRight + rightArray[r].liquity_net.toNumber()
         }
 
-        console.log('d3####leftArray#####', leftArray)
-        console.log('d3####rightArray#####', rightArray)
+        // console.log('d3####leftArray#####', leftArray)
+        // console.log('d3####rightArray#####', rightArray)
 
         let chartData: any = []
         chartData = [...leftArray.reverse(), { tick: currentTick, liquityAmount: currentLiquity }, ...rightArray]
@@ -170,9 +161,8 @@ export default Vue.extend({
           chartData = chartData.reverse()
         }
 
-        console.log('d3##chartData#####', chartData)
-        console.log('这里这里####minPriceTick####', minPriceTick)
-        console.log('这里这里####maxPriceTick####', maxPriceTick)
+        // console.log('d3##chartData#####', chartData)
+
         this.drawChart(chartData, tickMin, tickMax, minPriceTick, maxPriceTick, currentTick)
       }
     },
@@ -409,10 +399,6 @@ export default Vue.extend({
 
       const minPriceTickX = Math.abs(minPriceTick - tickMin) * unit
       const maxPriceTickX = Math.abs(maxPriceTick - tickMin) * unit
-
-      console.log('unit####', unit)
-      console.log('minPriceTickX#####', minPriceTickX)
-      console.log('maxPriceTickX#####', maxPriceTickX)
 
       svg.append('g').attr('class', 'brush').call(brush).call(brush.move, [minPriceTickX, maxPriceTickX])
       leftHandle.attr('transform', 'translate(' + minPriceTickX + ', 0)')

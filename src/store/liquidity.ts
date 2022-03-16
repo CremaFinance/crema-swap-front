@@ -10,8 +10,6 @@ import { TOKENS, RATES } from '@/utils/tokens'
 import { fixD, decimalFormat, checkNullObj } from '@/utils'
 import { tick2price, contractPrice2showPrice, preview_calculate_liqudity, preclaim, TickWord } from '@/tokenSwap/swapv3'
 import BigNumber from 'bignumber.js'
-import { fetchSwapPositionsByOwner } from '@/contract/farming'
-import { LPFARMS } from '@/utils/farming'
 
 // const AUTO_REFRESH_TIME = 60
 const AUTO_REFRESH_TIME = 60
@@ -88,10 +86,7 @@ export const actions = actionTree(
         const pool = LIQUIDITY_POOLS[i]
         const poolInfo = cloneDeep(pool)
         const swapTokenPubkey = new PublicKey(pool.tokenSwapAccount)
-        console.log('pool.tokenSwapAccount#####', pool.tokenSwapAccount)
         const tokenSwap = await TokenSwap.getAllAccounts(connection, swapTokenPubkey, SWAPV3_PROGRAMID, payer)
-
-        console.log(i, '#####tokenSwap####', tokenSwap)
         // 存用户仓位信息
         if (tokenSwap && tokenSwap.user_position_account_array && tokenSwap.user_position_account_array.length > 0) {
           tokenSwap.user_position_account_array.forEach((item) => {
@@ -104,13 +99,9 @@ export const actions = actionTree(
         const coin = TOKENS[tokenSwap.mintA.toString()]
         const pc = TOKENS[tokenSwap.mintB.toString()]
         const name = `${coin.symbol}-${pc.symbol}`
-        console.log('tokenSwap.current_price.toNumber()#####', tokenSwap.current_price.toNumber())
         const currentPriceView = contractPrice2showPrice(tokenSwap.current_price.toNumber(), coin.decimals, pc.decimals) // 前端展示用(正向)
-        console.log('currentPriceView#####', currentPriceView)
         const currentPriceViewReverse = String(1 / Number(currentPriceView)) // 前端展示当前价格(反向)
-        console.log('tokenSwap.fee.toNumber()#####', tokenSwap.fee.toNumber())
         const feeView = tokenSwap.fee.toNumber() / Math.pow(10, 10) // 考虑到展示百分比，所以除以了10次方， 实际decimal为12
-        console.log('feeView#####', feeView)
         const newPool = {
           ...tokenSwap,
           ...poolInfo,
@@ -133,110 +124,40 @@ export const actions = actionTree(
         console.log('swapProgramId#####', tokenSwap.swapProgramId.toString())
       }
 
-      console.log('liquidityPools#####', liquidityPools)
-
       commit('setInfos', liquidityPools)
       logger('Liquidity pool infomations updated')
 
       commit('setInitialized')
       commit('setLoading', false)
     },
-    // getMyPositions({ state, commit }, tokenAccounts) {
-    //   const list: any = []
-    //   const infos = state.infos
-    //   if (checkNullObj(tokenAccounts)) {
-    //     return list
-    //   }
-    //   for (const coinPair in infos) {
-    //     const poolInfo = cloneDeep(infos[coinPair])
-    //     const userPositionAccountObj = poolInfo.userPositionAccountObj
-
-    //     for (const key in tokenAccounts) {
-    //       if (userPositionAccountObj[key]) {
-    //         const myPos = userPositionAccountObj[key]
-    //         const minPrice = tick2price(myPos.lower_tick)
-    //         const maxPrice = tick2price(myPos.upper_tick)
-
-    //         console.log('myPos###liquity####', myPos.liquity.toString())
-    //         list.push({
-    //           nftTokenId: myPos.nft_token_id.toString(),
-    //           nftTokenMint: key,
-    //           minPrice: fixD(Math.pow(minPrice, 2), 12),
-    //           maxPrice: fixD(Math.pow(maxPrice, 2), 12),
-    //           ...myPos,
-    //           poolInfo
-    //         })
-    //       }
-    //     }
-    //   }
-
-    //   console.log('myPositions#####', list)
-    //   commit('setMyPositions', list)
-    // },
-    async getMyPositions({ state, commit }, tokenAccounts) {
-      const conn = this.$web3
-      const wallet = (this as any)._vm.$wallet
-      // for (let i = 0; i < LPFARMS.length; i++) {
-      //   const canStatePositions: any = await fetchSwapPositionsByOwner(
-      //     new PublicKey(LPFARMS[i].address),
-      //     wallet.publicKey,
-      //     conn,
-      //     wallet
-      //   )
-      //   for (let j = 0; j < canStatePositions.length; j++) {
-
-      //   }
-      // }
-
+    getMyPositions({ state, commit }, tokenAccounts) {
       const list: any = []
       const infos = state.infos
       if (checkNullObj(tokenAccounts)) {
         return list
       }
-
       for (const coinPair in infos) {
         const poolInfo = cloneDeep(infos[coinPair])
         const userPositionAccountObj = poolInfo.userPositionAccountObj
-
-        let unstakeList: any = []
-        for (let i = 0; i < LPFARMS.length; i++) {
-          const stakedPositons = await fetchSwapPositionsByOwner(
-            new PublicKey(poolInfo.tokenSwapAccount),
-            wallet.publicKey,
-            conn,
-            wallet
-          )
-          // statedList = [...statedList, ...stakedPositons]
-          for (let j = 0; j < stakedPositons.length; j++) {
-            unstakeList.push(stakedPositons[j].nftTokenId.toString())
-          }
-        }
 
         for (const key in tokenAccounts) {
           if (userPositionAccountObj[key]) {
             const myPos = userPositionAccountObj[key]
             const minPrice = tick2price(myPos.lower_tick)
             const maxPrice = tick2price(myPos.upper_tick)
-
-            console.log('myPos###liquity####', myPos.liquity.toString())
-            if (unstakeList.includes(myPos.nft_token_id.toString())) {
-              list.push({
-                nftTokenId: myPos.nft_token_id.toString(),
-                nftTokenMint: key,
-                minPrice: fixD(Math.pow(minPrice, 2), 12),
-                maxPrice: fixD(Math.pow(maxPrice, 2), 12),
-                ...myPos,
-                poolInfo
-              })
-            }
+            list.push({
+              nftTokenId: myPos.nft_token_id.toString(),
+              nftTokenMint: key,
+              minPrice: fixD(Math.pow(minPrice, 2), 12),
+              maxPrice: fixD(Math.pow(maxPrice, 2), 12),
+              ...myPos,
+              poolInfo
+            })
           }
         }
       }
-
-      console.log('myPositions#####', list)
       commit('setMyPositions', list)
     },
-
     setCurrentPositon({ commit }, data) {
       const { myPosions, id } = data
       const list = myPosions
@@ -252,15 +173,14 @@ export const actions = actionTree(
       }
 
       if (isFind) {
+        console.log('到这里了吗####isFind###', isFind)
+        console.log('currentData####', currentData)
         const { ans_src, ans_dst } = preview_calculate_liqudity(
           currentData.lower_tick,
           currentData.upper_tick,
           currentData.liquity,
           currentData.poolInfo.current_price
         )
-
-        console.log('ans_src####', ans_src)
-        console.log('ans_dst####', ans_dst)
 
         const fromCoinAmount = fixD(
           ans_src / Math.pow(10, currentData.poolInfo.coin.decimals),

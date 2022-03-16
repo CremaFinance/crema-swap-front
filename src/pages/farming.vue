@@ -3,17 +3,40 @@
     <div class="farming-container-center">
       <!-- title开始 -->
       <div class="farming-title">
-        <h3 class="title">Farming</h3>
+        <div class="title">Farming</div>
+        <div class="title-right">
+          <div class="pool-status-tab">
+            <div
+              :class="poolStatus === 'Staked' ? 'pool-status-staked-active' : 'pool-status-staked'"
+              @click="poolStatus = 'Staked'"
+            >
+              Staked
+            </div>
+            <div
+              :class="poolStatus === 'All' ? 'pool-status-all-active' : 'pool-status-all'"
+              @click="poolStatus = 'All'"
+            >
+              All
+            </div>
+          </div>
+          <div class="search-pool">
+            <Input v-model="searchKey" placeholder="Search Token or Pools" />
+            <div class="input-search"></div>
+          </div>
+        </div>
       </div>
       <!-- banner -->
       <div class="farming-banner">
-        <DFarmingBanner class="pc-banner" :is-farming="showFarm" />
-        <H5DFarmingBanner class="h5-banner" :is-farming="showFarm" />
-        <!-- <img class="h5-banner" src="@/assets/images/farming-banner-h5.png" alt="" /> -->
+        <img class="pc-banner" src="@/assets/images/farming-banner-pc.png" alt="" />
+        <img class="h5-banner" src="@/assets/images/farming-banner-h5.png" alt="" />
+      </div>
+      <div class="h5-search-pool">
+        <Input v-model="searchKey" placeholder="Search Token or Pools" />
+        <div class="input-search"></div>
       </div>
       <!-- 池子列表 -->
-      <FarmingPoolNew class="pc-farming-pool" :is-staked="poolStatus" :search-key="searchKey"></FarmingPoolNew>
-      <H5FarmingPoolNew class="h5-farming-pool" :is-staked="poolStatus" :search-key="searchKey"></H5FarmingPoolNew>
+      <FarmingPool class="pc-farming-pool" :isStaked="poolStatus" :searchKey="searchKey"></FarmingPool>
+      <H5FarmingPool class="h5-farming-pool" :isStaked="poolStatus" :searchKey="searchKey"></H5FarmingPool>
     </div>
   </div>
 </template>
@@ -24,8 +47,7 @@ export default Vue.extend({
   data() {
     return {
       poolStatus: 'All',
-      searchKey: '',
-      showFarm: 'Farming'
+      searchKey: ''
     }
   }
 })
@@ -33,25 +55,16 @@ export default Vue.extend({
 <style lang="less" scoped>
 .farming-container {
   .farming-container-center {
-    width: 1100px;
+    width: 1000px;
     margin: auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
     .farming-title {
-      width: 1000px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       .title {
-        // font-size: 20px;
-        // font-weight: normal;
-        // color: #B5B8C2;
         font-size: 20px;
+        font-weight: normal;
         color: #fff;
-        padding: 28px 0px 12px;
-        margin-bottom: 0px;
-        font-weight: 700;
       }
       .title-right {
         display: flex;
@@ -115,15 +128,18 @@ export default Vue.extend({
       }
     }
     .farming-banner {
-      // margin-top: 20px;
+      margin-top: 20px;
       border-radius: 20px;
       img {
         width: 1000px;
-        height: 160px;
+        height: 120px;
       }
       .h5-banner {
         display: none;
       }
+    }
+    .h5-search-pool {
+      display: none;
     }
     .pc-farming-pool {
       display: block;
@@ -152,9 +168,33 @@ export default Vue.extend({
         }
         .h5-banner {
           display: block;
-          // width: 100%;
+          width: 100%;
           // height: 88px;
-          // height: auto;
+          height: auto;
+        }
+      }
+      .h5-search-pool {
+        width: 100%;
+        margin-top: 20px;
+        padding-left: 20px;
+        padding-right: 5px;
+        background: #23262b;
+        box-shadow: 0px 0px 2px 0px #535966, 0px 2px 3px 1px #1a1c1f;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        input {
+          border: none;
+          outline: none;
+          background: #23262b;
+          line-height: 40px;
+        }
+        .input-search {
+          width: 30px;
+          height: 30px;
+          background: url('../assets/images/input-search.png');
+          background-size: 100% auto;
         }
       }
       .pc-farming-pool {

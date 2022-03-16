@@ -32,7 +32,7 @@
               <img class="img-left" :src="importIcon(`/coins/${currentData.coin.symbol.toLowerCase()}.png`)" />
               <img class="img-right" :src="importIcon(`/coins/${currentData.pc.symbol.toLowerCase()}.png`)" />
             </div>
-            <div v-if="currentData.coin && currentData.pc" class="deta-block-either">
+            <div class="deta-block-either" v-if="currentData.coin && currentData.pc">
               <!-- 94 16 16 -->
               {{ currentData.coin.symbol }} / {{ currentData.pc.symbol }}
             </div>
@@ -57,7 +57,7 @@
               </div>
             </div>
           </div>
-          <Slider v-model="sliderValue" :tooltip-visible="sliderChangeFlag" @change="sliderChange"></Slider>
+          <Slider v-model="sliderValue" @change="sliderChange" :tooltipVisible="sliderChangeFlag"></Slider>
         </div>
         <div class="liquidity-coins">
           <div class="before-coin">

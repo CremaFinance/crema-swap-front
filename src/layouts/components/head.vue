@@ -31,10 +31,10 @@
           <img src="../../assets/images/icon-Pools@2x.png" />
           <span>Pools</span>
         </nuxt-link>
-        <nuxt-link to="/farming">
+        <!-- <nuxt-link to="/farming">
           <img src="../../assets/images/icon-Farming@2x.png" />
           <span>Farming</span>
-        </nuxt-link>
+        </nuxt-link> -->
         <!-- <nuxt-link to="/staking">
           <img src="../../assets/images/icon-Staking@2x.png" />
           <span>Staking</span>
@@ -102,6 +102,7 @@ export default Vue.extend({
     this.$accessor.setSlippage(slippage)
   }
 })
+console.log()
 </script>
 <style lang="less" scoped>
 .header-container {
@@ -205,14 +206,10 @@ export default Vue.extend({
         }
       }
     }
-    .docs-img {
+    .docs-img{
       width: 18px !important;
       height: 18px !important;
     }
-  }
-  .docs-img {
-    width: 18px !important;
-    height: 18px !important;
   }
 
   > .right {

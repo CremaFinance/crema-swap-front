@@ -1,5 +1,5 @@
 <template>
-  <Tooltip overlay-class-name="customize-tooltip">
+  <Tooltip overlayClassName="customize-tooltip">
     <template slot="title">
       <div v-if="currentStatus === 'Active'" class="active-tooltip">
         The price of this pool is currently within your position price range.

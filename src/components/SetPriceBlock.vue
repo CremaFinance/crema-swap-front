@@ -8,7 +8,6 @@
         :from-coin="fromCoin"
         :to-coin="toCoin"
         :dirction="dirction"
-        :tickSpace="tickSpace"
       ></SetPriceItem>
       <SetPriceItem
         v-model="maxPrice"
@@ -17,7 +16,6 @@
         :from-coin="fromCoin"
         :to-coin="toCoin"
         :dirction="dirction"
-        :tickSpace="tickSpace"
       ></SetPriceItem>
     </div>
 
@@ -32,7 +30,7 @@
       <button @click="understand">I understand</button>
     </div>
     <button class="full-range" @click="showUnderStand = true">Full Range</button>
-    <div v-if="invalidPriceRange" class="price-hint">
+    <div class="price-hint" v-if="invalidPriceRange">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-a-icon-MarketAdress"></use>
       </svg>
@@ -94,13 +92,11 @@ export default Vue.extend({
   },
   watch: {
     min(newVal: string, oldVal: string) {
-      console.log('setPriceBlock####min##watch####', newVal)
       if (newVal !== oldVal) {
         this.minPrice = newVal
       }
     },
     max(newVal: string, oldVal: string) {
-      console.log('setPriceBlock####max##watch####', newVal)
       if (newVal !== oldVal) {
         this.maxPrice = newVal
       }

@@ -49,18 +49,18 @@ export default Vue.extend({
       }
     }
   },
-  // watch: {
-  //   pItem: {
-  //     handler: 'pItemWatch',
-  //     immediate: true
-  //   }
-  // },
+  watch: {
+    pItem: {
+      handler: 'pItemWatch',
+      immediate: true
+    }
+  },
   methods: {
     importIcon,
     decimalFormat,
-    // pItemWatch(value: any) {
-    //   console.log('pItemWatch####value####', value)
-    // },
+    pItemWatch(value: any) {
+      console.log('pItemWatch####value####', value)
+    },
     gotoDetail(item: any) {
       this.$router.push(`/detail/${item.nftTokenId}`)
     },

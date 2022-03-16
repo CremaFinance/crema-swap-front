@@ -292,7 +292,6 @@ export default Vue.extend({
       }
     },
     async updateAmounts() {
-      console.log('没进来吗44444#####this.poolInfo####', this.poolInfo)
       if (!this.poolInfo) return
       const slippage = Number(this.$accessor.slippage) // 滑点
       const direct =
@@ -311,8 +310,6 @@ export default Vue.extend({
           swap = await swapSdk.load()
         }
 
-        console.log('这里到了没啊@@@swap####', swap)
-
         if (swap && swap.ticks && swap.ticks.length > 1) {
           this.insufficientLiquidity = false
         } else {
@@ -320,8 +317,6 @@ export default Vue.extend({
           this.loading = false
           return
         }
-
-        console.log('666666')
 
         if (this.fixedFromCoin) {
           // const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toString()
@@ -346,16 +341,13 @@ export default Vue.extend({
           // this.loading = false
           // console.log('amountOut####', amountOut.fixed())
           // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
-          console.log('source_amount####', source_amount)
-          console.log('source_amount####', source_amount.toNumber())
-          console.log('direct#####', direct)
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
           // console.log('1111source_amount####', source_amount)
           // const DECIMALS = new Decimal(1000000)
           // console.log('res.amountOut.div(DECIMALS).toString()####', res.amountOut.div(DECIMALS).toString())
           const amountOut = (res && res.amountOut.toNumber()) || 0
-          console.log('1111amountOut#####', amountOut, '####direct####', direct)
+          // console.log('1111amountOut#####', amountOut, '####direct####', direct)
 
           if (amountOut) {
             this.insufficientLiquidity = false
@@ -365,8 +357,6 @@ export default Vue.extend({
             this.insufficientLiquidity = true
             this.toCoinAmount = '0'
           }
-
-          console.log('1111111')
           this.loading = false
 
           // let url = 'https://mercurial.rpcpool.com'
@@ -413,7 +403,6 @@ export default Vue.extend({
             this.insufficientLiquidity = true
             this.fromCoinAmount = '0'
           }
-          console.log('2222222')
           this.loading = false
         }
       }
@@ -602,7 +591,7 @@ export default Vue.extend({
     }
   }
   .swap-btn {
-    // font-weight: bold;
+    font-weight: bold;
     color: #fff;
     font-size: 20px;
     .gradient-btn-large();
