@@ -1,10 +1,10 @@
 <template>
   <div class="farming-pool-card-list">
-    <div class="farming-pool-card-box" v-for="(item, index) in tableDataArr" :key="index">
+    <div v-for="(item, index) in tableDataArr" :key="index" class="farming-pool-card-box">
       <div
+        v-if="isStaked === 'All' || isStaked === item.isStaked"
         class="farming-pool-card"
         :class="isShowTableTr == index && index == 0 ? 'is-open' : ''"
-        v-if="isStaked === 'All' || isStaked === item.isStaked"
       >
         <div class="symbol-info">
           <div class="symbol-left">
@@ -53,9 +53,9 @@
             <div class="trade-info-text">
               106.01CRM<img
                 v-if="index == 0"
-                @click="showStakeConfirm('Harvest')"
                 src="@/assets/images/farming-earned-icon.png"
                 alt=""
+                @click="showStakeConfirm('Harvest')"
               />
             </div>
           </div>

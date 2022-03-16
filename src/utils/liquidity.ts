@@ -129,6 +129,11 @@ export async function addLiquidityNew(
   maximumTokenB: number,
   new_position: number
 ): Promise<string> {
+  console.log('addLiquidityNew####poolInfo###', poolInfo)
+  console.log('addLiquidityNew####fromCoin###', fromCoin)
+  console.log('addLiquidityNew####toCoin###', toCoin)
+  console.log('addLiquidityNew####connection###', connection)
+  console.log('addLiquidityNew####wallet###', wallet)
   console.log('addLiquidityNew###userAccountA###', userAccountA)
   console.log('addLiquidityNew###userAccountB###', userAccountB)
   // console.log('addLiquidityNew###userTransferAuthority###', userTransferAuthority)
@@ -162,6 +167,7 @@ export async function addLiquidityNew(
 
   if (poolInfo.coin.mintAddress === toCoin?.mintAddress && poolInfo.pc.mintAddress === fromCoin?.mintAddress) {
     // userAccounts.reverse()
+    console.log('是进到这里了吗####')
     userAmounts.reverse()
   }
 
@@ -169,6 +175,11 @@ export async function addLiquidityNew(
   const userPcTokenAccount = userAccounts[1]
 
   let coinAmount: any
+
+  console.log('poolInfo.coin.decimals####', poolInfo.coin.decimals)
+  console.log('poolInfo.pc.decimals####', poolInfo.pc.decimals)
+  console.log('userAmounts#######', userAmounts)
+
   if (userAmounts[0]) {
     coinAmount = new TokenAmount(userAmounts[0], poolInfo.coin.decimals, false).wei.toNumber()
   }
@@ -346,6 +357,20 @@ function depositAllTokenTypesInstruction(
   maximumTokenB: number | Numberu64,
   user_position_index: number | Numberu64
 ): TransactionInstruction {
+  console.log('@test####depositAllTokenTypesInstruction###tokenSwap###', tokenSwap)
+  console.log('@test####depositAllTokenTypesInstruction###authority###', authority)
+  console.log('@test####depositAllTokenTypesInstruction###userTransferAuthority###', userTransferAuthority)
+  console.log('@test####depositAllTokenTypesInstruction###sourceA###', sourceA)
+  console.log('@test####depositAllTokenTypesInstruction###sourceB###', sourceB)
+  console.log('@test####depositAllTokenTypesInstruction###intoA###', intoA)
+  console.log('@test####depositAllTokenTypesInstruction###intoB###', intoB)
+  console.log('@test####depositAllTokenTypesInstruction###nft_mint_pubkey###', nft_mint_pubkey)
+  console.log('@test####depositAllTokenTypesInstruction###user_nft_pubkey###', user_nft_pubkey)
+  console.log('@test####depositAllTokenTypesInstruction###tick_info_key###', tick_info_key)
+  console.log('@test####depositAllTokenTypesInstruction###user_postion_key###', user_postion_key)
+  console.log('@test####depositAllTokenTypesInstruction###swapProgramId###', swapProgramId)
+  console.log('@test####depositAllTokenTypesInstruction###tokenProgramId###', tokenProgramId)
+
   console.log('depositAllTokenTypesInstruction###tokenSwap###', tokenSwap.toString())
   console.log('depositAllTokenTypesInstruction###authority###', authority.toString())
   // console.log('depositAllTokenTypesInstruction###user_wallet_key###', user_wallet_key.toString())

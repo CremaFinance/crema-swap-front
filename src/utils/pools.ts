@@ -205,31 +205,24 @@ export function isOfficalMarket(marketAddress: string) {
 export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   // main net start ********
   // USDT-USDC
-  {
-    coinPair: 'USDT-USDC',
-    tokenSwapAccount: '8J3avAjuRfL2CYFKKDwhhceiRoajhrHv9kN5nUiEnuBG'
-  },
-  {
-    coinPair: 'UST-USDC',
-    tokenSwapAccount: 'FESPUeMZLHPGqQvpyJe2QCbNmqCtYPEr1fw2oUDGJN9Z'
-  },
-  {
-    coinPair: 'PAI-USDC',
-    tokenSwapAccount: 'CYnnubJbqfeMcAiZE6cTMCfvuoWJiRrMKQANE7s3wLSK'
-  },
-  {
-    coinPair: 'USDH-USDC',
-    tokenSwapAccount: 'B1eNrQEExnPPmVbM3jiEAd89nW7tXUiArrk81JtUz6H8'
-  },
-  {
-    coinPair: 'pUSDT-pUSDC',
-    tokenSwapAccount: 'QNZScPBQzskAPvYVipVeUBSkGVQ4vrkXyowcibXdi7V'
-  },
-  {
-    coinPair: 'UST-USDH',
-    tokenSwapAccount: 'C52SfQELE8kAUES36fAfBcvCkoWLgHTrANqMdFXqEnm8'
-  }
+  // {
+  //   coinPair: 'USDT-USDC',
+  //   tokenSwapAccount: '8J3avAjuRfL2CYFKKDwhhceiRoajhrHv9kN5nUiEnuBG'
+  // },
+  // {
+  //   coinPair: 'UST-USDC',
+  //   tokenSwapAccount: 'FESPUeMZLHPGqQvpyJe2QCbNmqCtYPEr1fw2oUDGJN9Z'
+  // },
+  // {
+  //   coinPair: 'PAI-USDC',
+  //   tokenSwapAccount: 'CYnnubJbqfeMcAiZE6cTMCfvuoWJiRrMKQANE7s3wLSK'
+  // },
+  // {
+  //   coinPair: 'USDH-USDC',
+  //   tokenSwapAccount: 'B1eNrQEExnPPmVbM3jiEAd89nW7tXUiArrk81JtUz6H8'
+  // }
   // main net end ********
+  // test net start **********
   // HYSD-USDD
   // {
   //   // tokenSwapAccount: 'Ei9AknG73StHLYgFvobYGsSFVKxDUYnMmm7m5FPkG5dm'
@@ -237,15 +230,24 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   //   tokenSwapAccount: '2CQJoV8r4jYmtnAuj967pnSCbgDfe8w7gKuGKE8RSuPw'
   // },
   // csol-usdc
-  // {
-  //   coinPair: 'CSOL-CUSDC',
-  //   tokenSwapAccount: 'Gz113eAqg5FPJr3mnB2EhmDrGkUBHfsaY4xtbExd53nv'
-  // },
-  // // usdt-usdc
+  {
+    coinPair: 'CSOL-CUSDC',
+    tokenSwapAccount: 'Gz113eAqg5FPJr3mnB2EhmDrGkUBHfsaY4xtbExd53nv'
+  },
+  // usdt-usdc
   // {
   //   coinPair: 'CUSDT-CUSDC',
   //   tokenSwapAccount: '38ZpXbmvga78CFPR2YJbS3vDNHYsV67K1angDNLje3gA'
-  // }
+  // },
+  {
+    coinPair: 'CUSDT-CUSDC',
+    tokenSwapAccount: '6jZ1KK9LephzTTTL4pRnHwL9qBG8ymHk5Biv7vFdNtrR'
+  },
+  {
+    coinPair: 'CNSOL-CNUSDC',
+    tokenSwapAccount: '7JEGfvmHNecSV826CAAwoeaf2tY55jM9vQJrt1avALmy'
+  }
+  // test net end ********
   // {
   //   name: 'HYSD-USDD',
   //   coin: { ...TOKENS.HYSD },

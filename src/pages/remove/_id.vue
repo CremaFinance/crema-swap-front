@@ -38,7 +38,7 @@
         <Slider
           v-model="sliderValue"
           :tooltip-visible="sliderChangeFlag"
-          :tooltipPlacement="'bottom'"
+          :tooltip-placement="'bottom'"
           @change="sliderChange"
         ></Slider>
       </div>

@@ -18,16 +18,16 @@
       <div class="add-liquidity-modal">
         <div class="modal-header">
           <div class="modal-header-left">
-            <svg class="icon" aria-hidden="true" @click="$emit('onClose')" v-if="title == 'Increase Liquidity'">
+            <svg v-if="title == 'Increase Liquidity'" class="icon" aria-hidden="true" @click="$emit('onClose')">
               <use xlink:href="#icon-icon-return"></use>
             </svg>
             {{ title }}
           </div>
           <div class="modal-header-right">
-            <svg class="icon" aria-hidden="true" @click="showSetting = true" v-if="title == 'Increase Liquidity'">
+            <svg v-if="title == 'Increase Liquidity'" class="icon" aria-hidden="true" @click="showSetting = true">
               <use xlink:href="#icon-a-bianzu81"></use>
             </svg>
-            <svg class="icon" v-else aria-hidden="true" @click="$emit('onClose')">
+            <svg v-else class="icon" aria-hidden="true" @click="$emit('onClose')">
               <use xlink:href="#icon-icon-close"></use>
             </svg>
           </div>
@@ -109,7 +109,7 @@
               <div class="title">Min Price</div>
               <p v-if="direct" class="price">{{ decimalFormat(secondConfirmData.minPrice, 6) }}</p>
               <p v-else class="price">{{ decimalFormat(1 / secondConfirmData.maxPrice, 6) }}</p>
-              <div v-if="!direct" class="text">
+              <div v-if="direct" class="text">
                 {{ secondConfirmData.fromCoin.symbol }} per {{ secondConfirmData.toCoin.symbol }}
               </div>
               <div v-else class="text">
