@@ -87,6 +87,7 @@ export const actions = actionTree(
         const poolInfo = cloneDeep(pool)
         const swapTokenPubkey = new PublicKey(pool.tokenSwapAccount)
         const tokenSwap = await TokenSwap.getAllAccounts(connection, swapTokenPubkey, SWAPV3_PROGRAMID, payer)
+        console.log(i, '#####', 'tokenSwap####', tokenSwap)
         // 存用户仓位信息
         if (tokenSwap && tokenSwap.user_position_account_array && tokenSwap.user_position_account_array.length > 0) {
           tokenSwap.user_position_account_array.forEach((item) => {
