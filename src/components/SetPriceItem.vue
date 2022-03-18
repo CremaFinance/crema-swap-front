@@ -9,7 +9,7 @@
           </svg>
         </span>
       </a>
-      <input id="pValu" v-model="pValue" @blur="onBlur" autocomplete="off" />
+      <input id="pValu" v-model="pValue" autocomplete="off" @blur="onBlur" />
       <a class="minus-btn" :disabled="!fromCoin && !toCoin" @click="addPrice">
         <span>
           <svg class="icon" aria-hidden="true">
@@ -74,12 +74,14 @@ export default Vue.extend({
   },
   watch: {
     value(newVal: string, oldVal: string) {
+      console.log('&&&&&&SetPriceItem###value####', newVal)
       const arr = newVal.split('.')
       if (arr && arr[1] && arr[1].length > 6) {
         this.pValue = String(decimalFormat(newVal, 6))
         this.oValue = Number(newVal)
       } else {
         this.pValue = newVal
+        this.oValue = Number(newVal)
       }
     },
     dirction(newVal: boolean) {
@@ -97,6 +99,12 @@ export default Vue.extend({
   },
   methods: {
     addPrice() {
+      console.log('this.oValue###', this.oValue)
+      if (Number.isNaN(this.oValue) || !this.oValue) {
+        return
+      }
+
+      console.log('this.tickSpace###', this.tickSpace)
       const tick = getNearestTickByPrice(new Decimal(this.oValue), this.tickSpace)
       console.log('addPrice####tick####', tick)
       const price = tick2Price(tick + this.tickSpace)
@@ -107,6 +115,10 @@ export default Vue.extend({
       this.$emit('input', value)
     },
     minusPrice() {
+      console.log('this.oValue###', this.oValue)
+      if (Number.isNaN(this.oValue) || !this.oValue) {
+        return
+      }
       const tick = getNearestTickByPrice(new Decimal(this.oValue), this.tickSpace)
       console.log('minusPrice####tick####', tick)
       const price = tick2Price(tick - this.tickSpace)

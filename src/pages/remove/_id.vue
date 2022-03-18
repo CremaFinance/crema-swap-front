@@ -38,7 +38,7 @@
         <Slider
           v-model="sliderValue"
           :tooltip-visible="sliderChangeFlag"
-          :tooltipPlacement="'bottom'"
+          :tooltip-placement="'bottom'"
           @change="sliderChange"
         ></Slider>
       </div>
@@ -81,9 +81,13 @@ import Vue from 'vue'
 import { Modal, Slider, Button } from 'ant-design-vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
-import { checkNullObj, getUnixTs, decimalFormat } from '@/utils'
+import { checkNullObj, getUnixTs, decimalFormat, fixD } from '@/utils'
 import { clone, cloneDeep, get } from 'lodash-es'
 import { removeLiquidity } from '@/utils/liquidity'
+import { calculateSlidTokenAmount, TokenSwap } from '@cremafinance/crema-sdk'
+import { PublicKey } from '@solana/web3.js'
+import { SWAPV3_PROGRAMID } from '@/utils/ids'
+import Decimal from 'decimal.js'
 
 Vue.use(Slider).use(Button)
 
@@ -194,7 +198,7 @@ export default Vue.extend({
       this.amountPercentageIndex = -1
       this.setPercent({ value: this.sliderValue / 100 }, -1)
     },
-    toRemove() {
+    async toRemove() {
       this.sliderChangeFlag = false
       // console.log('这里滑点是多少呢####', this.$accessor.slippage)
       // console.log('考虑滑点前####this.fromCoinAmount####', this.fromCoinAmount)
@@ -235,6 +239,32 @@ export default Vue.extend({
         icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
       })
 
+      const swap = await new TokenSwap(
+        this.$web3,
+        new PublicKey(SWAPV3_PROGRAMID),
+        // new PublicKey(LPFARMS[i].swapKey),
+        this.poolInfo.tokenSwap,
+        null
+      ).load()
+      // console.log('currentData####123!!!!@@@', currentData)
+      const slidTokenAmountObj = calculateSlidTokenAmount(
+        currentData.lower_tick,
+        currentData.upper_tick,
+        // new Decimal(currentData.liquity.toString()),
+        this.sliderValue === 100
+          ? new Decimal(currentData.liquity.toString())
+          : new Decimal(fixD(new Decimal(currentData.liquity.toString()).mul(this.sliderValue / 100).toString(), 0)),
+        swap.tokenSwapInfo.currentSqrtPrice,
+        new Decimal(Number(this.$accessor.slippage) / 100)
+      )
+
+      console.log('slidTokenAmountObj.minAmountA.toString()####', slidTokenAmountObj.minAmountA.toString())
+      console.log('slidTokenAmountObj.minAmountB.toString()####', slidTokenAmountObj.minAmountB.toString())
+
+      fromCoinAmount = fixD(slidTokenAmountObj.minAmountA.toString(), 0)
+      toCoinAmount = fixD(slidTokenAmountObj.minAmountB.toString(), 0)
+      console.log('currentData.liquity.toString()####', currentData.liquity.toString())
+      console.log('this.sliderValue#####', this.sliderValue)
       removeLiquidity(
         conn,
         wallet,
@@ -247,7 +277,10 @@ export default Vue.extend({
         poolInfo.pc,
         fromCoinAmount,
         toCoinAmount,
-        currentData.liquity.toNumber() * (this.sliderValue / 100)
+        // String(currentData.liquity),
+        this.sliderValue === 100
+          ? currentData.liquity.toString()
+          : fixD(new Decimal(currentData.liquity.toString()).mul(this.sliderValue / 100).toString(), 0)
       )
         .then((txid) => {
           this.$notify.info({
@@ -262,7 +295,7 @@ export default Vue.extend({
           })
 
           this.isLoading = false
-          const description = `Remove  ${fromCoinAmount} ${poolInfo.coin?.symbol} and ${toCoinAmount} ${poolInfo.pc?.symbol} from the pool`
+          const description = `Remove  ${this.fromCoinAmount} ${poolInfo.coin?.symbol} and ${this.toCoinAmount} ${poolInfo.pc?.symbol} from the pool`
 
           this.$accessor.transaction.sub({ txid, description })
 

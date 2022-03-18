@@ -1,7 +1,7 @@
 <template>
   <Modal
     title="Settings"
-    :zIndex="1070"
+    :z-index="1070"
     centered
     width="400px"
     :visible="true"
@@ -23,8 +23,8 @@
         <Input v-model="slippage" typ="number" size="large" suffix="%" @input="oninput" />
       </div>
       <div
-        class="slippage-hint"
         v-if="slippage"
+        class="slippage-hint"
         :class="
           Number(slippage) > 1 && 50 >= Number(slippage)
             ? 'slippage-hint-waring'

@@ -27,7 +27,7 @@
                   <Icon type="loading" />
                 </div>
                 <div v-else-if="item.tokenAccountAddress">
-                  {{ item.balance.toEther() }}
+                  {{ item.balance.fixed() }}
                 </div>
                 <div v-else></div>
               </div>

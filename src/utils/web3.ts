@@ -422,6 +422,10 @@ export async function sendTransaction(
   transaction: Transaction,
   signers: Array<Account> = []
 ) {
+  console.log('sendTransaction###connection###', connection)
+  console.log('sendTransaction###wallet###', wallet)
+  console.log('sendTransaction###transaction###', connection)
+  console.log('sendTransaction###signers###', connection)
   const txid: TransactionSignature = await wallet.sendTransaction(transaction, connection, {
     signers,
     skipPreflight: true,
