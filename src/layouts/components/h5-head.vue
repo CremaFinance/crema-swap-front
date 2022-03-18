@@ -83,12 +83,13 @@
         <span>Test Guide</span>
       </a> -->
 
-      <!-- <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
-        <svg class="icon" aria-hidden="true">
+      <a class="paper-guide" href="https://gitbook.crema.finance/" target="_blank">
+        <!-- <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-Docs"></use>
-        </svg>
+        </svg> -->
+        <img src="@/assets/images/icon-Docs.png" alt="" />
         <span>Docs</span>
-      </a> -->
+      </a>
 
       <div class="contact-list">
         <a href="https://twitter.com/Crema_Finance" target="_blank">

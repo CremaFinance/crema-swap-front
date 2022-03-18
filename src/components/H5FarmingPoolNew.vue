@@ -21,13 +21,13 @@
           <div class="symbol-right">
             <div class="open-or-close" :class="index !== 0 ? 'open-or-close-disabled' : ''">
               <!-- Details -->
-              <div @click="changeRel = !changeRel">
+              <div @mouseenter="changeRel = !changeRel" @mouseleave="changeRel = !changeRel">
                 <svg class="stern-icon set-dot" aria-hidden="true">
                   <use xlink:href="#icon-more"></use>
                 </svg>
 
                 <div v-show="changeRel" class="symbol-relation">
-                  <div>
+                  <div @click="gotoLp(item)">
                     <svg aria-hidden="true">
                       <use xlink:href="#icon-icon-Get-NFT"></use>
                     </svg>
@@ -88,11 +88,12 @@
             :disabled="!item.miner || !Number(item.miner.PendingRewardView) || isDisabled"
             @click="toClaim(item)"
           >
-            <div>Harvest all</div>
+            <!-- <div>Harvest all</div> -->
+            Harvest all
           </Button>
         </div>
         <div class="stake-and-unstake">
-          <div class="stake-box trade-info" v-for="(pitem, pindex) in item.positions" :key="pindex">
+          <div v-for="(pitem, pindex) in item.positions" :key="pindex" class="stake-box trade-info">
             <div class="trade-info-item">
               <div class="trade-info-title">NFT</div>
               <div class="trade-info-text">
@@ -119,16 +120,19 @@
               :loading="isStaking && currentPosition && currentPosition.nftMintAddress === pitem.nftMintAddress"
               @click="toStake(item, pitem)"
             >
-              <div>Stake</div>
+              <!-- <div>Stake</div> -->
+              Stake
             </Button>
             <Button
               v-else
               class="action-btn none-btn"
               :loading="isUnStaking && currentPosition && currentPosition.nftMintAddress === pitem.nftMintAddress"
+              :class="pitem.isStaked ? '' : 'un-stake'"
               :disabled="isDisabled"
               @click="toUnStake(item, pitem)"
             >
-              <div>Unstake</div>
+              <!-- <div>Unstake</div> -->
+              Unstake
             </Button>
           </div>
           <!-- <div class="stake-box trade-info unstake-box">
@@ -494,6 +498,7 @@ export default Vue.extend({
 })
 </script>
 <style lang="less" scoped>
+@import '../styles/base.less';
 * {
   line-height: 1;
 }
@@ -522,7 +527,6 @@ export default Vue.extend({
 .farming-pool-card {
   padding: 22px 12px;
   height: 235px;
-  width: 340px;
   overflow: hidden;
   .trade-info {
     padding: 0 16px;
@@ -584,24 +588,20 @@ export default Vue.extend({
     }
   }
   .action-btn {
+    .gradient-btn-large();
     width: 100%;
     line-height: 1;
     height: 40px;
     padding: 1px;
-    background: linear-gradient(180deg, #e4e2fe 0%, #2881f2 100%);
-    border-radius: 6px;
-    border: none;
-    div {
-      text-align: center;
-      border-radius: 6px;
-      line-height: 38px;
-      font-size: 14px;
-      font-weight: normal;
-      color: #fff;
-      background: linear-gradient(268deg, #5fe6d0 0%, #597bff 38%, #9380ff 72%, #e590ff 100%);
-      &:hover {
-        background: linear-gradient(270deg, #93ffed 0%, #84caff 34%, #a291ff 68%, #efb9ff 100%);
-      }
+    font-size: 14px;
+    font-weight: normal;
+  }
+  .un-stake {
+    box-sizing: border-box;
+    padding: 1px;
+    background: #282c33 !important;
+    &:hover {
+      background: #34383e !important;
     }
   }
   .none-btn {
@@ -626,12 +626,16 @@ export default Vue.extend({
     .stake-box {
       padding: 0 16px 40px;
       border-bottom: 1px solid rgba(#fff, 0.1);
+      &:last-child{
+        border-bottom:none;
+      }
     }
     .unstake-box {
       margin-top: 20px;
       padding-bottom: 20px;
       border: none;
     }
+
   }
 }
 .symbol-info {
@@ -719,6 +723,7 @@ export default Vue.extend({
             align-items: center;
             padding-left: 8px;
             font-size: 12px;
+            border-radius: 10px;
             svg {
               margin-right: 4px;
               width: 20px;

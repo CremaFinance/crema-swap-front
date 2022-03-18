@@ -116,7 +116,7 @@ export default Vue.extend({
   },
   methods: {
     getPhan(val,num,width,title,date){
-      this.$axios.get(`https://dev-api-crema.bitank.com/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`).then((res) =>{
+      this.$axios.get(`https://api.crema.finance/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`).then((res) =>{
         let list = res.data.list
         const result: any = {
           categoryData:[],
@@ -136,7 +136,7 @@ export default Vue.extend({
       })
     },
     getTvl(date,title,val,view,con){
-      this.$axios.get(`https://dev-api-crema.bitank.com/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`).then((res) =>{
+      this.$axios.get(`https://api.crema.finance/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`).then((res) =>{
         let list = res.data.list
         const result: any = {
           categoryData:[],
@@ -527,7 +527,7 @@ export default Vue.extend({
   justify-content: space-between;
   align-content: space-between;
   > div{
-    width: 162px;
+    width: 48%;
     height: 100px;
     border-radius: 10px;
     background: linear-gradient(225deg, #3e434e 0%, #2e3238 100%);
