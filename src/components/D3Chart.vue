@@ -524,4 +524,13 @@ export default Vue.extend({
     }
   }
 }
+
+@media screen and (max-width: 750px) {
+  .chart {
+    .zoom-button-box {
+      top: 0px;
+    }
+  }
+}
 </style>
+

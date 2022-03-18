@@ -119,12 +119,21 @@ export const actions = actionTree(
               withinRange = false
             }
 
+            console.log('canStatePositions[j].lowerTick###', canStatePositions[j].lowerTick)
+            console.log('canStatePositions[j].upperTick###', canStatePositions[j].upperTick)
+
             cpresult.push({
               ...canStatePositions[j],
               nftMintAddress: canStatePositions[j].nftTokenId.toString(),
               liquityUSD: decimalFormat(liquityUSD.toString(), 4),
-              lowerPrice: decimalFormat(tick2Price(canStatePositions[j].lowerTick).toString(), 6),
-              upperPrice: decimalFormat(tick2Price(canStatePositions[j].upperTick).toString(), 6),
+              lowerPrice:
+                canStatePositions[j].lowerTick !== -443632
+                  ? decimalFormat(tick2Price(canStatePositions[j].lowerTick).toString(), 6)
+                  : '0',
+              upperPrice:
+                canStatePositions[j].upperTick !== 443632
+                  ? decimalFormat(tick2Price(canStatePositions[j].upperTick).toString(), 6)
+                  : '∞',
               isStaked: false,
               withinRange
             })
@@ -156,8 +165,14 @@ export const actions = actionTree(
               ...stakedPositons[k],
               nftMintAddress: stakedPositons[k].nftMint.toString(),
               liquityUSD: decimalFormat(liquityUSD.toString(), 4),
-              lowerPrice: decimalFormat(tick2Price(stakedPositons[k].lowerTick).toString(), 6),
-              upperPrice: decimalFormat(tick2Price(stakedPositons[k].upperTick).toString(), 6),
+              lowerPrice:
+                stakedPositons[k].lowerTick !== -443632
+                  ? decimalFormat(tick2Price(stakedPositons[k].lowerTick).toString(), 6)
+                  : '0',
+              upperPrice:
+                stakedPositons[k].upperTick !== 443632
+                  ? decimalFormat(tick2Price(stakedPositons[k].upperTick).toString(), 6)
+                  : '∞',
               isStaked: true
             })
           }

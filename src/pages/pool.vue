@@ -1118,6 +1118,8 @@ export default Vue.extend({
     }
     .set-price-range-chart-box {
       display: block;
+      overflow: hidden;
+      margin-top: 20px;
     }
   }
 }
