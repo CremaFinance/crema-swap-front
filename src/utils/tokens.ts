@@ -179,6 +179,42 @@ export const TOKENS: Tokens = {
   //   referrer: '',
   //   official: true,
   //   showDefault: true
+  // },
+  // '8CZUSdQu5A6jE4oWMVYRZ29QVpYXigostjnYbWjXuCYs': {
+  //   symbol: 'CNSOL',
+  //   name: 'CNSOL',
+  //   mintAddress: '8CZUSdQu5A6jE4oWMVYRZ29QVpYXigostjnYbWjXuCYs',
+  //   decimals: 9,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // BVwhuJSmKCTXVCP6y1Vyso46Z8tktD3LBBkBGtcESvji: {
+  //   symbol: 'CNUSDC',
+  //   name: 'CNUSDC',
+  //   mintAddress: 'BVwhuJSmKCTXVCP6y1Vyso46Z8tktD3LBBkBGtcESvji',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ': {
+  //   symbol: 'pUSDT',
+  //   name: 'pUSDT',
+  //   mintAddress: '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58: {
+  //   symbol: 'pUSDC',
+  //   name: 'pUSDC',
+  //   mintAddress: 'FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58',
+  //   decimals: 6,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
   // }
   // test net end ******************
 

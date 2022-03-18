@@ -10,6 +10,9 @@ import { TOKENS, RATES } from '@/utils/tokens'
 import { fixD, decimalFormat, checkNullObj } from '@/utils'
 import { tick2price, contractPrice2showPrice, preview_calculate_liqudity, preclaim, TickWord } from '@/tokenSwap/swapv3'
 import BigNumber from 'bignumber.js'
+import { fetchSwapPositionsByOwner } from '@/contract/farming'
+import { LPFARMS } from '@/utils/farming'
+import Decimal from 'decimal.js'
 
 // const AUTO_REFRESH_TIME = 60
 const AUTO_REFRESH_TIME = 60
@@ -103,6 +106,7 @@ export const actions = actionTree(
         const currentPriceView = contractPrice2showPrice(tokenSwap.current_price.toNumber(), coin.decimals, pc.decimals) // 前端展示用(正向)
         const currentPriceViewReverse = String(1 / Number(currentPriceView)) // 前端展示当前价格(反向)
         const feeView = tokenSwap.fee.toNumber() / Math.pow(10, 10) // 考虑到展示百分比，所以除以了10次方， 实际decimal为12
+        // console.log('feeView#####', feeView)
         const newPool = {
           ...tokenSwap,
           ...poolInfo,
@@ -122,8 +126,9 @@ export const actions = actionTree(
         }
 
         liquidityPools[name] = newPool
-        console.log('swapProgramId#####', tokenSwap.swapProgramId.toString())
       }
+
+      console.log('liquidityPools#####', liquidityPools)
 
       commit('setInfos', liquidityPools)
       logger('Liquidity pool infomations updated')
@@ -131,34 +136,102 @@ export const actions = actionTree(
       commit('setInitialized')
       commit('setLoading', false)
     },
-    getMyPositions({ state, commit }, tokenAccounts) {
+    // getMyPositions({ state, commit }, tokenAccounts) {
+    //   const list: any = []
+    //   const infos = state.infos
+    //   if (checkNullObj(tokenAccounts)) {
+    //     return list
+    //   }
+    //   for (const coinPair in infos) {
+    //     const poolInfo = cloneDeep(infos[coinPair])
+    //     const userPositionAccountObj = poolInfo.userPositionAccountObj
+
+    //     for (const key in tokenAccounts) {
+    //       if (userPositionAccountObj[key]) {
+    //         const myPos = userPositionAccountObj[key]
+    //         const minPrice = tick2price(myPos.lower_tick)
+    //         const maxPrice = tick2price(myPos.upper_tick)
+
+    //         console.log('myPos###liquity####', myPos.liquity.toString())
+    //         list.push({
+    //           nftTokenId: myPos.nft_token_id.toString(),
+    //           nftTokenMint: key,
+    //           minPrice: fixD(Math.pow(minPrice, 2), 12),
+    //           maxPrice: fixD(Math.pow(maxPrice, 2), 12),
+    //           ...myPos,
+    //           poolInfo
+    //         })
+    //       }
+    //     }
+    //   }
+
+    //   console.log('myPositions#####', list)
+    //   commit('setMyPositions', list)
+    // },
+    async getMyPositions({ state, commit }, tokenAccounts) {
+      const conn = this.$web3
+      const wallet = (this as any)._vm.$wallet
+      // for (let i = 0; i < LPFARMS.length; i++) {
+      //   const canStatePositions: any = await fetchSwapPositionsByOwner(
+      //     new PublicKey(LPFARMS[i].address),
+      //     wallet.publicKey,
+      //     conn,
+      //     wallet
+      //   )
+      //   for (let j = 0; j < canStatePositions.length; j++) {
+
+      //   }
+      // }
+
       const list: any = []
       const infos = state.infos
       if (checkNullObj(tokenAccounts)) {
         return list
       }
+
       for (const coinPair in infos) {
         const poolInfo = cloneDeep(infos[coinPair])
         const userPositionAccountObj = poolInfo.userPositionAccountObj
+
+        let unstakeList: any = []
+        for (let i = 0; i < LPFARMS.length; i++) {
+          const stakedPositons = await fetchSwapPositionsByOwner(
+            new PublicKey(poolInfo.tokenSwapAccount),
+            wallet.publicKey,
+            conn,
+            wallet
+          )
+          // statedList = [...statedList, ...stakedPositons]
+          for (let j = 0; j < stakedPositons.length; j++) {
+            unstakeList.push(stakedPositons[j].nftTokenId.toString())
+          }
+        }
 
         for (const key in tokenAccounts) {
           if (userPositionAccountObj[key]) {
             const myPos = userPositionAccountObj[key]
             const minPrice = tick2price(myPos.lower_tick)
             const maxPrice = tick2price(myPos.upper_tick)
-            list.push({
-              nftTokenId: myPos.nft_token_id.toString(),
-              nftTokenMint: key,
-              minPrice: fixD(Math.pow(minPrice, 2), 12),
-              maxPrice: fixD(Math.pow(maxPrice, 2), 12),
-              ...myPos,
-              poolInfo
-            })
+
+            console.log('myPos###liquity####', myPos.liquity.toString())
+            if (unstakeList.includes(myPos.nft_token_id.toString())) {
+              list.push({
+                nftTokenId: myPos.nft_token_id.toString(),
+                nftTokenMint: key,
+                minPrice: fixD(Math.pow(minPrice, 2), 12),
+                maxPrice: fixD(Math.pow(maxPrice, 2), 12),
+                ...myPos,
+                poolInfo
+              })
+            }
           }
         }
       }
+
+      console.log('myPositions#####', list)
       commit('setMyPositions', list)
     },
+
     setCurrentPositon({ commit }, data) {
       const { myPosions, id } = data
       const list = myPosions
@@ -174,14 +247,17 @@ export const actions = actionTree(
       }
 
       if (isFind) {
-        console.log('到这里了吗####isFind###', isFind)
-        console.log('currentData####', currentData)
+        console.log('currentData.poolInfo.current_price####', currentData.poolInfo.current_price.toString())
         const { ans_src, ans_dst } = preview_calculate_liqudity(
           currentData.lower_tick,
           currentData.upper_tick,
           currentData.liquity,
           currentData.poolInfo.current_price
         )
+
+        console.log('currentData.liquity#####', currentData.liquity.toString())
+        console.log('ans_src####', ans_src)
+        console.log('ans_dst####', ans_dst)
 
         const fromCoinAmount = fixD(
           ans_src / Math.pow(10, currentData.poolInfo.coin.decimals),
@@ -216,8 +292,8 @@ export const actions = actionTree(
         console.log('watchCurrentData####token_b_fee####', token_b_fee.toString())
         // const a = token_a_fee.div(new Numberu128(Math.pow(10, poolData.coin.decimals)))
         // const b = token_b_fee.div(new Numberu128(Math.pow(10, poolData.pc.decimals)))
-        const a = token_a_fee.toNumber() / Math.pow(10, currentData.poolInfo.coin.decimals)
-        const b = token_b_fee.toNumber() / Math.pow(10, currentData.poolInfo.pc.decimals)
+        const a = new Decimal(token_a_fee.toString()).div(Math.pow(10, currentData.poolInfo.coin.decimals))
+        const b = new Decimal(token_b_fee.toString()).div(Math.pow(10, currentData.poolInfo.pc.decimals))
 
         const tokenaFee = a
         const tokenbFee = b
@@ -248,20 +324,26 @@ export const actions = actionTree(
 
         // feeUSD计算
 
-        const tokenaFeeBig = new BigNumber(tokenaFee)
-        const tokenbFeeBig = new BigNumber(tokenbFee)
+        // const tokenaFeeBig = new BigNumber(tokenaFee.toString())
+        // const tokenbFeeBig = new BigNumber(tokenbFee.toString())
 
-        const tokenfeeA = tokenaFeeBig.multipliedBy(currentPrice)
-        const tokenfeeB = tokenbFeeBig.plus(tokenfeeA)
-        const feeUSDBig = tokenfeeB.multipliedBy(RATES[currentData.poolInfo.pc.symbol])
-        const feeUSD = decimalFormat(feeUSDBig.toFixed(), 4)
+        // console.log('currentPrice####', currentPrice)
+
+        // const tokenfeeA = tokenaFeeBig.multipliedBy(currentPrice)
+        // const tokenfeeB = tokenbFeeBig.plus(tokenfeeA)
+        const tokenfeeA = tokenaFee.mul(currentPrice)
+        const tokenfeeB = tokenbFee.plus(tokenfeeA)
+        const feeUSDBig = tokenfeeB.mul(RATES[currentData.poolInfo.pc.symbol])
+        const feeUSD = decimalFormat(feeUSDBig.toString(), 4)
+        // console.log('feeUSDBig.toString()####', feeUSDBig.toString())
+        console.log('feeUSD###', feeUSD)
 
         const newData = {
           ...currentData,
           fromCoinAmount,
           toCoinAmount,
-          tokenaFee,
-          tokenbFee,
+          tokenaFee: tokenaFee.toString(),
+          tokenbFee: tokenbFee.toString(),
           amountUSD,
           feeUSD,
           currentStatus,
@@ -269,6 +351,8 @@ export const actions = actionTree(
           fromPercent,
           toPercent
         }
+
+        console.log('newData###', newData)
 
         commit('setCurrentPosition', newData)
       } else {

@@ -26,6 +26,7 @@ import {
   contractPrice2showPrice
 } from '@/tokenSwap/swapv3'
 import { fixD, checkNullObj, decimalFormat } from '@/utils'
+import Decimal from 'decimal.js'
 
 export default Vue.extend({
   props: {
@@ -51,7 +52,7 @@ export default Vue.extend({
   data() {
     return {
       isDraw: false,
-      zoom: 1
+      zoom: 0.125
     }
   },
   watch: {
@@ -85,46 +86,66 @@ export default Vue.extend({
         this.dataProcessing(infos, this.zoom)
       }
     },
-    minPriceWatch(newVal: string) {
-      if (this.currentChartData && this.currentChartData.length > 0) {
-        this.updateChartRange(newVal, this.maxPrice)
+    minPriceWatch(newVal: string, oldVal: string) {
+      console.log('minPriceWatch没走到这儿####newVal', newVal)
+      // if (this.currentChartData && this.currentChartData.length > 0) {
+      if (newVal !== oldVal) {
+        // this.updateChartRange(newVal, this.maxPrice)
+        this.dataProcessing(this.poolInfo, this.zoom)
       }
     },
-    maxPriceWatch(newVal: string) {
-      if (this.currentChartData && this.currentChartData.length > 0) {
-        if (newVal !== '∞') {
-          this.updateChartRange(this.minPrice, newVal)
-        } else {
-          this.updateChartRange(this.minPrice, String(this.currentChartData[this.currentChartData.length - 1][0]))
-        }
+    maxPriceWatch(newVal: string, oldVal: string) {
+      console.log('maxPriceWatch没走到这儿####newVal', newVal)
+
+      // if (this.currentChartData && this.currentChartData.length > 0) {
+      if (newVal !== oldVal) {
+        this.dataProcessing(this.poolInfo, this.zoom)
+        // if (newVal !== '∞') {
+        //   this.updateChartRange(this.minPrice, newVal)
+        // } else {
+        //   this.updateChartRange(this.minPrice, String(this.currentChartData[this.currentChartData.length - 1][0]))
+        // }
       }
     },
     zoomOut() {
+      if (this.zoom < 0.015625) return
       const zoom = this.zoom / 2
       this.zoom = zoom
       this.dataProcessing(this.poolInfo, zoom)
     },
     zoomIn() {
+      if (this.zoom > 32) return
       const zoom = this.zoom * 2
       this.zoom = zoom
       this.dataProcessing(this.poolInfo, zoom)
     },
-    dataProcessing(infos: any, zoom: number = 1) {
+    dataProcessing(infos: any, zoom: number = 0.125) {
+      console.log('zoom####', zoom)
       if (infos && infos.coin) {
         const current_price = infos.currentPriceView
+        console.log('dataProcessing####current_price#####', current_price)
         const currentTick = price2tick(Math.sqrt(current_price))
+        console.log('这里this.minPrice####', this.minPrice)
+        console.log('这里this.maxPrice####', this.maxPrice)
 
         const tickMax = (currentTick + 1000) * zoom
         const tickMin = (currentTick - 1000) * zoom
 
-        const minPriceTick = price2tick(this.minPrice)
-        const maxPriceTick = price2tick(this.maxPrice)
+        console.log('这里currentTick####', currentTick)
+        console.log('this.minPrice123123####', this.minPrice)
+        console.log('this.maxPrice123123####', this.maxPrice)
+        const minPriceTick = price2tick(Number(decimalFormat(String(this.minPrice), 12)))
+        const maxPriceTick = price2tick(Number(decimalFormat(String(this.maxPrice), 12)))
 
         // console.log('tickMax#####', tickMax)
         // console.log('tickMin#####', tickMin)
+        console.log('infos.current_liquity####', infos.current_liquity.toString())
 
-        const currentLiquity = infos.current_liquity.toNumber()
+        // const currentLiquity = infos.current_liquity.toNumber()
+        const currentLiquity = new Decimal(infos.current_liquity.toString()).div(Math.pow(10, 6)).toNumber()
         const tick_info_array = infos.tick_info_array
+
+        console.log('tick_info_array######', tick_info_array)
 
         const leftArray: any = []
         const rightArray: any = []
@@ -142,17 +163,19 @@ export default Vue.extend({
         let nowLiquityLeft = currentLiquity
         for (let l = 0; l < leftArray.length; l++) {
           leftArray[l].liquityAmount = nowLiquityLeft
-          nowLiquityLeft = nowLiquityLeft - leftArray[l].liquity_net.toNumber()
+          nowLiquityLeft =
+            nowLiquityLeft - new Decimal(leftArray[l].liquity_net.toString()).div(Math.pow(10, 6)).toNumber()
         }
 
         let nowLiquityRight = currentLiquity
         for (let r = 0; r < rightArray.length; r++) {
           rightArray[r].liquityAmount = nowLiquityRight
-          nowLiquityRight = nowLiquityRight + rightArray[r].liquity_net.toNumber()
+          nowLiquityRight =
+            nowLiquityRight + new Decimal(rightArray[r].liquity_net.toString()).div(Math.pow(10, 6)).toNumber()
         }
 
-        // console.log('d3####leftArray#####', leftArray)
-        // console.log('d3####rightArray#####', rightArray)
+        console.log('d3####leftArray#####', leftArray)
+        console.log('d3####rightArray#####', rightArray)
 
         let chartData: any = []
         chartData = [...leftArray.reverse(), { tick: currentTick, liquityAmount: currentLiquity }, ...rightArray]
@@ -161,8 +184,9 @@ export default Vue.extend({
           chartData = chartData.reverse()
         }
 
-        // console.log('d3##chartData#####', chartData)
-
+        console.log('d3##chartData#####', chartData)
+        console.log('这里这里####minPriceTick####', minPriceTick)
+        console.log('这里这里####maxPriceTick####', maxPriceTick)
         this.drawChart(chartData, tickMin, tickMax, minPriceTick, maxPriceTick, currentTick)
       }
     },
@@ -271,19 +295,36 @@ export default Vue.extend({
       if (_this.direction) {
         for (let i = 0; i < xArr.length; i++) {
           const price: string = decimalFormat(String(tick2price(xArr[i])), 6) || '0'
+          // const price: string = '.'
           xPriceArr.push(price)
+          console.log('xArr[i]####', xArr[i])
+          console.log('tickMin####', tickMin)
+          console.log('unit####', unit)
           const x = Math.abs(xArr[i] - tickMin) * unit
+          console.log('x#####', x)
 
           let length: number = 0
+          // for (let j = 0; j < price.length; j++) {
+          //   if (price[j] === '1') {
+          //     length += 4.02
+          //   } else if (price[j] === '.') {
+          //     length += 4
+          //   } else {
+          //     length += 5.7
+          //   }
+          // }
           for (let j = 0; j < price.length; j++) {
             if (price[j] === '1') {
               length += 4.02
             } else if (price[j] === '.') {
-              length += 4
+              length += 2.64
+            } else if (price[j] === '7') {
+              length += 5.48
             } else {
-              length += 5.7
+              length += 6
             }
           }
+          console.log('length#####', length)
 
           ticksBox
             .append('text')
@@ -300,13 +341,24 @@ export default Vue.extend({
           const x = Math.abs(xArr[i] - tickMin) * unit
           // console.log('这里这里####price####', price)
           let length: number = 0
+          // for (let j = 0; j < price.length; j++) {
+          //   if (price[j] === '1') {
+          //     length += 4.02
+          //   } else if (price[j] === '.') {
+          //     length += 4
+          //   } else {
+          //     length += 5.7
+          //   }
+          // }
           for (let j = 0; j < price.length; j++) {
             if (price[j] === '1') {
               length += 4.02
             } else if (price[j] === '.') {
-              length += 4
+              length += 2.64
+            } else if (price[j] === '7') {
+              length += 5.48
             } else {
-              length += 5.7
+              length += 6
             }
           }
 
@@ -397,8 +449,20 @@ export default Vue.extend({
         ])
         .on('end', brushend)
 
-      const minPriceTickX = Math.abs(minPriceTick - tickMin) * unit
-      const maxPriceTickX = Math.abs(maxPriceTick - tickMin) * unit
+      let minPriceTickX = Math.abs(minPriceTick - tickMin) * unit
+      let maxPriceTickX = Math.abs(maxPriceTick - tickMin) * unit
+      if (this.minPrice === '0') {
+        minPriceTickX = 0
+      }
+      if (this.maxPrice === '∞') {
+        maxPriceTickX = width
+      }
+
+      console.log('unit####', unit)
+      console.log('this.minPrice123####', this.minPrice)
+      console.log('this.maxPrice123####', this.maxPrice)
+      console.log('minPriceTickX#####', minPriceTickX)
+      console.log('maxPriceTickX#####', maxPriceTickX)
 
       svg.append('g').attr('class', 'brush').call(brush).call(brush.move, [minPriceTickX, maxPriceTickX])
       leftHandle.attr('transform', 'translate(' + minPriceTickX + ', 0)')
@@ -441,7 +505,7 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     right: 0px;
-    top: 0px;
+    top: -14px;
     div {
       width: 40px;
       height: 20px;

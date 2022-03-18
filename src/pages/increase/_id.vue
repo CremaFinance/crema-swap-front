@@ -155,11 +155,14 @@ import {
   price2Tick,
   calculateLiquityOnlyA,
   calculateLiquityOnlyB,
-  calculateLiquity
+  calculateLiquity,
+  TokenSwap,
+  calculateSlidTokenAmount
 } from '@cremafinance/crema-sdk'
 import { PublicKey } from '@solana/web3.js'
 import Decimal from 'decimal.js'
 import { inputRegex, escapeRegExp } from '@/utils/regex'
+import { SWAPV3_PROGRAMID } from '@/utils/ids'
 
 export default Vue.extend({
   components: {
@@ -431,7 +434,7 @@ export default Vue.extend({
         }
       }
     },
-    supply() {
+    async supply() {
       this.isLoading = true
       const conn = this.$web3
       const wallet = (this as any).$wallet
@@ -468,6 +471,24 @@ export default Vue.extend({
         toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
       }
 
+      const swap = await new TokenSwap(
+        this.$web3,
+        new PublicKey(SWAPV3_PROGRAMID),
+        // new PublicKey(LPFARMS[i].swapKey),
+        this.poolInfo.tokenSwap,
+        null
+      ).load()
+
+      const slidTokenAmountObj = calculateSlidTokenAmount(
+        currentData.lower_tick,
+        currentData.upper_tick,
+        new Decimal(this.deltaLiquity),
+        swap.tokenSwapInfo.currentSqrtPrice,
+        new Decimal(Number(this.$accessor.slippage) / 100)
+      )
+      fromCoinAmount = fixD(slidTokenAmountObj.maxAmountA.toString(), 0)
+      toCoinAmount = fixD(slidTokenAmountObj.maxAmountB.toString(), 0)
+
       addLiquidityNew(
         conn,
         wallet,
@@ -480,7 +501,7 @@ export default Vue.extend({
         nftAccount,
         currentData.lower_tick,
         currentData.upper_tick,
-        this.deltaLiquity,
+        fixD(String(this.deltaLiquity), 0),
         fromCoinAmount,
         toCoinAmount,
         1
