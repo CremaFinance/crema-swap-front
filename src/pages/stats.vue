@@ -159,7 +159,7 @@
           </div>
           <div class="right">
             <h3>Volume(24H)</h3>
-            <p>$ {{ addCommom(item.vol_in_usd, 2) }}</p>
+            <p>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</p>
           </div>
           <div class="right">
             <h3>Recommend Range</h3>
