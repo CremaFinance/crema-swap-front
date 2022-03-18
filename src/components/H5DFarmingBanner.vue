@@ -104,17 +104,15 @@ export default Vue.extend({
 </script>
 <style lang="less" scoped>
 .farming-Banner {
-  width: 340px;
   height: 110px;
   background: url('@/assets/images/farming-nav-h5.png');
   background-size: 100% 100%;
 }
 .My-Caffeine {
   height: 90px;
-  width: 340px;
   background: url('@/assets/images/my-caffeine-h5.png');
   background-size: 100% 100%;
-  border-radius: 20px;
+  // border-radius: 20px;
   margin-top: 20px;
   display: flex;
   justify-content: space-between;
