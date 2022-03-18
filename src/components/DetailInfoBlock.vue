@@ -12,7 +12,8 @@
       </button>
     </div>
     <div class="rates">
-      $ {{ title !== 'Liquidity' ? decimalFormat(currentData.feeUSD, 6) : decimalFormat(currentData.amountUSD, 6) }}
+      $
+      {{ title !== 'Liquidity' ? processShowUSD(currentData.feeUSD) : processShowUSD(currentData.amountUSD) }}
     </div>
     <div :class="['info-box', !direction ? 'reverse' : '']">
       <div v-if="poolInfo" class="info-block">
@@ -148,6 +149,13 @@ export default Vue.extend({
         return fromCoinAmount ? '100%' : '0%'
       } else {
         return toCoinAmount ? '100%' : '0%'
+      }
+    },
+    processShowUSD(value: string) {
+      if (Number(value) < 0.00001 && Number(value) > 0) {
+        return '<0.00001'
+      } else {
+        return value
       }
     }
   }

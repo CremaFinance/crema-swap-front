@@ -102,7 +102,6 @@ export default Vue.extend({
     this.$accessor.setSlippage(slippage)
   }
 })
-console.log()
 </script>
 <style lang="less" scoped>
 .header-container {
@@ -206,10 +205,14 @@ console.log()
         }
       }
     }
-    .docs-img{
+    .docs-img {
       width: 18px !important;
       height: 18px !important;
     }
+  }
+  .docs-img {
+    width: 18px !important;
+    height: 18px !important;
   }
 
   > .right {

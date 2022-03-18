@@ -22,6 +22,7 @@ export const INIT_PUBKEY = new PublicKey('11111111111111111111111111111111')
 export const USER_POSITION_LENGTH = 360000
 export const MAX_USER_POSITION_COUNT = Math.floor((USER_POSITION_LENGTH - 38) / 120)
 export const TICK_INFO_LENGTH = 504000
+// export const TICK_INFO_LENGTH = 840000
 export const SWAPV3_PROGRAMID: PublicKey = new PublicKey(
   //'VenTxqaDv4Mj2krfs5Xahf23owM2MCVDQmTR1Qxj7J5',
   //'C8L7YYHrn38sKfAxVo5BFsGYFWcLeRAdaavVNfzg9s5N'

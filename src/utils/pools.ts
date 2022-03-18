@@ -229,7 +229,11 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
     coinPair: 'UST-USDH',
     tokenSwapAccount: 'C52SfQELE8kAUES36fAfBcvCkoWLgHTrANqMdFXqEnm8'
   }
+  // {
+  //   coinPair: ''
+  // }
   // main net end ********
+  // test net start **********
   // HYSD-USDD
   // {
   //   // tokenSwapAccount: 'Ei9AknG73StHLYgFvobYGsSFVKxDUYnMmm7m5FPkG5dm'
@@ -241,11 +245,20 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   //   coinPair: 'CSOL-CUSDC',
   //   tokenSwapAccount: 'Gz113eAqg5FPJr3mnB2EhmDrGkUBHfsaY4xtbExd53nv'
   // },
-  // // usdt-usdc
+  // usdt-usdc
   // {
   //   coinPair: 'CUSDT-CUSDC',
   //   tokenSwapAccount: '38ZpXbmvga78CFPR2YJbS3vDNHYsV67K1angDNLje3gA'
+  // },
+  // {
+  //   coinPair: 'CUSDT-CUSDC',
+  //   tokenSwapAccount: '6jZ1KK9LephzTTTL4pRnHwL9qBG8ymHk5Biv7vFdNtrR'
+  // },
+  // {
+  //   coinPair: 'CNSOL-CNUSDC',
+  //   tokenSwapAccount: '7JEGfvmHNecSV826CAAwoeaf2tY55jM9vQJrt1avALmy'
   // }
+  // test net end ********
   // {
   //   name: 'HYSD-USDD',
   //   coin: { ...TOKENS.HYSD },

@@ -1,6 +1,8 @@
 <template>
   <div class="test-container">
-    <div id="main" class="chart-test"></div>
+    <div id="main" style="margin: auto;" class="chart-test"></div>
+    <div style="margin-left: 200px;">{{volTime.day}} - {{volTime.month}} - {{volTime.year}}</div>
+    <div style="margin-left: 200px;">{{TradingVolume}}</div>
   </div>
 </template>
 
@@ -9,152 +11,143 @@ import { Vue } from 'nuxt-property-decorator'
 import * as echarts from 'echarts'
 
 export default Vue.extend({
-  mounted() {
-    const chartDom = document.getElementById('main')
-    if (chartDom) {
-      const myChart = echarts.init(chartDom)
-      let option: any
-
-      option = {
-        xAxis: {
-          // show: false,
-          type: 'category',
-          boundaryGap: false
-          // data: [0, 100, 200, 300, 400, 500, 600]
-        },
-        yAxis: {
-          show: false,
-          type: 'value'
-        },
-        tooltip: {
-          show: true
-        },
-        brush: {
-          toolbox: ['lineX'],
-          xAxisIndex: 'all',
-          brushLink: 'all',
-          outOfBrush: {
-            colorAlpha: 0.1
-          }
-        },
-        // dataZoom: [
-        //   {
-        //     type: 'slider',
-        //     top: '20%',
-        //     bottom: '24%',
-        //     moveHandleSize: 1
-        //   }
-        // ],
-        series: [
-          {
-            // data: [
-            //   820, 932, 901, 934, 1290, 1330, 1320, 820, 932, 901, 934, 1290, 1330, 1320, 820, 932, 901, 934, 1290,
-            //   1330, 1320, 820, 932, 901, 934, 1290, 1330, 1320
-            // ],
-            data: [
-              [0, 820],
-              [10, 821],
-              [20, 831],
-              [30, 841],
-              [40, 851],
-              [50, 861],
-              [60, 871],
-              [70, 881],
-              [80, 891],
-              [90, 901],
-              [100, 911],
-              [110, 921],
-              [120, 931],
-              [130, 941],
-              [140, 951],
-              [150, 961],
-              [160, 971],
-              [170, 981],
-              [180, 991],
-              [190, 1001],
-              [200, 1011],
-              [210, 1021],
-              [220, 1031],
-              [230, 1041],
-              [240, 1051],
-              [250, 1061],
-              [260, 1071],
-              [270, 1081],
-              [280, 1091],
-              [290, 1101],
-              [300, 1111],
-
-              [310, 1101],
-              [320, 1091],
-              [330, 1081],
-              [340, 1071],
-              [350, 1061],
-              [360, 1051],
-              [370, 1041],
-              [380, 1031],
-              [390, 1021],
-              [400, 1011],
-              [410, 1001],
-              [420, 990],
-              [430, 980],
-              [440, 970],
-              [450, 960],
-              [460, 950],
-              [470, 940],
-              [480, 930],
-              [490, 920],
-              [500, 910],
-              [510, 900],
-              [520, 890],
-              [530, 880],
-              [540, 870],
-              [550, 860],
-              [560, 850],
-              [570, 840],
-              [580, 830],
-              [590, 820],
-              [600, 810]
-            ],
-            type: 'line',
-            // symbolSize: 0,
-            showSymbol: false,
-            // lineStyle: {
-            //   color: 'rgba(0,0,0,0)',
-            //   width: 0
-            // },
-            areaStyle: {
-              // color: 'rgba(0,0,0,0)',
-              // opacity: 0
-            }
-          }
-        ]
-      }
-
-      // myChart.dispatchAction({
-      //   type: 'brush',
-      //   areas: [
-      //     {
-      //       brushType: 'lineX',
-      //       coordRange: [300, 400],
-      //       xAxisIndex: 0
-      //     }
-      //   ]
-      // })
-
-      option && myChart.setOption(option)
-
-      myChart.dispatchAction({
-        type: 'brush',
-        areas: [
-          {
-            brushType: 'lineX',
-            coordRange: [29, 32],
-            xAxisIndex: 0
-          }
-        ]
-      })
+  data() {
+    return {
+      pillar:'',
+      volTime:{
+        day:'',
+        month:'',
+        year:''
+      },
+      TradingVolume:''
     }
-  }
+  },
+  mounted() {
+    this.getPhan(100,100,1,'vol','day')
+  },
+  methods: {
+    getPhan(val,num,width,title,date){
+      this.$axios.get(`https://dev-api-crema.bitank.com/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`).then((res) =>{
+        let list = res.data.list
+        const result: any = {
+          categoryData:[],
+          valueData:[],
+        }
+        if(list){
+          list.forEach((item) =>{
+            result.categoryData.push((item.date).slice(0,10))
+            // result.categoryData.push(item.date)
+            result.valueData.push(item.num)
+          })
+        }
+        this.pillar = result
+        this.initialize(num,width)
+      })
+    },
+    initialize(val, wid){
+      const chartpillar: any = document.getElementById('main')
+      if (chartpillar) {
+        const myPillar = echarts.init(chartpillar)
+        let optionPillar: any = {
+          tooltip: {
+            trigger:'axis',
+            formatter:(params) =>{
+              let months = params[0].axisValue.slice(5,7);
+              let value = months == 1 ? 'Jan' : months == 2 ? 'Feb' :months == 3 ? 'Mar' : 
+                          months == 4 ? 'Apr' :months == 5 ? 'May' : months == 6 ? 'Jun' : 
+                          months == 7 ? 'Jul' : months == 8 ? 'Aug' : months == 9 ? 'Sep' : 
+                          months == 10 ? 'Oct' : months == 11 ? 'Nov' :'Dec'
+              this.volTime = {
+                day:params[0].axisValue.slice(8,10),
+                month:value,
+                year:params[0].axisValue.slice(0,4),
+              }
+              this.TradingVolume = params[0].value[1]
+            }
+          },
+          grid: {
+            bottom: 40,
+            left: 20,
+            right: 20
+          },
+          xAxis: {
+            type:'category',
+            // type:'time',
+            data: this.pillar.categoryData,
+            // boundaryGap: false,
+            interval:1,
+            axisTick: {
+              show: false
+            },
+            axisLine: {
+              show: false
+            },
+            splitLine: {
+              show: false
+            },
+            splitArea: {
+              show: false
+            },
+            axisLabel: {
+              margin: 20,
+              padding: [0, 0, 0, 20]    // 四个数字分别为上右下左与原位置距离
+            }
+          },
+          yAxis: {
+            // data: this.pillar.valueData,
+            // type:'value',
+            show: false,
+            splitArea: { show: false }
+          },
+          // title: {
+          //   left: 20,
+          //   top: 15
+          // },
+          dataZoom: [
+            {
+              type:'inside',
+              start: 0,
+              end: 20
+            }
+          ],
+          series: [
+            {
+              data: this.pillar.valueData,
+              type:'bar',
+              barGap:'1%',
+              large: true,
+              itemStyle: {
+                color:'#a90000',
+                normal: {
+                  barBorderRadius: 20,
+                  color: new echarts.graphic.LinearGradient(0,1,0,0,[
+                      {
+                        offset: 0,
+                        color:'#D3ABFF' // 0% 处的颜色
+                      },
+                      {
+                        offset: 0.6,
+                        color:'#00FFFE' // 60% 处的颜色
+                      },
+                      {
+                        offset: 1,
+                        color:'#00FFFE' // 100% 处的颜色
+                      }
+                    ],
+                    false
+                  )
+                }
+              },
+              barWidth: 10 //柱图宽度
+            }
+          ]
+        }
+        //  对实例对象进行设置配置
+        optionPillar && myPillar.setOption(optionPillar)
+      }
+    }
+  },
+  
 })
 </script>
 

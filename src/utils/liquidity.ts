@@ -124,11 +124,16 @@ export async function addLiquidityNew(
   user_nft_pubkey: PublicKey | null,
   tick_lower: number,
   tick_upper: number,
-  liquity_mount: number | Numberu128,
-  maximumTokenA: number,
-  maximumTokenB: number,
+  liquity_mount: number | Numberu128 | string,
+  maximumTokenA: number | string,
+  maximumTokenB: number | string,
   new_position: number
 ): Promise<string> {
+  console.log('addLiquidityNew####poolInfo###', poolInfo)
+  console.log('addLiquidityNew####fromCoin###', fromCoin)
+  console.log('addLiquidityNew####toCoin###', toCoin)
+  console.log('addLiquidityNew####connection###', connection)
+  console.log('addLiquidityNew####wallet###', wallet)
   console.log('addLiquidityNew###userAccountA###', userAccountA)
   console.log('addLiquidityNew###userAccountB###', userAccountB)
   // console.log('addLiquidityNew###userTransferAuthority###', userTransferAuthority)
@@ -162,6 +167,7 @@ export async function addLiquidityNew(
 
   if (poolInfo.coin.mintAddress === toCoin?.mintAddress && poolInfo.pc.mintAddress === fromCoin?.mintAddress) {
     // userAccounts.reverse()
+    console.log('是进到这里了吗####')
     userAmounts.reverse()
   }
 
@@ -169,13 +175,20 @@ export async function addLiquidityNew(
   const userPcTokenAccount = userAccounts[1]
 
   let coinAmount: any
+
+  console.log('poolInfo.coin.decimals####', poolInfo.coin.decimals)
+  console.log('poolInfo.pc.decimals####', poolInfo.pc.decimals)
+  console.log('userAmounts#######', userAmounts)
+
   if (userAmounts[0]) {
-    coinAmount = new TokenAmount(userAmounts[0], poolInfo.coin.decimals, false).wei.toNumber()
+    // coinAmount = new TokenAmount(userAmounts[0], poolInfo.coin.decimals, false).wei.toNumber()
+    coinAmount = userAmounts[0]
   }
 
   let pcAmount: any
   if (userAmounts[1]) {
-    pcAmount = new TokenAmount(userAmounts[1], poolInfo.pc.decimals, false).wei.toNumber()
+    // pcAmount = new TokenAmount(userAmounts[1], poolInfo.pc.decimals, false).wei.toNumber()
+    pcAmount = userAmounts[1]
   }
 
   let wrappedCoinSolAccount
@@ -341,11 +354,25 @@ function depositAllTokenTypesInstruction(
   new_position: number,
   tick_lower: number,
   tick_upper: number,
-  liquity_amount: number | Numberu128,
+  liquity_amount: number | Numberu128 | string,
   maximumTokenA: number | Numberu64,
   maximumTokenB: number | Numberu64,
   user_position_index: number | Numberu64
 ): TransactionInstruction {
+  console.log('@test####depositAllTokenTypesInstruction###tokenSwap###', tokenSwap)
+  console.log('@test####depositAllTokenTypesInstruction###authority###', authority)
+  console.log('@test####depositAllTokenTypesInstruction###userTransferAuthority###', userTransferAuthority)
+  console.log('@test####depositAllTokenTypesInstruction###sourceA###', sourceA)
+  console.log('@test####depositAllTokenTypesInstruction###sourceB###', sourceB)
+  console.log('@test####depositAllTokenTypesInstruction###intoA###', intoA)
+  console.log('@test####depositAllTokenTypesInstruction###intoB###', intoB)
+  console.log('@test####depositAllTokenTypesInstruction###nft_mint_pubkey###', nft_mint_pubkey)
+  console.log('@test####depositAllTokenTypesInstruction###user_nft_pubkey###', user_nft_pubkey)
+  console.log('@test####depositAllTokenTypesInstruction###tick_info_key###', tick_info_key)
+  console.log('@test####depositAllTokenTypesInstruction###user_postion_key###', user_postion_key)
+  console.log('@test####depositAllTokenTypesInstruction###swapProgramId###', swapProgramId)
+  console.log('@test####depositAllTokenTypesInstruction###tokenProgramId###', tokenProgramId)
+
   console.log('depositAllTokenTypesInstruction###tokenSwap###', tokenSwap.toString())
   console.log('depositAllTokenTypesInstruction###authority###', authority.toString())
   // console.log('depositAllTokenTypesInstruction###user_wallet_key###', user_wallet_key.toString())
@@ -385,7 +412,7 @@ function depositAllTokenTypesInstruction(
     {
       instruction: 2, // Deposit instruction
       new_position,
-      liquity_amount: new Numberu128(liquity_amount).toBuffer(),
+      liquity_amount: new Numberu128(String(liquity_amount)).toBuffer(),
       tick_lower,
       tick_upper,
       maximumTokenA: new Numberu64(maximumTokenA).toBuffer(),
@@ -538,7 +565,7 @@ export async function removeLiquidity(
   toCoin: TokenInfo | undefined | null,
   fromAmount: string | undefined | null,
   toAmount: string | undefined | null,
-  liquityAmount: number | Numberu128
+  liquityAmount: number | Numberu128 | string
 ): Promise<string> {
   console.log('removeLiquidity###connection###', connection)
   console.log('removeLiquidity###wallet###', wallet)
@@ -579,12 +606,14 @@ export async function removeLiquidity(
 
   let coinAmount: any
   if (userAmounts[0]) {
-    coinAmount = new TokenAmount(userAmounts[0], poolInfo.coin.decimals, false).wei.toNumber()
+    // coinAmount = new TokenAmount(userAmounts[0], poolInfo.coin.decimals, false).wei.toNumber()
+    coinAmount = Number(userAmounts[0])
   }
 
   let pcAmount: any
   if (userAmounts[1]) {
-    pcAmount = new TokenAmount(userAmounts[1], poolInfo.pc.decimals, false).wei.toNumber()
+    // pcAmount = new TokenAmount(userAmounts[1], poolInfo.pc.decimals, false).wei.toNumber()
+    pcAmount = Number(userAmounts[1])
   }
 
   let wrappedCoinSolAccount
@@ -689,7 +718,7 @@ function withdrawAllTokenTypesInstruction(
   user_postion_key: PublicKey,
   swapProgramId: PublicKey,
   tokenProgramId: PublicKey,
-  liquityAmount: number | Numberu128,
+  liquityAmount: number | Numberu128 | string,
   minimumTokenA: number | Numberu64,
   minimumTokenB: number | Numberu64,
   user_position_index: number | Numberu64
@@ -702,10 +731,10 @@ function withdrawAllTokenTypesInstruction(
   console.log('withdrawAllTokenTypesInstruction###fromB###', fromB)
   console.log('withdrawAllTokenTypesInstruction###userAccountA###', userAccountA)
   console.log('withdrawAllTokenTypesInstruction###userAccountB###', userAccountB)
-  console.log('withdrawAllTokenTypesInstruction###nft_mint_pubkey###', nft_mint_pubkey)
-  console.log('withdrawAllTokenTypesInstruction###user_nft_pubkey###', user_nft_pubkey)
-  console.log('withdrawAllTokenTypesInstruction###tick_info_key###', tick_info_key)
-  console.log('withdrawAllTokenTypesInstruction###user_postion_key###', user_postion_key)
+  console.log('withdrawAllTokenTypesInstruction###nft_mint_pubkey###', nft_mint_pubkey.toString())
+  console.log('withdrawAllTokenTypesInstruction###user_nft_pubkey###', user_nft_pubkey.toString())
+  console.log('withdrawAllTokenTypesInstruction###tick_info_key###', tick_info_key.toString())
+  console.log('withdrawAllTokenTypesInstruction###user_postion_key###', user_postion_key.toString())
   console.log('withdrawAllTokenTypesInstruction###swapProgramId###', swapProgramId)
   console.log('withdrawAllTokenTypesInstruction###tokenProgramId###', tokenProgramId)
   console.log('withdrawAllTokenTypesInstruction###liquityAmount###', liquityAmount)
