@@ -13,7 +13,7 @@
       </div>
 
       <div class="farming-pool-container">
-        <div class="loading-box" v-if="farming.farmingListLoading"><Spin /></div>
+        <div v-if="farming.farmingListLoading" class="loading-box"><Spin /></div>
         <!-- 池子列表 -->
         <FarmingPoolNew class="pc-farming-pool" :is-staked="poolStatus" :search-key="searchKey"></FarmingPoolNew>
         <H5FarmingPoolNew class="h5-farming-pool" :is-staked="poolStatus" :search-key="searchKey"></H5FarmingPoolNew>
@@ -29,15 +29,15 @@ export default Vue.extend({
   components: {
     Spin
   },
-  computed: {
-    ...mapState(['farming'])
-  },
   data() {
     return {
       poolStatus: 'All',
       searchKey: '',
       showFarm: 'Farming'
     }
+  },
+  computed: {
+    ...mapState(['farming'])
   }
 })
 </script>
@@ -138,7 +138,7 @@ export default Vue.extend({
     }
     .farming-pool-container {
       width: 1000px;
-      min-height: 80px;
+      // min-height: 80px;
       position: relative;
       margin-top: 20px;
     }
@@ -168,7 +168,7 @@ export default Vue.extend({
 @media screen and (max-width: 750px) {
   .farming-container {
     width: 100%;
-    padding: 20px 16px 0;
+    // padding: 20px 16px 0;
     .farming-container-center {
       width: 100%;
       .farming-title {
@@ -184,7 +184,7 @@ export default Vue.extend({
         }
         .h5-banner {
           display: block;
-          // width: 100%;
+          width: 100%;
           // height: 88px;
           // height: auto;
         }
