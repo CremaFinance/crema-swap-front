@@ -58,11 +58,11 @@
           <p><span>{{ wdAll.Token }}</span></p>
           <img src="@/assets/images/h5-token.png" alt="">
         </div>
-        <!-- <div>
+        <div>
           <p>Total Users</p>
           <p><span>{{ wdAll.Users }}</span></p>
           <img src="@/assets/images/h5-user.png" alt="">
-        </div> -->
+        </div>
       </div>
     </div>
   </div>

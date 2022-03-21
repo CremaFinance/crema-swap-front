@@ -39,8 +39,8 @@
               Still need to produce xxx caffeine to mint NFT
             </div>
             <img
-              :class="isNotLink ? 'NotLink-img' : ''"
               v-if="isNotLink"
+              :class="isNotLink ? 'NotLink-img' : ''"
               src="@/assets/images/img-link-Wallet.png"
               alt=""
             />
@@ -62,25 +62,28 @@
                 </div>
               </div>
               <div class="pmgressbar-btn">
-                <Button v-if="!isNotLink && !isClaim" class="action-btn">
-                  <div @click="changeMint">Mint</div>
+                <Button v-if="!isNotLink && !isClaim" class="action-btn" @click="changeMint">
+                  <!-- <div @click="changeMint">Mint</div> -->
+                  Mint
                 </Button>
-                <Button v-if="!isNotLink && !isClaim" class="action-btn">
-                  <div @click="changeUpgrade">Upgrade</div>
+                <Button v-if="!isNotLink && !isClaim" class="action-btn" @click="changeUpgrade">
+                  <!-- <div @click="changeUpgrade">Upgrade</div> -->
+                  Upgrade
                 </Button>
                 <Button v-if="isNotLink" class="action-btn">
-                  <div>Connect a wallet</div>
+                  Connect a wallet
                 </Button>
-                <Button v-if="isClaim" class="action-btn">
-                  <div @click="changeClaim">Claim</div>
+                <Button v-if="isClaim" class="action-btn" @click="changeClaim">
+                  <!-- <div @click="changeClaim">Claim</div> -->
+                  Claim
                 </Button>
               </div>
             </div>
           </div>
           <div class="farm-NFT-detail-Mint-Reight">
-            <img @click="changeImg('left')" src="@/assets/images/icon-left-NFT.png" alt="" />
-            <img :src="`/_nuxt/src/assets/images/${this.farmCard}.png`" alt="" />
-            <img @click="changeImg('right')" src="@/assets/images/icon-right-NFT.png" alt="" />
+            <img src="@/assets/images/icon-left-NFT.png" alt=""  @click="changeImg('left')"/>
+            <img :src="`/_nuxt/src/assets/images/${ farmCard }.png`" alt="" />
+            <img src="@/assets/images/icon-right-NFT.png" alt=""  @click="changeImg('right')"/>
             <div>Rewards up to {{ nftPrice }} CRM tokens</div>
           </div>
         </div>
@@ -537,14 +540,17 @@ export default Vue.extend({
 }
 .pmgressbar-btn {
   width: 100%;
-  height: 40px;
   margin-top: 24px;
   display: flex;
   justify-content: space-around;
 }
 .action-btn {
+  // .farm-btn-small();
+  .gradient-btn-large();
   width: 130px;
-  .farm-btn-small();
+  height: 40px;
+  font-size: 14px;
+  font-weight: 100;
   div {
     line-height: 38px;
   }
