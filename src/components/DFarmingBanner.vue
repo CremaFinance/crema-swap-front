@@ -13,7 +13,7 @@
         </div>
         <div style="height: 14px; text-align: center; line-height: 14px">My Caffeine</div>
         <!-- <nuxt-link to="/active" class="farming-Btn"></nuxt-link> -->
-        <a @click="commingsoon" class="farming-Btn"></a>
+        <a class="farming-Btn" @click="comingsoon"></a>
       </div>
     </div>
     <div v-if="isFarming == 'Farm'" class="farm-Banner">
@@ -70,7 +70,7 @@ export default Vue.extend({
     caffeineAmount() {
       if (this.wallet && this.wallet.tokenAccounts) {
         const account: any = this.wallet.tokenAccounts
-        console.log('account###', account)
+        // console.log('account###', account)
         let caffeineAmount = new TokenAmount(0)
         if (account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR']) {
           caffeineAmount = account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'].balance
@@ -106,9 +106,9 @@ export default Vue.extend({
       this.min = m
       this.sec = s
     },
-    commingsoon() {
+    comingsoon() {
       this.$notify.success({
-        message: 'Comming Soon',
+        message: 'Coming Soon',
         description: ''
       })
     }

@@ -2,16 +2,37 @@
   <Modal title="Claim Rewards" :width="400" centered :visible="true" :footer="null" @cancel="$emit('onClose')">
     <div class="mint-NFT-popup">
       <div class="mint-NFT-key">
-        <img src="../assets/images/img-Treasure-case-closed.png" />
+        <img v-if="showLock" src="../assets/images/img-Treasure-case-close.png" />
+        <img v-if="showOpen" src="../assets/images/img-Open-the-treasure-chest.png" />
+        <img v-if="showUnset" src="../assets/images/img-Treasure-case-closed.png" />
       </div>
-      <div class="mint-NFT-Total">
+      <div v-if="showOpen" class="mint-NFT-num">
+        <img src="../assets/images/CRM.png" alt="">
+        <span>x 1,000</span>
+      </div>
+      <div v-if="showLock" class="count-down">
+        <span>{{ day ? day : '--' }}</span> : 
+        <span>{{ hour ? hour : '--' }}</span> :
+        <span>{{ min ? min : '--' }}</span> :
+        <span>{{ sec ? sec : '--' }}</span>
+      </div>
+      <div v-if="showLock" class="count-date">
+        <span>Day</span>
+        <span>Hours</span>
+        <span>Min</span>
+        <span>Sec</span>
+      </div>
+      <div v-if="!showOpen" class="mint-NFT-Total">
         <div class="Total-left">
             <img src="../assets/images/Brass_Key@2x.png" alt="">
         </div>
         <span>Open mystery box to get up to 10x bonus</span>
       </div>
       <div class="mint-NFT-btn-box">
-        <Button class="mint-NFT-btn"> Open </Button>
+        <Button class="mint-NFT-btn" :class="showLock ? 'btn-close':''">
+          {{ showLock ? 'Open' : showOpen ? 'Claim' : 'Open'}}
+          <!-- Open -->
+        </Button>
       </div>
     </div>
   </Modal>
@@ -35,14 +56,43 @@ export default Vue.extend({
     }
   },
   data() {
-    return {}
+    return {
+      showLock:true,
+      showOpen:false,
+      showUnset:false,
+      day: '',
+      hour: '',
+      min: '',
+      sec: ''
+    }
   },
-  computed: {
-
-  },
+  computed: {},
   watch: {},
-  mounted() {},
-  methods: {}
+  mounted() {
+     window.setInterval(() => {
+      this.countDown('2022-3-30 0:0:0')
+    }, 1000)
+  },
+  methods: {
+    countDown(time) {
+      let nowTime = +new Date()
+      let inputTime = +new Date(time)
+      let times: string | number = (inputTime - nowTime) / 1000
+      let d: string | number = parseInt(String(times / 60 / 60 / 24))
+      d = d < 10 ? '0' + d : d
+      let h: string | number = parseInt(String((times / 60 / 60) % 24))
+      h = h < 10 ? '0' + h : h
+      let m: string | number = parseInt(String((times / 60) % 60))
+      m = m < 10 ? '0' + m : m
+      let s: string | number = parseInt(String(times % 60))
+      s = s < 10 ? '0' + s : s
+      // return d + '天' + h + '时' + m + '分' + s + '秒';
+      this.day = d
+      this.hour = h
+      this.min = m
+      this.sec = s
+    }
+  }
 })
 </script>
 <style lang="less" scoped>
@@ -51,13 +101,28 @@ export default Vue.extend({
   padding-bottom: 60px;
   .mint-NFT-key {
     width: 100%;
-    height: 270px;
+    // height: 270px;
     display: flex;
     justify-content: center;
     position: relative;
     > img{
       width: 270px;
       height: 270px;
+    }
+  }
+  .mint-NFT-num{
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    font-size: 24px;
+    font-family: 'Arial-BoldMT', Arial;
+    font-weight: bold;
+    background: linear-gradient(233deg, #4BB5FF 0%, #CE90FF 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    > img{
+      width: 36px;
+      margin-right: 10px;
     }
   }
   .mint-NFT-Total {
@@ -70,6 +135,33 @@ export default Vue.extend({
     span {
       padding-left: 14px;
     }
+  }
+  .count-down {
+    width: 220px;
+    // margin-top: 16px;
+    margin: 0 auto;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .count-down span {
+    display: block;
+    width: 40px;
+    height: 50px;
+    line-height: 50px;
+    background: rgba(#707070, 0.2);
+    border-radius: 4px;
+    font-size: 24px;
+    text-align: center;
+  }
+  .count-date{
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+    margin: 10px auto 30px;
+    font-size: 12px;
+    color: rgba(#fff, 0.2);
   }
   .mint-NFT-Total .Total-left{
       width: 50px;
@@ -91,6 +183,12 @@ export default Vue.extend({
       margin-top: 40px;
       height: 100%;
       font-size: 16px;
+    }
+    .btn-close{
+       background: #282c33 !important;
+      &:hover {
+        background: #34383e !important;
+      }
     }
   }
 }

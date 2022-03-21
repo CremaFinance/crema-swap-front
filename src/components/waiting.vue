@@ -1,6 +1,6 @@
 <template>
   <Modal
-    title="Waiting For Confirmation"
+    title="Waiting for Confirmation"
     centered
     :visible="true"
     :footer="null"
