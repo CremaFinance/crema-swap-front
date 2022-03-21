@@ -15,8 +15,10 @@
       </div>
 
       <div class="mint-NFT-btn-box">
-        <Button class="mint-NFT-btn btn-cancel" @click="$emit('onClose')"> <div>Cancel</div> </Button>
-        <Button class="mint-NFT-btn"> <div>Confirm</div> </Button>
+        <!-- <Button class="mint-NFT-btn btn-cancel" @click="$emit('onClose')"> <div>Cancel</div> </Button>
+        <Button class="mint-NFT-btn"> <div>Confirm</div> </Button> -->
+        <Button class="mint-NFT-btn btn-cancel" @click="$emit('onClose')">Cancel</Button>
+        <Button class="mint-NFT-btn">Confirm</Button>
       </div>
     </div>
   </Modal>
@@ -95,20 +97,20 @@ export default Vue.extend({
     justify-content: space-between;
     .mint-NFT-btn {
       height: 100% !important;
-      .farm-btn-small();
+      // .farm-btn-small();
+      .gradient-btn-large();
+      height: 48px;
+      font-size: 14px;
+      font-weight: 100;
       width: 170px;
       > div {
         line-height: 48px;
       }
     }
     .btn-cancel {
-      background: rgba(#fff, 0.1) !important;
-      > div {
-        background: rgba(#000, 0.5);
-        height: 46px;
-        &:hover {
-          background: rgba(#000, 0.2);
-        }
+      background: #282c33 !important;
+      &:hover {
+        background: #34383e !important;
       }
     }
   }

@@ -259,8 +259,8 @@ export async function addLiquidityNew(
         poolInfo.tokenSwap,
         poolInfo.authority,
         user_wallet_key,
-        userAccountA,
-        userAccountB,
+        wrappedCoinSolAccount ? wrappedCoinSolAccount : userAccountA,
+        wrappedSolAccount ? wrappedSolAccount : userAccountB,
         poolInfo.tokenAccountA,
         poolInfo.tokenAccountB,
         user_mint_pubkey,
@@ -292,8 +292,8 @@ export async function addLiquidityNew(
         poolInfo.authority,
         user_wallet_key,
         // wallet.publicKey,
-        userAccountA,
-        userAccountB,
+        wrappedCoinSolAccount ? wrappedCoinSolAccount : userAccountA,
+        wrappedSolAccount ? wrappedSolAccount : userAccountB,
         poolInfo.tokenAccountA,
         poolInfo.tokenAccountB,
         user_mint_pubkey,
@@ -481,6 +481,31 @@ export async function claim(
     user_position_key = choosePosition(poolInfo.user_position_account_array)
   }
 
+  let wrappedCoinSolAccount
+  if (poolInfo.coin.mintAddress === NATIVE_SOL.mintAddress) {
+    wrappedCoinSolAccount = await createTokenAccountIfNotExist(
+      connection,
+      wrappedCoinSolAccount,
+      owner,
+      TOKENS.WSOL.mintAddress,
+      null,
+      transaction,
+      signers
+    )
+  }
+  let wrappedSolAccount
+  if (poolInfo.pc.mintAddress === NATIVE_SOL.mintAddress) {
+    wrappedSolAccount = await createTokenAccountIfNotExist(
+      connection,
+      wrappedSolAccount,
+      owner,
+      TOKENS.WSOL.mintAddress,
+      null,
+      transaction,
+      signers
+    )
+  }
+
   if (user_mint_pubkey && user_position_key && user_nft_pubkey) {
     transaction.add(
       claimInstruction(
@@ -489,8 +514,8 @@ export async function claim(
         owner,
         new PublicKey(poolInfo.poolCoinTokenAccount),
         new PublicKey(poolInfo.poolPcTokenAccount),
-        userCoinTokenAccount,
-        userPcTokenAccount,
+        wrappedCoinSolAccount || userCoinTokenAccount,
+        wrappedSolAccount || userPcTokenAccount,
         user_mint_pubkey,
         new PublicKey(user_nft_pubkey),
         poolInfo.tick_detail_key,

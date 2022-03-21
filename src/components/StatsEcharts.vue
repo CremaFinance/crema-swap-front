@@ -56,10 +56,10 @@
             <p>Total Tokens</p>
             <p><Spin v-if="!wdAll.Token" size="small"/><span>{{ wdAll.Token }}</span></p>
           </div>
-          <!-- <div class="chart-spec-user">
+          <div class="chart-spec-user">
             <p>Total Users</p>
             <p><Spin v-if="!wdAll.Users" size="small"/><span>{{ wdAll.Users }}</span></p>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>
