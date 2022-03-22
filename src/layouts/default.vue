@@ -28,12 +28,13 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 import Head from './components/head.vue'
 import H5Head from './components/h5-head.vue'
+import { getprice } from '@/utils/stake'
 // import NoticeModal from '@/components/Notice.vue'
 
 export default Vue.extend({
   components: {
     Head,
-    H5Head,
+    H5Head
     // NoticeModal
   },
   data() {
@@ -60,6 +61,11 @@ export default Vue.extend({
         this.isPc = true
       }
     }
+
+    // const test = await getprice('solana')
+    // console.log('test####', test)
+    // // socean-staked-sol
+    // // marinade-staked-sol-wormhole
   },
   destroyed() {
     window.onresize = null

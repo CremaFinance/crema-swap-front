@@ -6,13 +6,14 @@ import { LIQUIDITY_POOLS } from '@/utils/pools'
 
 import logger from '@/utils/logger'
 import { SWAP_PAYER, SWAPV3_PROGRAMID } from '@/utils/ids'
-import { TOKENS, RATES } from '@/utils/tokens'
+import { TOKENS, RATES, NATIVE_SOL } from '@/utils/tokens'
 import { fixD, decimalFormat, checkNullObj } from '@/utils'
 import { tick2price, contractPrice2showPrice, preview_calculate_liqudity, preclaim, TickWord } from '@/tokenSwap/swapv3'
 import BigNumber from 'bignumber.js'
 import { fetchSwapPositionsByOwner } from '@/contract/farming'
 import { LPFARMS } from '@/utils/farming'
 import Decimal from 'decimal.js'
+import { getprice } from '@/utils/stake'
 
 // const AUTO_REFRESH_TIME = 60
 const AUTO_REFRESH_TIME = 60
@@ -100,8 +101,17 @@ export const actions = actionTree(
           })
         }
 
-        const coin = TOKENS[tokenSwap.mintA.toString()]
-        const pc = TOKENS[tokenSwap.mintB.toString()]
+        let coin = TOKENS[tokenSwap.mintA.toString()]
+        if (tokenSwap.mintA.toString() === 'So11111111111111111111111111111111111111112') {
+          coin = NATIVE_SOL
+        }
+        let pc = TOKENS[tokenSwap.mintB.toString()]
+        if (tokenSwap.mintB.toString() === 'So11111111111111111111111111111111111111112') {
+          pc = NATIVE_SOL
+        }
+        console.log('tokenSwap.mintA.toString()####', tokenSwap.mintA.toString())
+        console.log('tokenSwap.mintB.toString()####', tokenSwap.mintB.toString())
+
         const name = `${coin.symbol}-${pc.symbol}`
         const currentPriceView = contractPrice2showPrice(tokenSwap.current_price.toNumber(), coin.decimals, pc.decimals) // 前端展示用(正向)
         const currentPriceViewReverse = String(1 / Number(currentPriceView)) // 前端展示当前价格(反向)
@@ -232,7 +242,7 @@ export const actions = actionTree(
       commit('setMyPositions', list)
     },
 
-    setCurrentPositon({ commit }, data) {
+    async setCurrentPositon({ commit }, data) {
       const { myPosions, id } = data
       const list = myPosions
       // const id = this.$router
@@ -303,6 +313,24 @@ export const actions = actionTree(
         const toCoinAmountBig = new BigNumber(toCoinAmount)
         const fromNum = fromCoinAmountBig.multipliedBy(currentPrice)
         const toNum = toCoinAmountBig.plus(fromNum)
+
+        if (currentData.poolInfo.pc.symbol.includes('SOL')) {
+          if (!RATES['SOL']) {
+            const solPrice = await getprice('solana')
+            RATES['SOL'] = solPrice
+          }
+          if (!RATES['mSOL']) {
+            const msolPrice = await getprice('msol')
+            RATES['mSOL'] = msolPrice
+          }
+          if (!RATES['scnSOL']) {
+            const scnsolPrice = await getprice('socean-staked-sol')
+            RATES['scnSOL'] = scnsolPrice
+          }
+        }
+
+        console.log('RATES[currentData.poolInfo.pc.symbol]#####', RATES[currentData.poolInfo.pc.symbol])
+
         const amountUSDBig = toNum.multipliedBy(RATES[currentData.poolInfo.pc.symbol])
 
         const amountUSD = decimalFormat(amountUSDBig.toFixed(), 4)
