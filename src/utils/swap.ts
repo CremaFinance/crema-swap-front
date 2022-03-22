@@ -2,7 +2,7 @@ import { Numberu64 } from '../tokenSwap'
 import * as Layout from '../tokenSwap/layout'
 import * as BufferLayout from 'buffer-layout'
 import { Account, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
-import { NATIVE_SOL, TOKENS, getTokenByMintAddress } from './tokens'
+import { NATIVE_SOL, TOKENS, getTokenByMintAddress, WSOL } from './tokens'
 import { TokenAmount } from '@/utils/safe-math'
 import {
   createTokenAccountIfNotExist,
@@ -101,10 +101,10 @@ export async function swap(
   let toMint = toCoinMint
 
   if (fromMint === NATIVE_SOL.mintAddress) {
-    fromMint = TOKENS.WSOL.mintAddress
+    fromMint = WSOL.mintAddress
   }
   if (toMint === NATIVE_SOL.mintAddress) {
-    toMint = TOKENS.WSOL.mintAddress
+    toMint = WSOL.mintAddress
   }
 
   let wrappedSolAccount: PublicKey | null = null
@@ -115,7 +115,7 @@ export async function swap(
       connection,
       wrappedSolAccount,
       owner,
-      TOKENS.WSOL.mintAddress,
+      WSOL.mintAddress,
       amountIn.wei.toNumber() + 1e7,
       transaction,
       signers
@@ -126,7 +126,7 @@ export async function swap(
       connection,
       wrappedSolAccount2,
       owner,
-      TOKENS.WSOL.mintAddress,
+      WSOL.mintAddress,
       1e7,
       transaction,
       signers
@@ -136,26 +136,26 @@ export async function swap(
   console.log('fromCoinMint$$$$###', fromCoinMint)
   console.log('toCoinMint$$$$###', toCoinMint)
   console.log('fromTokenAccount####', fromTokenAccount)
-  const newFromTokenAccount = await createAssociatedTokenAccountIfNotExist(
-    fromTokenAccount,
-    owner,
-    fromMint,
-    transaction
-  )
-  console.log('newFromTokenAccount####', newFromTokenAccount.toString())
-  console.log('toTokenAccount#####', toTokenAccount)
-  const newToTokenAccount = await createAssociatedTokenAccountIfNotExist(toTokenAccount, owner, toMint, transaction)
+  let newFromTokenAccount
+  if (!wrappedSolAccount) {
+    newFromTokenAccount = await createAssociatedTokenAccountIfNotExist(fromTokenAccount, owner, fromMint, transaction)
+    console.log('newFromTokenAccount####', newFromTokenAccount.toString())
+  }
 
+  let newToTokenAccount
+  if (!wrappedSolAccount2) {
+    newToTokenAccount = await createAssociatedTokenAccountIfNotExist(toTokenAccount, owner, toMint, transaction)
+    console.log('newToTokenAccount####', newToTokenAccount.toString())
+  }
   console.log('wrappedSolAccount####', wrappedSolAccount)
-  console.log('newToTokenAccount####', newToTokenAccount.toString())
 
   transaction.add(
     swapInstruction(
       poolInfo.tokenSwap,
       poolInfo.authority,
       owner,
-      wrappedSolAccount ?? newFromTokenAccount,
-      wrappedSolAccount2 ?? newToTokenAccount,
+      wrappedSolAccount || newFromTokenAccount,
+      wrappedSolAccount2 || newToTokenAccount,
       fromCoinMint === poolInfo.coin.mintAddress
         ? new PublicKey(poolInfo.poolCoinTokenAccount)
         : new PublicKey(poolInfo.poolPcTokenAccount),
