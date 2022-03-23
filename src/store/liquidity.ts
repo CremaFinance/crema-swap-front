@@ -313,20 +313,30 @@ export const actions = actionTree(
         const toCoinAmountBig = new BigNumber(toCoinAmount)
         const fromNum = fromCoinAmountBig.multipliedBy(currentPrice)
         const toNum = toCoinAmountBig.plus(fromNum)
-
-        if (currentData.poolInfo.pc.symbol.includes('SOL')) {
-          if (!RATES['SOL']) {
-            const solPrice = await getprice('solana')
-            RATES['SOL'] = solPrice
+        try {
+          if (currentData.poolInfo.pc.symbol.includes('SOL')) {
+            console.log('coingecago####')
+            if (!RATES['SOL']) {
+              const solPrice = await getprice('solana')
+              console.log('solPrice####', solPrice)
+              RATES['SOL'] = solPrice
+            }
+            if (!RATES['mSOL']) {
+              const msolPrice = await getprice('msol')
+              console.log('msolPrice####', msolPrice)
+              RATES['mSOL'] = msolPrice
+            }
+            if (!RATES['scnSOL']) {
+              const scnsolPrice = await getprice('socean-staked-sol')
+              console.log('scnsolPrice####', scnsolPrice)
+              RATES['scnSOL'] = scnsolPrice
+            }
           }
-          if (!RATES['mSOL']) {
-            const msolPrice = await getprice('msol')
-            RATES['mSOL'] = msolPrice
-          }
-          if (!RATES['scnSOL']) {
-            const scnsolPrice = await getprice('socean-staked-sol')
-            RATES['scnSOL'] = scnsolPrice
-          }
+        } catch (err) {
+          console.log('err###', err)
+          RATES['SOL'] = 92
+          RATES['mSOL'] = 91
+          RATES['scnSOL'] = 91
         }
 
         console.log('RATES[currentData.poolInfo.pc.symbol]#####', RATES[currentData.poolInfo.pc.symbol])
