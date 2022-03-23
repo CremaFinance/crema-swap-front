@@ -14,12 +14,12 @@
       </div>
       <div
         v-else-if="
+          source.address === 'So11111111111111111111111111111111111111112' &&
           tokenAccounts &&
-          tokenAccounts['11111111111111111111111111111111'] &&
-          source.address === 'So11111111111111111111111111111111111111112'
+          tokenAccounts['11111111111111111111111111111111']
         "
       >
-        {{ tokenAccounts['11111111111111111111111111111111'].balance.fixed() }} 123
+        {{ tokenAccounts['11111111111111111111111111111111'].balance.fixed() }}
       </div>
       <div v-else-if="tokenAccounts && tokenAccounts[source.address]">
         {{ tokenAccounts[source.address].balance.fixed() || '0' }}
@@ -72,15 +72,6 @@ export default Vue.extend({
   },
   methods: {
     tokenAccountsWatch(tokenAccounts: any) {
-      console.log('coinItem####tokenAccounts#####', tokenAccounts)
-      console.log(
-        'tokenAccounts[11111111111111111111111111111111].balance.fixed()####',
-        tokenAccounts['11111111111111111111111111111111'].balance.fixed()
-      )
-      console.log(
-        'tokenAccounts[So11111111111111111111111111111111111111112].balance.fixed()####',
-        tokenAccounts['So11111111111111111111111111111111111111112'].balance.fixed()
-      )
       this.tokenAccounts = tokenAccounts
     }
     // toSelect() {
