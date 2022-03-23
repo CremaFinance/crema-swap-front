@@ -5,9 +5,9 @@
         <div></div>
         <div class="farm-caffeine-title"><div>Learn more ></div></div>
         <div class="farm-caffeine-option" :class="changeBtn">
-          <div v-for="(item, index) in caffeineData" :key="index" :class="item.name" @click="changeIcon(item.icon)">
+          <div v-for="(item, index) in keyData" :key="index" :class="item.name" @click="changeIcon(item)">
             <div class="option-icon"></div>
-              {{ item.key }}
+            {{ item.key }}
             <div class="option-count">
               <div></div>
               {{ item.num }}
@@ -21,59 +21,61 @@
           <div>
             <div>
               <div class="td-title">My Caffeine</div>
-              <div class="td-text">106.8%</div>
+              <div class="td-text">{{ caffeineAmount }}</div>
             </div>
-            <div>
+            <!-- <div>
               <div class="td-title">Total Earned</div>
               <div class="td-text">106.8%</div>
-            </div>
+            </div> -->
             <div>
               <div class="td-title">Earnings <span class="title-Harvest">&nbsp;&nbsp;Harvest&nbsp;></span></div>
-              <div class="td-text" style="text-align: right !important">106.8%</div>
+              <div class="td-text" style="text-align: right !important">{{ farming.earnings }}</div>
             </div>
           </div>
         </div>
         <div class="farm-NFT-detail-Mint">
           <div class="farm-NFT-detail-Mint-Left" :class="isClaim ? 'farm-NFT-isClaim' : ''">
-            <div v-if="!isNotLink && !isClaim" style="height: 160px; padding: 60px 0">
+            <!-- <div v-if="wallet.connected && !isClaim" style="height: 160px; padding: 60px 0">
               Still need to produce xxx caffeine to mint NFT
+            </div> -->
+            <div class="tips-text-box">
+              <img
+                v-if="!wallet.connected"
+                :class="!wallet.connected ? 'NotLink-img' : ''"
+                src="@/assets/images/img-link-Wallet.png"
+                alt=""
+              />
+              <h3 class="congratulations">{{ tipsTowLineText ? 'Congratulations' : '' }}</h3>
+              <p class="tips-text">{{ tipText || tipsTowLineText }}</p>
             </div>
-            <img
-              v-if="isNotLink"
-              :class="isNotLink ? 'NotLink-img' : ''"
-              src="@/assets/images/img-link-Wallet.png"
-              alt=""
-            />
-            <p v-if="isClaim">Congratulations</p>
-            <h3 v-if="isClaim">Congratulations, this event the NFT got the rewards 1000 CRM</h3>
+
+            <!-- tipsTowLineText -->
+            <!-- <p v-if="wallet.connected && isClaim">Congratulations</p>
+            <h3 v-if="wallet.connected && isClaim">Congratulations, this event the NFT got the rewards 1000 CRM</h3> -->
+
             <div class="farm-NFT-detail-Mint-pmgressbar">
-              <div v-show="isShowHint" class="pmgressbar-hint">
-                <span>{{ hint }}</span>
+              <div v-if="wallet.connected && !isClaim" class="pmgressbar-hint" :class="isdir">
+                <p>{{ isdir }}</p>
                 <span>1,000 / 2,000</span>
               </div>
-              <div v-if="!isNotLink && !isClaim" class="pmgressbar-detail">
+              <div v-if="wallet.connected && !isClaim" class="pmgressbar-detail">
                 <div>
-                  <div
-                    v-for="(item, index) in changeHintData"
-                    :key="index"
-                    @mouseenter="changeHint(item.val)"
-                    @mouseleave="changeHint"
-                  ></div>
+                  <div v-for="(item, index) in changeHintData" :key="index"></div>
+                  <!-- @mouseenter="changeHint(item.val)"
+                  @mouseleave="changeHint" -->
                 </div>
               </div>
               <div class="pmgressbar-btn">
-                <Button v-if="!isNotLink && !isClaim" class="action-btn" @click="changeMint">
+                <Button v-if="wallet.connected && !isClaim" class="action-btn" @click="changeMint">
                   <!-- <div @click="changeMint">Mint</div> -->
                   Mint
                 </Button>
-                <Button v-if="!isNotLink && !isClaim" class="action-btn" @click="changeUpgrade">
+                <Button v-if="wallet.connected && !isClaim" class="action-btn" @click="changeUpgrade">
                   <!-- <div @click="changeUpgrade">Upgrade</div> -->
                   Upgrade
                 </Button>
-                <Button v-if="isNotLink" class="action-btn">
-                  Connect a wallet
-                </Button>
-                <Button v-if="isClaim" class="action-btn" @click="changeClaim">
+                <Button v-if="!wallet.connected" class="action-btn"> Connect a wallet </Button>
+                <Button v-if="wallet.connected && isClaim" class="action-btn" @click="changeClaim">
                   <!-- <div @click="changeClaim">Claim</div> -->
                   Claim
                 </Button>
@@ -81,14 +83,20 @@
             </div>
           </div>
           <div class="farm-NFT-detail-Mint-Reight">
-            <img src="@/assets/images/icon-left-NFT.png" alt=""  @click="changeImg('left')"/>
-            <img :src="`/_nuxt/src/assets/images/${ farmCard }.png`" alt="" />
-            <img src="@/assets/images/icon-right-NFT.png" alt=""  @click="changeImg('right')"/>
+            <img src="@/assets/images/icon-left-NFT.png" alt="" @click="changeImg('left')" />
+            <img :src="`/_nuxt/src/assets/images/${farmCard}.png`" alt="" />
+            <img src="@/assets/images/icon-right-NFT.png" alt="" @click="changeImg('right')" />
             <div>Rewards up to {{ nftPrice }} CRM tokens</div>
           </div>
         </div>
       </div>
-      <DMintNFTPopout v-if="showMint" @onClose="() => (showMint = false)" />
+      <DMintNFTPopout
+        v-if="showMint"
+        :currentKeyItem="currentKeyItem"
+        :isMinting="isMinting"
+        @onClose="() => (showMint = false)"
+        @toMint="toMint"
+      />
       <ClaimRewards v-if="showClaim" @onClose="() => (showClaim = false)" />
       <DUpgradeNFTPopout v-if="showUpgrade" @onClose="() => (showUpgrade = false)" />
     </div>
@@ -96,7 +104,23 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 import importIcon from '@/utils/import-icon'
+import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
+import invariant from 'tiny-invariant'
+import { makeSDK, fetchCremakeys } from '@/contract/farming'
+import {
+  clusterApiUrl,
+  Connection,
+  Keypair,
+  PublicKey,
+  AccountInfo as BaseAccountInfo,
+  Signer,
+  TokenAccountsFilter,
+  Context,
+  SignatureResult
+} from '@solana/web3.js'
+import { TokenAmount, gt } from '@/utils/safe-math'
 // import { Button } from 'ant-design-vue'
 // Vue.use(Button)
 export default Vue.extend({
@@ -115,7 +139,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      isShowHint: false,
       showMint: false,
       showClaim: false,
       showUpgrade: false,
@@ -123,18 +146,62 @@ export default Vue.extend({
       showStake: false,
       isShowTableTr: -1,
       changeNFT: false,
-      hint: '',
       isNotLink: false,
-      isClaim: true,
+      isClaim: false,
       changeBtn: 'Card-Bronze',
       farmCard: 'Card-Bronze',
       nftPrice: '300',
-      caffeineData: [
-        { icon: 'Card-Bronze', name: 'option-Bronze', key: 'Brass Key', num: '1' },
-        { icon: 'Card-Silver', name: 'option-Silver', key: 'Silver Key', num: '2' },
-        { icon: 'Card-Golden', name: 'option-Golden', key: 'Golden Key', num: '1' },
-        { icon: 'Card-Platinum', name: 'option-Platinum', key: 'Platinum Key', num: '2' },
-        { icon: 'Card-Diamond', name: 'option-Diamond', key: 'Diamond Key', num: '4' }
+      keyData: [
+        {
+          id: 1,
+          icon: 'Card-Bronze',
+          img: 'Brass_Key',
+          name: 'option-Bronze',
+          key: 'Brass Key',
+          num: '',
+          minRequireAmount: 2000,
+          maxpreReward: 300
+        },
+        {
+          id: 2,
+          icon: 'Card-Silver',
+          img: 'Silver_Key',
+          name: 'option-Silver',
+          key: 'Silver Key',
+          num: '',
+          minRequireAmount: 5000,
+          maxpreReward: 700
+        },
+        {
+          id: 3,
+          icon: 'Card-Golden',
+          img: 'Golden_Key',
+          name: 'option-Golden',
+          key: 'Golden Key',
+          num: '',
+          minRequireAmount: 10000,
+          maxpreReward: 1300
+        },
+        {
+          id: 4,
+          icon: 'Card-Platinum',
+          img: 'Platinum_Key',
+          name: 'option-Platinum',
+          key: 'Platinum Key',
+          num: '',
+          minRequireAmount: 17000,
+          maxpreReward: 2100
+        },
+        {
+          id: 5,
+          icon: 'Card-Diamond',
+          img: 'Diamond_Key',
+          name: 'option-Diamond',
+          key: 'Diamond Key',
+          num: '',
+          minRequireAmount: 26000,
+          maxpreReward: 3100
+        }
       ],
       changeHintData: [
         { val: 'Bronze' },
@@ -143,39 +210,122 @@ export default Vue.extend({
         { val: 'Platinum' },
         { val: 'Diamond' }
       ],
-      isEewardRangeTab: -1
+      isEewardRangeTab: -1,
+      isdir: 'Brass',
+      isMinting: false,
+      isDisabled: false,
+      isUpgrading: false,
+      isClaiming: false,
+      currentKeyItem: {
+        id: 1,
+        icon: 'Card-Bronze',
+        img: 'Brass_Key',
+        name: 'option-Bronze',
+        key: 'Brass Key',
+        num: '',
+        minRequireAmount: 2000,
+        maxpreReward: 300
+      }
+    }
+  },
+  computed: {
+    ...mapState(['wallet', 'transaction', 'url', 'farming']),
+    caffeineAmount() {
+      if (this.wallet && this.wallet.tokenAccounts) {
+        const account: any = this.wallet.tokenAccounts
+        // console.log('account###', account)
+        let caffeineAmount = new TokenAmount(0)
+        if (account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR']) {
+          caffeineAmount = account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'].balance
+          return caffeineAmount.fixed()
+        }
+      }
+      return 0
+    },
+    tipText() {
+      if (!this.wallet && !this.wallet.connected) {
+        return 'Please connect a wallet'
+      }
+      if (this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
+        return `Still need to earn ${this.currentKeyItem.minRequireAmount - this.caffeineAmount} Caffeine to mint ${
+          this.currentKeyItem.key
+        } NFT`
+      }
+      return ''
+    },
+    canMintKeyName() {
+      if (this.caffeineAmount >= 26000) {
+        return 'Diamond Key'
+      } else if (this.caffeineAmount >= 17000) {
+        return 'Platinum Key'
+      } else if (this.caffeineAmount >= 10000) {
+        return 'Golden Key'
+      } else if (this.caffeineAmount >= 5000) {
+        return 'Silver Key'
+      } else if (this.caffeineAmount >= 2000) {
+        return 'Brass Key'
+      }
+      return ''
+    },
+    tipsTowLineText() {
+      if (this.canMintKeyName && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
+        return `You can mint a ${this.canMintKeyName} key`
+      }
+      return ''
     }
   },
   watch: {
     changeBtn(newValue, oldValue) {
       if (newValue == 'Card-Bronze') {
-        this.isClaim = true
+        this.isClaim = false
         this.isNotLink = false
         this.nftPrice = '300'
+        this.isdir = 'Brass'
       } else if (newValue == 'Card-Silver') {
         this.isClaim = false
-        this.isNotLink = true
+        this.isNotLink = false
         this.nftPrice = '700'
+        this.isdir = 'Silver'
       } else if (newValue == 'Card-Golden') {
         this.isClaim = false
         this.isNotLink = false
         this.nftPrice = '1,300'
+        this.isdir = 'Golden'
       } else if (newValue == 'Card-Platinum') {
         this.isClaim = false
         this.isNotLink = false
         this.nftPrice = '2,100'
+        this.isdir = 'Platinum'
       } else if (newValue == 'Card-Diamond') {
-        this.isClaim = true
+        this.isClaim = false
         this.isNotLink = false
         this.nftPrice = '3,100'
+        this.isdir = 'Diamond'
       }
+    },
+    'wallet.connected': {
+      handler: 'walletWatch',
+      immediate: true
     }
+    // currentKeyItem(newVal, oldVal) {
+    //   if (newVal && this.caffeineAmount > 2000) {
+    //     this.tipText =
+    //   }
+    // }
   },
+  mounted() {},
   methods: {
     importIcon,
-    changeHint(value: string) {
-      this.hint = value
-      this.isShowHint = !this.isShowHint
+    // changeHint(value: string) {
+    //   this.hint = value
+    //   this.isShowHint = !this.isShowHint
+    // },
+    walletWatch(newValue) {
+      if (newValue) {
+        this.getKeys()
+        this.$accessor.farming.getEarnings()
+        // this.$accessor.farming.getCaffeineAmount()
+      }
     },
     changeMint() {
       this.showMint = true
@@ -186,15 +336,19 @@ export default Vue.extend({
     changeUpgrade() {
       this.showUpgrade = true
     },
-    changeIcon(val) {
-      this.changeBtn = val
-      this.farmCard = val
+    changeIcon(item: any) {
+      this.changeBtn = item.icon
+      this.farmCard = item.icon
+
+      console.log('changeIcon####val####', item)
+
+      this.currentKeyItem = item
     },
     changeImg(key) {
       if (key == 'left') {
         this.changeBtn =
           this.changeBtn == 'Card-Bronze'
-            ? 'Card-Bronze'
+            ? 'Card-Diamond'
             : this.changeBtn == 'Card-Silver'
             ? 'Card-Bronze'
             : this.changeBtn == 'Card-Golden'
@@ -216,9 +370,142 @@ export default Vue.extend({
             : this.changeBtn == 'Card-Platinum'
             ? 'Card-Diamond'
             : this.changeBtn == 'Card-Diamond'
-            ? 'Card-Diamond'
+            ? 'Card-Bronze'
             : 'Card-Diamond'
         this.farmCard = this.changeBtn
+      }
+    },
+    async getKeys() {
+      const wallet = (this as any).$wallet
+      const conn = this.$web3
+      console.log('wallet.publicKey#####', wallet.publicKey.toString())
+      const keys = await fetchCremakeys(conn, wallet, wallet.publicKey)
+      console.log('keys#####', keys)
+    },
+    async toMint() {
+      this.showMint = false
+      this.isMinting = true
+      this.isDisabled = true
+      const wallet = (this as any).$wallet
+      const conn = this.$web3
+      const degree = this.currentKeyItem.id
+
+      const sdk: any = makeSDK(conn, wallet)
+      const authoritySdk = sdk.provider.walletKey
+
+      invariant(wallet.publicKey.toString() == authoritySdk.toString(), 'user is the same to sdk')
+
+      try {
+        console.log('到这里了吗#####')
+        const res = await sdk.activity.mintCremaKey({
+          user: wallet.publicKey,
+          degree
+        })
+        console.log('res#####', res)
+        const receipt = await res.tx.confirm()
+        this.$accessor.transaction.setShowWaiting(false)
+        console.log('receipt####', receipt)
+        if (receipt && receipt.signature) {
+          const txid = receipt.signature
+          const description = `Mint NFT`
+          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.setShowSubmitted(true)
+          const _this = this
+          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+            _this.isMinting = false
+            _this.isDisabled = false
+            if (!signatureResult.err) {
+              // _this.$accessor.farming.getFarmingList()
+              // 监听到成功后刷新
+              _this.getKeys()
+            }
+          })
+        }
+      } catch (err) {
+        console.log('toMint ERROR#####', err)
+        this.$accessor.transaction.setShowWaiting(false)
+        this.isMinting = false
+        this.isDisabled = false
+      }
+    },
+    async toUpgrade(mint: PublicKey) {
+      this.isUpgrading = true
+      this.isDisabled = true
+      const wallet = (this as any).$wallet
+      const conn = this.$web3
+
+      const sdk: any = makeSDK(conn, wallet)
+      const authoritySdk = sdk.provider.walletKey
+      invariant(wallet.publicKey.toBase58() == authoritySdk.toBase58(), 'user is the same to sdk')
+
+      try {
+        const tx = await sdk.activity.upgrade({
+          user: wallet.publicKey,
+          mint
+        })
+
+        const receipt = await tx.confirm()
+
+        this.$accessor.transaction.setShowWaiting(false)
+        console.log('receipt####', receipt)
+        if (receipt && receipt.signature) {
+          const txid = receipt.signature
+          const description = `Upgrade`
+          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.setShowSubmitted(true)
+          const _this = this
+          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+            _this.isUpgrading = false
+            _this.isDisabled = false
+            if (!signatureResult.err) {
+              // _this.$accessor.farming.getFarmingList()
+              // 监听到成功后刷新
+            }
+          })
+        }
+      } catch (err) {
+        this.$accessor.transaction.setShowWaiting(false)
+        this.isUpgrading = false
+        this.isDisabled = false
+      }
+    },
+    async toClaim(mint: PublicKey) {
+      this.isClaiming = true
+      this.isDisabled = true
+      const wallet = (this as any).$wallet
+      const conn = this.$web3
+
+      const sdk: any = makeSDK(conn, wallet)
+      const authoritySdk = sdk.provider.walletKey
+      invariant(wallet.publicKey.toBase58() == authoritySdk.toBase58(), 'user is the same to sdk')
+
+      try {
+        const tx = await sdk.activity.claimReward({
+          user: wallet.publicKey,
+          mint
+        })
+        const receipt = await tx.confirm()
+        this.$accessor.transaction.setShowWaiting(false)
+        console.log('receipt####', receipt)
+        if (receipt && receipt.signature) {
+          const txid = receipt.signature
+          const description = `Upgrade`
+          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.setShowSubmitted(true)
+          const _this = this
+          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+            _this.isClaiming = false
+            _this.isDisabled = false
+            if (!signatureResult.err) {
+              // _this.$accessor.farming.getFarmingList()
+              // 监听到成功后刷新
+            }
+          })
+        }
+      } catch (err) {
+        this.$accessor.transaction.setShowWaiting(false)
+        this.isClaiming = false
+        this.isDisabled = false
       }
     }
   }
@@ -448,25 +735,36 @@ export default Vue.extend({
   width: 280px;
   height: 100%;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: space-between;
-  > img {
-    width: 100px;
-    height: 100px;
+  // flex-wrap: wrap;
+  flex-direction: column;
+  // justify-content: center;
+  // align-content: space-between;
+  .tips-text-box {
+    height: 260px;
+    > img {
+      width: 160px;
+      height: 160px;
+    }
+    .congratulations {
+      width: 100%;
+      font-size: 18px;
+      font-family: Krungthep;
+      // line-height: 20px;
+      background: linear-gradient(233deg, #89cfff 0%, #e0b9ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      height: 20px;
+      margin-bottom: 25px;
+      margin-top: 20px;
+    }
+    .tips-text {
+      width: 100%;
+    }
   }
 }
 .farm-NFT-isClaim {
   justify-content: flex-start;
   align-content: space-around;
-  > p {
-    font-size: 18px;
-    font-family: Krungthep;
-    // line-height: 20px;
-    background: linear-gradient(233deg, #89cfff 0%, #e0b9ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
 }
 .farm-NFT-isClaim > .farm-NFT-detail-Mint-pmgressbar .pmgressbar-btn {
   justify-content: flex-start;
@@ -480,23 +778,51 @@ export default Vue.extend({
   position: relative;
 }
 .pmgressbar-hint {
-  width: 160px;
-  height: 32px;
+  width: 100px;
+  height: 40px;
   font-size: 12px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 0 15px 0 20px;
-  background: rgba(#000, 0.2);
-  border-radius: 5px;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  padding: 0 10px;
+  // background: url('@/assets/images/caffeine-value.png');
+  // background-size: 100% 100%;
+  border-radius: 6px;
   position: absolute;
-  top: 0;
+  p {
+    margin: 0 !important;
+    font-weight: 800;
+    background: linear-gradient(283deg, #4cffdf 0%, #6676f5 62%, #c400ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+.Brass {
   left: 0;
+  border: 2px solid #d18945;
+}
+.Silver {
+  left: 6px;
+  border: 2px solid #e3f3ff;
+}
+.Golden {
+  left: 53px;
+  border: 2px solid #fbff7c;
+}
+.Platinum {
+  left: 133px;
+  border: 2px solid #6efbff;
+}
+.Diamond {
+  right: 0;
+  border: 2px solid #c495ff;
 }
 .pmgressbar-detail {
   width: 100%;
   height: 28px;
-  margin-top: 36px;
+  margin-top: 48px;
   > div:nth-child(1) {
     width: 100%;
     height: 12px;
@@ -512,7 +838,8 @@ export default Vue.extend({
       border-radius: 5px;
       border: 1px #000 solid;
       cursor: pointer;
-      &:hover {
+      &:hover,
+      &.active {
         border: 2px #fff solid;
       }
     }

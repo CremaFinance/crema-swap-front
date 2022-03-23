@@ -35,14 +35,15 @@ export default Vue.extend({
   methods: {
     gotoMyPosition() {
       this.$router.push('/farming')
-    },
-  },
+    }
+  }
 })
 </script>
 <style lang="less" scoped>
 .farming-container {
   background: url('@/assets/images/farm-background.png');
   background-size: 100% 100%;
+  overflow: hidden;
   margin-top: -20px;
   padding-top: 20px;
   .farming-container-center {
@@ -59,17 +60,17 @@ export default Vue.extend({
       .icon {
         width: 20px;
         height: 20px;
-        fill: #B5B8C2;
+        fill: #b5b8c2;
         margin-right: 4px;
       }
-      &:hover{
+      &:hover {
         color: #fff;
-        .icon{
-          fill: #FFF;
+        .icon {
+          fill: #fff;
         }
       }
       font-size: 14px;
-      color: #B5B8C2;
+      color: #b5b8c2;
     }
     .farming-banner {
       margin-top: 15px;
@@ -93,6 +94,11 @@ export default Vue.extend({
     }
   }
 }
+@media screen and (max-width: 1370px) {
+  .farming-container {
+    margin-top: -40px;
+  }
+}
 @media screen and (max-width: 750px) {
   .farming-container {
     width: 100%;
@@ -101,6 +107,7 @@ export default Vue.extend({
     .farming-container-center {
       width: 100%;
       .farming-banner {
+        width: 100%;
         .pc-banner {
           display: none;
         }

@@ -180,6 +180,15 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   },
+  BdZPG9xWrG3uFrx2KrUW1jT4tZ9VKPDWknYihzoPRJS3: {
+    symbol: 'prtSOL',
+    name: 'prtSOL',
+    mintAddress: 'BdZPG9xWrG3uFrx2KrUW1jT4tZ9VKPDWknYihzoPRJS3',
+    decimals: 9,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
   So11111111111111111111111111111111111111112: {
     symbol: 'WSOL',
     name: 'WSOL',

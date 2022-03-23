@@ -85,6 +85,7 @@ export default Vue.extend({
 }
 .pc-header-container {
   display: block;
+  background: #22252b;
   padding: 0px 40px;
   z-index: 999;
   position: fixed;

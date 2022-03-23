@@ -703,8 +703,8 @@ export async function removeLiquidity(
         poolInfo.swapProgramId,
         poolInfo.tokenProgramId,
         liquityAmount,
-        coinAmount ? Math.floor(coinAmount) : 0,
-        pcAmount ? Math.floor(pcAmount) : 0,
+        coinAmount ? Math.floor(coinAmount) - 10 : 0,
+        pcAmount ? Math.floor(pcAmount) - 10 : 0,
         index
       )
     )

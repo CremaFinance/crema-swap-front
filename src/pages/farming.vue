@@ -15,8 +15,18 @@
       <div class="farming-pool-container">
         <div v-if="farming.farmingListLoading" class="loading-box"><Spin /></div>
         <!-- 池子列表 -->
-        <FarmingPoolNew class="pc-farming-pool" :is-staked="poolStatus" :search-key="searchKey"></FarmingPoolNew>
-        <H5FarmingPoolNew class="h5-farming-pool" :is-staked="poolStatus" :search-key="searchKey"></H5FarmingPoolNew>
+        <FarmingPoolNew
+          class="pc-farming-pool"
+          :tvlData="tvlData"
+          :is-staked="poolStatus"
+          :search-key="searchKey"
+        ></FarmingPoolNew>
+        <H5FarmingPoolNew
+          class="h5-farming-pool"
+          :tvlData="tvlData"
+          :is-staked="poolStatus"
+          :search-key="searchKey"
+        ></H5FarmingPoolNew>
       </div>
     </div>
   </div>
@@ -33,11 +43,30 @@ export default Vue.extend({
     return {
       poolStatus: 'All',
       searchKey: '',
-      showFarm: 'Farming'
+      showFarm: 'Farming',
+      tvlData: {}
     }
   },
   computed: {
     ...mapState(['farming'])
+  },
+  mounted() {
+    this.getFarmTvl()
+  },
+  methods: {
+    getFarmTvl() {
+      this.$axios.get(`https://dev-api-crema.bitank.com/farm/tvl`).then((res) => {
+        // this.$axios.get(`/farm/tvl`).then((res) => {
+        console.log('res#####', res)
+        const result: any = {}
+        if (res && res.wrappers) {
+          res.wrappers.forEach((item) => {
+            result[item.address] = item
+          })
+        }
+        this.tvlData = result
+      })
+    }
   }
 })
 </script>
@@ -126,7 +155,6 @@ export default Vue.extend({
       }
     }
     .farming-banner {
-      // margin-top: 20px;
       border-radius: 20px;
       img {
         width: 1000px;
@@ -179,6 +207,7 @@ export default Vue.extend({
         }
       }
       .farming-banner {
+        width: 100%;
         .pc-banner {
           display: none;
         }
