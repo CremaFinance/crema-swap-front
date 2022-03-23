@@ -24,6 +24,13 @@ PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 
 
+/*!
+ * vue-virtual-scroll-list v2.3.3
+ * open source under the MIT license
+ * https://github.com/tangbc/vue-virtual-scroll-list#readme
+ */
+
+
 /**
  * @license
  * Lodash <https://lodash.com/>
@@ -363,13 +370,6 @@ THE SOFTWARE.
  * @author Chen, Yi-Cyuan [emn178@gmail.com]
  * @copyright Chen, Yi-Cyuan 2015-2018
  * @license MIT
- */
-
-
-/*!
- * vue-virtual-scroll-list v2.3.3
- * open source under the MIT license
- * https://github.com/tangbc/vue-virtual-scroll-list#readme
  */
 
 
