@@ -339,7 +339,7 @@ export const actions = actionTree(
           RATES['scnSOL'] = 91
         }
 
-        console.log('RATES[currentData.poolInfo.pc.symbol]#####', RATES[currentData.poolInfo.pc.symbol])
+        // console.log('RATES[currentData.poolInfo.pc.symbol]#####', RATES[currentData.poolInfo.pc.symbol])
 
         const amountUSDBig = toNum.multipliedBy(RATES[currentData.poolInfo.pc.symbol])
 
