@@ -59,7 +59,7 @@
         <NftCard :pool-info="poolInfo" :current-data="currentData"></NftCard>
 
         <div v-if="currentData.nftTokenMint" class="nft-address">
-          <a :href="`https://solscan.io/token/${currentData.nftTokenMint}`" target="_blank">
+          <a :href="`https://solscan.io/account/${currentData.nftTokenMint}`" target="_blank">
             {{ currentData.nftTokenMint.substr(0, 4) }}
             ...
             {{ currentData.nftTokenMint.substr(currentData.nftTokenMint.length - 4, 4) }}
@@ -489,6 +489,7 @@ export default Vue.extend({
         display: flex;
         align-items: center;
         justify-content: center;
+        cursor: pointer;
         svg {
           fill: rgba(255, 255, 255, 0.5);
           width: 14px;

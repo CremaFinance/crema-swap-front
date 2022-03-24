@@ -198,9 +198,7 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: false
   }
-
   // main net end *************
-
   // test net start ***************
   // '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
   //   symbol: 'CSOL',
@@ -266,7 +264,6 @@ export const TOKENS: Tokens = {
   //   showDefault: true
   // }
   // test net end ******************
-
   // CRM: {
   //   symbol: 'CRM',
   //   name: 'CRM',
