@@ -11,7 +11,10 @@ export const RATES: any = {
   CTA: 1,
   CTB: 1,
   pUSDT: 1,
-  pUSDC: 1
+  pUSDC: 1,
+  mSOL: 0,
+  scnSOL: 0,
+  SOL: 0
 }
 export interface TokenInfo {
   symbol: string
@@ -84,6 +87,16 @@ export const NATIVE_SOL: TokenInfo = {
   showDefault: true
 }
 
+export const WSOL: TokenInfo = {
+  symbol: 'WSOL',
+  name: 'Wrapped Solana',
+  mintAddress: 'So11111111111111111111111111111111111111112',
+  decimals: 9,
+  referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
+  official: true,
+  showDefault: false
+}
+
 export const TOKENS: Tokens = {
   // main net start *************
   Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB: {
@@ -149,9 +162,43 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   }
-
+  // '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm': {
+  //   symbol: 'scnSOL',
+  //   name: 'scnSOL',
+  //   mintAddress: '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm',
+  //   decimals: 9,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So: {
+  //   symbol: 'mSOL',
+  //   name: 'mSOL',
+  //   mintAddress: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
+  //   decimals: 9,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // BdZPG9xWrG3uFrx2KrUW1jT4tZ9VKPDWknYihzoPRJS3: {
+  //   symbol: 'prtSOL',
+  //   name: 'prtSOL',
+  //   mintAddress: 'BdZPG9xWrG3uFrx2KrUW1jT4tZ9VKPDWknYihzoPRJS3',
+  //   decimals: 9,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // },
+  // So11111111111111111111111111111111111111112: {
+  //   symbol: 'WSOL',
+  //   name: 'WSOL',
+  //   mintAddress: 'So11111111111111111111111111111111111111112',
+  //   decimals: 9,
+  //   referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
+  //   official: true,
+  //   showDefault: false
+  // }
   // main net end *************
-
   // test net start ***************
   // '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
   //   symbol: 'CSOL',
@@ -217,7 +264,6 @@ export const TOKENS: Tokens = {
   //   showDefault: true
   // }
   // test net end ******************
-
   // CRM: {
   //   symbol: 'CRM',
   //   name: 'CRM',

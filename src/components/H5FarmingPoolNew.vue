@@ -55,11 +55,11 @@
         <div class="trade-info">
           <div class="trade-info-item">
             <div class="trade-info-title">APR</div>
-            <div class="trade-info-text">--</div>
+            <div class="trade-info-text">{{ getTvl(item) }}</div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Liquidity</div>
-            <div class="trade-info-text">--</div>
+            <div class="trade-info-text">{{ getLiquidity(item) }}</div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Reward Range</div>
@@ -182,7 +182,7 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { Button } from 'ant-design-vue'
 import { mapState } from 'vuex'
-import { QuarrySDK, MinerWrapper } from 'test-quarry-sdk'
+import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import {
@@ -202,7 +202,7 @@ import invariant from 'tiny-invariant'
 import { makeSDK, getTokenAccountsByOwnerAndMint } from '@/contract/farming'
 import { Token, TokenAmount } from '@saberhq/token-utils'
 import { Tooltip } from 'ant-design-vue'
-
+import { fixD } from '@/utils'
 Vue.use(Button)
 export default Vue.extend({
   components: {
@@ -216,6 +216,12 @@ export default Vue.extend({
     searchKey: {
       type: String,
       default: ''
+    },
+    tvlData: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     }
   },
   data() {
@@ -276,6 +282,32 @@ export default Vue.extend({
   },
   methods: {
     importIcon,
+    getTvl(item: any) {
+      let apr
+      if (item && this.tvlData && this.tvlData[item.positionWrapper]) {
+        apr = this.tvlData[item.positionWrapper].apr * 100
+        if (apr > 10000) {
+          apr = Infinity
+        } else {
+          apr = `${apr}%`
+        }
+      } else {
+        apr = '--'
+      }
+      return apr
+    },
+    getLiquidity(item: any) {
+      let tvl
+      if (item && this.tvlData && this.tvlData[item.positionWrapper]) {
+        tvl = this.tvlData[item.positionWrapper].tvl
+        if (tvl) {
+          tvl = '$ ' + fixD(tvl, 2)
+        }
+      } else {
+        tvl = '--'
+      }
+      return tvl
+    },
     showStakeConfirm(title: string) {
       this.stakeTitle = title
       this.showStake = true
@@ -343,10 +375,10 @@ export default Vue.extend({
       const wallet = (this as any).$wallet
       const conn = this.$web3
       const sdk = makeSDK(conn, wallet)
-      const wrapperInfo = await sdk.positionWrapper.fetchPositionWrapper(wrapper)
+      const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
       invariant(wrapperInfo !== null, 'wrapper not found')
 
-      const userSwapPosition = await sdk.positionWrapper.fetchSwapPositionsByOwner(wrapperInfo.swapKey, nftMint)
+      const userSwapPosition = await PositionWrapper.fetchSwapPositionsByOwner(wrapperInfo.swapKey, nftMint, conn)
       invariant(userSwapPosition !== null, "Can't find the swap position you own")
 
       this.$accessor.transaction.setTransactionDesc(`Stake ${poolInfo.name} NFT`)
@@ -414,7 +446,7 @@ export default Vue.extend({
       this.$accessor.transaction.setShowWaiting(true)
 
       // Get wrapper info
-      const wrapperInfo = await sdk.positionWrapper.fetchPositionWrapper(wrapper)
+      const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
       invariant(wrapperInfo !== null, 'wrapper not found')
 
       try {
@@ -626,8 +658,8 @@ export default Vue.extend({
     .stake-box {
       padding: 0 16px 40px;
       border-bottom: 1px solid rgba(#fff, 0.1);
-      &:last-child{
-        border-bottom:none;
+      &:last-child {
+        border-bottom: none;
       }
     }
     .unstake-box {
@@ -635,7 +667,6 @@ export default Vue.extend({
       padding-bottom: 20px;
       border: none;
     }
-
   }
 }
 .symbol-info {

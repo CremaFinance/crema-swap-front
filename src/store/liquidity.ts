@@ -6,13 +6,14 @@ import { LIQUIDITY_POOLS } from '@/utils/pools'
 
 import logger from '@/utils/logger'
 import { SWAP_PAYER, SWAPV3_PROGRAMID } from '@/utils/ids'
-import { TOKENS, RATES } from '@/utils/tokens'
+import { TOKENS, RATES, NATIVE_SOL } from '@/utils/tokens'
 import { fixD, decimalFormat, checkNullObj } from '@/utils'
 import { tick2price, contractPrice2showPrice, preview_calculate_liqudity, preclaim, TickWord } from '@/tokenSwap/swapv3'
 import BigNumber from 'bignumber.js'
 import { fetchSwapPositionsByOwner } from '@/contract/farming'
 import { LPFARMS } from '@/utils/farming'
 import Decimal from 'decimal.js'
+import { getprice } from '@/utils/stake'
 
 // const AUTO_REFRESH_TIME = 60
 const AUTO_REFRESH_TIME = 60
@@ -28,7 +29,8 @@ export const state = () => ({
   feeIsSet: false,
   infos: {} as any,
   myPositions: [],
-  currentPositon: {}
+  currentPositon: {},
+  rates: {}
   // userPositionAccountObj: {} as any
 })
 
@@ -72,6 +74,9 @@ export const mutations = mutationTree(state, {
 
   setCurrentPosition(state, obj: object) {
     state.currentPositon = cloneDeep(obj)
+  },
+  setRates(state, value) {
+    state.rates = value
   }
 })
 
@@ -100,8 +105,17 @@ export const actions = actionTree(
           })
         }
 
-        const coin = TOKENS[tokenSwap.mintA.toString()]
-        const pc = TOKENS[tokenSwap.mintB.toString()]
+        let coin = TOKENS[tokenSwap.mintA.toString()]
+        if (tokenSwap.mintA.toString() === 'So11111111111111111111111111111111111111112') {
+          coin = NATIVE_SOL
+        }
+        let pc = TOKENS[tokenSwap.mintB.toString()]
+        if (tokenSwap.mintB.toString() === 'So11111111111111111111111111111111111111112') {
+          pc = NATIVE_SOL
+        }
+        console.log('tokenSwap.mintA.toString()####', tokenSwap.mintA.toString())
+        console.log('tokenSwap.mintB.toString()####', tokenSwap.mintB.toString())
+
         const name = `${coin.symbol}-${pc.symbol}`
         const currentPriceView = contractPrice2showPrice(tokenSwap.current_price.toNumber(), coin.decimals, pc.decimals) // 前端展示用(正向)
         const currentPriceViewReverse = String(1 / Number(currentPriceView)) // 前端展示当前价格(反向)
@@ -193,7 +207,7 @@ export const actions = actionTree(
         const poolInfo = cloneDeep(infos[coinPair])
         const userPositionAccountObj = poolInfo.userPositionAccountObj
 
-        let unstakeList: any = []
+        let unstakeObj: any = {}
         for (let i = 0; i < LPFARMS.length; i++) {
           const stakedPositons = await fetchSwapPositionsByOwner(
             new PublicKey(poolInfo.tokenSwapAccount),
@@ -203,7 +217,7 @@ export const actions = actionTree(
           )
           // statedList = [...statedList, ...stakedPositons]
           for (let j = 0; j < stakedPositons.length; j++) {
-            unstakeList.push(stakedPositons[j].nftTokenId.toString())
+            unstakeObj[stakedPositons[j].nftTokenId.toString()] = stakedPositons[j]
           }
         }
 
@@ -214,8 +228,10 @@ export const actions = actionTree(
             const maxPrice = tick2price(myPos.upper_tick)
 
             console.log('myPos###liquity####', myPos.liquity.toString())
-            if (unstakeList.includes(myPos.nft_token_id.toString())) {
+            if (unstakeObj[myPos.nft_token_id.toString()]) {
               list.push({
+                ...unstakeObj[myPos.nft_token_id.toString()],
+                nftTokenAccount: unstakeObj[myPos.nft_token_id.toString()].nftAccount.toString(),
                 nftTokenId: myPos.nft_token_id.toString(),
                 nftTokenMint: key,
                 minPrice: fixD(Math.pow(minPrice, 2), 12),
@@ -232,7 +248,23 @@ export const actions = actionTree(
       commit('setMyPositions', list)
     },
 
-    setCurrentPositon({ commit }, data) {
+    getRates({ commit }) {
+      const result: any = {}
+      // this.$axios.get('https://dev-api-crema.bitank.com/price?quote_symbol=usd').then((res: any) => {
+      this.$axios.get('https://api.crema.finance/price?quote_symbol=usd').then((res: any) => {
+        console.log('getRates###res####', res)
+
+        if (res && res.data && res.data.prices) {
+          res.data.prices.forEach((item) => {
+            result[item.base_symbol] = Number(item.price)
+          })
+
+          commit('setRates', result)
+        }
+      })
+    },
+
+    async setCurrentPositon({ state, commit }, data) {
       const { myPosions, id } = data
       const list = myPosions
       // const id = this.$router
@@ -303,17 +335,31 @@ export const actions = actionTree(
         const toCoinAmountBig = new BigNumber(toCoinAmount)
         const fromNum = fromCoinAmountBig.multipliedBy(currentPrice)
         const toNum = toCoinAmountBig.plus(fromNum)
-        const amountUSDBig = toNum.multipliedBy(RATES[currentData.poolInfo.pc.symbol])
+
+        let pcSymbolRate = RATES[currentData.poolInfo.pc.symbol]
+
+        console.log('pcSymbolRate默认价格噢###', pcSymbolRate)
+
+        if (state.rates[currentData.poolInfo.pc.symbol.toUpperCase()]) {
+          pcSymbolRate = state.rates[currentData.poolInfo.pc.symbol.toUpperCase()]
+          console.log('走的接口噢####pcSymbolRate####', pcSymbolRate)
+        } else {
+          try {
+            const price = await getprice(currentData.poolInfo.pc.symbol.toLowerCase())
+            pcSymbolRate = price
+            console.log('走的接coingeco client####pcSymbolRate####', pcSymbolRate)
+          } catch (err) {}
+        }
+
+        const amountUSDBig = toNum.multipliedBy(pcSymbolRate)
 
         const amountUSD = decimalFormat(amountUSDBig.toFixed(), 4)
 
         let fromPercent: any = fromNum.toNumber()
-          ? fromNum.dividedBy(amountUSDBig.multipliedBy(RATES[currentData.poolInfo.pc.symbol])).multipliedBy(100)
+          ? fromNum.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
           : new BigNumber(0)
         let toPercent: any = toCoinAmountBig.toNumber()
-          ? toCoinAmountBig
-              .dividedBy(amountUSDBig.multipliedBy(RATES[currentData.poolInfo.pc.symbol]))
-              .multipliedBy(100)
+          ? toCoinAmountBig.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
           : new BigNumber(0)
 
         fromPercent = Math.round(fromPercent.toNumber())
@@ -333,7 +379,7 @@ export const actions = actionTree(
         // const tokenfeeB = tokenbFeeBig.plus(tokenfeeA)
         const tokenfeeA = tokenaFee.mul(currentPrice)
         const tokenfeeB = tokenbFee.plus(tokenfeeA)
-        const feeUSDBig = tokenfeeB.mul(RATES[currentData.poolInfo.pc.symbol])
+        const feeUSDBig = tokenfeeB.mul(pcSymbolRate)
         const feeUSD = decimalFormat(feeUSDBig.toString(), 4)
         // console.log('feeUSDBig.toString()####', feeUSDBig.toString())
         console.log('feeUSD###', feeUSD)

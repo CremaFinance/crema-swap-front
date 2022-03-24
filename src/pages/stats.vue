@@ -201,7 +201,7 @@
             <span>{{ item.name }}</span>
           </td>
           <td class="th-ri">
-            $ {{ addCommom(item.price, 2) }}
+            $ {{ item.price }}
             <!-- <i :class="String(item.price_rate_24h).slice(0, 1) == '-' ? 'i-red' : ''">
               {{ String(item.price_rate_24h).slice(0, 1) != '-' 
                 && (String(item.price_rate_24h).substr(0, String(item.price_rate_24h).length - 1)) * 1 != 0
@@ -234,7 +234,7 @@
           <div class="left">
             <h3>Price</h3>
             <p>
-              $ {{ addCommom(item.price, 2) }}
+              $ {{ item.price }}
               <!-- <i :class="String(item.price_rate_24h).slice(0, 1) == '-' ? 'i-red' : ''">
               {{ String(item.price_rate_24h).slice(0, 1) != '-' 
                 && (String(item.price_rate_24h).substr(0, String(item.price_rate_24h).length - 1)) * 1 != 0

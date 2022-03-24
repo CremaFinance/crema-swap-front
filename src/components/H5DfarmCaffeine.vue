@@ -14,7 +14,10 @@
         <span>1,884,295.65 <span class="caffeine-clue">Harvest ></span></span>
       </div>
     </div>
-    <div class="caffeine-banner-farming"></div>
+    <div class="caffeine-banner-farming">
+      <img src="@/assets/images/caffeine-clueh5.png" alt="">
+      <div>Learn more ></div>
+    </div>
     <div class="farm-caffeine-option" :class="changeBtn">
       <div v-for="(item, index) in caffeineData" :key="index" :class="item.name" @click="changeIcon(item.icon)">
         <div class="option-icon"></div>
@@ -26,15 +29,16 @@
       </div>
     </div>
     <div class="farm-caffeine-key">
-      <img @click="changeImg('left')" src="@/assets/images/icon-left-NFT.png" alt="" />
-      <img :src="`/_nuxt/src/assets/images/${this.farmCard}.png`" alt="" />
-      <img @click="changeImg('right')" src="@/assets/images/icon-right-NFT.png" alt="" />
+      <img src="@/assets/images/icon-left-NFT.png" alt="" @click="changeImg('left')"/>
+      <img :src="`/_nuxt/src/assets/images/${farmCard}.png`" alt="" />
+      <img src="@/assets/images/icon-right-NFT.png" alt="" @click="changeImg('right')"/>
       <!-- <div>Rewards up to 300 CRM tokens</div> -->
     </div>
     <p>Congratulations, you can upgrade NFT from Bronze Key to Silver Key</p>
-    <div class="pmgressbar-hint" :class="isShowcaffeine ? 'show-hint':''">
-      <span v-if="isShowcaffeine">{{ isShowcaffeine ? hint : 'Bronze' }}</span>
-      <span v-if="isShowcaffeine">1,000 / 2,000</span>
+    <div class="pmgressbar-hint" :class="isdir">
+      <!-- <span v-if="isShowcaffeine">{{ isShowcaffeine ? hint : 'Bronze' }}</span> -->
+      <p>{{ isdir }}</p>
+      <span>1,000 / 2,000</span>
     </div>
     <div class="pmgressbar-detail">
       <div>
@@ -110,14 +114,24 @@ export default Vue.extend({
         { icon: 'Card-Platinum', name: 'option-Platinum', key: 'Platinum', num: '2' },
         { icon: 'Card-Diamond', name: 'option-Diamond', key: 'Diamond', num: '4' }
       ],
-      changeHintData: [{ val: 'Bronze' }, { val: 'Silver' }, { val: 'Golden' }, { val: 'Platinum' }, { val: 'Diamond' }]
+      changeHintData: [{ val: 'Bronze' }, { val: 'Silver' }, { val: 'Golden' }, { val: 'Platinum' }, { val: 'Diamond' }],
+      isdir:'Brass',
     }
   },
   watch: {
-    // searchKey: {
-    //   immediate: true,
-    //   handler: 'updateSearchKey'
-    // }
+    changeBtn(newValue, oldValue) {
+      if (newValue == 'Card-Bronze') {
+        this.isdir = 'Brass'
+      } else if (newValue == 'Card-Silver') {
+        this.isdir = 'Silver'
+      } else if (newValue == 'Card-Golden') {
+        this.isdir = 'Golden'
+      } else if (newValue == 'Card-Platinum') {
+        this.isdir = 'Platinum'
+      } else if (newValue == 'Card-Diamond') {
+        this.isdir = 'Diamond'
+      }
+    },
     tableDataArr: {
       handler(newValue, oldValue) {
         if (!newValue[0]) {
@@ -148,7 +162,7 @@ export default Vue.extend({
       this.showUpgrade = true
     },
     changeIcon(val) {
-      console.log(val)
+      // console.log(val)
       this.changeBtn = val
       this.farmCard = val
     },
@@ -156,7 +170,7 @@ export default Vue.extend({
       if (key == 'left') {
         this.changeBtn =
           this.changeBtn == 'Card-Bronze'
-            ? 'Card-Bronze'
+            ? 'Card-Diamond'
             : this.changeBtn == 'Card-Silver'
             ? 'Card-Bronze'
             : this.changeBtn == 'Card-Golden'
@@ -178,7 +192,7 @@ export default Vue.extend({
             : this.changeBtn == 'Card-Platinum'
             ? 'Card-Diamond'
             : this.changeBtn == 'Card-Diamond'
-            ? 'Card-Diamond'
+            ? 'Card-Bronze'
             : 'Card-Diamond'
         this.farmCard = this.changeBtn
       }
@@ -189,16 +203,16 @@ export default Vue.extend({
 <style lang="less" scoped>
 @import '../styles/base.less';
 .caffeine-pool-container {
-  width: 340px;
+  width: 100%;
   padding-top: 20px;
   position: relative;
   margin-bottom: 40px;
   > p {
-    margin-top: 30px;
+    margin: 30px 0 20px;
   }
 }
 .caffeine-banner {
-  width: 340px;
+  // width: 340px;
   height: 150px;
   display: flex;
   flex-wrap: wrap;
@@ -216,17 +230,27 @@ export default Vue.extend({
 }
 .caffeine-banner-farming {
   position: absolute;
-  width: 340px;
+  // position: relative;
+  width: 100%;
   height: 340px;
-  background: url('@/assets/images/caffeine-clueh5.png');
-  background-size: 100% 100%;
+  display: flex;
+  justify-content: center;
   top: 106px;
+  img{
+    width: 340px;
+  }
+  > div{
+    width: 100%;
+    position: absolute;
+    text-align: center;
+    top: 216px;
+  }
 }
 .caffeine-clue {
   margin-left: 8px;
 }
 .farm-caffeine-option {
-  width: 340px;
+  width: 100%;
   height: 140px;
   display: flex;
   justify-content: space-between;
@@ -248,6 +272,7 @@ export default Vue.extend({
   flex-wrap: wrap;
   position: relative;
   z-index: 100;
+  color: #b5b8c2;
   p {
     width: 100%;
     margin-bottom: 0 !important;
@@ -373,18 +398,43 @@ export default Vue.extend({
   }
 }
 .pmgressbar-hint {
-  width: 160px;
-  height: 32px;
+  width: 100px;
+  height: 40px;
   font-size: 12px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 0 15px 0 20px;
-  background: none;
-  border-radius: 5px;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  padding: 0 10px;
+  border: 2px solid #D18945;
+  border-radius: 6px;
+  p{
+    margin: 0 !important;
+    font-weight: 800;
+    background: linear-gradient(283deg, #4CFFDF 0%, #6676F5 62%, #C400FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
-.show-hint{
-  background: rgba(#000, 0.2);
+.Bronze{
+  border: 2px solid #D18945;
+}
+.Silver{ 
+  margin-left: 8px;
+  border: 2px solid #E3F3FF;
+}
+.Golden{ 
+  margin-left: 53px;
+  border: 2px solid #FBFF7C;
+}
+.Platinum{ 
+  margin-left: 133px;
+  border: 2px solid #6EFBFF;
+}
+.Diamond{ 
+  margin-left: 180px;
+  border: 2px solid #C495FF;
 }
 .pmgressbar-detail {
   width: 100%;
@@ -426,7 +476,8 @@ export default Vue.extend({
     }
     > div:nth-child(5) {
       background: #C495FF;
-      left: 271px;
+      // left: 271px;
+      right:0px;
     }
   }
 }

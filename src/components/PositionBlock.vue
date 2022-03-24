@@ -8,10 +8,21 @@
           <div class="name">{{ pItem.poolInfo.name }}</div>
         </div>
         <div class="fee">{{ pItem.poolInfo.feeView }}%</div>
+        <div v-if="pItem.nftTokenMint" class="nft-address" @click.stop="">
+          <a :href="`https://solscan.io/account/${pItem.nftTokenAccount}`" target="_blank">
+            {{ pItem.nftTokenMint.substr(0, 4) }}
+            ...
+            {{ pItem.nftTokenMint.substr(pItem.nftTokenMint.length - 4, 4) }}
+          </a>
+          <svg class="icon" aria-hidden="true" @click.stop="$accessor.copy(pItem.nftTokenMint)">
+            <use xlink:href="#icon-icon_copy"></use>
+          </svg>
+        </div>
+        <div class="h5-right right">
+          <StatusBlock :current-status="getCurrentStatus(pItem)" />
+        </div>
       </div>
-      <div class="h5-right right">
-        <StatusBlock :current-status="getCurrentStatus(pItem)" />
-      </div>
+
       <div class="min-and-max">
         <p>
           <span>Min:</span>
@@ -136,6 +147,31 @@ export default Vue.extend({
         color: #fff;
         margin-left: 10px;
       }
+      .nft-address {
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0px 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        margin-left: 10px;
+        cursor: pointer;
+        // backdrop-filter: blur(0px);
+        svg {
+          width: 14px;
+          height: 14px;
+          fill: rgba(255, 255, 255, 0.5);
+          margin-left: 8px;
+        }
+        a {
+          font-size: 14px;
+          color: #fff;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
     }
     .min-and-max {
       display: flex;
@@ -209,8 +245,9 @@ export default Vue.extend({
   }
   .h5-right {
     display: flex;
-    margin-top: 20px;
-    justify-content: flex-end;
+    margin-top: 10px;
+    // margin-top: 20px;
+    // justify-content: flex-end;
   }
   .position-block {
     padding: 14px;
@@ -221,6 +258,7 @@ export default Vue.extend({
         width: 100%;
         display: flex;
         justify-content: space-between;
+        flex-wrap: wrap;
         .icon-box {
           img {
             width: 20px;
@@ -229,6 +267,9 @@ export default Vue.extend({
           .name {
             font-size: 12px;
           }
+        }
+        .nft-address {
+          margin-top: 10px;
         }
       }
       .min-and-max {

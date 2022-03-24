@@ -100,6 +100,7 @@ export default Vue.extend({
   mounted() {
     const slippage = localStorage.getItem('crema-slippage') || '1'
     this.$accessor.setSlippage(slippage)
+    this.$accessor.liquidity.getRates()
   }
 })
 </script>

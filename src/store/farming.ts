@@ -30,7 +30,8 @@ import { contractPrice2showPrice } from '@/tokenSwap/swapv3'
 
 export const state = () => ({
   farmingList: [],
-  farmingListLoading: false
+  farmingListLoading: false,
+  earnings: ''
 })
 
 export const getters = getterTree(state, {})
@@ -41,6 +42,9 @@ export const mutations = mutationTree(state, {
   },
   setFarmingListLoading(state, status) {
     state.farmingListLoading = status
+  },
+  setEarnings(state, value) {
+    state.earnings = value
   }
 })
 
@@ -68,8 +72,11 @@ export const actions = actionTree(
           null
         ).load()
 
+        console.log('farming#####swap####', swap)
+
         if (wallet) {
           const pinfo: any = await fetchPositionWrapper(conn, wallet, new PublicKey(LPFARMS[i].positionWrapper))
+          console.log('farming#####pinfo####', pinfo)
           const payer = SWAP_PAYER
           const tokenSwap = await CTokenSwap.getAllAccounts(
             conn,
@@ -90,12 +97,16 @@ export const actions = actionTree(
             new PublicKey(LPFARMS[i].positionWrapperWrapMint)
           )
 
+          console.log('farming#####miner####', miner)
+
           const canStatePositions: any = await fetchSwapPositionsByOwner(
             new PublicKey(LPFARMS[i].address),
             wallet.publicKey,
             conn,
             wallet
           )
+
+          console.log('farming#####canStatePositions####', canStatePositions)
 
           const cpresult: any = []
           for (let j = 0; j < canStatePositions.length; j++) {
@@ -125,6 +136,7 @@ export const actions = actionTree(
             cpresult.push({
               ...canStatePositions[j],
               nftMintAddress: canStatePositions[j].nftTokenId.toString(),
+              liquityToString: canStatePositions[j].liquity.toString(),
               liquityUSD: decimalFormat(liquityUSD.toString(), 4),
               lowerPrice:
                 canStatePositions[j].lowerTick !== -443632
@@ -146,6 +158,8 @@ export const actions = actionTree(
             wallet.publicKey
           )
 
+          console.log('farming#####stakedPositons####', stakedPositons)
+
           const sdresult: any = []
           for (let k = 0; k < stakedPositons.length; k++) {
             const amount = await calculateTokenAmount(
@@ -164,6 +178,7 @@ export const actions = actionTree(
             sdresult.push({
               ...stakedPositons[k],
               nftMintAddress: stakedPositons[k].nftMint.toString(),
+              liquityToString: stakedPositons[k].liquity.toString(),
               liquityUSD: decimalFormat(liquityUSD.toString(), 4),
               lowerPrice:
                 stakedPositons[k].lowerTick !== -443632
@@ -204,9 +219,26 @@ export const actions = actionTree(
         }
       }
 
-      console.log('result#####', result)
+      console.log('farming#####farmingList#####', result)
       commit('setFarmingList', result)
       commit('setFarmingListLoading', false)
+    },
+    async getEarnings({ commit }) {
+      const conn = this.$web3
+      const wallet = (this as any)._vm.$wallet
+
+      const miner: any = await minerInfo(
+        conn,
+        wallet,
+        new PublicKey(LPFARMS[0].rewarderKey),
+        new PublicKey(LPFARMS[0].positionWrapperWrapMint)
+      )
+
+      const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(LPFARMS[0].rewardTokenMint))
+      const rewardTokenDecimal = rewardTokenInfo.value.decimals
+
+      const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
+      commit('setEarnings', earning)
     }
     // async getRewardTokenDecimal
   }

@@ -63,7 +63,7 @@ export default Vue.extend({
     caffeineAmount() {
       if (this.wallet && this.wallet.tokenAccounts) {
         const account: any = this.wallet.tokenAccounts
-        console.log('account###', account)
+        // console.log('account###', account)
         let caffeineAmount = new TokenAmount(0)
         if (account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR']) {
           caffeineAmount = account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'].balance
@@ -150,7 +150,7 @@ img {
   background-size: 100% 100%;
 }
 .farm-Banner {
-  width: 340px;
+  width: 100%;
   height: 150px;
   background: url('@/assets/images/farm-banner-h5.png');
   background-size: 100% 100%;
