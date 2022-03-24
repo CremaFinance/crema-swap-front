@@ -57,10 +57,10 @@
           <img src="@/assets/images/stats.png" alt="" />
           <span>Stats</span>
         </li>
-        <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
+        <!-- <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
           <img src="@/assets/images/icon-Farming@2x.png" alt="" />
           <span>Farming</span>
-        </li>
+        </li> -->
         <!-- <li>
           <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
             <svg class="icon" aria-hidden="true">
