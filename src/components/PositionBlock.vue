@@ -18,10 +18,11 @@
             <use xlink:href="#icon-icon_copy"></use>
           </svg>
         </div>
+        <div class="h5-right right">
+          <StatusBlock :current-status="getCurrentStatus(pItem)" />
+        </div>
       </div>
-      <div class="h5-right right">
-        <StatusBlock :current-status="getCurrentStatus(pItem)" />
-      </div>
+
       <div class="min-and-max">
         <p>
           <span>Min:</span>
@@ -243,8 +244,9 @@ export default Vue.extend({
   }
   .h5-right {
     display: flex;
-    margin-top: 20px;
-    justify-content: flex-end;
+    margin-top: 10px;
+    // margin-top: 20px;
+    // justify-content: flex-end;
   }
   .position-block {
     padding: 14px;
@@ -255,6 +257,7 @@ export default Vue.extend({
         width: 100%;
         display: flex;
         justify-content: space-between;
+        flex-wrap: wrap;
         .icon-box {
           img {
             width: 20px;
@@ -263,6 +266,9 @@ export default Vue.extend({
           .name {
             font-size: 12px;
           }
+        }
+        .nft-address {
+          margin-top: 10px;
         }
       }
       .min-and-max {
