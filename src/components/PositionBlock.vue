@@ -8,12 +8,12 @@
           <div class="name">{{ pItem.poolInfo.name }}</div>
         </div>
         <div class="fee">{{ pItem.poolInfo.feeView }}%</div>
-        <div v-if="pItem.nftTokenMint" class="nft-address">
-          <span>
+        <div v-if="pItem.nftTokenMint" class="nft-address" @click.stop="">
+          <a :href="`https://solscan.io/token/${pItem.nftTokenMint}`" target="_blank">
             {{ pItem.nftTokenMint.substr(0, 4) }}
             ...
             {{ pItem.nftTokenMint.substr(pItem.nftTokenMint.length - 4, 4) }}
-          </span>
+          </a>
           <svg class="icon" aria-hidden="true" @click.stop="$accessor.copy(pItem.nftTokenMint)">
             <use xlink:href="#icon-icon_copy"></use>
           </svg>
@@ -162,9 +162,12 @@ export default Vue.extend({
           fill: rgba(255, 255, 255, 0.5);
           margin-left: 8px;
         }
-        span {
+        a {
           font-size: 14px;
           color: #fff;
+          &:hover {
+            text-decoration: underline;
+          }
         }
       }
     }
