@@ -207,7 +207,7 @@ export const actions = actionTree(
         const poolInfo = cloneDeep(infos[coinPair])
         const userPositionAccountObj = poolInfo.userPositionAccountObj
 
-        let unstakeList: any = []
+        let unstakeObj: any = {}
         for (let i = 0; i < LPFARMS.length; i++) {
           const stakedPositons = await fetchSwapPositionsByOwner(
             new PublicKey(poolInfo.tokenSwapAccount),
@@ -217,7 +217,7 @@ export const actions = actionTree(
           )
           // statedList = [...statedList, ...stakedPositons]
           for (let j = 0; j < stakedPositons.length; j++) {
-            unstakeList.push(stakedPositons[j].nftTokenId.toString())
+            unstakeObj[stakedPositons[j].nftTokenId.toString()] = stakedPositons[j]
           }
         }
 
@@ -228,8 +228,10 @@ export const actions = actionTree(
             const maxPrice = tick2price(myPos.upper_tick)
 
             console.log('myPos###liquity####', myPos.liquity.toString())
-            if (unstakeList.includes(myPos.nft_token_id.toString())) {
+            if (unstakeObj[myPos.nft_token_id.toString()]) {
               list.push({
+                ...unstakeObj[myPos.nft_token_id.toString()],
+                nftTokenAccount: unstakeObj[myPos.nft_token_id.toString()].nftAccount.toString(),
                 nftTokenId: myPos.nft_token_id.toString(),
                 nftTokenMint: key,
                 minPrice: fixD(Math.pow(minPrice, 2), 12),

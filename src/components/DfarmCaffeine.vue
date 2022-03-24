@@ -70,7 +70,11 @@
                   <!-- <div @click="changeMint">Mint</div> -->
                   Mint
                 </Button>
-                <Button v-if="wallet.connected && !isClaim" class="action-btn" @click="changeUpgrade">
+                <Button
+                  v-if="wallet.connected && !isClaim && currentKeyItem.id !== 5"
+                  class="action-btn"
+                  @click="changeUpgrade"
+                >
                   <!-- <div @click="changeUpgrade">Upgrade</div> -->
                   Upgrade
                 </Button>
@@ -98,7 +102,13 @@
         @toMint="toMint"
       />
       <ClaimRewards v-if="showClaim" @onClose="() => (showClaim = false)" />
-      <DUpgradeNFTPopout v-if="showUpgrade" @onClose="() => (showUpgrade = false)" />
+      <DUpgradeNFTPopout
+        v-if="showUpgrade"
+        :currentKeyItem="currentKeyItem"
+        :isUpgrading="isUpgrading"
+        :canUpgradeHeighKeyItem="keyData[canUpgradeHeighKeyId - 1]"
+        @onClose="() => (showUpgrade = false)"
+      />
     </div>
   </div>
 </template>
@@ -289,7 +299,7 @@ export default Vue.extend({
         this.currentKeyAmount > 0 &&
         this.caffeineAmount >= this.currentKeyItem.upgradeMinAmount
       ) {
-        return `You are eligible to upgrade this key to a ${this.canUpgradeHeighKeyName}.`
+        return `You are eligible to upgrade this key to a ${this.keyData[this.canUpgradeHeighKeyId - 1].key}.`
       }
 
       return ''
@@ -308,12 +318,12 @@ export default Vue.extend({
       }
       return ''
     },
-    canUpgradeHeighKeyName() {
+    canUpgradeHeighKeyId() {
       if (this.currentKeyItem.id === 5) return ''
       let i = 4
       while (i > 0) {
         if (this.caffeineAmount >= this.keyData[i].minRequireAmount - this.currentKeyItem.minRequireAmount) {
-          return this.keyData[i].key
+          return this.keyData[i].id
         }
         i--
       }

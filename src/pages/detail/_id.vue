@@ -59,7 +59,7 @@
         <NftCard :pool-info="poolInfo" :current-data="currentData"></NftCard>
 
         <div v-if="currentData.nftTokenMint" class="nft-address">
-          <a :href="`https://solscan.io/account/${currentData.nftTokenMint}`" target="_blank">
+          <a :href="`https://solscan.io/account/${currentData.nftTokenAccount}`" target="_blank">
             {{ currentData.nftTokenMint.substr(0, 4) }}
             ...
             {{ currentData.nftTokenMint.substr(currentData.nftTokenMint.length - 4, 4) }}

@@ -3,11 +3,11 @@
     <div class="mint-NFT-popup">
       <div class="mint-NFT-key">
         <div>
-          <img src="@/assets/images/Brass_Key@2x.png" alt="" />
+          <img :src="importIcon(`/images/${currentKeyItem.img}@2x.png`)" alt="" />
         </div>
         <div></div>
         <div>
-          <img src="@/assets/images/Silver_Key@2x.png" alt="" />
+          <img :src="importIcon(`/images/${canUpgradeHeighKeyItem.img}@2x.png`)" alt="" />
         </div>
       </div>
       <div class="mint-NFT-detail">
@@ -26,6 +26,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Modal } from 'ant-design-vue'
+import importIcon from '@/utils/import-icon'
 Vue.use(Modal)
 export default Vue.extend({
   components: {
@@ -39,6 +40,22 @@ export default Vue.extend({
     lastSelectCoin: {
       type: String,
       default: ''
+    },
+    isUpgrading: {
+      type: Boolean,
+      default: false
+    },
+    currentKeyItem: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    canUpgradeHeighKeyItem: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     }
   },
   data() {
@@ -47,7 +64,9 @@ export default Vue.extend({
   computed: {},
   watch: {},
   mounted() {},
-  methods: {}
+  methods: {
+    importIcon
+  }
 })
 </script>
 <style lang="less" scoped>

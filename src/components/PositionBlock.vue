@@ -9,7 +9,7 @@
         </div>
         <div class="fee">{{ pItem.poolInfo.feeView }}%</div>
         <div v-if="pItem.nftTokenMint" class="nft-address" @click.stop="">
-          <a :href="`https://solscan.io/account/${pItem.nftTokenMint}`" target="_blank">
+          <a :href="`https://solscan.io/account/${pItem.nftTokenAccount}`" target="_blank">
             {{ pItem.nftTokenMint.substr(0, 4) }}
             ...
             {{ pItem.nftTokenMint.substr(pItem.nftTokenMint.length - 4, 4) }}
