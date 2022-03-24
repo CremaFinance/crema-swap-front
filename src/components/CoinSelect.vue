@@ -175,8 +175,10 @@ export default Vue.extend({
       // } else {
       //   tokenList = [...hasBalance, ...noBalance]
       // }
+      console.log('solAccount###', solAccount)
 
       // 暂时没有sol相关交易对，先注释了
+      // tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
       tokenList = [...hasBalance, ...noBalance]
 
       // if (keyword) {

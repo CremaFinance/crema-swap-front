@@ -12,17 +12,17 @@
       <div v-if="wallet.loading">
         <Icon type="loading" />
       </div>
-      <div v-else-if="tokenAccounts && tokenAccounts[source.address]">
-        {{ tokenAccounts[source.address].balance.fixed() || '0' }}
-      </div>
       <div
         v-else-if="
+          source.address === 'So11111111111111111111111111111111111111112' &&
           tokenAccounts &&
-          tokenAccounts['11111111111111111111111111111111'] &&
-          source.address === 'So11111111111111111111111111111111111111112'
+          tokenAccounts['11111111111111111111111111111111']
         "
       >
         {{ tokenAccounts['11111111111111111111111111111111'].balance.fixed() }}
+      </div>
+      <div v-else-if="tokenAccounts && tokenAccounts[source.address]">
+        {{ tokenAccounts[source.address].balance.fixed() || '0' }}
       </div>
       <div v-else>0</div>
     </div>

@@ -7,7 +7,7 @@ import {
   Signer,
   TokenAccountsFilter
 } from '@solana/web3.js'
-import { QuarrySDK } from 'test-quarry-sdk'
+import { QuarrySDK, PositionWrapper } from 'test-quarry-sdk'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import type { AccountInfo } from '@solana/spl-token'
@@ -97,7 +97,7 @@ export async function getTokenAccountsByOwnerAndMint(
 export async function fetchSwapPositionsByOwner(swapKey: PublicKey, authority: PublicKey | null, conn, wallet) {
   const sdk = makeSDK(conn, wallet)
   const owner = authority !== null ? authority : sdk.provider.wallet.publicKey
-  const positions = await sdk.positionWrapper.fetchSwapPositionsByOwner(swapKey, owner)
+  const positions = await PositionWrapper.fetchSwapPositionsByOwner(swapKey, owner, conn)
 
   console.log('fetchSwapPositionsByOwner####positions####', positions)
   return positions
@@ -141,7 +141,7 @@ export async function minerInfo(conn: any, wallet: any, rewarderKey: PublicKey, 
 // 获取池子信息(获取reward range等)
 export async function fetchPositionWrapper(conn, wallet, wrapper: PublicKey) {
   const sdk = makeSDK(conn, wallet)
-  const info = await sdk.positionWrapper.fetchPositionWrapper(wrapper)
+  const info = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
   if (info === null) {
     console.log('PositionWrapper %s not found', wrapper.toBase58())
     return
@@ -153,11 +153,18 @@ export async function fetchPositionWrapper(conn, wallet, wrapper: PublicKey) {
 // 获取已质押的池子列表
 export async function fetchStakedPositions(conn: any, wallet: any, wrapper: PublicKey, owner: PublicKey | null) {
   const sdk = makeSDK(conn, wallet)
-  const positions = await sdk.positionWrapper.fetchStakePositions(wrapper, owner)
+  const positions = await PositionWrapper.fetchStakePositions(wrapper, owner, conn)
   return positions
   // if (positions.length > 0) {
   //   printTable(positions);
   // } else {
   //   console.log("No position in this wrapper:%s", wrapper.toBase58());
   // }
+}
+
+// activity
+export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
+  const sdk = makeSDK(conn, wallet)
+  const info = await sdk.activity.fetchCremaKeys(user)
+  return info
 }

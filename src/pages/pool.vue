@@ -830,6 +830,8 @@ export default Vue.extend({
       } else {
         const f_t = this.fromCoin?.decimals - this.toCoin?.decimals
         const t_f = this.toCoin?.decimals - this.fromCoin?.decimals
+        console.log('supply####f_t####', f_t)
+        console.log('supply####t_f####', t_f)
         if (this.direction) {
           tick_lower = getNearestTickByPrice(new Decimal(this.minPrice * Math.pow(10, t_f)), poolInfo.tick_space)
           tick_upper = getNearestTickByPrice(new Decimal(this.maxPrice * Math.pow(10, t_f)), poolInfo.tick_space)

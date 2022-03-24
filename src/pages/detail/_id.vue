@@ -57,6 +57,17 @@
       />
       <div class="nft-card-box">
         <NftCard :pool-info="poolInfo" :current-data="currentData"></NftCard>
+
+        <div v-if="currentData.nftTokenMint" class="nft-address">
+          <a :href="`https://solscan.io/account/${currentData.nftTokenAccount}`" target="_blank">
+            {{ currentData.nftTokenMint.substr(0, 4) }}
+            ...
+            {{ currentData.nftTokenMint.substr(currentData.nftTokenMint.length - 4, 4) }}
+          </a>
+          <svg class="icon" aria-hidden="true" @click.stop="$accessor.copy(currentData.nftTokenMint)">
+            <use xlink:href="#icon-icon_copy"></use>
+          </svg>
+        </div>
         <!-- <div v-if="poolInfo" class="nft-info">
           <div class="coin-name">{{ poolInfo.coin.symbol }} - {{ poolInfo.pc.symbol }}</div>
           <div class="fee-tier-tag">{{ poolInfo.feeView }}%</div>
@@ -471,6 +482,25 @@ export default Vue.extend({
                 text-align: right;
               }
             }
+          }
+        }
+      }
+      .nft-address {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        svg {
+          fill: rgba(255, 255, 255, 0.5);
+          width: 14px;
+          height: 14px;
+          margin-left: 6px;
+        }
+        a {
+          font-size: 14px;
+          color: #fff;
+          &:hover {
+            text-decoration: underline;
           }
         }
       }

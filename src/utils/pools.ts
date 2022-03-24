@@ -230,6 +230,18 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
     tokenSwapAccount: 'C52SfQELE8kAUES36fAfBcvCkoWLgHTrANqMdFXqEnm8'
   }
   // {
+  //   coinPair: 'scnSOL-SOL',
+  //   tokenSwapAccount: '4i4QctWjgDPRZfe62PVmJw1Lf5iirAKBDjQccim427hY'
+  // },
+  // {
+  //   coinPair: 'mSOL-scnSOL',
+  //   tokenSwapAccount: '44tS4kvhDHdAmwU7pcMMfovwjfbWGhNegQeMwzazkhDG'
+  // },
+  // {
+  //   coinPair: 'prtSOL-SOL',
+  //   tokenSwapAccount: 'ALPuJ3E525CHrNxNdCoUvjorppQ1W7EiYGnv9o42etfn'
+  // }
+  // {
   //   coinPair: ''
   // }
   // main net end ********
@@ -245,11 +257,11 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   //   coinPair: 'CSOL-CUSDC',
   //   tokenSwapAccount: 'Gz113eAqg5FPJr3mnB2EhmDrGkUBHfsaY4xtbExd53nv'
   // },
-  // usdt-usdc
-  // {
-  //   coinPair: 'CUSDT-CUSDC',
-  //   tokenSwapAccount: '38ZpXbmvga78CFPR2YJbS3vDNHYsV67K1angDNLje3gA'
-  // },
+  // // usdt-usdc
+  // // {
+  // //   coinPair: 'CUSDT-CUSDC',
+  // //   tokenSwapAccount: '38ZpXbmvga78CFPR2YJbS3vDNHYsV67K1angDNLje3gA'
+  // // },
   // {
   //   coinPair: 'CUSDT-CUSDC',
   //   tokenSwapAccount: '6jZ1KK9LephzTTTL4pRnHwL9qBG8ymHk5Biv7vFdNtrR'

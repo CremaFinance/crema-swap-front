@@ -4,11 +4,12 @@
       <div class="mint-NFT-key">
         <img src="../assets/images/img-bgD.png" />
         <div>
-          <img src="../assets/images/Platinum_Key@2x.png" alt="" />
+          <img :src="importIcon(`/images/${currentKeyItem.img}@2x.png`)" alt="" />
         </div>
       </div>
       <h3 style="font-weight: bold; padding: 0 20px; margin-top: 20px">
-        Congratulations, you can mint a diamond key that can unlock rewards up to 3100.
+        Congratulations, you can mint a diamond key that can unlock rewards up to {{ currentKeyItem.maxpreReward }}.
+        {{ currentKeyItem.img }}
       </h3>
       <div class="mint-NFT-Total">
         <div class="mint-NFT-Total-Top">
@@ -16,7 +17,7 @@
             <span>Total Consume</span>
           </div>
           <div>
-            <span class="mint-NFT-Total-val" style="font-size: 24px">27,000</span>
+            <span class="mint-NFT-Total-val" style="font-size: 24px">{{ currentKeyItem.minRequireAmount }}</span>
             <span>Caffeine</span>
           </div>
         </div>
@@ -31,7 +32,7 @@
         </div>
       </div>
       <div class="mint-NFT-btn-box">
-        <Button class="mint-NFT-btn"> Mint </Button>
+        <Button class="mint-NFT-btn" :loading="isMinting" @click="$emit('toMint')"> Mint </Button>
       </div>
     </div>
   </Modal>
@@ -39,6 +40,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Modal } from 'ant-design-vue'
+import importIcon from '@/utils/import-icon'
 Vue.use(Modal)
 export default Vue.extend({
   components: {
@@ -52,17 +54,27 @@ export default Vue.extend({
     lastSelectCoin: {
       type: String,
       default: ''
+    },
+    currentKeyItem: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    isMinting: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
     return {}
   },
-  computed: {
-
-  },
+  computed: {},
   watch: {},
   mounted() {},
-  methods: {}
+  methods: {
+    importIcon
+  }
 })
 </script>
 <style lang="less" scoped>
@@ -75,7 +87,7 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     position: relative;
-    > img{
+    > img {
       width: 210px;
       height: 210px;
     }
@@ -85,7 +97,7 @@ export default Vue.extend({
       top: 25px;
       display: flex;
       justify-content: center;
-      > img{
+      > img {
         width: 160px !important;
         height: 160px !important;
       }
@@ -114,15 +126,15 @@ export default Vue.extend({
       align-items: center;
       height: 36px;
     }
-    > p{
-      width:100%;
-      height:1px;
+    > p {
+      width: 100%;
+      height: 1px;
       border-bottom: 1px solid rgba(#fff, 0.2);
       margin: 4px 0 0 0 !important;
     }
   }
-  .mint-NFT-Total > div > div .mint-NFT-Total-val{
-      margin-right: 8px;
+  .mint-NFT-Total > div > div .mint-NFT-Total-val {
+    margin-right: 8px;
   }
   .mint-NFT-btn-box {
     height: 48px;

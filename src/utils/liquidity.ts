@@ -19,7 +19,7 @@ import {
   Keypair,
   SystemProgram
 } from '@solana/web3.js'
-import { NATIVE_SOL, TOKENS, TokenInfo, LP_TOKENS } from '@/utils/tokens'
+import { NATIVE_SOL, TOKENS, TokenInfo, LP_TOKENS, WSOL } from '@/utils/tokens'
 import { AccountLayout, NATIVE_MINT, Token, TOKEN_PROGRAM_ID, MintLayout } from '@solana/spl-token'
 import { Numberu64, TokenSwap, UserPosition, TokenSwapLayout } from '../tokenSwap'
 import { preview_calculate_liqudity, price2tick } from '../tokenSwap/swapv3'
@@ -197,8 +197,8 @@ export async function addLiquidityNew(
       connection,
       wrappedCoinSolAccount,
       owner,
-      TOKENS.WSOL.mintAddress,
-      coinAmount + 1e7,
+      WSOL.mintAddress,
+      coinAmount,
       transaction,
       signers
     )
@@ -209,12 +209,15 @@ export async function addLiquidityNew(
       connection,
       wrappedSolAccount,
       owner,
-      TOKENS.WSOL.mintAddress,
-      pcAmount + 1e7,
+      WSOL.mintAddress,
+      pcAmount,
       transaction,
       signers
     )
   }
+
+  console.log('wrappedCoinSolAccount@@@@@', wrappedCoinSolAccount && wrappedCoinSolAccount.toString())
+  console.log('wrappedSolAccount@@@@@', wrappedSolAccount && wrappedSolAccount.toString())
 
   console.log('signers###', signers)
 
@@ -259,8 +262,8 @@ export async function addLiquidityNew(
         poolInfo.tokenSwap,
         poolInfo.authority,
         user_wallet_key,
-        wrappedCoinSolAccount ? wrappedCoinSolAccount : userAccountA,
-        wrappedSolAccount ? wrappedSolAccount : userAccountB,
+        wrappedCoinSolAccount || userAccountA,
+        wrappedSolAccount || userAccountB,
         poolInfo.tokenAccountA,
         poolInfo.tokenAccountB,
         user_mint_pubkey,
@@ -292,8 +295,8 @@ export async function addLiquidityNew(
         poolInfo.authority,
         user_wallet_key,
         // wallet.publicKey,
-        wrappedCoinSolAccount ? wrappedCoinSolAccount : userAccountA,
-        wrappedSolAccount ? wrappedSolAccount : userAccountB,
+        wrappedCoinSolAccount || userAccountA,
+        wrappedSolAccount || userAccountB,
         poolInfo.tokenAccountA,
         poolInfo.tokenAccountB,
         user_mint_pubkey,
@@ -487,7 +490,7 @@ export async function claim(
       connection,
       wrappedCoinSolAccount,
       owner,
-      TOKENS.WSOL.mintAddress,
+      WSOL.mintAddress,
       null,
       transaction,
       signers
@@ -499,7 +502,7 @@ export async function claim(
       connection,
       wrappedSolAccount,
       owner,
-      TOKENS.WSOL.mintAddress,
+      WSOL.mintAddress,
       null,
       transaction,
       signers
@@ -647,8 +650,8 @@ export async function removeLiquidity(
       connection,
       wrappedCoinSolAccount,
       owner,
-      TOKENS.WSOL.mintAddress,
-      coinAmount + 1e7,
+      WSOL.mintAddress,
+      null,
       transaction,
       signers
     )
@@ -659,8 +662,8 @@ export async function removeLiquidity(
       connection,
       wrappedSolAccount,
       owner,
-      TOKENS.WSOL.mintAddress,
-      pcAmount + 1e7,
+      WSOL.mintAddress,
+      null,
       transaction,
       signers
     )
@@ -700,8 +703,8 @@ export async function removeLiquidity(
         poolInfo.swapProgramId,
         poolInfo.tokenProgramId,
         liquityAmount,
-        coinAmount ? Math.floor(coinAmount) : 0,
-        pcAmount ? Math.floor(pcAmount) : 0,
+        coinAmount ? Math.floor(coinAmount) - 10 : 0,
+        pcAmount ? Math.floor(pcAmount) - 10 : 0,
         index
       )
     )

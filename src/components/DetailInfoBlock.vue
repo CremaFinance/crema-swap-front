@@ -115,7 +115,7 @@ export default Vue.extend({
           } else if (Number(this.currentData.tokenbFee) === 0) {
             return '0'
           } else {
-            return '<0.00001'
+            return '<0.0001'
           }
         } else {
           return decimalFormat(this.currentData.toCoinAmount, this.poolInfo.pc.decimals)
@@ -152,8 +152,8 @@ export default Vue.extend({
       }
     },
     processShowUSD(value: string) {
-      if (Number(value) < 0.00001 && Number(value) > 0) {
-        return '<0.00001'
+      if (Number(value) < 0.0001 && Number(value) > 0) {
+        return '<0.0001'
       } else {
         return value
       }

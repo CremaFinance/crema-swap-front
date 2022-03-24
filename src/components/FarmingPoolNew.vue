@@ -24,11 +24,11 @@
           </div>
           <div style="width: 110px">
             <div class="td-title">APR</div>
-            <div class="td-text">--</div>
+            <div class="td-text">{{ getTvl(item) }}</div>
           </div>
           <div style="width: 140px">
             <div class="td-title">Liquidity</div>
-            <div class="td-text">--</div>
+            <div class="td-text">{{ getLiquidity(item) }}</div>
           </div>
           <div style="width: 180px">
             <div class="td-title">Reward Range</div>
@@ -265,7 +265,7 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
 import { Button } from 'ant-design-vue'
-import { QuarrySDK, MinerWrapper } from 'test-quarry-sdk'
+import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import {
@@ -285,6 +285,7 @@ import invariant from 'tiny-invariant'
 import { makeSDK, getTokenAccountsByOwnerAndMint } from '@/contract/farming'
 import { Token, TokenAmount } from '@saberhq/token-utils'
 import { Tooltip } from 'ant-design-vue'
+import { fixD } from '@/utils'
 
 Vue.use(Button)
 export default Vue.extend({
@@ -300,6 +301,12 @@ export default Vue.extend({
     searchKey: {
       type: String,
       default: ''
+    },
+    tvlData: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     }
   },
   data() {
@@ -378,6 +385,32 @@ export default Vue.extend({
   // },
   methods: {
     importIcon,
+    getTvl(item: any) {
+      let apr
+      if (item && this.tvlData && this.tvlData[item.positionWrapper]) {
+        apr = this.tvlData[item.positionWrapper].apr * 100
+        if (apr > 10000) {
+          apr = Infinity
+        } else {
+          apr = `${apr}%`
+        }
+      } else {
+        apr = '--'
+      }
+      return apr
+    },
+    getLiquidity(item: any) {
+      let tvl
+      if (item && this.tvlData && this.tvlData[item.positionWrapper]) {
+        tvl = this.tvlData[item.positionWrapper].tvl
+        if (tvl) {
+          tvl = '$ ' + fixD(tvl, 2)
+        }
+      } else {
+        tvl = '--'
+      }
+      return tvl
+    },
     gotoLp(item: any) {
       if (item) {
         this.$router.push(`/pool?from=${item.tokenA.symbol}&to=${item.tokenB.symbol}`)
@@ -437,10 +470,10 @@ export default Vue.extend({
       const wallet = (this as any).$wallet
       const conn = this.$web3
       const sdk = makeSDK(conn, wallet)
-      const wrapperInfo = await sdk.positionWrapper.fetchPositionWrapper(wrapper)
+      const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
       invariant(wrapperInfo !== null, 'wrapper not found')
 
-      const userSwapPosition = await sdk.positionWrapper.fetchSwapPositionsByOwner(wrapperInfo.swapKey, nftMint)
+      const userSwapPosition = await PositionWrapper.fetchSwapPositionsByOwner(wrapperInfo.swapKey, nftMint, conn)
       invariant(userSwapPosition !== null, "Can't find the swap position you own")
 
       this.$accessor.transaction.setTransactionDesc(`Stake ${poolInfo.name} NFT`)
@@ -509,7 +542,7 @@ export default Vue.extend({
       this.$accessor.transaction.setShowWaiting(true)
 
       // Get wrapper info
-      const wrapperInfo = await sdk.positionWrapper.fetchPositionWrapper(wrapper)
+      const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
       invariant(wrapperInfo !== null, 'wrapper not found')
 
       try {

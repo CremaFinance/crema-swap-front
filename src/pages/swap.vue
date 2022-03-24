@@ -322,6 +322,7 @@ export default Vue.extend({
         }
 
         console.log('666666')
+        console.log('direct#####', direct)
 
         if (this.fixedFromCoin) {
           // const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toString()
@@ -348,7 +349,7 @@ export default Vue.extend({
           // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
           console.log('source_amount####', source_amount)
           console.log('source_amount####', source_amount.toNumber())
-          console.log('direct#####', direct)
+
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
           // console.log('1111source_amount####', source_amount)
@@ -400,7 +401,7 @@ export default Vue.extend({
           // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
           // console.log('2222source_amount####', source_amount)
           const res: any =
-            direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
+            direct === 0 ? swap.preSwapB(new Decimal(source_amount)) : swap.preSwapA(new Decimal(source_amount))
 
           const amountOut = (res && res.amountOut.toNumber()) || 0
           // console.log('22222amountOut#####', amountOut, '###direct###', direct)

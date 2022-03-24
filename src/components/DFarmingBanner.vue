@@ -38,7 +38,7 @@ import { TokenAmount, gt } from '@/utils/safe-math'
 // Vue.use(Button)
 export default Vue.extend({
   components: {
-    // Button
+    // Button-
   },
   props: {
     isStaked: {

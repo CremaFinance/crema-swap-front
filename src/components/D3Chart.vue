@@ -25,6 +25,7 @@ import {
   showPrice2contractPrice,
   contractPrice2showPrice
 } from '@/tokenSwap/swapv3'
+import { tick2Price, price2Tick } from '@cremafinance/crema-sdk'
 import { fixD, checkNullObj, decimalFormat } from '@/utils'
 import Decimal from 'decimal.js'
 
@@ -53,6 +54,7 @@ export default Vue.extend({
     return {
       isDraw: false,
       zoom: 0.125
+      // zoom: 1
     }
   },
   watch: {
@@ -120,22 +122,28 @@ export default Vue.extend({
       this.dataProcessing(this.poolInfo, zoom)
     },
     dataProcessing(infos: any, zoom: number = 0.125) {
+      // dataProcessing(infos: any, zoom: number = 1) {
       console.log('zoom####', zoom)
       if (infos && infos.coin) {
-        const current_price = infos.currentPriceView
+        const current_price = this.direction ? infos.currentPriceView : infos.currentPriceViewReverse
         console.log('dataProcessing####current_price#####', current_price)
-        const currentTick = price2tick(Math.sqrt(current_price))
+        // const currentTick = price2Tick(new Decimal(Math.sqrt(current_price)))
+        const currentTick = price2Tick(new Decimal(current_price))
         console.log('这里this.minPrice####', this.minPrice)
         console.log('这里this.maxPrice####', this.maxPrice)
 
-        const tickMax = (currentTick + 1000) * zoom
-        const tickMin = (currentTick - 1000) * zoom
+        // const tickMax = (currentTick + 1000) * zoom
+        // const tickMin = (currentTick - 1000) * zoom
+        const tickMax = currentTick + 1000 * zoom
+        const tickMin = currentTick - 1000 * zoom
 
         console.log('这里currentTick####', currentTick)
+        console.log('这里tickMax####', tickMax)
+        console.log('这里tickMin####', tickMin)
         console.log('this.minPrice123123####', this.minPrice)
         console.log('this.maxPrice123123####', this.maxPrice)
-        const minPriceTick = price2tick(Number(decimalFormat(String(this.minPrice), 12)))
-        const maxPriceTick = price2tick(Number(decimalFormat(String(this.maxPrice), 12)))
+        const minPriceTick = price2Tick(new Decimal(decimalFormat(String(this.minPrice), 12)))
+        const maxPriceTick = price2Tick(new Decimal(decimalFormat(String(this.maxPrice), 12)))
 
         // console.log('tickMax#####', tickMax)
         // console.log('tickMin#####', tickMin)
@@ -187,6 +195,9 @@ export default Vue.extend({
         console.log('d3##chartData#####', chartData)
         console.log('这里这里####minPriceTick####', minPriceTick)
         console.log('这里这里####maxPriceTick####', maxPriceTick)
+        console.log('这里这里####currentTick####', currentTick)
+        console.log('这里这里####tickMin####', tickMin)
+        console.log('这里这里####tickMax####', tickMax)
         this.drawChart(chartData, tickMin, tickMax, minPriceTick, maxPriceTick, currentTick)
       }
     },
@@ -210,7 +221,24 @@ export default Vue.extend({
       const width = 460 - margin.left - margin.right // 460
       const height = 195 - margin.top - margin.bottom // 195
 
-      const unit = width / (tickMax - tickMin)
+      const xArr = [
+        tickMin,
+        currentTick - (currentTick - tickMin) / 2,
+        currentTick,
+        currentTick + (tickMax - currentTick) / 2,
+        tickMax
+      ]
+      const xPriceArr: any = []
+      console.log('xArr123####', xArr)
+
+      const utickMin = xArr[0] - (xArr[1] - xArr[0]) * 2
+      const utickMax = xArr[4] + (xArr[4] - xArr[3]) * 2
+      console.log('utickMin#####', utickMin)
+      console.log('utickMax#####', utickMax)
+      //
+      // const unit = width / (tickMax * 1.2 - tickMin / 1.2)
+      console.log('width###', width)
+      const unit = width / (utickMax - utickMin)
 
       // console.log('unit####', unit)
 
@@ -289,18 +317,27 @@ export default Vue.extend({
 
       const ticksBox = xAxisBox.append('g')
       const z = tickMax - tickMin
-      const xArr = [tickMin / 1.2, tickMin / 2.4, currentTick, tickMax / 2.4, tickMax / 1.2]
-      const xPriceArr: any = []
+      // const xArr = [tickMin / 1.2, tickMin / 2.4, currentTick, tickMax / 2.4, tickMax / 1.2]
+      // const xArr = [
+      //   tickMin,
+      //   currentTick - (currentTick - tickMin) / 2,
+      //   currentTick,
+      //   currentTick + (tickMax - currentTick) / 2,
+      //   tickMax
+      // ]
+      // const xPriceArr: any = []
+      // console.log('xArr123####', xArr)
 
       if (_this.direction) {
         for (let i = 0; i < xArr.length; i++) {
-          const price: string = decimalFormat(String(tick2price(xArr[i])), 6) || '0'
+          const price: string = decimalFormat(String(tick2Price(xArr[i]).toNumber()), 6) || '0'
           // const price: string = '.'
           xPriceArr.push(price)
           console.log('xArr[i]####', xArr[i])
           console.log('tickMin####', tickMin)
           console.log('unit####', unit)
-          const x = Math.abs(xArr[i] - tickMin) * unit
+          // const x = Math.abs(xArr[i] - tickMin / 1.2) * unit
+          const x = Math.abs(xArr[i] - utickMin) * unit
           console.log('x#####', x)
 
           let length: number = 0
@@ -336,9 +373,9 @@ export default Vue.extend({
         }
       } else {
         for (let i = xArr.length - 1; i >= 0; i--) {
-          const price: string = decimalFormat(String(tick2price(xArr[i]) / 1), 6) || '0'
+          const price: string = decimalFormat(String(tick2Price(xArr[i]).toNumber() / 1), 6) || '0'
           xPriceArr.push(price)
-          const x = Math.abs(xArr[i] - tickMin) * unit
+          const x = Math.abs(xArr[i] - utickMin) * unit
           // console.log('这里这里####price####', price)
           let length: number = 0
           // for (let j = 0; j < price.length; j++) {
@@ -479,8 +516,8 @@ export default Vue.extend({
 
         rightHandle.attr('transform', 'translate(' + e.selection[1] + ', 0)')
 
-        const minPrice = tick2price(e.selection[0] / unit + tickMin)
-        const maxPrice = tick2price(e.selection[1] / unit + tickMin)
+        const minPrice = tick2Price(e.selection[0] / unit + tickMin).toNumber()
+        const maxPrice = tick2Price(e.selection[1] / unit + tickMin).toNumber()
 
         _this.$emit('onChangeMinPrice', String(minPrice))
         _this.$emit('onChangeMaxPrice', String(maxPrice))
