@@ -29,7 +29,8 @@ export const state = () => ({
   feeIsSet: false,
   infos: {} as any,
   myPositions: [],
-  currentPositon: {}
+  currentPositon: {},
+  rates: {}
   // userPositionAccountObj: {} as any
 })
 
@@ -73,6 +74,9 @@ export const mutations = mutationTree(state, {
 
   setCurrentPosition(state, obj: object) {
     state.currentPositon = cloneDeep(obj)
+  },
+  setRates(state, value) {
+    state.rates = value
   }
 })
 
@@ -242,7 +246,23 @@ export const actions = actionTree(
       commit('setMyPositions', list)
     },
 
-    async setCurrentPositon({ commit }, data) {
+    getRates({ commit }) {
+      const result: any = {}
+      // this.$axios.get('https://dev-api-crema.bitank.com/price?quote_symbol=usd').then((res: any) => {
+      this.$axios.get('https://api.crema.finance/price?quote_symbol=usd').then((res: any) => {
+        console.log('getRates###res####', res)
+
+        if (res && res.data && res.data.prices) {
+          res.data.prices.forEach((item) => {
+            result[item.base_symbol] = Number(item.price)
+          })
+
+          commit('setRates', result)
+        }
+      })
+    },
+
+    async setCurrentPositon({ state, commit }, data) {
       const { myPosions, id } = data
       const list = myPosions
       // const id = this.$router
@@ -313,45 +333,31 @@ export const actions = actionTree(
         const toCoinAmountBig = new BigNumber(toCoinAmount)
         const fromNum = fromCoinAmountBig.multipliedBy(currentPrice)
         const toNum = toCoinAmountBig.plus(fromNum)
-        try {
-          if (currentData.poolInfo.pc.symbol.includes('SOL')) {
-            console.log('coingecago####')
-            if (!RATES['SOL']) {
-              const solPrice = await getprice('solana')
-              console.log('solPrice####', solPrice)
-              RATES['SOL'] = solPrice
-            }
-            if (!RATES['mSOL']) {
-              const msolPrice = await getprice('msol')
-              console.log('msolPrice####', msolPrice)
-              RATES['mSOL'] = msolPrice
-            }
-            if (!RATES['scnSOL']) {
-              const scnsolPrice = await getprice('socean-staked-sol')
-              console.log('scnsolPrice####', scnsolPrice)
-              RATES['scnSOL'] = scnsolPrice
-            }
-          }
-        } catch (err) {
-          console.log('err###', err)
-          RATES['SOL'] = 92
-          RATES['mSOL'] = 91
-          RATES['scnSOL'] = 91
+
+        let pcSymbolRate = RATES[currentData.poolInfo.pc.symbol]
+
+        console.log('pcSymbolRate默认价格噢###', pcSymbolRate)
+
+        if (state.rates[currentData.poolInfo.pc.symbol.toUpperCase()]) {
+          pcSymbolRate = state.rates[currentData.poolInfo.pc.symbol.toUpperCase()]
+          console.log('走的接口噢####pcSymbolRate####', pcSymbolRate)
+        } else {
+          try {
+            const price = await getprice(currentData.poolInfo.pc.symbol.toLowerCase())
+            pcSymbolRate = price
+            console.log('走的接coingeco client####pcSymbolRate####', pcSymbolRate)
+          } catch (err) {}
         }
 
-        // console.log('RATES[currentData.poolInfo.pc.symbol]#####', RATES[currentData.poolInfo.pc.symbol])
-
-        const amountUSDBig = toNum.multipliedBy(RATES[currentData.poolInfo.pc.symbol])
+        const amountUSDBig = toNum.multipliedBy(pcSymbolRate)
 
         const amountUSD = decimalFormat(amountUSDBig.toFixed(), 4)
 
         let fromPercent: any = fromNum.toNumber()
-          ? fromNum.dividedBy(amountUSDBig.multipliedBy(RATES[currentData.poolInfo.pc.symbol])).multipliedBy(100)
+          ? fromNum.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
           : new BigNumber(0)
         let toPercent: any = toCoinAmountBig.toNumber()
-          ? toCoinAmountBig
-              .dividedBy(amountUSDBig.multipliedBy(RATES[currentData.poolInfo.pc.symbol]))
-              .multipliedBy(100)
+          ? toCoinAmountBig.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
           : new BigNumber(0)
 
         fromPercent = Math.round(fromPercent.toNumber())
@@ -371,7 +377,7 @@ export const actions = actionTree(
         // const tokenfeeB = tokenbFeeBig.plus(tokenfeeA)
         const tokenfeeA = tokenaFee.mul(currentPrice)
         const tokenfeeB = tokenbFee.plus(tokenfeeA)
-        const feeUSDBig = tokenfeeB.mul(RATES[currentData.poolInfo.pc.symbol])
+        const feeUSDBig = tokenfeeB.mul(pcSymbolRate)
         const feeUSD = decimalFormat(feeUSDBig.toString(), 4)
         // console.log('feeUSDBig.toString()####', feeUSDBig.toString())
         console.log('feeUSD###', feeUSD)

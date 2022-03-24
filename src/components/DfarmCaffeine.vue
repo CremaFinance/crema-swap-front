@@ -8,9 +8,9 @@
           <div v-for="(item, index) in keyData" :key="index" :class="item.name" @click="changeIcon(item)">
             <div class="option-icon"></div>
             {{ item.key }}
-            <div class="option-count">
+            <div v-if="keysObj && keysObj[item.id]" class="option-count">
               <div></div>
-              {{ item.num }}
+              {{ keysObj[item.id].length }}
             </div>
           </div>
         </div>
@@ -160,6 +160,7 @@ export default Vue.extend({
           key: 'Brass Key',
           num: '',
           minRequireAmount: 2000,
+          upgradeMinAmount: 3000,
           maxpreReward: 300
         },
         {
@@ -170,6 +171,7 @@ export default Vue.extend({
           key: 'Silver Key',
           num: '',
           minRequireAmount: 5000,
+          upgradeMinAmount: 5000,
           maxpreReward: 700
         },
         {
@@ -180,6 +182,7 @@ export default Vue.extend({
           key: 'Golden Key',
           num: '',
           minRequireAmount: 10000,
+          upgradeMinAmount: 7000,
           maxpreReward: 1300
         },
         {
@@ -190,6 +193,7 @@ export default Vue.extend({
           key: 'Platinum Key',
           num: '',
           minRequireAmount: 17000,
+          upgradeMinAmount: 9000,
           maxpreReward: 2100
         },
         {
@@ -224,8 +228,10 @@ export default Vue.extend({
         key: 'Brass Key',
         num: '',
         minRequireAmount: 2000,
+        upgradeMinAmount: 3000,
         maxpreReward: 300
-      }
+      },
+      keysObj: {}
     }
   },
   computed: {
@@ -242,15 +248,50 @@ export default Vue.extend({
       }
       return 0
     },
+    currentKeyAmount() {
+      if (this.keysObj && this.currentKeyItem && this.keysObj[this.currentKeyItem.id]) {
+        return this.keysObj[this.currentKeyItem.id].length
+      }
+      return 0
+    },
     tipText() {
+      // 1、未连接钱包，数据占位--
       if (!this.wallet && !this.wallet.connected) {
-        return 'Please connect a wallet'
+        return 'Please connect a wallet. '
       }
-      if (this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
-        return `Still need to earn ${this.currentKeyItem.minRequireAmount - this.caffeineAmount} Caffeine to mint ${
+
+      // 2、当前不存在NFT
+      if (this.currentKeyAmount < 1 && this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
+        return `You need  ${this.currentKeyItem.minRequireAmount - this.caffeineAmount} more Caffeine to mint a new ${
           this.currentKeyItem.key
-        } NFT`
+        }. `
       }
+
+      // 3、当前存在的咖啡因数量可以铸造当前选中的等级时展示
+      if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
+        return `You are eligible to mint a new ${this.currentKeyItem.key} key. `
+      }
+
+      // 4、该等级下存在NFT 时，不可升级时
+      if (
+        this.currentKeyItem.id !== 5 &&
+        this.currentKeyAmount > 0 &&
+        this.caffeineAmount < this.currentKeyItem.upgradeMinAmount
+      ) {
+        return `You need ${
+          this.currentKeyItem.upgradeMinAmount - this.caffeineAmount
+        } more Caffeine to upgrade this key. `
+      }
+
+      // 5、该等级下存在NFT 时，可升级时
+      if (
+        this.currentKeyItem.id !== 5 &&
+        this.currentKeyAmount > 0 &&
+        this.caffeineAmount >= this.currentKeyItem.upgradeMinAmount
+      ) {
+        return `You are eligible to upgrade this key to a ${this.canUpgradeHeighKeyName}.`
+      }
+
       return ''
     },
     canMintKeyName() {
@@ -267,10 +308,18 @@ export default Vue.extend({
       }
       return ''
     },
-    tipsTowLineText() {
-      if (this.canMintKeyName && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
-        return `You can mint a ${this.canMintKeyName} key`
+    canUpgradeHeighKeyName() {
+      if (this.currentKeyItem.id === 5) return ''
+      let i = 4
+      while (i > 0) {
+        if (this.caffeineAmount >= this.keyData[i].minRequireAmount - this.currentKeyItem.minRequireAmount) {
+          return this.keyData[i].key
+        }
+        i--
       }
+      return ''
+    },
+    tipsTowLineText() {
       return ''
     }
   },
@@ -381,6 +430,7 @@ export default Vue.extend({
       console.log('wallet.publicKey#####', wallet.publicKey.toString())
       const keys = await fetchCremakeys(conn, wallet, wallet.publicKey)
       console.log('keys#####', keys)
+      this.keysObj = keys
     },
     async toMint() {
       this.showMint = false

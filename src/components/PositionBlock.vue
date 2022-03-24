@@ -8,6 +8,16 @@
           <div class="name">{{ pItem.poolInfo.name }}</div>
         </div>
         <div class="fee">{{ pItem.poolInfo.feeView }}%</div>
+        <div v-if="pItem.nftTokenMint" class="nft-address">
+          <span>
+            {{ pItem.nftTokenMint.substr(0, 4) }}
+            ...
+            {{ pItem.nftTokenMint.substr(pItem.nftTokenMint.length - 4, 4) }}
+          </span>
+          <svg class="icon" aria-hidden="true" @click.stop="$accessor.copy(pItem.nftTokenMint)">
+            <use xlink:href="#icon-icon_copy"></use>
+          </svg>
+        </div>
       </div>
       <div class="h5-right right">
         <StatusBlock :current-status="getCurrentStatus(pItem)" />
@@ -135,6 +145,27 @@ export default Vue.extend({
         font-size: 14px;
         color: #fff;
         margin-left: 10px;
+      }
+      .nft-address {
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0px 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        margin-left: 10px;
+        // backdrop-filter: blur(0px);
+        svg {
+          width: 14px;
+          height: 14px;
+          fill: rgba(255, 255, 255, 0.5);
+          margin-left: 8px;
+        }
+        span {
+          font-size: 14px;
+          color: #fff;
+        }
       }
     }
     .min-and-max {
