@@ -7,7 +7,7 @@ import {
   Signer,
   TokenAccountsFilter
 } from '@solana/web3.js'
-import { QuarrySDK, PositionWrapper } from 'test-quarry-sdk'
+import { QuarrySDK, PositionWrapper, findActivityMasterAddress } from 'test-quarry-sdk'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import type { AccountInfo } from '@solana/spl-token'
@@ -167,4 +167,22 @@ export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
   const sdk = makeSDK(conn, wallet)
   const info = await sdk.activity.fetchCremaKeys(user)
   return info
+}
+
+export async function getMasterPda() {
+  const pda = await findActivityMasterAddress()
+  return pda
+  // printObjectJSON({ activityMaster: pda })
+}
+
+export async function fetchActivitymaster(conn: any, wallet: any, master: PublicKey) {
+  const sdk = makeSDK(conn, wallet)
+  const info = await sdk.activity.fetchActivitymaster(master)
+  if (info === null) {
+    console.log('Activitymaster %s not found', master.toBase58())
+    return null
+  }
+  return info
+  // console.log(typeof UactivityErrors)
+  // printObjectTable(info)
 }

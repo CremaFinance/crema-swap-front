@@ -108,6 +108,7 @@
         :isUpgrading="isUpgrading"
         :canUpgradeHeighKeyItem="keyData[canUpgradeHeighKeyId - 1]"
         @onClose="() => (showUpgrade = false)"
+        @toUpgrade="toUpgrade"
       />
     </div>
   </div>
@@ -118,7 +119,7 @@ import { mapState } from 'vuex'
 import importIcon from '@/utils/import-icon'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
 import invariant from 'tiny-invariant'
-import { makeSDK, fetchCremakeys } from '@/contract/farming'
+import { makeSDK, fetchCremakeys, getMasterPda, fetchActivitymaster } from '@/contract/farming'
 import {
   clusterApiUrl,
   Connection,
@@ -241,7 +242,8 @@ export default Vue.extend({
         upgradeMinAmount: 3000,
         maxpreReward: 300
       },
-      keysObj: {}
+      keysObj: {},
+      openRewardTimestamp: 0
     }
   },
   computed: {
@@ -372,7 +374,9 @@ export default Vue.extend({
     //   }
     // }
   },
-  mounted() {},
+  mounted() {
+    this.getCanClaimDate()
+  },
   methods: {
     importIcon,
     // changeHint(value: string) {
@@ -434,6 +438,29 @@ export default Vue.extend({
         this.farmCard = this.changeBtn
       }
     },
+    async getCanClaimDate() {
+      try {
+        const res = await getMasterPda()
+        let MasterPda
+        console.log('getCanClaimDate###test####', res)
+        if (res && res[0]) {
+          MasterPda = res[0].toString()
+          console.log('MasterPda####', res[0].toString())
+        }
+        const wallet = (this as any).$wallet
+        const conn = this.$web3
+        const activeInfo = await fetchActivitymaster(conn, wallet, new PublicKey(MasterPda))
+        console.log('activeInfo####', activeInfo)
+        if (activeInfo && activeInfo.openRewardTimestamp) {
+          console.log('openRewardTimestamp###', activeInfo.openRewardTimestamp.toString())
+          this.openRewardTimestamp = activeInfo.openRewardTimestamp
+        }
+      } catch (err) {
+        console.log('getCanClaimDate###err###', err)
+      }
+      // 1650605923
+      // 1648179129
+    },
     async getKeys() {
       const wallet = (this as any).$wallet
       const conn = this.$web3
@@ -455,6 +482,8 @@ export default Vue.extend({
 
       invariant(wallet.publicKey.toString() == authoritySdk.toString(), 'user is the same to sdk')
 
+      this.$accessor.transaction.setTransactionDesc('Mint NFT')
+      this.$accessor.transaction.setShowWaiting(true)
       try {
         console.log('到这里了吗#####')
         const res = await sdk.activity.mintCremaKey({
@@ -488,7 +517,11 @@ export default Vue.extend({
         this.isDisabled = false
       }
     },
-    async toUpgrade(mint: PublicKey) {
+    async toUpgrade() {
+      const mint = this.keysObj[this.currentKeyItem.id][0].mint
+      if (!mint) return
+      // const mint = ''
+      this.showUpgrade = false
       this.isUpgrading = true
       this.isDisabled = true
       const wallet = (this as any).$wallet
@@ -498,10 +531,12 @@ export default Vue.extend({
       const authoritySdk = sdk.provider.walletKey
       invariant(wallet.publicKey.toBase58() == authoritySdk.toBase58(), 'user is the same to sdk')
 
+      this.$accessor.transaction.setTransactionDesc('Upgrade NFT')
+      this.$accessor.transaction.setShowWaiting(true)
       try {
         const tx = await sdk.activity.upgrade({
           user: wallet.publicKey,
-          mint
+          mint: new PublicKey(mint)
         })
 
         const receipt = await tx.confirm()
@@ -510,7 +545,7 @@ export default Vue.extend({
         console.log('receipt####', receipt)
         if (receipt && receipt.signature) {
           const txid = receipt.signature
-          const description = `Upgrade`
+          const description = 'Upgrade NFT'
           this.$accessor.transaction.sub({ txid, description })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
@@ -520,6 +555,7 @@ export default Vue.extend({
             if (!signatureResult.err) {
               // _this.$accessor.farming.getFarmingList()
               // 监听到成功后刷新
+              _this.getKeys()
             }
           })
         }
@@ -539,6 +575,9 @@ export default Vue.extend({
       const authoritySdk = sdk.provider.walletKey
       invariant(wallet.publicKey.toBase58() == authoritySdk.toBase58(), 'user is the same to sdk')
 
+      this.$accessor.transaction.setTransactionDesc('Claim NFT')
+      this.$accessor.transaction.setShowWaiting(true)
+
       try {
         const tx = await sdk.activity.claimReward({
           user: wallet.publicKey,
@@ -549,7 +588,7 @@ export default Vue.extend({
         console.log('receipt####', receipt)
         if (receipt && receipt.signature) {
           const txid = receipt.signature
-          const description = `Upgrade`
+          const description = 'Claim NFT'
           this.$accessor.transaction.sub({ txid, description })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this

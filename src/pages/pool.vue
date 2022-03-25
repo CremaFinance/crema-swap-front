@@ -790,6 +790,7 @@ export default Vue.extend({
 
       this.fromCoinAmount = tempToCoinAmount
       this.toCoinAmount = tempFromCoinAmount
+      this.currentCoinTab = this.direction ? this.poolInfo.coin.symbol : this.poolInfo.pc.symbol
     },
     async supply() {
       this.suppling = true
