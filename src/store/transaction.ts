@@ -127,6 +127,7 @@ export const actions = actionTree(
                 'a',
                 {
                   style: { color: '#b5b8c2', 'text-decoration': 'underline' },
+                  class: { 'notify-link': true },
                   attrs: {
                     href: `https://solscan.io/tx/${txid}`,
                     target: '_blank'
