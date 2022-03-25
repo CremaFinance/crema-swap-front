@@ -486,8 +486,8 @@ export default Vue.extend({
         ])
         .on('end', brushend)
 
-      let minPriceTickX = Math.abs(minPriceTick - tickMin) * unit
-      let maxPriceTickX = Math.abs(maxPriceTick - tickMin) * unit
+      let minPriceTickX = Math.abs(minPriceTick - utickMin) * unit
+      let maxPriceTickX = Math.abs(maxPriceTick - utickMin) * unit
       if (this.minPrice === '0') {
         minPriceTickX = 0
       }
@@ -516,8 +516,8 @@ export default Vue.extend({
 
         rightHandle.attr('transform', 'translate(' + e.selection[1] + ', 0)')
 
-        const minPrice = tick2Price(e.selection[0] / unit + tickMin).toNumber()
-        const maxPrice = tick2Price(e.selection[1] / unit + tickMin).toNumber()
+        const minPrice = tick2Price(e.selection[0] / unit + utickMin).toNumber()
+        const maxPrice = tick2Price(e.selection[1] / unit + utickMin).toNumber()
 
         _this.$emit('onChangeMinPrice', String(minPrice))
         _this.$emit('onChangeMaxPrice', String(maxPrice))
