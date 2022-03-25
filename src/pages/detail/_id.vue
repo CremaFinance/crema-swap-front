@@ -320,7 +320,7 @@ export default Vue.extend({
           }
 
           this.showClaimHint = false
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Claim' })
           setTimeout(() => {
             this.$accessor.liquidity.requestInfos()
           }, 2000)

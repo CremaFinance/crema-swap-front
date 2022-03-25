@@ -520,7 +520,7 @@ export default Vue.extend({
 
           const description = `Add liquidity  ${this.fromCoinAmount} ${poolInfo.coin?.symbol} and ${this.toCoinAmount} ${poolInfo.pc?.symbol} to the pool`
 
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Add liquidity' })
           // this.$accessor.transaction.sub({ txid: 'txid问题？', description: '难道是这个问题吗' })
           this.$accessor.transaction.setShowSubmitted(true)
           setTimeout(() => {

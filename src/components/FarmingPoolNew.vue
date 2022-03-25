@@ -492,7 +492,7 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Stake ${poolInfo.name} NFT`
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Stake' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
@@ -558,7 +558,7 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Unstake ${poolInfo.name} NFT`
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Unstake' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
@@ -605,7 +605,7 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Harvest all rewards`
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Harvest' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
