@@ -544,7 +544,7 @@ export default Vue.extend({
           // })
 
           const description = `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${this.toCoinAmount} ${this.toCoin?.symbol}`
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Swap' })
           this.$accessor.transaction.setShowSubmitted(true)
           this.fromCoinAmount = ''
           this.toCoinAmount = ''
