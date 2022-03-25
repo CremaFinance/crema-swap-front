@@ -53,8 +53,8 @@ export default Vue.extend({
   data() {
     return {
       isDraw: false,
-      zoom: 0.125
-      // zoom: 1
+      // zoom: 0.125
+      zoom: 1
     }
   },
   watch: {
@@ -121,7 +121,7 @@ export default Vue.extend({
       this.zoom = zoom
       this.dataProcessing(this.poolInfo, zoom)
     },
-    dataProcessing(infos: any, zoom: number = 0.125) {
+    dataProcessing(infos: any, zoom: number = 1) {
       // dataProcessing(infos: any, zoom: number = 1) {
       console.log('zoom####', zoom)
       if (infos && infos.coin) {
@@ -134,8 +134,8 @@ export default Vue.extend({
 
         // const tickMax = (currentTick + 1000) * zoom
         // const tickMin = (currentTick - 1000) * zoom
-        const tickMax = currentTick + 1000 * zoom
-        const tickMin = currentTick - 1000 * zoom
+        const tickMax = currentTick + 100 * zoom
+        const tickMin = currentTick - 100 * zoom
 
         console.log('这里currentTick####', currentTick)
         console.log('这里tickMax####', tickMax)
@@ -231,8 +231,10 @@ export default Vue.extend({
       const xPriceArr: any = []
       console.log('xArr123####', xArr)
 
-      const utickMin = xArr[0] - (xArr[1] - xArr[0]) * 2
-      const utickMax = xArr[4] + (xArr[4] - xArr[3]) * 2
+      // const utickMin = xArr[0] - (xArr[1] - xArr[0]) * 2
+      // const utickMax = xArr[4] + (xArr[4] - xArr[3]) * 2
+      const utickMin = xArr[0] - (xArr[1] - xArr[0])
+      const utickMax = xArr[4] + (xArr[4] - xArr[3])
       console.log('utickMin#####', utickMin)
       console.log('utickMax#####', utickMax)
       //
@@ -272,9 +274,9 @@ export default Vue.extend({
           if (index === 0) return 0
           if (_this.direction) {
             // return Math.abs(chartData[index - 1].tick - tickMin) * unit
-            return Math.abs(chartData[index - 1].tick - tickMin) * unit
+            return Math.abs(chartData[index - 1].tick - utickMin) * unit
           } else {
-            return Math.abs(tickMax - chartData[index - 1].tick) * unit
+            return Math.abs(utickMax - chartData[index - 1].tick) * unit
           }
         })
         .attr('y', function (d: any, index: number) {
@@ -333,12 +335,12 @@ export default Vue.extend({
           const price: string = decimalFormat(String(tick2Price(xArr[i]).toNumber()), 6) || '0'
           // const price: string = '.'
           xPriceArr.push(price)
-          console.log('xArr[i]####', xArr[i])
-          console.log('tickMin####', tickMin)
-          console.log('unit####', unit)
+          // console.log('xArr[i]####', xArr[i])
+          // console.log('tickMin####', tickMin)
+          // console.log('unit####', unit)
           // const x = Math.abs(xArr[i] - tickMin / 1.2) * unit
           const x = Math.abs(xArr[i] - utickMin) * unit
-          console.log('x#####', x)
+          // console.log('x#####', x)
 
           let length: number = 0
           // for (let j = 0; j < price.length; j++) {
@@ -361,7 +363,7 @@ export default Vue.extend({
               length += 6
             }
           }
-          console.log('length#####', length)
+          // console.log('length#####', length)
 
           ticksBox
             .append('text')
@@ -486,8 +488,8 @@ export default Vue.extend({
         ])
         .on('end', brushend)
 
-      let minPriceTickX = Math.abs(minPriceTick - tickMin) * unit
-      let maxPriceTickX = Math.abs(maxPriceTick - tickMin) * unit
+      let minPriceTickX = Math.abs(minPriceTick - utickMin) * unit
+      let maxPriceTickX = Math.abs(maxPriceTick - utickMin) * unit
       if (this.minPrice === '0') {
         minPriceTickX = 0
       }
@@ -495,11 +497,11 @@ export default Vue.extend({
         maxPriceTickX = width
       }
 
-      console.log('unit####', unit)
-      console.log('this.minPrice123####', this.minPrice)
-      console.log('this.maxPrice123####', this.maxPrice)
-      console.log('minPriceTickX#####', minPriceTickX)
-      console.log('maxPriceTickX#####', maxPriceTickX)
+      // console.log('unit####', unit)
+      // console.log('this.minPrice123####', this.minPrice)
+      // console.log('this.maxPrice123####', this.maxPrice)
+      // console.log('minPriceTickX#####', minPriceTickX)
+      // console.log('maxPriceTickX#####', maxPriceTickX)
 
       svg.append('g').attr('class', 'brush').call(brush).call(brush.move, [minPriceTickX, maxPriceTickX])
       leftHandle.attr('transform', 'translate(' + minPriceTickX + ', 0)')
@@ -516,8 +518,8 @@ export default Vue.extend({
 
         rightHandle.attr('transform', 'translate(' + e.selection[1] + ', 0)')
 
-        const minPrice = tick2Price(e.selection[0] / unit + tickMin).toNumber()
-        const maxPrice = tick2Price(e.selection[1] / unit + tickMin).toNumber()
+        const minPrice = tick2Price(e.selection[0] / unit + utickMin).toNumber()
+        const maxPrice = tick2Price(e.selection[1] / unit + utickMin).toNumber()
 
         _this.$emit('onChangeMinPrice', String(minPrice))
         _this.$emit('onChangeMaxPrice', String(maxPrice))

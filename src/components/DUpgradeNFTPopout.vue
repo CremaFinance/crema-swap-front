@@ -11,14 +11,15 @@
         </div>
       </div>
       <div class="mint-NFT-detail">
-        Congratulations, you can upgrade from Bronze Key to Silver Key that can unlock unlock rewards up to 700。
+        Congratulations, you can upgrade from Bronze Key to Silver Key that can unlock unlock rewards up to
+        {{ canUpgradeHeighKeyItem.minRequireAmount - currentKeyItem.minRequireAmount }}。
       </div>
 
       <div class="mint-NFT-btn-box">
         <!-- <Button class="mint-NFT-btn btn-cancel" @click="$emit('onClose')"> <div>Cancel</div> </Button>
         <Button class="mint-NFT-btn"> <div>Confirm</div> </Button> -->
         <Button class="mint-NFT-btn btn-cancel" @click="$emit('onClose')">Cancel</Button>
-        <Button class="mint-NFT-btn">Confirm</Button>
+        <Button class="mint-NFT-btn" :loading="isUpgrading" @click="$emit('toUpgrade')">Confirm</Button>
       </div>
     </div>
   </Modal>
