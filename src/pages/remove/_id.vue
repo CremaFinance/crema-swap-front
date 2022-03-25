@@ -297,7 +297,7 @@ export default Vue.extend({
           this.isLoading = false
           const description = `Remove  ${this.fromCoinAmount} ${poolInfo.coin?.symbol} and ${this.toCoinAmount} ${poolInfo.pc?.symbol} from the pool`
 
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Remove liquidity' })
 
           setTimeout(() => {
             this.$accessor.liquidity.requestInfos()

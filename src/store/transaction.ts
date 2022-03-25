@@ -105,25 +105,41 @@ export const actions = actionTree(
     setTransactionDesc({ commit }, desc: string) {
       commit('setTransactionDesc', desc)
     },
-    sub({ commit }, { txid, description }: { txid: string; description: string }) {
+    sub({ commit }, { txid, description, type = '' }: { txid: string; description: string; type: string }) {
       const walletAddress = this.$accessor.wallet?.address
       commit('pushTx', { txid, description, walletAddress })
       logger('Sub', txid)
 
       const conn = this.$web3
       const notify = this.$notify
-
-      notify.info({
-        key: txid + 'loading',
-        icon: (h: any) =>
-          h('img', {
-            class: { 'notify-icon': true, 'loading-animate': true },
-            attrs: { src: '/icon-loading.png' }
-          }),
-        message: (h: any) => h('div', { style: 'color: #fff' }, 'Confirming transaction'),
-        description,
-        duration: 0
-      })
+      if (type) {
+        notify.info({
+          key: txid + 'loading',
+          icon: (h: any) =>
+            h('img', {
+              class: { 'notify-icon': true, 'loading-animate': true },
+              attrs: { src: '/icon-loading.png' }
+            }),
+          message: (h: any) => h('div', { style: 'color: #fff' }, 'Confirming transaction'),
+          description: (h: any) =>
+            h('div', {}, [
+              h(
+                'a',
+                {
+                  style: { color: '#b5b8c2', 'text-decoration': 'underline' },
+                  class: { 'notify-link': true },
+                  attrs: {
+                    href: `https://solscan.io/tx/${txid}`,
+                    target: '_blank'
+                  }
+                },
+                'View transaction'
+              ),
+              h('span', {}, `: ${type}`)
+            ]),
+          duration: 0
+        })
+      }
 
       const listenerId = conn.onSignature(
         txid,

@@ -34,7 +34,7 @@
           </div>
         </div>
         <div class="farm-NFT-detail-Mint">
-          <div class="farm-NFT-detail-Mint-Left" :class="isClaim ? 'farm-NFT-isClaim' : ''">
+          <div class="farm-NFT-detail-Mint-Left" :class="canClaim ? 'farm-NFT-isClaim' : ''">
             <!-- <div v-if="wallet.connected && !isClaim" style="height: 160px; padding: 60px 0">
               Still need to produce xxx caffeine to mint NFT
             </div> -->
@@ -54,11 +54,11 @@
             <h3 v-if="wallet.connected && isClaim">Congratulations, this event the NFT got the rewards 1000 CRM</h3> -->
 
             <div class="farm-NFT-detail-Mint-pmgressbar">
-              <div v-if="wallet.connected && !isClaim" class="pmgressbar-hint" :class="isdir">
+              <div v-if="wallet.connected && !canClaim" class="pmgressbar-hint" :class="isdir">
                 <p>{{ isdir }}</p>
                 <span>1,000 / 2,000</span>
               </div>
-              <div v-if="wallet.connected && !isClaim" class="pmgressbar-detail">
+              <div v-if="wallet.connected && !canClaim" class="pmgressbar-detail">
                 <div>
                   <div v-for="(item, index) in changeHintData" :key="index"></div>
                   <!-- @mouseenter="changeHint(item.val)"
@@ -66,12 +66,12 @@
                 </div>
               </div>
               <div class="pmgressbar-btn">
-                <Button v-if="wallet.connected && !isClaim" class="action-btn" @click="changeMint">
+                <Button v-if="wallet.connected && !canClaim" class="action-btn" @click="changeMint">
                   <!-- <div @click="changeMint">Mint</div> -->
                   Mint
                 </Button>
                 <Button
-                  v-if="wallet.connected && !isClaim && currentKeyItem.id !== 5"
+                  v-if="wallet.connected && !canClaim && currentKeyItem.id !== 5"
                   class="action-btn"
                   @click="changeUpgrade"
                 >
@@ -79,7 +79,7 @@
                   Upgrade
                 </Button>
                 <Button v-if="!wallet.connected" class="action-btn"> Connect a wallet </Button>
-                <Button v-if="wallet.connected && isClaim" class="action-btn" @click="changeClaim">
+                <Button v-if="wallet.connected && canClaim" class="action-btn" @click="changeClaim">
                   <!-- <div @click="changeClaim">Claim</div> -->
                   Claim
                 </Button>
@@ -272,36 +272,47 @@ export default Vue.extend({
         return 'Please connect a wallet. '
       }
 
-      // 2、当前不存在NFT
-      if (this.currentKeyAmount < 1 && this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
-        return `You need  ${this.currentKeyItem.minRequireAmount - this.caffeineAmount} more Caffeine to mint a new ${
-          this.currentKeyItem.key
-        }. `
-      }
+      if (!this.canClaim) {
+        // 2、当前不存在NFT
+        if (this.currentKeyAmount < 1 && this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
+          return `You need  ${this.currentKeyItem.minRequireAmount - this.caffeineAmount} more Caffeine to mint a new ${
+            this.currentKeyItem.key
+          }. `
+        }
 
-      // 3、当前存在的咖啡因数量可以铸造当前选中的等级时展示
-      if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
-        return `You are eligible to mint a new ${this.currentKeyItem.key} key. `
-      }
+        // 3、当前存在的咖啡因数量可以铸造当前选中的等级时展示
+        if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
+          return `You are eligible to mint a new ${this.currentKeyItem.key} key. `
+        }
 
-      // 4、该等级下存在NFT 时，不可升级时
-      if (
-        this.currentKeyItem.id !== 5 &&
-        this.currentKeyAmount > 0 &&
-        this.caffeineAmount < this.currentKeyItem.upgradeMinAmount
-      ) {
-        return `You need ${
-          this.currentKeyItem.upgradeMinAmount - this.caffeineAmount
-        } more Caffeine to upgrade this key. `
-      }
+        // 4、该等级下存在NFT 时，不可升级时
+        if (
+          this.currentKeyItem.id !== 5 &&
+          this.currentKeyAmount > 0 &&
+          this.caffeineAmount < this.currentKeyItem.upgradeMinAmount
+        ) {
+          return `You need ${
+            this.currentKeyItem.upgradeMinAmount - this.caffeineAmount
+          } more Caffeine to upgrade this key. `
+        }
 
-      // 5、该等级下存在NFT 时，可升级时
-      if (
-        this.currentKeyItem.id !== 5 &&
-        this.currentKeyAmount > 0 &&
-        this.caffeineAmount >= this.currentKeyItem.upgradeMinAmount
-      ) {
-        return `You are eligible to upgrade this key to a ${this.keyData[this.canUpgradeHeighKeyId - 1].key}.`
+        // 5、该等级下存在NFT 时，可升级时
+        if (
+          this.currentKeyItem.id !== 5 &&
+          this.currentKeyAmount > 0 &&
+          this.caffeineAmount >= this.currentKeyItem.upgradeMinAmount
+        ) {
+          return `You are eligible to upgrade this key to a ${this.keyData[this.canUpgradeHeighKeyId - 1].key}.`
+        }
+      } else {
+        // 6、抽奖开启，当前等级下不存在NFT：
+        if (this.currentKeyAmount < 1) {
+          return `Sorry, you don't have ${this.currentKeyItem.key}.`
+        }
+
+        if (this.currentKeyAmount > 0) {
+          return `You can use your ${this.currentKeyItem.key} to unlock the treasury box soon.`
+        }
       }
 
       return ''
@@ -333,6 +344,15 @@ export default Vue.extend({
     },
     tipsTowLineText() {
       return ''
+    },
+    canClaim() {
+      if (this.openRewardTimestamp) {
+        const now = parseInt(String(new Date().getTime() / 1000))
+        if (this.openRewardTimestamp <= now) {
+          return true
+        }
+      }
+      return false
     }
   },
   watch: {
@@ -497,7 +517,7 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Mint NFT`
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Mint' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
@@ -546,7 +566,7 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = 'Upgrade NFT'
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Upgrade' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
@@ -589,7 +609,7 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = 'Claim NFT'
-          this.$accessor.transaction.sub({ txid, description })
+          this.$accessor.transaction.sub({ txid, description, type: 'Claim' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
