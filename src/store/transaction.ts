@@ -113,9 +113,22 @@ export const actions = actionTree(
       const conn = this.$web3
       const notify = this.$notify
 
+      notify.info({
+        key: txid + 'loading',
+        icon: (h: any) =>
+          h('img', {
+            class: { 'notify-icon': true, 'loading-animate': true },
+            attrs: { src: '/icon-loading.png' }
+          }),
+        message: (h: any) => h('div', { style: 'color: #fff' }, 'Confirming transaction'),
+        description,
+        duration: 0
+      })
+
       const listenerId = conn.onSignature(
         txid,
         function (signatureResult: SignatureResult, context: Context) {
+          notify.close(txid + 'loading')
           const { slot } = context
 
           if (!signatureResult.err) {
