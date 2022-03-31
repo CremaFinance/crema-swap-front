@@ -229,14 +229,14 @@ export default Vue.extend({
         tickMax
       ]
       const xPriceArr: any = []
-      console.log('xArr123####', xArr)
+      console.log('D3Chart####xArr123####', xArr)
 
       // const utickMin = xArr[0] - (xArr[1] - xArr[0]) * 2
       // const utickMax = xArr[4] + (xArr[4] - xArr[3]) * 2
       const utickMin = xArr[0] - (xArr[1] - xArr[0])
       const utickMax = xArr[4] + (xArr[4] - xArr[3])
-      console.log('utickMin#####', utickMin)
-      console.log('utickMax#####', utickMax)
+      console.log('D3Chart####utickMin#####', utickMin)
+      console.log('D3Chart####utickMax#####', utickMax)
       //
       // const unit = width / (tickMax * 1.2 - tickMin / 1.2)
       console.log('width###', width)
@@ -488,8 +488,13 @@ export default Vue.extend({
         ])
         .on('end', brushend)
 
-      let minPriceTickX = Math.abs(minPriceTick - utickMin) * unit
-      let maxPriceTickX = Math.abs(maxPriceTick - utickMin) * unit
+      console.log('D3Chart####minPriceTick####', minPriceTick)
+      console.log('D3Chart####maxPriceTick####', maxPriceTick)
+      console.log('D3Chart####utickMin####', utickMin)
+
+      let minPriceTickX = minPriceTick < utickMin ? -100 : Math.abs(minPriceTick - utickMin) * unit
+      // let minPriceTickX = -100
+      let maxPriceTickX = maxPriceTick < utickMin ? -100 : Math.abs(maxPriceTick - utickMin) * unit
       if (this.minPrice === '0') {
         minPriceTickX = 0
       }
@@ -498,10 +503,10 @@ export default Vue.extend({
       }
 
       // console.log('unit####', unit)
-      // console.log('this.minPrice123####', this.minPrice)
-      // console.log('this.maxPrice123####', this.maxPrice)
-      // console.log('minPriceTickX#####', minPriceTickX)
-      // console.log('maxPriceTickX#####', maxPriceTickX)
+      console.log('D3Chart####this.minPrice123####', this.minPrice)
+      console.log('D3Chart####this.maxPrice123####', this.maxPrice)
+      console.log('D3Chart####minPriceTickX#####', minPriceTickX)
+      console.log('D3Chart####maxPriceTickX#####', maxPriceTickX)
 
       svg.append('g').attr('class', 'brush').call(brush).call(brush.move, [minPriceTickX, maxPriceTickX])
       leftHandle.attr('transform', 'translate(' + minPriceTickX + ', 0)')
