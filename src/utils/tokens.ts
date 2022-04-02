@@ -161,7 +161,7 @@ export const TOKENS: Tokens = {
     referrer: '',
     official: true,
     showDefault: true
-  }
+  },
   // '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm': {
   //   symbol: 'scnSOL',
   //   name: 'scnSOL',
@@ -171,15 +171,15 @@ export const TOKENS: Tokens = {
   //   official: true,
   //   showDefault: true
   // },
-  // mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So: {
-  //   symbol: 'mSOL',
-  //   name: 'mSOL',
-  //   mintAddress: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
-  //   decimals: 9,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // },
+  mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So: {
+    symbol: 'mSOL',
+    name: 'mSOL',
+    mintAddress: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
+    decimals: 9,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
   // BdZPG9xWrG3uFrx2KrUW1jT4tZ9VKPDWknYihzoPRJS3: {
   //   symbol: 'prtSOL',
   //   name: 'prtSOL',
@@ -189,15 +189,15 @@ export const TOKENS: Tokens = {
   //   official: true,
   //   showDefault: true
   // },
-  // So11111111111111111111111111111111111111112: {
-  //   symbol: 'WSOL',
-  //   name: 'WSOL',
-  //   mintAddress: 'So11111111111111111111111111111111111111112',
-  //   decimals: 9,
-  //   referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
-  //   official: true,
-  //   showDefault: false
-  // }
+  So11111111111111111111111111111111111111112: {
+    symbol: 'WSOL',
+    name: 'WSOL',
+    mintAddress: 'So11111111111111111111111111111111111111112',
+    decimals: 9,
+    referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
+    official: true,
+    showDefault: false
+  }
   // main net end *************
   // test net start ***************
   // '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
