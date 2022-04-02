@@ -127,7 +127,9 @@ export async function addLiquidityNew(
   liquity_mount: number | Numberu128 | string,
   maximumTokenA: number | string,
   maximumTokenB: number | string,
-  new_position: number
+  new_position: number,
+  fromCoinBalance?: number | string,
+  toCoinBalance?: number | string
 ): Promise<string> {
   console.log('addLiquidityNew####poolInfo###', poolInfo)
   console.log('addLiquidityNew####fromCoin###', fromCoin)
@@ -164,17 +166,20 @@ export async function addLiquidityNew(
   console.log('userAccountA####', userAccountA)
   const userAccounts = [new PublicKey(userAccountA), new PublicKey(userAccountB)]
   const userAmounts = [maximumTokenA, maximumTokenB]
+  const balanceAmounts = [fromCoinBalance, toCoinBalance]
 
   if (poolInfo.coin.mintAddress === toCoin?.mintAddress && poolInfo.pc.mintAddress === fromCoin?.mintAddress) {
     // userAccounts.reverse()
     console.log('是进到这里了吗####')
     userAmounts.reverse()
+    balanceAmounts.reverse()
   }
 
   const userCoinTokenAccount = userAccounts[0]
   const userPcTokenAccount = userAccounts[1]
 
   let coinAmount: any
+  let coinBalance: any
 
   console.log('poolInfo.coin.decimals####', poolInfo.coin.decimals)
   console.log('poolInfo.pc.decimals####', poolInfo.pc.decimals)
@@ -183,13 +188,19 @@ export async function addLiquidityNew(
   if (userAmounts[0]) {
     // coinAmount = new TokenAmount(userAmounts[0], poolInfo.coin.decimals, false).wei.toNumber()
     coinAmount = userAmounts[0]
+    coinBalance = balanceAmounts[0]
   }
 
   let pcAmount: any
+  let pcBalance: any
   if (userAmounts[1]) {
     // pcAmount = new TokenAmount(userAmounts[1], poolInfo.pc.decimals, false).wei.toNumber()
     pcAmount = userAmounts[1]
+    pcBalance = balanceAmounts[1]
   }
+
+  console.log('addLiquidityNew###coinAmount####', coinAmount)
+  console.log('addLiquidityNew###pcAmount####', pcAmount)
 
   let wrappedCoinSolAccount
   if (poolInfo.coin.mintAddress === NATIVE_SOL.mintAddress) {
@@ -198,7 +209,7 @@ export async function addLiquidityNew(
       wrappedCoinSolAccount,
       owner,
       WSOL.mintAddress,
-      coinAmount,
+      coinAmount > coinBalance ? coinBalance : coinAmount,
       transaction,
       signers
     )
@@ -210,7 +221,7 @@ export async function addLiquidityNew(
       wrappedSolAccount,
       owner,
       WSOL.mintAddress,
-      pcAmount,
+      pcAmount > pcBalance ? pcBalance : pcAmount,
       transaction,
       signers
     )

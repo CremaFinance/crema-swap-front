@@ -793,6 +793,7 @@ export default Vue.extend({
       this.currentCoinTab = this.direction ? this.poolInfo.coin.symbol : this.poolInfo.pc.symbol
     },
     async supply() {
+      // console.log('this.wallet.tokenAccounts#####', this.wallet.tokenAccounts)
       this.suppling = true
 
       const conn = this.$web3
@@ -899,6 +900,9 @@ export default Vue.extend({
       this.$accessor.transaction.setShowWaiting(true)
       const deltaLiquity = fixD(this.deltaLiquity, 0)
 
+      // console.log('this.fromCoinBalance####', this.fromCoinBalance.wei.toNumber())
+      // console.log('this.toCoinBalance####', this.toCoinBalance.wei.toNumber())
+
       addLiquidityNew(
         conn,
         wallet,
@@ -916,7 +920,9 @@ export default Vue.extend({
         // this.direction ? toCoinAmount : fromCoinAmount,
         fromCoinAmount,
         toCoinAmount,
-        0
+        0,
+        this.fromCoinBalance.wei.toNumber(),
+        this.toCoinBalance.wei.toNumber()
       )
         .then((txid) => {
           const description = `Add liquidity  ${this.fromCoinAmount && this.fromCoinAmount} ${
