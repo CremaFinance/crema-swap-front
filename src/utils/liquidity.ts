@@ -212,7 +212,7 @@ export async function addLiquidityNew(
       wrappedCoinSolAccount,
       owner,
       WSOL.mintAddress,
-      coinAmount > coinBalance ? coinBalance : coinAmount,
+      Number(coinAmount) > Number(coinBalance) ? Number(coinBalance) : Number(coinAmount),
       transaction,
       signers
     )
@@ -224,7 +224,7 @@ export async function addLiquidityNew(
       wrappedSolAccount,
       owner,
       WSOL.mintAddress,
-      pcAmount > pcBalance ? pcBalance : pcAmount,
+      Number(pcAmount) > Number(pcBalance) ? Number(pcBalance) : Number(pcAmount),
       transaction,
       signers
     )
