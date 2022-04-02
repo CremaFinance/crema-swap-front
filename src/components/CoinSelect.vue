@@ -170,16 +170,16 @@ export default Vue.extend({
         return b.balance.toEther() - a.balance.toEther()
       })
 
-      // if (this.existingCoins !== 'SOL') {
-      //   tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
-      // } else {
-      //   tokenList = [...hasBalance, ...noBalance]
-      // }
+      if (this.existingCoins !== 'SOL') {
+        tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
+      } else {
+        tokenList = [...hasBalance, ...noBalance]
+      }
       console.log('solAccount###', solAccount)
 
       // 暂时没有sol相关交易对，先注释了
-      // tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
-      tokenList = [...hasBalance, ...noBalance]
+      tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
+      // tokenList = [...hasBalance, ...noBalance]
 
       // if (keyword) {
       //   tokenList = tokenList.filter(

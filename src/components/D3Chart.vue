@@ -161,9 +161,14 @@ export default Vue.extend({
 
         for (let i = 0; i < tick_info_array.length; i++) {
           item = tick_info_array[i]
-          if (item.tick <= currentTick && item.tick >= tickMin) {
+          // if (item.tick <= currentTick && item.tick >= tickMin) {
+          //   leftArray.unshift(item)
+          // } else if (item.tick > currentTick && item.tick <= tickMax) {
+          //   rightArray.push(item)
+          // }
+          if (item.tick <= currentTick) {
             leftArray.unshift(item)
-          } else if (item.tick > currentTick && item.tick <= tickMax) {
+          } else if (item.tick > currentTick) {
             rightArray.push(item)
           }
         }

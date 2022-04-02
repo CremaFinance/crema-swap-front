@@ -504,7 +504,9 @@ export default Vue.extend({
         fixD(String(this.deltaLiquity), 0),
         fromCoinAmount,
         toCoinAmount,
-        1
+        1,
+        this.fromCoin.balance.wei.toNumber(),
+        this.toCoin.balance.wei.toNumber()
       )
         .then((txid) => {
           this.$notify.info({
