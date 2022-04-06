@@ -39,10 +39,12 @@ export default Vue.extend({
     'liquidity.myPositions': {
       handler: 'watchMyPositions',
       immediate: true
+    },
+    'wallet.connected'(newVal) {
+      if (!newVal) {
+        this.list = []
+      }
     }
-    // 'wallet.tokenAccount': {
-
-    // }
   },
   mounted() {},
   methods: {

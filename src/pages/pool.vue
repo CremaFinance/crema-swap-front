@@ -21,6 +21,7 @@
             :current="currentCoinTab"
             @onChange="changeDirection"
           ></CoinTab>
+          <RefreshIcon @refresh="refresh" :loading="liquidity.loading"></RefreshIcon>
           <SetIcon></SetIcon>
         </div>
       </div>
@@ -37,6 +38,15 @@
                 1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimals) }}
                 {{ toCoin.symbol }}
               </div>
+              <Progress
+                type="circle"
+                :width="14"
+                :stroke-width="10"
+                :percent="(100 / liquidity.autoRefreshTime) * liquidity.countdown"
+                :show-info="false"
+                :class="liquidity.loading ? 'disabled' : ''"
+                @click="refresh"
+              />
             </div>
           </div>
           <div class="form-box">
@@ -157,7 +167,7 @@
 <script lang="ts">
 import { Vue } from 'nuxt-property-decorator'
 import { mapState } from 'vuex'
-import { Button, Icon } from 'ant-design-vue'
+import { Button, Icon, Progress } from 'ant-design-vue'
 // import AddLiquidity from '../layouts/components/AddLiquidity.vue'
 // import WaitingHint from '@/components/waiting.vue'
 // import SuccessHint from '@/components/success.vue'
@@ -195,7 +205,8 @@ const USDC = getTokenBySymbol('USDC')
 
 export default Vue.extend({
   components: {
-    Button
+    Button,
+    Progress
   },
   data() {
     return {
@@ -416,6 +427,9 @@ export default Vue.extend({
       immediate: true
     }
   },
+  created() {
+    this.$accessor.liquidity.getPoolsDefaultPriceRange()
+  },
   mounted() {
     this.updateCoinInfo(this.wallet.tokenAccounts)
   },
@@ -424,13 +438,14 @@ export default Vue.extend({
     fixD,
     decimalFormat,
     checkNullObj,
+    refresh() {
+      this.$accessor.liquidity.requestInfos()
+    },
     poolInfoWatch(value: any, oldValue: any) {
-      console.log('111111')
       if (value) {
         // 第一次刷新或，替换交易对
         if (!oldValue || oldValue.name !== value.name) {
           this.ifFirstDirectionChange = true
-          // console.log('poolInfoWatch####22222')
           let direction = true
           // 设置默认方向
           if (value.coin.symbol === this.fromCoin?.symbol && value.pc.symbol === this.toCoin?.symbol) {
@@ -440,29 +455,27 @@ export default Vue.extend({
           }
           this.direction = direction
 
+          // console.log('poolInfoWatch###value###', value)
           // 设置价格区间默认值
-          const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
-          console.log('value.tick_space#####', value.tick_space)
-          const minTick = tick - value.tick_space
-          const maxTick = tick + value.tick_space
 
-          // let minPrice = ''
-          // let maxPrice = ''
+          if (this.liquidity.poolsDefaultPriceRangeObj[value.coinPair]) {
+            const priceInterval = this.liquidity.poolsDefaultPriceRangeObj[value.coinPair].price_interval
+            this.minPrice = priceInterval.lower_price
+            this.maxPrice = priceInterval.upper_price
+            this.defaultMinPrice = priceInterval.lower_price
+            this.defaultMaxPrice = priceInterval.upper_price
+          } else {
+            const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
+            const minTick = tick - value.tick_space
+            const maxTick = tick + value.tick_space
 
-          const minPrice = tick2Price(minTick).toString()
-          const maxPrice = tick2Price(maxTick).toString()
-
-          // if (direction) {
-          //   minPrice = tick2Price(minTick).toString()
-          //   maxPrice = tick2Price(maxTick).toString()
-          // } else {
-          //   minPrice = String(1 / tick2Price(maxTick).toNumber())
-          //   maxPrice = String(1 / tick2Price(minTick).toNumber())
-          // }
-          this.minPrice = minPrice
-          this.maxPrice = maxPrice
-          this.defaultMinPrice = minPrice
-          this.defaultMaxPrice = maxPrice
+            const minPrice = tick2Price(minTick).toString()
+            const maxPrice = tick2Price(maxTick).toString()
+            this.minPrice = minPrice
+            this.maxPrice = maxPrice
+            this.defaultMinPrice = minPrice
+            this.defaultMaxPrice = maxPrice
+          }
 
           // 设置当前fee tier
           if (value.feeView === 0.01) {
@@ -599,7 +612,9 @@ export default Vue.extend({
       } else {
         // minPrice = Number(min)
         // maxPrice = Number(max)
-        if (this.direction) {
+        console.log('pool###updateAmounts###this.direction####', this.direction)
+        console.log('pool###updateAmounts###direction####', direction)
+        if (direction === 0) {
           minPrice = Number(min)
           maxPrice = Number(max)
         } else {
@@ -824,6 +839,17 @@ export default Vue.extend({
       //   icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
       // })
 
+      let direction: any
+      if (this.fixedFromCoin) {
+        // coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+        direction =
+          this.fromCoin?.symbol === this.poolInfo.coin.symbol && this.toCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
+      } else {
+        // coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+        direction =
+          this.toCoin?.symbol === this.poolInfo.coin.symbol && this.fromCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
+      }
+
       let tick_lower: number
       let tick_upper: number
       if (this.minPrice === '0' && this.maxPrice === '∞') {
@@ -834,7 +860,7 @@ export default Vue.extend({
         const t_f = this.toCoin?.decimals - this.fromCoin?.decimals
         console.log('supply####f_t####', f_t)
         console.log('supply####t_f####', t_f)
-        if (this.direction) {
+        if (direction === 0) {
           tick_lower = getNearestTickByPrice(new Decimal(this.minPrice * Math.pow(10, t_f)), poolInfo.tick_space)
           tick_upper = getNearestTickByPrice(new Decimal(this.maxPrice * Math.pow(10, t_f)), poolInfo.tick_space)
         } else {
@@ -989,15 +1015,18 @@ export default Vue.extend({
         .clear-all {
           font-size: 14px;
           color: rgba(255, 255, 255, 0.5);
-          margin-right: 16px;
+          margin-right: 0px;
           &:hover {
             color: #fff;
           }
         }
         .coin-tab {
           font-size: 12px;
-          margin-right: 16px;
+          margin-left: 10px;
           font-weight: bold;
+        }
+        .set-icon-container {
+          margin-left: 10px;
         }
       }
     }
@@ -1014,6 +1043,12 @@ export default Vue.extend({
         justify-content: space-between;
         .right {
           font-weight: bold;
+          display: flex;
+          align-items: center;
+          .ant-progress {
+            margin-left: 4px;
+            margin-bottom: 3px;
+          }
         }
       }
       .form-box {

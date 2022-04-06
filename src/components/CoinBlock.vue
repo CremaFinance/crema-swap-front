@@ -11,10 +11,10 @@
       </div>
       <div class="right">
         <div class="balance-box">
-          <span>Balance: {{ (balance && !balance.wei.isNaN() && balance.fixed()) || 0 }}</span>
+          <span>Balance: {{ (wallet.connected && balance && !balance.wei.isNaN() && balance.fixed()) || 0 }}</span>
           <!-- <span>Balance: {{ (coinBalance && !coinBalance.wei.isNaN() && coinBalance.fixed()) || 0 }}</span> -->
           <button
-            v-if="showMax && balance && (!value || lt(value, balance.toEther()))"
+            v-if="wallet.connected && showMax && balance && (!value || lt(value, balance.toEther()))"
             class="max"
             @click="$emit('onMax')"
           >

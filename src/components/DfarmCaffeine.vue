@@ -34,7 +34,7 @@
           </div>
         </div>
         <div class="farm-NFT-detail-Mint">
-          <div class="farm-NFT-detail-Mint-Left" :class="canClaim ? 'farm-NFT-isClaim' : ''">
+          <div class="farm-NFT-detail-Mint-Left" :class="farmingIsEnd ? 'farm-NFT-isClaim' : ''">
             <!-- <div v-if="wallet.connected && !isClaim" style="height: 160px; padding: 60px 0">
               Still need to produce xxx caffeine to mint NFT
             </div> -->
@@ -45,8 +45,8 @@
                 src="@/assets/images/img-link-Wallet.png"
                 alt=""
               />
-              <h3 class="congratulations">{{ tipsTowLineText ? 'Congratulations' : '' }}</h3>
-              <p class="tips-text">{{ tipText || tipsTowLineText }}</p>
+              <!-- <h3 class="congratulations">{{ tipsTowLineText ? 'Congratulations' : '' }}</h3> -->
+              <p v-if="wallet.connected" class="tips-text">{{ tipText || tipsTowLineText }}</p>
             </div>
 
             <!-- tipsTowLineText -->
@@ -54,11 +54,11 @@
             <h3 v-if="wallet.connected && isClaim">Congratulations, this event the NFT got the rewards 1000 CRM</h3> -->
 
             <div class="farm-NFT-detail-Mint-pmgressbar">
-              <div v-if="wallet.connected && !canClaim" class="pmgressbar-hint" :class="isdir">
+              <div v-if="wallet.connected && !farmingIsEnd" class="pmgressbar-hint" :class="isdir">
                 <p>{{ isdir }}</p>
                 <span>1,000 / 2,000</span>
               </div>
-              <div v-if="wallet.connected && !canClaim" class="pmgressbar-detail">
+              <div v-if="wallet.connected && !farmingIsEnd" class="pmgressbar-detail">
                 <div>
                   <div v-for="(item, index) in changeHintData" :key="index"></div>
                   <!-- @mouseenter="changeHint(item.val)"
@@ -66,12 +66,12 @@
                 </div>
               </div>
               <div class="pmgressbar-btn">
-                <Button v-if="wallet.connected && !canClaim" class="action-btn" @click="changeMint">
+                <Button v-if="wallet.connected && !farmingIsEnd" class="action-btn" @click="changeMint">
                   <!-- <div @click="changeMint">Mint</div> -->
                   Mint
                 </Button>
                 <Button
-                  v-if="wallet.connected && !canClaim && currentKeyItem.id !== 5"
+                  v-if="wallet.connected && !farmingIsEnd && currentKeyItem.id !== 5"
                   class="action-btn"
                   @click="changeUpgrade"
                 >
@@ -79,9 +79,13 @@
                   Upgrade
                 </Button>
                 <Button v-if="!wallet.connected" class="action-btn"> Connect a wallet </Button>
-                <Button v-if="wallet.connected && canClaim" class="action-btn" @click="changeClaim">
+                <Button
+                  v-if="wallet.connected && farmingIsEnd && currentKeyAmount > 0"
+                  class="action-btn"
+                  @click="changeClaim"
+                >
                   <!-- <div @click="changeClaim">Claim</div> -->
-                  Claim
+                  Open
                 </Button>
               </div>
             </div>
@@ -101,7 +105,14 @@
         @onClose="() => (showMint = false)"
         @toMint="toMint"
       />
-      <ClaimRewards v-if="showClaim" @onClose="() => (showClaim = false)" />
+      <ClaimRewards
+        v-if="showClaim"
+        :isClaiming="isClaiming"
+        :currentKeyItem="currentKeyItem"
+        :openRewardTimestamp="openRewardTimestamp"
+        @onClose="() => (showClaim = false)"
+        @toClaim="toClaim"
+      />
       <DUpgradeNFTPopout
         v-if="showUpgrade"
         :currentKeyItem="currentKeyItem"
@@ -119,7 +130,7 @@ import { mapState } from 'vuex'
 import importIcon from '@/utils/import-icon'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
 import invariant from 'tiny-invariant'
-import { makeSDK, fetchCremakeys, getMasterPda, fetchActivitymaster } from '@/contract/farming'
+import { makeSDK, fetchCremakeys, getMasterPda, fetchActivitymaster, quarryInfo } from '@/contract/farming'
 import {
   clusterApiUrl,
   Connection,
@@ -172,7 +183,8 @@ export default Vue.extend({
           num: '',
           minRequireAmount: 2000,
           upgradeMinAmount: 3000,
-          maxpreReward: 300
+          maxpreReward: 200,
+          rewardX: '2X'
         },
         {
           id: 2,
@@ -183,7 +195,8 @@ export default Vue.extend({
           num: '',
           minRequireAmount: 5000,
           upgradeMinAmount: 5000,
-          maxpreReward: 700
+          maxpreReward: 500,
+          rewardX: '3X'
         },
         {
           id: 3,
@@ -194,7 +207,8 @@ export default Vue.extend({
           num: '',
           minRequireAmount: 10000,
           upgradeMinAmount: 7000,
-          maxpreReward: 1300
+          maxpreReward: 1000,
+          rewardX: '4X'
         },
         {
           id: 4,
@@ -205,7 +219,8 @@ export default Vue.extend({
           num: '',
           minRequireAmount: 17000,
           upgradeMinAmount: 9000,
-          maxpreReward: 2100
+          maxpreReward: 2000,
+          rewardX: '5X'
         },
         {
           id: 5,
@@ -215,7 +230,8 @@ export default Vue.extend({
           key: 'Diamond Key',
           num: '',
           minRequireAmount: 26000,
-          maxpreReward: 3100
+          maxpreReward: 3000,
+          rewardX: '6X'
         }
       ],
       changeHintData: [
@@ -240,10 +256,12 @@ export default Vue.extend({
         num: '',
         minRequireAmount: 2000,
         upgradeMinAmount: 3000,
-        maxpreReward: 300
+        maxpreReward: 200,
+        rewardX: '2X'
       },
       keysObj: {},
-      openRewardTimestamp: 0
+      openRewardTimestamp: 0,
+      farmingEndTimestamp: 0
     }
   },
   computed: {
@@ -272,7 +290,7 @@ export default Vue.extend({
         return 'Please connect a wallet. '
       }
 
-      if (!this.canClaim) {
+      if (!this.farmingIsEnd) {
         // 2、当前不存在NFT
         if (this.currentKeyAmount < 1 && this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
           return `You need  ${this.currentKeyItem.minRequireAmount - this.caffeineAmount} more Caffeine to mint a new ${
@@ -310,8 +328,12 @@ export default Vue.extend({
           return `Sorry, you don't have ${this.currentKeyItem.key}.`
         }
 
-        if (this.currentKeyAmount > 0) {
+        // 7、质押结束后，当前等级下有NFT，等待开启奖励：
+        if (this.currentKeyAmount > 0 && !this.canClaim) {
           return `You can use your ${this.currentKeyItem.key} to unlock the treasury box soon.`
+        } else if (this.currentKeyAmount > 0 && this.canClaim) {
+          // 8、质押结束后，当前等级下有NFT，到达可开启时间：
+          return 'This key is ready to open the treasure box. Claim your rewards now! '
         }
       }
 
@@ -344,6 +366,15 @@ export default Vue.extend({
     },
     tipsTowLineText() {
       return ''
+    },
+    farmingIsEnd() {
+      if (this.farmingEndTimestamp) {
+        const now = parseInt(String(new Date().getTime() / 1000))
+        if (this.farmingEndTimestamp <= now) {
+          return true
+        }
+      }
+      return false
     },
     canClaim() {
       if (this.openRewardTimestamp) {
@@ -388,14 +419,16 @@ export default Vue.extend({
       handler: 'walletWatch',
       immediate: true
     }
-    // currentKeyItem(newVal, oldVal) {
-    //   if (newVal && this.caffeineAmount > 2000) {
-    //     this.tipText =
+    // currentKeyItem(newVal) {
+    //   if (this.keysObj && newVal && this.keysObj[newVal.id]) {
+    //     const tokenMint = this.keysObj[newVal.id][0].mint
+    //     this.getFarmingDate(new PublicKey(tokenMint))
     //   }
     // }
   },
   mounted() {
     this.getCanClaimDate()
+    this.getFarmingDate()
   },
   methods: {
     importIcon,
@@ -473,13 +506,31 @@ export default Vue.extend({
         console.log('activeInfo####', activeInfo)
         if (activeInfo && activeInfo.openRewardTimestamp) {
           console.log('openRewardTimestamp###', activeInfo.openRewardTimestamp.toString())
-          this.openRewardTimestamp = activeInfo.openRewardTimestamp
+          // this.openRewardTimestamp = activeInfo.openRewardTimestamp.toNumber()
+          // 为了测试设置为3月30日
+          // this.openRewardTimestamp = 1648569600
+          this.openRewardTimestamp = 1648310400
         }
       } catch (err) {
         console.log('getCanClaimDate###err###', err)
       }
-      // 1650605923
-      // 1648179129
+    },
+    async getFarmingDate() {
+      const wallet = (this as any).$wallet
+      const conn = this.$web3
+      const rewarderKey = new PublicKey('9VdAkPH9WTiAEEr1fdSd5ycbK8Z3JsdyDuzxCk6vpJod')
+      const positionWrapperWrapMint = new PublicKey('9aExwsPhX6i1NMdWgPG6odh8VxTfib2Fw2hLd1Tui9V4')
+      try {
+        const res: any = await quarryInfo(conn, wallet, rewarderKey, positionWrapperWrapMint)
+        console.log('getFarmingDate###famineTs###', res.famineTs.toString())
+        if (res && res.famineTs) {
+          // this.farmingEndTimestamp = Number(res.famineTs.toString())  // 目前后端设置的质押活动结束时间是永久 即9223372036854775807
+          // 为了测试，暂设置为3月27
+          this.farmingEndTimestamp = 1648310400
+        }
+      } catch (err) {
+        console.log('getFarmingDate###err###', err)
+      }
     },
     async getKeys() {
       const wallet = (this as any).$wallet
@@ -585,7 +636,8 @@ export default Vue.extend({
         this.isDisabled = false
       }
     },
-    async toClaim(mint: PublicKey) {
+    async toClaim() {
+      const mint = this.keysObj[this.currentKeyItem.id][0].mint
       this.isClaiming = true
       this.isDisabled = true
       const wallet = (this as any).$wallet
@@ -601,7 +653,7 @@ export default Vue.extend({
       try {
         const tx = await sdk.activity.claimReward({
           user: wallet.publicKey,
-          mint
+          mint: new PublicKey(mint)
         })
         const receipt = await tx.confirm()
         this.$accessor.transaction.setShowWaiting(false)

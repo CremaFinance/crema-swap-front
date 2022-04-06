@@ -115,7 +115,7 @@ export default Vue.extend({
           } else if (Number(this.currentData.tokenbFee) === 0) {
             return '0'
           } else {
-            return '<0.0001'
+            return '<0.00001'
           }
         } else {
           return decimalFormat(this.currentData.toCoinAmount, this.poolInfo.pc.decimals)

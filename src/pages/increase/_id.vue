@@ -94,7 +94,7 @@
             :balance="fromCoin ? fromCoin.balance : null"
             :show-lock="showFromCoinLock"
             not-select
-            @onInput="inputChange"
+            @onInput="(amount) => (fromCoinAmount = amount)"
             @onFocus="
               () => {
                 fixedFromCoin = true
@@ -109,7 +109,7 @@
             :balance="toCoin ? toCoin.balance : null"
             :show-lock="showToCoinLock"
             not-select
-            @onInput="inputChange"
+            @onInput="(amount) => (toCoinAmount = amount)"
             @onFocus="
               () => {
                 fixedFromCoin = false
@@ -293,16 +293,17 @@ export default Vue.extend({
     importIcon,
     // updateAmounts(price: string, tick_lower: number, tick_upper: number) {
     updateAmounts() {
+      if (!this.fromCoinAmount && !this.toCoinAmount) return
       const tick_lower = this.currentData.lower_tick
       const tick_upper = this.currentData.upper_tick
       let coinAmount: any
       let direction: any
       if (this.fixedFromCoin) {
-        coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+        coinAmount = new TokenAmount(fixD(this.fromCoinAmount, 2), this.fromCoin?.decimals, false).wei.toNumber()
         direction =
           this.fromCoin?.symbol === this.poolInfo.coin.symbol && this.toCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
       } else {
-        coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+        coinAmount = new TokenAmount(fixD(this.toCoinAmount, 2), this.toCoin?.decimals, false).wei.toNumber()
         direction =
           this.toCoin?.symbol === this.poolInfo.coin.symbol && this.toCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
       }
@@ -330,20 +331,20 @@ export default Vue.extend({
 
         if (this.fixedFromCoin) {
           const toCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
-          this.toCoinAmount = toCoinAmount
+          this.toCoinAmount = toCoinAmount === '--' ? '' : toCoinAmount
         } else {
           const fromCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
-          this.fromCoinAmount = fromCoinAmount
+          this.fromCoinAmount = fromCoinAmount === '--' ? '' : fromCoinAmount
         }
       } else if (!this.showToCoinLock) {
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-        const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+        const coinAmount = new TokenAmount(fixD(this.toCoinAmount, 2), this.toCoin?.decimals, false).wei.toNumber()
         // const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
         const delta_liquity = calculateLiquityOnlyA(tick_lower, tick_upper, new Decimal(coinAmount))
         this.deltaLiquity = delta_liquity
       } else if (!this.showFromCoinLock) {
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-        const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+        const coinAmount = new TokenAmount(fixD(this.fromCoinAmount, 2), this.fromCoin?.decimals, false).wei.toNumber()
         // const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
         const delta_liquity = calculateLiquityOnlyB(tick_lower, tick_upper, new Decimal(coinAmount))
         this.deltaLiquity = delta_liquity

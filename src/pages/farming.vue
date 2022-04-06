@@ -4,6 +4,12 @@
       <!-- title开始 -->
       <div class="farming-title">
         <h3 class="title">Farming</h3>
+        <div class="refresh-icon-box">
+          <!-- <svg class="icon" aria-hidden="true" @click="toRefresh">
+            <use xlink:href="#icon-icon-refresh"></use>
+          </svg> -->
+          <RefreshIcon @refresh="toRefresh" :loading="farming.loading"></RefreshIcon>
+        </div>
       </div>
       <!-- banner -->
       <div class="farming-banner">
@@ -20,12 +26,14 @@
           :tvlData="tvlData"
           :is-staked="poolStatus"
           :search-key="searchKey"
+          @refreshData="toRefresh"
         ></FarmingPoolNew>
         <H5FarmingPoolNew
           class="h5-farming-pool"
           :tvlData="tvlData"
           :is-staked="poolStatus"
           :search-key="searchKey"
+          @refreshData="toRefresh"
         ></H5FarmingPoolNew>
       </div>
     </div>
@@ -35,6 +43,8 @@
 import Vue from 'vue'
 import { Input, Spin } from 'ant-design-vue'
 import { mapState } from 'vuex'
+import { fixD, addCommom, decimalFormat, checkNullObj } from '@/utils'
+import { TokenSwap, calculateTokenAmount, tick2Price } from '@cremafinance/crema-sdk'
 export default Vue.extend({
   components: {
     Spin
@@ -44,28 +54,117 @@ export default Vue.extend({
       poolStatus: 'All',
       searchKey: '',
       showFarm: 'Farming',
-      tvlData: {}
+      tvlData: null,
+      timer: null,
+      earningTimer: null
     }
   },
   computed: {
-    ...mapState(['farming'])
+    ...mapState(['farming', 'wallet', 'liquidity']),
+    farmingConfigData() {
+      return {
+        walletConnected: this.wallet.connected,
+        rates: this.liquidity.rates,
+        farmingConfigObj: this.farming.farmingConfigObj,
+        tvlData: this.tvlData
+      }
+    }
+  },
+  watch: {
+    // 'wallet.connected': {
+    //   handler: 'walletWatch',
+    //   immediate: true
+    // },
+    farmingConfigData(newVal, oldVal) {
+      console.log('123getFarmingList###farmingConfigData####newVal###', newVal)
+      if (newVal.rates && newVal.farmingConfigObj && newVal.tvlData && this.farming.farmingList.length < 1) {
+        this.$accessor.farming.getFarmingList({
+          rates: newVal.rates,
+          farmingConfig: newVal.farmingConfigObj,
+          haveLoading: true,
+          tvlData: newVal.tvlData
+        })
+      }
+      if (
+        newVal.rates &&
+        newVal.farmingConfigObj &&
+        newVal.tvlData &&
+        newVal.walletConnected &&
+        checkNullObj(this.farming.earningObj)
+      ) {
+        this.$accessor.farming.getEarningsObj()
+      }
+    }
+  },
+  created() {
+    this.getFarmTvl()
+    this.$accessor.farming.getFarmingConfig()
   },
   mounted() {
-    this.getFarmTvl()
+    const _this = this
+    this.timer = setInterval(function () {
+      console.log('123getFarmingList###进到轮循了')
+      _this.toRefresh(true)
+    }, 20000)
+  },
+  destroyed() {
+    clearInterval(this.timer)
+    this.timer = null
+
+    // clearInterval(this.earningTimer)
+    // this.earningTimer = null
   },
   methods: {
     getFarmTvl() {
       this.$axios.get(`https://dev-api-crema.bitank.com/farm/tvl`).then((res) => {
         // this.$axios.get(`/farm/tvl`).then((res) => {
-        console.log('res#####', res)
+        console.log('farmingTest####getFarmTvl###res#####', res)
         const result: any = {}
+        // const farmingConfg = this.farming.farmingConfg
         if (res && res.wrappers) {
           res.wrappers.forEach((item) => {
-            result[item.address] = item
+            const apr = item.apr * 100
+            const tvl = item.tvl
+            // console.log('farmingConfgsdfsdf####', farmingConfg)
+            // const farmingConfigItem = farmingConfg.filter((fitem) => fitem.positionWrapper === item.address)
+            // console.log('farmingConfigItem####', farmingConfigItem)
+            result[item.address] = {
+              ...item,
+              aprView: apr > 10000 ? Infinity : `${fixD(apr, 2)}%`,
+              tvlView: tvl ? `$ ${addCommom(tvl, 2)}` : '--',
+              etrMinPrice: decimalFormat(tick2Price(item.etrMin).toString(), 6),
+              etrMaxPrice: decimalFormat(tick2Price(item.etrMax).toString(), 6)
+            }
           })
         }
+
         this.tvlData = result
       })
+    },
+    // walletWatch(newVal) {
+    //   const _this = this
+    //   if (newVal) {
+    //     _this.refreshEarningsObj()
+    //     this.earningTimer = setInterval(function () {
+    //       _this.refreshEarningsObj()
+    //     }, 20000)
+    //   } else {
+    //     clearInterval(this.earningTimer)
+    //     this.earningTimer = null
+    //   }
+    // },
+    refreshEarningsObj() {
+      this.$accessor.farming.getEarningsObj()
+    },
+    toRefresh(unLoaidng) {
+      this.$accessor.farming.getFarmingList({
+        rates: this.farmingConfigData.rates,
+        farmingConfig: this.farmingConfigData.farmingConfigObj,
+        haveLoading: !unLoaidng,
+        tvlData: this.tvlData
+      })
+      this.getFarmTvl()
+      if (this.wallet.connected) this.$accessor.farming.getEarningsObj()
     }
   }
 })
@@ -83,15 +182,44 @@ export default Vue.extend({
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-top: 28px;
+      padding-bottom: 20px;
       .title {
         // font-size: 20px;
         // font-weight: normal;
         // color: #B5B8C2;
         font-size: 20px;
         color: #fff;
-        padding: 28px 0px 12px;
+        // padding: 28px 0px 12px;
         margin-bottom: 0px;
         font-weight: 700;
+      }
+      .refresh-icon-box {
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
+        box-shadow: 2px 4px 12px 0px #23262b, -3px -2px 10px 0px rgba(138, 147, 160, 0.16);
+        border-radius: 15px;
+        // border-image: linear-gradient(137deg, rgba(35, 38, 43, 1), rgba(62, 67, 78, 1)) 1 1;
+        padding: 6px;
+
+        & + .icon-box {
+          margin-left: 20px;
+        }
+
+        &:hover {
+          background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);
+        }
+      }
+      .icon {
+        width: 18px;
+        height: 18px;
+        // fill: rgba(255, 255, 255, 0.5);
+        fill: #fff;
+        cursor: pointer;
+        // &:hover {
+        //   fill: #fff;
+        // }
       }
       .title-right {
         display: flex;

@@ -80,7 +80,7 @@ export interface Tokens {
 
 export const NATIVE_SOL: TokenInfo = {
   symbol: 'SOL',
-  name: 'Native Solana',
+  name: 'Wrapped SOL',
   mintAddress: '11111111111111111111111111111111',
   decimals: 9,
   official: true,
@@ -89,7 +89,7 @@ export const NATIVE_SOL: TokenInfo = {
 
 export const WSOL: TokenInfo = {
   symbol: 'WSOL',
-  name: 'Wrapped Solana',
+  name: 'Wrapped SOL',
   mintAddress: 'So11111111111111111111111111111111111111112',
   decimals: 9,
   referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
@@ -146,7 +146,7 @@ export const TOKENS: Tokens = {
   },
   '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ': {
     symbol: 'pUSDT',
-    name: 'pUSDT',
+    name: 'pUSDT test',
     mintAddress: '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ',
     decimals: 6,
     referrer: '',
@@ -155,7 +155,7 @@ export const TOKENS: Tokens = {
   },
   FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58: {
     symbol: 'pUSDC',
-    name: 'pUSDC',
+    name: 'pUSDC test',
     mintAddress: 'FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58',
     decimals: 6,
     referrer: '',

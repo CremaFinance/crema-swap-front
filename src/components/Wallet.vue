@@ -76,7 +76,7 @@
             </svg>
             <span>Copy Address</span>
           </a> -->
-          <a class="view" target="_blank" :href="`https://explorer.solana.com//address/${wallet.address}`">
+          <a class="view" target="_blank" :href="`https://solscan.io/address/${wallet.address}`">
             <!-- <svg class="icon" aria-hidden="true">
               <use xlink:href="#iconicon_The_top_right"></use>
             </svg> -->

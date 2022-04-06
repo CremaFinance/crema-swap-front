@@ -13,6 +13,12 @@
           </svg>
           <span>Docs</span>
         </a> -->
+        <a href="https://gitbook.crema.finance/" target="_blank">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-docs"></use>
+          </svg>
+          <span>Docs</span>
+        </a>
         <a href="https://twitter.com/Crema_Finance" target="_blank" rel="noopener noreferrer">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-twitter"></use>

@@ -6,12 +6,12 @@
         <p>My Caffeine</p>
         <div>
           <img src="../assets/images/icon-caffeine.png" alt="" />
-          <span>{{ caffeineAmount }}</span>
+          <span>{{ wallet.connected ? caffeineAmount : 0 }}</span>
         </div>
       </div>
       <div class="farming-Banner-btn">
         <!-- <nuxt-link to="/active" class="farming-Btn"></nuxt-link> -->
-        <a class="farming-Btn"></a>
+        <a class="farming-Btn" @click="comingsoon"></a>
       </div>
     </div>
     <div v-if="isFarming == 'Farm'" class="farm-Banner">
@@ -29,6 +29,7 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
 import { TokenAmount, gt } from '@/utils/safe-math'
+import { fixD, addCommom } from '@/utils'
 // import { Button } from 'ant-design-vue'
 // Vue.use(Button)
 export default Vue.extend({
@@ -67,7 +68,7 @@ export default Vue.extend({
         let caffeineAmount = new TokenAmount(0)
         if (account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR']) {
           caffeineAmount = account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'].balance
-          return caffeineAmount.fixed()
+          return addCommom(caffeineAmount.fixed(), 6)
         }
       }
       return 0
@@ -98,6 +99,12 @@ export default Vue.extend({
       this.hour = h
       this.min = m
       this.sec = s
+    },
+    comingsoon() {
+      this.$notify.success({
+        message: 'Coming Soon',
+        description: ''
+      })
     }
   }
 })
@@ -146,7 +153,7 @@ img {
   display: block;
   width: 110px;
   height: 35px;
-  background: url('@/assets/images/img-mintnft_btn.png');
+  background: url('@/assets/images/img-mintnft_btn-h5.png');
   background-size: 100% 100%;
 }
 .farm-Banner {

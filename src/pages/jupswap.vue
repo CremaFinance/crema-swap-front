@@ -606,13 +606,13 @@ export default Vue.extend({
       font-size: 20px;
       color: #fff;
     }
-    .buttons {
-      display: flex;
-      align-items: center;
-      .is-loading {
-        animation: spin 1s linear infinite;
-      }
-    }
+    // .buttons {
+    //   display: flex;
+    //   align-items: center;
+    //   .is-loading {
+    //     animation: spin 1s linear infinite;
+    //   }
+    // }
   }
   .form-box {
     .change-icon {
@@ -690,11 +690,11 @@ export default Vue.extend({
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(1turn);
-  }
-}
+// @keyframes spin {
+//   to {
+//     transform: rotate(1turn);
+//   }
+// }
 
 @media screen and (max-width: 750px) {
   // .container {

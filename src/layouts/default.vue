@@ -46,6 +46,9 @@ export default Vue.extend({
   computed: {
     ...mapState(['transaction', 'url'])
   },
+  created() {
+    this.$accessor.liquidity.getRates()
+  },
   mounted() {
     // const showNotice = sessionStorage.getItem('crema_show_notice')
     // if (!showNotice) {
