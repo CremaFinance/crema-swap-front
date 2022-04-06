@@ -355,12 +355,24 @@ export const actions = actionTree(
 
         const amountUSD = decimalFormat(amountUSDBig.toFixed(), 4)
 
-        let fromPercent: any = fromNum.toNumber()
-          ? fromNum.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
-          : new BigNumber(0)
+        console.log('123###amountUSDBig####', amountUSDBig.toString())
+        console.log('123###fromNum####', fromNum.toString())
+        console.log('123###toCoinAmountBig###', toCoinAmountBig.toString())
+        console.log('123###pcSymbolRate#####', pcSymbolRate.toString())
+
+        // let fromPercent: any = fromNum.toNumber()
+        //   ? fromNum.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
+        //   : new BigNumber(0)
+        // let toPercent: any = toCoinAmountBig.toNumber()
+        //   ? toCoinAmountBig.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
+        //   : new BigNumber(0)
+        let fromPercent: any = fromNum.toNumber() ? fromNum.dividedBy(toNum).multipliedBy(100) : new BigNumber(0)
         let toPercent: any = toCoinAmountBig.toNumber()
-          ? toCoinAmountBig.dividedBy(amountUSDBig.multipliedBy(pcSymbolRate)).multipliedBy(100)
+          ? toCoinAmountBig.dividedBy(toNum).multipliedBy(100)
           : new BigNumber(0)
+
+        console.log('123###fromPercent###', fromPercent.toString())
+        console.log('123###toPercent###', toPercent.toString())
 
         fromPercent = Math.round(fromPercent.toNumber())
         toPercent = Math.round(toPercent.toNumber())
