@@ -1,7 +1,7 @@
 <template>
   <div class="swap-info">
     <div class="block">
-      <span>Exchange Rate{{ countdown }}</span>
+      <span>Exchange Rate</span>
 
       <div class="right">
         <div v-if="fromCoin && toCoin && Number(fromCoinAmount) && Number(toCoinAmount) && defaultRates">

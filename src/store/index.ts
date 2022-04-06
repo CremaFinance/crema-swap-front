@@ -28,7 +28,8 @@ function enquireScreen(call: Function) {
 
 export const state = () => ({
   isMobile: false,
-  slippage: '1'
+  slippage: '1',
+  showNetWorkWarnning: true
 })
 
 export type RootState = ReturnType<typeof state>
@@ -42,6 +43,9 @@ export const mutations = mutationTree(state, {
   setSlippage(state, slippage: string) {
     state.slippage = slippage
     localStorage.setItem('crema-slippage', slippage)
+  },
+  setNetWorkWarnning(state, value) {
+    state.showNetWorkWarnning = value
   }
 })
 
@@ -75,6 +79,9 @@ export const actions = actionTree(
 
     setSlippage({ commit }, slippage) {
       commit('setSlippage', slippage)
+    },
+    setNetWorkWarnning({ commit }, value) {
+      commit('setNetWorkWarnning', value)
     }
   }
 )

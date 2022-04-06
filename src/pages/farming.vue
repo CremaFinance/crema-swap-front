@@ -92,7 +92,7 @@ export default Vue.extend({
         newVal.walletConnected &&
         checkNullObj(this.farming.earningObj)
       ) {
-        this.$accessor.farming.getEarningsObj()
+        this.$accessor.farming.getEarningsObj(true)
       }
     }
   },

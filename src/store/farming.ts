@@ -35,6 +35,7 @@ export const state = () => ({
   farmingListLoading: false,
   earnings: '',
   earningObj: {} as any,
+  earningLoading: false,
   farmingConfigObj: null as any,
   statisticsDataObj: null as any,
   positionsObj: {} as any,
@@ -59,6 +60,10 @@ export const mutations = mutationTree(state, {
   setEarningObj(state, value) {
     state.earningObj = value
   },
+  setEarningLoading(state, value) {
+    state.earningLoading = value
+  },
+
   setFarmingConfig(state, value) {
     state.farmingConfig = value
   },
@@ -377,7 +382,8 @@ export const actions = actionTree(
           const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
 
           let liquityUSD = amountA.plus(amountB)
-          const tokenBRate = RATES[tokenB.symbol.toUpperCase()] || 1
+          const tokenBSymbol = tokenB.symbol.toUpperCase() === 'WSOL' ? 'SOL' : tokenB.symbol.toUpperCase()
+          const tokenBRate = RATES[tokenBSymbol] || 1
           liquityUSD = liquityUSD.mul(tokenBRate)
 
           let withinRange = true
@@ -436,7 +442,8 @@ export const actions = actionTree(
           const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
 
           // const liquityUSD = amountA.mul(RATES[tokenA.symbol]).plus(amountB.mul(RATES[tokenB.symbol]))
-          const tokenBRate = RATES[tokenB.symbol.toUpperCase()] || 1
+          const tokenBSymbol = tokenB.symbol.toUpperCase() === 'WSOL' ? 'SOL' : tokenB.symbol.toUpperCase()
+          const tokenBRate = RATES[tokenBSymbol] || 1
           let liquityUSD = amountA.plus(amountB)
           liquityUSD = liquityUSD.mul(tokenBRate)
           sdresult.push({
@@ -484,11 +491,15 @@ export const actions = actionTree(
       const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
       commit('setEarnings', earning)
     },
-    async getEarningsObj({ state, commit }) {
+    async getEarningsObj({ state, commit }, haveLoading) {
       const LPFARMS = state.farmingConfigObj
       const conn = this.$web3
       const wallet = (this as any)._vm.$wallet
       const result: any = {}
+
+      if (haveLoading) {
+        commit('setEarningLoading', true)
+      }
 
       console.log('123getFarmingList###getEarningsObj####进来了吗###', LPFARMS)
 
@@ -516,6 +527,9 @@ export const actions = actionTree(
       console.log('123getFarmingList###getEarningsObj###result####', result)
 
       commit('setEarningObj', result)
+      if (haveLoading) {
+        commit('setEarningLoading', false)
+      }
     }
     // async getRewardTokenDecimal
   }

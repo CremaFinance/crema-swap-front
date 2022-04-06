@@ -59,10 +59,12 @@
               </svg> -->
             </div>
             <!-- <div class="td-text">{{ item.miner ? item.miner.PendingRewardView : '--' }}</div> -->
-            <div v-if="wallet.connected" class="td-text">
+            <div v-if="farming.earningLoading" class="td-text"><Spin size="small" /></div>
+            <div v-if="wallet.connected && !farming.earningLoading" class="td-text">
               {{ (farming.earningObj && farming.earningObj[item.positionWrapper]) || '--' }}
             </div>
-            <div v-else class="td-text">--</div>
+
+            <div v-if="!wallet.connected" class="td-text">--</div>
           </div>
           <div class="symbol-stern">
             <!-- <Button v-if="!changeNFT" class="action-btn btn-wind">
@@ -432,9 +434,9 @@ export default Vue.extend({
               // }, 1500)
               _this.$emit('refreshData')
               _this.$accessor.farming.getPositionObj({
-                tvlData: this.tvlData,
+                tvlData: _this.tvlData,
                 farmingInfo: poolInfo,
-                rates: this.liquidity.rates
+                rates: _this.liquidity.rates
               })
             }
           })
@@ -502,9 +504,9 @@ export default Vue.extend({
               // }, 1500)
               _this.$emit('refreshData')
               _this.$accessor.farming.getPositionObj({
-                tvlData: this.tvlData,
+                tvlData: _this.tvlData,
                 farmingInfo: poolInfo,
-                rates: this.liquidity.rates
+                rates: _this.liquidity.rates
               })
             }
           })
@@ -555,9 +557,9 @@ export default Vue.extend({
               // _this.$accessor.farming.getEarningsObj()
               _this.$emit('refreshData')
               _this.$accessor.farming.getPositionObj({
-                tvlData: this.tvlData,
+                tvlData: _this.tvlData,
                 farmingInfo: poolInfo,
-                rates: this.liquidity.rates
+                rates: _this.liquidity.rates
               })
             }
           })
@@ -593,6 +595,11 @@ export default Vue.extend({
     &::before {
       background: rgba(#000, 0) !important;
     }
+  }
+}
+.td-text {
+  .ant-spin-dot-item {
+    background-color: rgba(255, 255, 255, 0.5);
   }
 }
 </style>
