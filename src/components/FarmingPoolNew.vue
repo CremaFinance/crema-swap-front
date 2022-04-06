@@ -458,6 +458,11 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isStaking = false
         this.isDisabled = false
+        this.$notify.error({
+          key: 'StakeErr',
+          message: 'Transaction failed',
+          description: ''
+        })
       }
     },
     async toUnStake(poolInfo: any, positionInfo: any) {
@@ -528,6 +533,11 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isUnStaking = false
         this.isDisabled = false
+        this.$notify.error({
+          key: 'UnStakeErr',
+          message: 'Transaction failed',
+          description: ''
+        })
       }
     },
     async minerWrapper(rewarderKey: PublicKey, mint: PublicKey): Promise<MinerWrapper> {
@@ -553,9 +563,13 @@ export default Vue.extend({
 
       try {
         const miner = await this.minerWrapper(rewarderKey, mint)
+        console.log('toClaim###miner###', miner)
         const tx = await miner.claim()
+        console.log('toClaim###tx###', tx)
         this.$accessor.transaction.setShowWaiting(false)
         const receipt = await tx.confirm()
+        console.log('toClaim###receipt###', receipt)
+
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Harvest all rewards`
@@ -581,6 +595,11 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isClaiming = false
         this.isDisabled = false
+        this.$notify.error({
+          key: 'HarvestErr',
+          message: 'Transaction failed',
+          description: ''
+        })
       }
     }
   }
