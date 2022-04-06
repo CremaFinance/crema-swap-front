@@ -271,8 +271,8 @@ export default Vue.extend({
         const account: any = this.wallet.tokenAccounts
         // console.log('account###', account)
         let caffeineAmount = new TokenAmount(0)
-        if (account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR']) {
-          caffeineAmount = account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'].balance
+        if (account['CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw']) {
+          caffeineAmount = account['CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw'].balance
           return caffeineAmount.fixed()
         }
       }
