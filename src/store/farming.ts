@@ -518,9 +518,15 @@ export const actions = actionTree(
           console.log('123getFarmingList###getEarningsObj####miner###', miner)
           const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
 
-          result[LPFARMS[key].positionWrapper] = addCommom(earning, 6)
+          result[LPFARMS[key].positionWrapper] = {
+            value: earning,
+            view: addCommom(earning, 6)
+          }
         } else {
-          result[LPFARMS[key].positionWrapper] = '0'
+          result[LPFARMS[key].positionWrapper] = {
+            value: '0',
+            view: '0'
+          }
         }
       }
 

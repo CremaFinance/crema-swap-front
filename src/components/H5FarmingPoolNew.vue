@@ -108,7 +108,12 @@
               </svg> -->
             </div>
             <div class="trade-info-text">
-              {{ (farming.earningObj && farming.earningObj[item.positionWrapper]) || '--' }}
+              {{
+                (farming.earningObj &&
+                  farming.earningObj[item.positionWrapper] &&
+                  farming.earningObj[item.positionWrapper].view) ||
+                '--'
+              }}
             </div>
           </div>
         </div>
@@ -118,7 +123,12 @@
             v-else
             class="action-btn"
             :loading="isClaiming"
-            :disabled="(!farming.earningObj && !Number(farming.earningObj[item.positionWrapper])) || isDisabled"
+            :disabled="
+              !farming.earningObj ||
+              !farming.earningObj[item.positionWrapper] ||
+              !Number(farming.earningObj[item.positionWrapper].value) ||
+              isDisabled
+            "
             @click="toClaim(item)"
           >
             <!-- <div>Harvest all</div> -->

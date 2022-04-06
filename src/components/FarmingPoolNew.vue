@@ -61,7 +61,12 @@
             <!-- <div class="td-text">{{ item.miner ? item.miner.PendingRewardView : '--' }}</div> -->
             <div v-if="farming.earningLoading" class="td-text"><Spin size="small" /></div>
             <div v-if="wallet.connected && !farming.earningLoading" class="td-text">
-              {{ (farming.earningObj && farming.earningObj[item.positionWrapper]) || '--' }}
+              {{
+                (farming.earningObj &&
+                  farming.earningObj[item.positionWrapper] &&
+                  farming.earningObj[item.positionWrapper].view) ||
+                '--'
+              }}
             </div>
 
             <div v-if="!wallet.connected" class="td-text">--</div>
@@ -89,10 +94,15 @@
               v-if="!changeNFT && wallet.connected"
               class="action-btn btn-wind"
               :loading="isClaiming && currentPool.positionWrapper === item.positionWrapper"
-              :disabled="!farming.earningObj || !Number(farming.earningObj[item.positionWrapper]) || isDisabled"
+              :disabled="
+                !farming.earningObj ||
+                !farming.earningObj[item.positionWrapper] ||
+                !Number(farming.earningObj[item.positionWrapper].value) ||
+                isDisabled
+              "
               @click="toClaim(item)"
-              >Harvest all</Button
-            >
+              >Harvest all
+            </Button>
             <Tooltip overlay-class-name="the-more-tooltip" placement="top">
               <div class="the-more-icon-box">
                 <svg class="stern-icon set-dot" aria-hidden="true">
@@ -307,6 +317,9 @@ export default Vue.extend({
     },
     'farming.positionsObj'(newVal) {
       console.log('positionsObj####newVal###', newVal)
+    },
+    'farming.earningObj'(newVal) {
+      console.log('farming.earningObj#####', newVal)
     }
   },
   methods: {
