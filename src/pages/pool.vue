@@ -460,10 +460,16 @@ export default Vue.extend({
 
           if (this.liquidity.poolsDefaultPriceRangeObj[value.coinPair]) {
             const priceInterval = this.liquidity.poolsDefaultPriceRangeObj[value.coinPair].price_interval
-            this.minPrice = priceInterval.lower_price
-            this.maxPrice = priceInterval.upper_price
-            this.defaultMinPrice = priceInterval.lower_price
-            this.defaultMaxPrice = priceInterval.upper_price
+            // const tick = getNearestTickByPrice(new Decimal(this.pValue), this.tickSpace)
+            // console.log('onBlur###tick####', tick)
+            // const price = tick2Price(tick)
+            const minTick = getNearestTickByPrice(new Decimal(priceInterval.lower_price), value.tick_space)
+            const maxTick = getNearestTickByPrice(new Decimal(priceInterval.upper_price), value.tick_space)
+
+            this.minPrice = tick2Price(minTick).toString()
+            this.maxPrice = tick2Price(maxTick).toString()
+            this.defaultMinPrice = tick2Price(minTick).toString()
+            this.defaultMaxPrice = tick2Price(maxTick).toString()
           } else {
             const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
             const minTick = tick - value.tick_space

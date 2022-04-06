@@ -1,6 +1,11 @@
 <template>
   <div>
-    <div v-if="isFarming == 'Farming'" class="farming-Banner"></div>
+    <a
+      v-if="isFarming == 'Farming'"
+      class="farming-Banner"
+      href="https://medium.com/@Crema.finance/caffeine-farming-event-your-prelaunch-opportunity-to-grab-cremas-token-incentives-706425032a88"
+      target="_blank"
+    ></a>
     <div v-if="isFarming == 'Farming'" class="My-Caffeine">
       <div class="farming-Banner-value">
         <p>My Caffeine</p>
@@ -111,6 +116,8 @@ export default Vue.extend({
 </script>
 <style lang="less" scoped>
 .farming-Banner {
+  display: block;
+  width: 100%;
   height: 110px;
   background: url('@/assets/images/farming-nav-h5.png');
   background-size: 100% 100%;

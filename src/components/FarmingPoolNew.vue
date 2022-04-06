@@ -182,7 +182,7 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
 import { Button } from 'ant-design-vue'
-import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
+import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import {
@@ -336,7 +336,16 @@ export default Vue.extend({
     // },
     gotoLp(item: any) {
       if (item) {
-        this.$router.push(`/pool?from=${item.tokenA.symbol}&to=${item.tokenB.symbol}`)
+        console.log('gotoLp###item####', item)
+        let tokenA = item.tokenA.symbol
+        if (item.tokenA.symbol === 'WSOL') {
+          tokenA = 'SOL'
+        }
+        let tokenB = item.tokenB.symbol
+        if (item.tokenB.symbol === 'WSOL') {
+          tokenB = 'SOL'
+        }
+        this.$router.push(`/pool?from=${tokenA}&to=${tokenB}`)
       }
     },
     processNftAddress(address: string) {

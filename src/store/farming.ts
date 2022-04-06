@@ -36,7 +36,8 @@ export const state = () => ({
   earnings: '',
   earningObj: {} as any,
   farmingConfigObj: null as any,
-  statisticsDataObj: null as any
+  statisticsDataObj: null as any,
+  positionsObj: null as any
 })
 
 export const getters = getterTree(state, {})
@@ -65,6 +66,19 @@ export const mutations = mutationTree(state, {
   },
   setStatisticsDataObj(state, value) {
     state.statisticsDataObj = value
+  },
+  setPositionsObj(state, value: any) {
+    if (state.positionsObj) {
+      state.positionsObj = {
+        ...state.positionsObj,
+        [value.farmingInfo.positionWrapper]: value.positions
+      }
+    } else {
+      state.positionsObj = {
+        [value.farmingInfo.positionWrapper]: value.positions
+      }
+    }
+    // state.positionsObj = value
   }
 })
 
@@ -74,7 +88,7 @@ export const actions = actionTree(
     async getStatisticsDataObj({ commit }) {
       const result: any = {}
       // const res: any = await this.$axios.get('https://dev-api-crema.bitank.com/farm/tvl')
-      const res: any = await this.$axios.get('https://dev-api-crema.bitank.com/farm/tvl')
+      const res: any = await this.$axios.get('https://pre-api-crema.bitank.com/farm/tvl')
       console.log('getStatisticsDataObj####res####', res)
       if (res && res.wrappers) {
         res.wrappers.forEach((item) => {
@@ -315,6 +329,139 @@ export const actions = actionTree(
       commit('setLoading', false)
       if (haveLoading) {
         commit('setFarmingListLoading', false)
+      }
+    },
+    async getPositionObj({ state, commit }, { rates, farmingInfo, tvlData }) {
+      const conn = this.$web3
+      const wallet = (this as any)._vm.$wallet
+      const RATES = { ...rates, CUSDC: 1 }
+      const { tokenA, tokenB } = farmingInfo
+      const swap = await new TokenSwap(
+        conn,
+        new PublicKey(SWAPV3_PROGRAMID),
+        new PublicKey(farmingInfo.swapKey),
+        null
+      ).load()
+
+      if (wallet) {
+        const payer = SWAP_PAYER
+        const tokenSwap = await CTokenSwap.getAllAccounts(
+          conn,
+          new PublicKey(farmingInfo.swapKey),
+          SWAPV3_PROGRAMID,
+          payer
+        )
+        const currentPrice = contractPrice2showPrice(
+          tokenSwap.current_price.toNumber(),
+          tokenA.decimals,
+          tokenB.decimals
+        )
+
+        const canStatePositions: any = await fetchSwapPositionsByOwner(
+          new PublicKey(farmingInfo.swapKey),
+          wallet.publicKey,
+          conn,
+          wallet
+        )
+
+        console.log('farming#####canStatePositions####', canStatePositions)
+
+        const cpresult: any = []
+        for (let j = 0; j < canStatePositions.length; j++) {
+          const amount = await calculateTokenAmount(
+            canStatePositions[j].lowerTick,
+            canStatePositions[j].upperTick,
+            new Decimal(canStatePositions[j].liquity),
+            swap.tokenSwapInfo.currentSqrtPrice
+          )
+
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
+          const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
+
+          let liquityUSD = amountA.plus(amountB)
+          liquityUSD = liquityUSD.mul(RATES[tokenB.symbol])
+
+          let withinRange = true
+
+          // 判断是否在有效tick范围内
+          const etrMax =
+            (tvlData && tvlData[farmingInfo.positionWrapper] && tvlData[farmingInfo.positionWrapper].etrMax) || 0
+          const etrMin =
+            (tvlData && tvlData[farmingInfo.positionWrapper] && tvlData[farmingInfo.positionWrapper].etrMin) || 0
+          if (canStatePositions[j].lowerTick >= etrMax || canStatePositions[j].upperTick <= etrMin) {
+            withinRange = false
+          }
+
+          console.log('canStatePositions[j].lowerTick###', canStatePositions[j].lowerTick)
+          console.log('canStatePositions[j].upperTick###', canStatePositions[j].upperTick)
+
+          cpresult.push({
+            ...canStatePositions[j],
+            nftMintAddress: canStatePositions[j].nftTokenId.toString(),
+            nftAccountAddress: canStatePositions[j].nftAccount.toString(),
+            liquityToString: canStatePositions[j].liquity.toString(),
+            liquityUSD: addCommom(liquityUSD.toString(), 4),
+            lowerPrice:
+              canStatePositions[j].lowerTick !== -443632
+                ? decimalFormat(tick2Price(canStatePositions[j].lowerTick).toString(), 6)
+                : '0',
+            upperPrice:
+              canStatePositions[j].upperTick !== 443632
+                ? decimalFormat(tick2Price(canStatePositions[j].upperTick).toString(), 6)
+                : '∞',
+            isStaked: false,
+            withinRange
+          })
+        }
+
+        const stakedPositons = await fetchStakedPositions(
+          conn,
+          wallet,
+          new PublicKey(farmingInfo.positionWrapper),
+          wallet.publicKey
+        )
+
+        console.log('farming#####stakedPositons####', stakedPositons)
+
+        const sdresult: any = []
+        for (let k = 0; k < stakedPositons.length; k++) {
+          const item: any = stakedPositons[k]
+          const amount = await calculateTokenAmount(
+            stakedPositons[k].lowerTick,
+            stakedPositons[k].upperTick,
+            new Decimal(stakedPositons[k].liquity.toString()),
+            swap.tokenSwapInfo.currentSqrtPrice
+          )
+
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
+          const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
+
+          // const liquityUSD = amountA.mul(RATES[tokenA.symbol]).plus(amountB.mul(RATES[tokenB.symbol]))
+          let liquityUSD = amountA.plus(amountB)
+          liquityUSD = liquityUSD.mul(RATES[tokenB.symbol])
+          sdresult.push({
+            ...stakedPositons[k],
+            nftMintAddress: stakedPositons[k].nftMint.toString(),
+            nftAccountAddress: item.nftVault.toString(),
+            liquityToString: stakedPositons[k].liquity.toString(),
+            liquityUSD: addCommom(liquityUSD.toString(), 4),
+            lowerPrice:
+              stakedPositons[k].lowerTick !== -443632
+                ? decimalFormat(tick2Price(stakedPositons[k].lowerTick).toString(), 6)
+                : '0',
+            upperPrice:
+              stakedPositons[k].upperTick !== 443632
+                ? decimalFormat(tick2Price(stakedPositons[k].upperTick).toString(), 6)
+                : '∞',
+            isStaked: true
+          })
+        }
+
+        cpresult.sort(function (a, b) {
+          return b.withinRange - a.withinRange
+        })
+
+        commit('setPositionsObj', { positions: [...sdresult, ...cpresult], farmingInfo })
       }
     },
     async getEarnings({ commit }) {

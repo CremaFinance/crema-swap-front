@@ -212,7 +212,7 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { Button } from 'ant-design-vue'
 import { mapState } from 'vuex'
-import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
+import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import {

@@ -52,7 +52,8 @@ export default Vue.extend({
       justify-content: center;
       cursor: pointer;
       &:hover {
-        background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);
+        // background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);
+        background: #464953;
       }
       .icon {
         width: 16px;

@@ -3,7 +3,11 @@
     <div v-if="isFarming == 'Farming'" class="farming-Banner">
       <div class="farming-Banner-title">
         <!-- <span>Ends on May 30th, 2022 (UTC)</span> -->
-        <a>Learn more ></a>
+        <a
+          href="https://medium.com/@Crema.finance/caffeine-farming-event-your-prelaunch-opportunity-to-grab-cremas-token-incentives-706425032a88"
+          target="_blank"
+          >Learn more ></a
+        >
       </div>
       <div class="farming-Banner-Btn">
         <div style="height: 14px; text-align: center; line-height: 14px">My Caffeine</div>

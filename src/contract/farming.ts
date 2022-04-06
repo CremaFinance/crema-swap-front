@@ -7,7 +7,7 @@ import {
   Signer,
   TokenAccountsFilter
 } from '@solana/web3.js'
-import { QuarrySDK, PositionWrapper, findActivityMasterAddress } from 'test-quarry-sdk'
+import { QuarrySDK, PositionWrapper, findActivityMasterAddress } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import type { AccountInfo } from '@solana/spl-token'

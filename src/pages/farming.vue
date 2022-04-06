@@ -4,12 +4,12 @@
       <!-- title开始 -->
       <div class="farming-title">
         <h3 class="title">Farming</h3>
-        <div class="refresh-icon-box">
-          <!-- <svg class="icon" aria-hidden="true" @click="toRefresh">
+        <!-- <div class="refresh-icon-box"> -->
+        <!-- <svg class="icon" aria-hidden="true" @click="toRefresh">
             <use xlink:href="#icon-icon-refresh"></use>
           </svg> -->
-          <RefreshIcon @refresh="toRefresh" :loading="farming.loading"></RefreshIcon>
-        </div>
+        <RefreshIcon @refresh="toRefresh" :loading="farming.loading"></RefreshIcon>
+        <!-- </div> -->
       </div>
       <!-- banner -->
       <div class="farming-banner">
@@ -116,7 +116,7 @@ export default Vue.extend({
   },
   methods: {
     getFarmTvl() {
-      this.$axios.get(`https://dev-api-crema.bitank.com/farm/tvl`).then((res) => {
+      this.$axios.get(`https://pre-api-crema.bitank.com/farm/tvl`).then((res) => {
         // this.$axios.get(`/farm/tvl`).then((res) => {
         console.log('farmingTest####getFarmTvl###res#####', res)
         const result: any = {}
@@ -194,23 +194,23 @@ export default Vue.extend({
         margin-bottom: 0px;
         font-weight: 700;
       }
-      .refresh-icon-box {
-        width: 30px;
-        height: 30px;
-        background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
-        box-shadow: 2px 4px 12px 0px #23262b, -3px -2px 10px 0px rgba(138, 147, 160, 0.16);
-        border-radius: 15px;
-        // border-image: linear-gradient(137deg, rgba(35, 38, 43, 1), rgba(62, 67, 78, 1)) 1 1;
-        padding: 6px;
+      // .refresh-icon-box {
+      //   width: 30px;
+      //   height: 30px;
+      //   background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
+      //   box-shadow: 2px 4px 12px 0px #23262b, -3px -2px 10px 0px rgba(138, 147, 160, 0.16);
+      //   border-radius: 15px;
+      //   // border-image: linear-gradient(137deg, rgba(35, 38, 43, 1), rgba(62, 67, 78, 1)) 1 1;
+      //   padding: 6px;
 
-        & + .icon-box {
-          margin-left: 20px;
-        }
+      //   & + .icon-box {
+      //     margin-left: 20px;
+      //   }
 
-        &:hover {
-          background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);
-        }
-      }
+      //   &:hover {
+      //     background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);
+      //   }
+      // }
       .icon {
         width: 18px;
         height: 18px;

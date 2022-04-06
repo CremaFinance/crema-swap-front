@@ -128,7 +128,7 @@
 import Vue from 'vue'
 import { mapState } from 'vuex'
 import importIcon from '@/utils/import-icon'
-import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
+import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import invariant from 'tiny-invariant'
 import { makeSDK, fetchCremakeys, getMasterPda, fetchActivitymaster, quarryInfo } from '@/contract/farming'
 import {

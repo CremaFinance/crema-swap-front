@@ -110,7 +110,7 @@ export const TOKENS: Tokens = {
   },
   EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
     symbol: 'USDC',
-    name: 'USDC',
+    name: 'USD Coin',
     mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     decimals: 6,
     referrer: '',
@@ -119,7 +119,7 @@ export const TOKENS: Tokens = {
   },
   '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i': {
     symbol: 'UST',
-    name: 'UST',
+    name: 'UST (Wormhole)',
     mintAddress: '9vMJfxuKxXBoEa7rM12mYLMwTacLMLDJqHozw96WQL8i',
     decimals: 6,
     referrer: '',
@@ -128,7 +128,7 @@ export const TOKENS: Tokens = {
   },
   Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS: {
     symbol: 'PAI',
-    name: 'PAI',
+    name: 'Parrot USD',
     mintAddress: 'Ea5SjE2Y6yvCeW5dYTn7PYMuW5ikXkvbGdcmSnXeaLjS',
     decimals: 6,
     referrer: '',
@@ -137,7 +137,7 @@ export const TOKENS: Tokens = {
   },
   USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX: {
     symbol: 'USDH',
-    name: 'USDH',
+    name: 'USDH Hubble Stablecoin',
     mintAddress: 'USDH1SM1ojwWUga67PGrgFWUHibbjqMvuMaDkRJTgkX',
     decimals: 6,
     referrer: '',
@@ -146,7 +146,7 @@ export const TOKENS: Tokens = {
   },
   '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ': {
     symbol: 'pUSDT',
-    name: 'pUSDT test',
+    name: 'Port Finance USDT',
     mintAddress: '3RudPTAkfcq9Q9Jk8SVeCoecCBmdKMj6q5smsWzxqtqZ',
     decimals: 6,
     referrer: '',
@@ -155,7 +155,7 @@ export const TOKENS: Tokens = {
   },
   FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58: {
     symbol: 'pUSDC',
-    name: 'pUSDC test',
+    name: 'Port Finance USDC',
     mintAddress: 'FgSsGV8GByPaMERxeQJPvZRZHf7zCBhrdYtztKorJS58',
     decimals: 6,
     referrer: '',
@@ -164,7 +164,7 @@ export const TOKENS: Tokens = {
   },
   '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm': {
     symbol: 'scnSOL',
-    name: 'scnSOL',
+    name: 'Socean staked SOL',
     mintAddress: '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm',
     decimals: 9,
     referrer: '',
@@ -173,7 +173,7 @@ export const TOKENS: Tokens = {
   },
   mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So: {
     symbol: 'mSOL',
-    name: 'mSOL',
+    name: 'Marinade staked SOL(mSOL)',
     mintAddress: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
     decimals: 9,
     referrer: '',
@@ -182,7 +182,7 @@ export const TOKENS: Tokens = {
   },
   BdZPG9xWrG3uFrx2KrUW1jT4tZ9VKPDWknYihzoPRJS3: {
     symbol: 'prtSOL',
-    name: 'prtSOL',
+    name: 'prtSOL(Parrot Staked SOL)',
     mintAddress: 'BdZPG9xWrG3uFrx2KrUW1jT4tZ9VKPDWknYihzoPRJS3',
     decimals: 9,
     referrer: '',
@@ -191,7 +191,7 @@ export const TOKENS: Tokens = {
   },
   So11111111111111111111111111111111111111112: {
     symbol: 'WSOL',
-    name: 'WSOL',
+    name: 'Wrapped SOL',
     mintAddress: 'So11111111111111111111111111111111111111112',
     decimals: 9,
     referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',

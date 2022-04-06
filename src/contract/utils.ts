@@ -9,7 +9,7 @@ import BN from 'bn.js'
 import * as fs from 'fs'
 import invariant from 'tiny-invariant'
 import * as toml from 'toml'
-import { QuarrySDK } from 'test-quarry-sdk'
+import { QuarrySDK } from '@cremafinance/crema-farming'
 
 export async function currentTs(connection: Connection): Promise<BN> {
   const solt = await connection.getSlot()

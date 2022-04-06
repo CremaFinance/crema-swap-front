@@ -382,8 +382,10 @@ export default Vue.extend({
           if (poolInfo.coin && poolInfo.pc) {
             this.coinTabList = [poolInfo.coin.symbol, poolInfo.pc.symbol]
             this.currentCoin = poolInfo.coin.symbol
+
             this.fromCoin = poolInfo.coin
             this.toCoin = poolInfo.pc
+
             this.updateCoinInfo(this.wallet.tokenAccounts)
             if (Number(currentPositon.fromCoinAmount)) {
               this.showFromCoinLock = false
