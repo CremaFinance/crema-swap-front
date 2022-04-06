@@ -117,7 +117,7 @@
               </template>
             </Tooltip>
             <div class="the-more-icon-box" v-if="!changeNFT && wallet && wallet.connected">
-              <svg class="stern-icon" aria-hidden="true" @click="toogleData(index)">
+              <svg class="stern-icon" aria-hidden="true" @click="toogleData(index, item)">
                 <use :xlink:href="isOpenArr[index] ? '#icon-icon-Pack-up' : '#icon-icon-Pack-on'"></use>
               </svg>
             </div>
@@ -130,7 +130,19 @@
           </div>
         </div>
         <div v-if="!changeNFT" class="farming-pool-content-Bot" :class="isOpenArr[index] ? '' : 'is-close'">
-          <div class="content-Bot-All" v-for="(pitem, pindex) in item.positions" :key="pindex">
+          <div
+            v-if="!farming.positionsObj[item.positionWrapper] || farming.positionsObj[item.positionWrapper].length < 1"
+            class="no-positions"
+          >
+            <p>No positions</p>
+            <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
+          </div>
+          <div
+            v-else
+            class="content-Bot-All"
+            v-for="(pitem, pindex) in farming.positionsObj[item.positionWrapper]"
+            :key="pindex"
+          >
             <div>
               <div class="td-title">NFT</div>
               <a
@@ -172,10 +184,7 @@
               </Button>
             </div>
           </div>
-          <div v-if="!item.positions || item.positions.length < 1" class="no-positions">
-            <p>No positions</p>
-            <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
-          </div>
+          <div v-if="farming.positionsLoadingObj[item.positionWrapper]" class="position-loading"><Spin /></div>
         </div>
       </div>
     </div>
@@ -205,14 +214,15 @@ import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
 import invariant from 'tiny-invariant'
 import { makeSDK, getTokenAccountsByOwnerAndMint, calculateWrapAmount } from '@/contract/farming'
 import { Token, TokenAmount } from '@saberhq/token-utils'
-import { Tooltip } from 'ant-design-vue'
+import { Tooltip, Spin } from 'ant-design-vue'
 import { fixD, addCommom } from '@/utils'
 
 Vue.use(Button)
 export default Vue.extend({
   components: {
     Button,
-    Tooltip
+    Tooltip,
+    Spin
   },
   props: {
     isStaked: {
@@ -272,7 +282,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['wallet', 'transaction', 'url', 'farming'])
+    ...mapState(['wallet', 'transaction', 'url', 'farming', 'liquidity'])
   },
   watch: {
     'farming.farmingList': {
@@ -292,6 +302,9 @@ export default Vue.extend({
     tvlData: {
       handler: 'tvlDataWatch',
       immediate: true
+    },
+    'farming.positionsObj'(newVal) {
+      console.log('positionsObj####newVal###', newVal)
     }
   },
   methods: {
@@ -362,11 +375,15 @@ export default Vue.extend({
     watchFarmingList(list: any) {
       this.dataList = list
     },
-    toogleData(index: number) {
+    toogleData(index: number, item: any) {
       const obj = JSON.parse(JSON.stringify(this.isOpenArr))
       this.isOpenArr = {
         ...obj,
         [index]: !obj[index]
+      }
+      if (!obj[index]) {
+        console.log('positionsObj####setPositionsObj######obj[index]', obj[index])
+        this.$accessor.farming.getPositionObj({ tvlData: this.tvlData, farmingInfo: item, rates: this.liquidity.rates })
       }
     },
     async toStake(poolInfo: any, positionInfo: any) {
@@ -414,6 +431,11 @@ export default Vue.extend({
 
               // }, 1500)
               _this.$emit('refreshData')
+              this.$accessor.farming.getPositionObj({
+                tvlData: this.tvlData,
+                farmingInfo: poolInfo,
+                rates: this.liquidity.rates
+              })
             }
           })
         }
@@ -479,6 +501,11 @@ export default Vue.extend({
               // _this.$accessor.farming.getEarningsObj()
               // }, 1500)
               _this.$emit('refreshData')
+              this.$accessor.farming.getPositionObj({
+                tvlData: this.tvlData,
+                farmingInfo: poolInfo,
+                rates: this.liquidity.rates
+              })
             }
           })
         }
@@ -527,6 +554,11 @@ export default Vue.extend({
               // _this.$accessor.farming.getFarmingList()
               // _this.$accessor.farming.getEarningsObj()
               _this.$emit('refreshData')
+              this.$accessor.farming.getPositionObj({
+                tvlData: this.tvlData,
+                farmingInfo: poolInfo,
+                rates: this.liquidity.rates
+              })
             }
           })
         }
@@ -785,6 +817,7 @@ export default Vue.extend({
   }
 }
 .farming-pool-content-Bot {
+  position: relative;
   // height: 200px;
   width: 100%;
   background: #282c33;
@@ -814,6 +847,20 @@ export default Vue.extend({
   }
   .content-Bot-All > div:nth-child(1) {
     width: 190px;
+  }
+  .position-loading {
+    height: auto !important;
+    min-height: 100px;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
   }
 }
 .is-close {
