@@ -164,7 +164,7 @@ export default Vue.extend({
         tvlData: this.tvlData
       })
       this.getFarmTvl()
-      if (this.wallet.connected) this.$accessor.farming.getEarningsObj()
+      if (this.wallet.connected) this.$accessor.farming.getEarningsObj(!unLoaidng)
     }
   }
 })
