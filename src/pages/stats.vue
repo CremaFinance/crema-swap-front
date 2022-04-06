@@ -106,8 +106,8 @@
                   </li>
                   <li>
                     <h3>Farm</h3>
-                    <p v-if="farming.setStatisticsDataObj && farming.setStatisticsDataObj[item.swap_account]">
-                      {{ fixD(Number(farming.setStatisticsDataObj[item.swap_account].apr) * 100, 2) }}
+                    <p v-if="farming.statisticsDataObj && farming.statisticsDataObj[item.swap_account]">
+                      {{ fixD(Number(farming.statisticsDataObj[item.swap_account].apr) * 100, 2) }}%
                     </p>
                     <p v-else>N/A</p>
                   </li>
@@ -186,8 +186,8 @@
                   </li>
                   <li>
                     <h3>Farm</h3>
-                    <p v-if="farming.setStatisticsDataObj && farming.setStatisticsDataObj[item.swap_account]">
-                      {{ fixD(Number(farming.setStatisticsDataObj[item.swap_account].apr) * 100, 2) }}
+                    <p v-if="farming.statisticsDataObj && farming.statisticsDataObj[item.swap_account]">
+                      {{ fixD(Number(farming.statisticsDataObj[item.swap_account].apr) * 100, 2) }}%
                     </p>
                     <p v-else>N/A</p>
                   </li>
@@ -361,8 +361,8 @@ export default Vue.extend({
     decimalFormat,
     addCommom,
     getTotalApr(item: any) {
-      if (this.farming.setStatisticsDataObj && this.farming.setStatisticsDataObj[item.swap_account]) {
-        const farmApr = Number(this.farming.setStatisticsDataObj[item.swap_account].apr) * 100
+      if (this.farming.statisticsDataObj && this.farming.statisticsDataObj[item.swap_account]) {
+        const farmApr = Number(this.farming.statisticsDataObj[item.swap_account].apr) * 100
         const currentApr = Number(item.apr.split('%')[0])
         return `${fixD(String(farmApr + currentApr), 2)}%`
       } else {
