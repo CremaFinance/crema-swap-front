@@ -566,8 +566,9 @@ export default Vue.extend({
         console.log('toClaim###miner###', miner)
         const tx = await miner.claim()
         console.log('toClaim###tx###', tx)
+
+        const receipt = await tx.confirm({ maxRetries: 10 })
         this.$accessor.transaction.setShowWaiting(false)
-        const receipt = await tx.confirm()
         console.log('toClaim###receipt###', receipt)
 
         if (receipt && receipt.signature) {

@@ -105,7 +105,7 @@ export default Vue.extend({
     this.timer = setInterval(function () {
       console.log('123getFarmingList###进到轮循了')
       _this.toRefresh(true)
-    }, 20000)
+    }, 60000)
   },
   destroyed() {
     clearInterval(this.timer)
