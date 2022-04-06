@@ -24,6 +24,25 @@ PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 
 
+/*!
+  * vue-router v3.5.3
+  * (c) 2021 Evan You
+  * @license MIT
+  */
+
+/*!
+ * Vue.js v2.6.14
+ * (c) 2014-2021 Evan You
+ * Released under the MIT License.
+ */
+
+/*!
+ * vuex v3.6.2
+ * (c) 2021 Evan You
+ * @license MIT
+ */
+
+
 /*
 object-assign
 (c) Sindre Sorhus
@@ -403,23 +422,4 @@ THE SOFTWARE.
  * vue-virtual-scroll-list v2.3.3
  * open source under the MIT license
  * https://github.com/tangbc/vue-virtual-scroll-list#readme
- */
-
-
-/*!
-  * vue-router v3.5.3
-  * (c) 2021 Evan You
-  * @license MIT
-  */
-
-/*!
- * Vue.js v2.6.14
- * (c) 2014-2021 Evan You
- * Released under the MIT License.
- */
-
-/*!
- * vuex v3.6.2
- * (c) 2021 Evan You
- * @license MIT
  */
