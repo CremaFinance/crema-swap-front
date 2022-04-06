@@ -4,7 +4,7 @@
       <div
         v-if="isStaked === 'All' || isStaked === item.isStaked"
         class="farming-pool-card"
-        :class="isShowTableTr == index && index == 0 ? 'is-open' : ''"
+        :class="isOpenArr[index] ? 'is-open' : ''"
       >
         <div class="symbol-info">
           <div class="symbol-left">
@@ -55,9 +55,9 @@
                 </template>
               </Tooltip>
 
-              <div class="toggle-icon-box" @click="updateIsShowTableTr(index)">
+              <div class="toggle-icon-box" @click="toogleData(index)">
                 <svg class="icon" aria-hidden="true">
-                  <use :xlink:href="isShowTableTr ? '#icon-icon-Pack-on' : '#icon-icon-Pack-up'"></use>
+                  <use :xlink:href="isOpenArr[index] ? '#icon-icon-Pack-up' : '#icon-icon-Pack-on'"></use>
                 </svg>
               </div>
 
@@ -95,8 +95,8 @@
           <div class="trade-info-item">
             <div class="trade-info-title">Reward Range</div>
             <div class="trade-info-text">
-              {{ tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].etrMinPrice }} -
-              {{ tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].etrMaxPrice }}
+              {{ item.minPrice }} -
+              {{ item.maxPrice }}
             </div>
           </div>
           <div class="trade-info-item">
@@ -165,6 +165,10 @@
               Unstake
             </Button>
           </div>
+          <!-- <div v-if="!item.positions || item.positions.length < 1" class="no-positions">
+            <p>No positions</p>
+            <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
+          </div> -->
           <!-- <div class="stake-box trade-info unstake-box">
             <div class="trade-info-item">
               <div class="trade-info-title">NFT ID</div>
@@ -282,7 +286,15 @@ export default Vue.extend({
       isClaiming: false,
       isDisabled: false,
       currentPosition: null as any,
-      tvlDataObjNew: {} as any
+      tvlDataObjNew: {} as any,
+      isOpenArr: {
+        // 0: false,
+        // 1: false,
+        // 2: false,
+        // 3: false,
+        // 4: false,
+        // 5: false
+      } as any
     }
   },
   computed: {
@@ -318,6 +330,13 @@ export default Vue.extend({
   },
   methods: {
     importIcon,
+    toogleData(index: number) {
+      const obj = JSON.parse(JSON.stringify(this.isOpenArr))
+      this.isOpenArr = {
+        ...obj,
+        [index]: !obj[index]
+      }
+    },
     tvlDataWatch(newVal) {
       if (newVal) {
         const result: any = {}
@@ -371,28 +390,28 @@ export default Vue.extend({
         description: (h: any) => h('div', [`${title} Success`])
       })
     },
-    updateIsShowTableTr(index: any) {
-      if (index == 0 && this.isShowTableTr != 0) {
-        this.isShowTableTr = 0
-      } else if (index == 0 && this.isShowTableTr == 0) {
-        this.isShowTableTr = -1
-      }
-    },
-    toogleData(index: number) {
-      const info = this.tableDataArr[index]
-      const tempcoinA = info.coinB
-      const tempcoinB = info.coinA
-      const rewardRange = info.rewardRange
-      const temprewardRange = info.rewardRange.split('').reverse().join('')
-      const data = {
-        ...info,
-        coinA: tempcoinA,
-        coinB: tempcoinB,
-        rewardRange: temprewardRange
-      }
-      this.tableDataArr[index] = data
-      this.$forceUpdate()
-    },
+    // updateIsShowTableTr(index: any) {
+    //   if (index == 0 && this.isShowTableTr != 0) {
+    //     this.isShowTableTr = 0
+    //   } else if (index == 0 && this.isShowTableTr == 0) {
+    //     this.isShowTableTr = -1
+    //   }
+    // },
+    // toogleData(index: number) {
+    //   const info = this.tableDataArr[index]
+    //   const tempcoinA = info.coinB
+    //   const tempcoinB = info.coinA
+    //   const rewardRange = info.rewardRange
+    //   const temprewardRange = info.rewardRange.split('').reverse().join('')
+    //   const data = {
+    //     ...info,
+    //     coinA: tempcoinA,
+    //     coinB: tempcoinB,
+    //     rewardRange: temprewardRange
+    //   }
+    //   this.tableDataArr[index] = data
+    //   this.$forceUpdate()
+    // },
     gotoLp(item: any) {
       if (item) {
         this.$router.push(`/pool?from=${item.tokenA.symbol}&to=${item.tokenB.symbol}`)
@@ -871,6 +890,19 @@ export default Vue.extend({
     -webkit-background-clip: text;
     color: transparent;
     font-family: 'Arial-BoldMT', Arial;
+  }
+
+  .no-positions {
+    height: 150px !important;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    button {
+      height: 40px;
+      width: 150px;
+    }
   }
 }
 </style>

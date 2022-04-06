@@ -299,6 +299,10 @@ export const actions = actionTree(
           result.push({
             ...farmingConfig[key],
             positions: [...sdresult, ...cpresult],
+            minPrice:
+              (farmingConfig[key] && farmingConfig[key].effectivePrice && farmingConfig[key].effectivePrice[0]) || 0,
+            maxPrice:
+              (farmingConfig[key] && farmingConfig[key].effectivePrice && farmingConfig[key].effectivePrice[1]) || 0,
             // miner: miner
             //   ? {
             //       ...miner,

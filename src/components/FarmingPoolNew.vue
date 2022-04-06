@@ -47,8 +47,8 @@
           <div style="width: 180px">
             <div class="td-title">Reward Range</div>
             <div class="td-text">
-              {{ tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].etrMinPrice }} -
-              {{ tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].etrMaxPrice }}
+              {{ item.minPrice }} -
+              {{ item.maxPrice }}
             </div>
           </div>
           <div style="width: 130px">
@@ -171,6 +171,10 @@
                 Unstake
               </Button>
             </div>
+          </div>
+          <div v-if="!item.positions || item.positions.length < 1" class="no-positions">
+            <p>No positions</p>
+            <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
           </div>
         </div>
       </div>
@@ -817,5 +821,18 @@ export default Vue.extend({
 }
 .farming-pool-content-Bot div:last-child {
   border: none;
+}
+
+.no-positions {
+  height: 150px !important;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  button {
+    height: 40px;
+    width: 150px;
+  }
 }
 </style>

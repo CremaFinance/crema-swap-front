@@ -215,7 +215,7 @@
           </div>
         </div>
         <div v-if="item.isShowPop" class="top-title">
-          Estimated by the pool’s current total data. Actual performance depends on each user’s own liquidity settings.
+          Estimated based on trading activity in the past 7D plus farming rewards.
         </div>
         <Button class="deposit-btn-h5" @click="gotoLp(item)">Deposit</Button>
       </li>
