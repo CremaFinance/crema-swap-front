@@ -431,7 +431,7 @@ export default Vue.extend({
 
               // }, 1500)
               _this.$emit('refreshData')
-              this.$accessor.farming.getPositionObj({
+              _this.$accessor.farming.getPositionObj({
                 tvlData: this.tvlData,
                 farmingInfo: poolInfo,
                 rates: this.liquidity.rates
@@ -501,7 +501,7 @@ export default Vue.extend({
               // _this.$accessor.farming.getEarningsObj()
               // }, 1500)
               _this.$emit('refreshData')
-              this.$accessor.farming.getPositionObj({
+              _this.$accessor.farming.getPositionObj({
                 tvlData: this.tvlData,
                 farmingInfo: poolInfo,
                 rates: this.liquidity.rates
@@ -554,7 +554,7 @@ export default Vue.extend({
               // _this.$accessor.farming.getFarmingList()
               // _this.$accessor.farming.getEarningsObj()
               _this.$emit('refreshData')
-              this.$accessor.farming.getPositionObj({
+              _this.$accessor.farming.getPositionObj({
                 tvlData: this.tvlData,
                 farmingInfo: poolInfo,
                 rates: this.liquidity.rates
