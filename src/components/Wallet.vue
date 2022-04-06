@@ -357,7 +357,7 @@ export default class Wallet extends Vue {
 
     this.setWalletTimer()
     // this.setPriceTimer()
-    this.setLiquidityTimer()
+    // this.setLiquidityTimer()
     // this.setFarmTimer()
     // this.setIdoTimer()
   }
@@ -677,18 +677,18 @@ export default class Wallet extends Vue {
   //   }, 1000)
   // }
 
-  setLiquidityTimer() {
-    this.liquidityTimer = window.setInterval(async () => {
-      if (!this.liquidity.loading) {
-        if (this.liquidity.countdown < this.liquidity.autoRefreshTime) {
-          this.$accessor.liquidity.setCountdown(this.$accessor.liquidity.countdown + 1)
-          if (this.liquidity.countdown === this.liquidity.autoRefreshTime) {
-            await this.$accessor.liquidity.requestInfos()
-          }
-        }
-      }
-    }, 1000)
-  }
+  // setLiquidityTimer() {
+  //   this.liquidityTimer = window.setInterval(async () => {
+  //     if (!this.liquidity.loading) {
+  //       if (this.liquidity.countdown < this.liquidity.autoRefreshTime) {
+  //         this.$accessor.liquidity.setCountdown(this.$accessor.liquidity.countdown + 1)
+  //         if (this.liquidity.countdown === this.liquidity.autoRefreshTime) {
+  //           await this.$accessor.liquidity.requestInfos()
+  //         }
+  //       }
+  //     }
+  //   }, 1000)
+  // }
 
   // setFarmTimer() {
   //   this.farmTimer = window.setInterval(async () => {
