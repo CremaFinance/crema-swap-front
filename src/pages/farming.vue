@@ -116,7 +116,7 @@ export default Vue.extend({
   },
   methods: {
     getFarmTvl() {
-      this.$axios.get(`https://pre-api-crema.bitank.com/farm/tvl`).then((res) => {
+      this.$axios.get(`https://api.crema.finance/farm/tvl`).then((res) => {
         // this.$axios.get(`/farm/tvl`).then((res) => {
         console.log('farmingTest####getFarmTvl###res#####', res)
         const result: any = {}

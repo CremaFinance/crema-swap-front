@@ -107,7 +107,7 @@ export const actions = actionTree(
     async getStatisticsDataObj({ commit }) {
       const result: any = {}
       // const res: any = await this.$axios.get('https://dev-api-crema.bitank.com/farm/tvl')
-      const res: any = await this.$axios.get('https://pre-api-crema.bitank.com/farm/tvl')
+      const res: any = await this.$axios.get('https://api.crema.finance/farm/tvl')
       console.log('getStatisticsDataObj####res####', res)
       if (res && res.wrappers) {
         res.wrappers.forEach((item) => {

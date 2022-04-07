@@ -384,6 +384,8 @@ export default Vue.extend({
       this.$accessor.transaction.setTransactionDesc(`Stake ${poolInfo.name} NFT`)
       this.$accessor.transaction.setShowWaiting(true)
 
+      let txid = ''
+
       try {
         const res = await sdk.positionWrapper.mintAndStake({
           wrapper: wrapperInfo,
@@ -414,7 +416,7 @@ export default Vue.extend({
         // })
 
         if (receipt && receipt.signature) {
-          const txid = receipt.signature
+          txid = receipt.signature
           const description = `Stake ${poolInfo.name} NFT`
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
@@ -449,6 +451,7 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isStaking = false
         this.isDisabled = false
+        this.notify.close(txid + 'loading')
         this.$notify.error({
           key: 'StakeErr',
           message: 'Transaction failed',
@@ -487,6 +490,8 @@ export default Vue.extend({
       const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
       invariant(wrapperInfo !== null, 'wrapper not found')
 
+      let txid = ''
+
       try {
         const tx = await sdk.positionWrapper.unstakeAndBurn({
           wrapper: wrapperInfo,
@@ -509,7 +514,7 @@ export default Vue.extend({
 
         this.$accessor.transaction.setShowWaiting(false)
         if (receipt && receipt.signature) {
-          const txid = receipt.signature
+          txid = receipt.signature
           const description = `Unstake ${poolInfo.name} NFT`
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
@@ -545,6 +550,7 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isUnStaking = false
         this.isDisabled = false
+        this.notify.close(txid + 'loading')
         this.$notify.error({
           key: 'UnStakeErr',
           message: 'Transaction failed',
@@ -573,6 +579,7 @@ export default Vue.extend({
       this.$accessor.transaction.setTransactionDesc('Harvest all rewards')
       this.$accessor.transaction.setShowWaiting(true)
 
+      let txid = ''
       try {
         const miner = await this.minerWrapper(rewarderKey, mint)
         console.log('toClaim###miner###', miner)
@@ -592,7 +599,7 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
 
         if (receipt && receipt.signature) {
-          const txid = receipt.signature
+          txid = receipt.signature
           const description = `Harvest all rewards`
           const _this = this
           this.$accessor.transaction.setShowSubmitted(true)
@@ -644,6 +651,7 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isClaiming = false
         this.isDisabled = false
+        this.notify.close(txid + 'loading')
         this.$notify.error({
           key: 'HarvestErr',
           message: 'Transaction failed',
