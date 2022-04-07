@@ -100,8 +100,10 @@ export default Vue.extend({
     liquidityInfosAndWalletTokenAccount: {
       handler(_newObj: any, _oldObj: any) {
         const { infos, tokenAccounts } = _newObj
+
+        console.log('liquidityInfosAndWalletTokenAccount###this.$route####', this.$route)
         if (!checkNullObj(infos) && !checkNullObj(tokenAccounts)) {
-          this.$accessor.liquidity.getMyPositions(tokenAccounts)
+          if (this.$route.name !== 'farming') this.$accessor.liquidity.getMyPositions(tokenAccounts)
         }
       },
       deep: true
