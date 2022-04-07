@@ -7,12 +7,11 @@
         <img v-if="showUnset" src="../assets/images/img-Treasure-case-closed.png" />
       </div>
       <div v-if="showOpen" class="mint-NFT-num">
-        <img src="../assets/images/CRM.png" alt="">
-        <span>x 1,000</span>
+        <img src="../assets/images/CRM.png" alt="" />
+        <span>x {{ currentKeyItem.maxpreReward }}</span>
       </div>
       <div v-if="showLock" class="count-down">
-        <span>{{ day ? day : '--' }}</span> : 
-        <span>{{ hour ? hour : '--' }}</span> :
+        <span>{{ day ? day : '--' }}</span> : <span>{{ hour ? hour : '--' }}</span> :
         <span>{{ min ? min : '--' }}</span> :
         <span>{{ sec ? sec : '--' }}</span>
       </div>
@@ -24,15 +23,17 @@
       </div>
       <div v-if="!showOpen" class="mint-NFT-Total">
         <div class="Total-left">
-            <img src="../assets/images/Brass_Key@2x.png" alt="">
+          <img src="../assets/images/Brass_Key@2x.png" alt="" />
         </div>
-        <span>Open mystery box to get up to 10x bonus</span>
+        <span>Open mystery box to get up to {{ currentKeyItem.rewardX }} bonus</span>
       </div>
       <div class="mint-NFT-btn-box">
-        <Button class="mint-NFT-btn" :class="showLock ? 'btn-close':''">
-          {{ showLock ? 'Open' : showOpen ? 'Claim' : 'Open'}}
+        <Button v-if="showLock" disabled>Open</Button>
+        <Button v-if="showUnset" class="mint-NFT-btn" :class="showLock ? 'btn-close' : ''" @click="toOpen">
+          {{ showLock ? 'Open' : showOpen ? 'Claim' : 'Open' }}
           <!-- Open -->
         </Button>
+        <Button v-if="showOpen" class="mint-NFT-btn" :loading="isClaiming" @click="$emit('toClaim')">Claim</Button>
       </div>
     </div>
   </Modal>
@@ -53,27 +54,58 @@ export default Vue.extend({
     lastSelectCoin: {
       type: String,
       default: ''
+    },
+    isClaiming: {
+      type: Boolean,
+      default: false
+    },
+    currentKeyItem: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    openRewardTimestamp: {
+      type: Number,
+      default: 0
     }
   },
   data() {
     return {
-      showLock:true,
-      showOpen:false,
-      showUnset:false,
+      showLock: false,
+      showOpen: false,
+      showUnset: false,
       day: '',
       hour: '',
       min: '',
-      sec: ''
+      sec: '',
+      timer: null
     }
   },
   computed: {},
-  watch: {},
-  mounted() {
-     window.setInterval(() => {
-      this.countDown('2022-3-30 0:0:0')
-    }, 1000)
+  watch: {
+    openRewardTimestamp: {
+      handler: 'openRewardTimestampWatch',
+      immediate: true
+    }
+  },
+  mounted() {},
+  destroyed() {
+    clearInterval(this.timer)
+    this.timer = null
   },
   methods: {
+    openRewardTimestampWatch(newVal) {
+      const now = parseInt(String(new Date().getTime() / 1000))
+      if (newVal && newVal > now) {
+        this.showLock = true
+        this.timer = window.setInterval(() => {
+          this.countDown(parseInt(String(newVal * 1000)))
+        }, 1000)
+      } else if (newVal <= now) {
+        this.showUnset = true
+      }
+    },
     countDown(time) {
       let nowTime = +new Date()
       let inputTime = +new Date(time)
@@ -91,6 +123,10 @@ export default Vue.extend({
       this.hour = h
       this.min = m
       this.sec = s
+    },
+    toOpen() {
+      this.showUnset = false
+      this.showOpen = true
     }
   }
 })
@@ -105,22 +141,22 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     position: relative;
-    > img{
+    > img {
       width: 270px;
       height: 270px;
     }
   }
-  .mint-NFT-num{
+  .mint-NFT-num {
     display: flex;
     align-content: center;
     justify-content: center;
     font-size: 24px;
     font-family: 'Arial-BoldMT', Arial;
     font-weight: bold;
-    background: linear-gradient(233deg, #4BB5FF 0%, #CE90FF 50%);
+    background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 50%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    > img{
+    > img {
       width: 36px;
       margin-right: 10px;
     }
@@ -155,7 +191,7 @@ export default Vue.extend({
     font-size: 24px;
     text-align: center;
   }
-  .count-date{
+  .count-date {
     display: flex;
     justify-content: space-between;
     width: 200px;
@@ -163,18 +199,18 @@ export default Vue.extend({
     font-size: 12px;
     color: rgba(#fff, 0.2);
   }
-  .mint-NFT-Total .Total-left{
-      width: 50px;
-      height: 50px;
-      background: url('@/assets/images/img-bgD.png');
-      background-size: 100% 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      img{
-          width: 36px;
-          height: 36px;
-      }
+  .mint-NFT-Total .Total-left {
+    width: 50px;
+    height: 50px;
+    background: url('@/assets/images/img-bgD.png');
+    background-size: 100% 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    img {
+      width: 36px;
+      height: 36px;
+    }
   }
   .mint-NFT-btn-box {
     height: 48px;
@@ -184,8 +220,8 @@ export default Vue.extend({
       height: 100%;
       font-size: 16px;
     }
-    .btn-close{
-       background: #282c33 !important;
+    .btn-close {
+      background: #282c33 !important;
       &:hover {
         background: #34383e !important;
       }

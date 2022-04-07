@@ -20,16 +20,22 @@
             >
               <div class="left">
                 <img :src="importIconNew(`/coins/${item.symbol.toLowerCase()}.png`)" />
-                <span>{{ item.symbol }}</span>
+                <div class="name-box">
+                  <h3>{{ item.symbol }}</h3>
+                  <p>{{ item.name }}</p>
+                </div>
               </div>
-              <div class="balance">
-                <div v-if="wallet.loading">
-                  <Icon type="loading" />
+              <div class="balance-box">
+                <div class="balance">
+                  <div v-if="wallet.loading">
+                    <Icon type="loading" />
+                  </div>
+                  <div v-else-if="item.tokenAccountAddress && wallet.connected">
+                    {{ item.balance.fixed() }}
+                  </div>
+                  <div v-else></div>
                 </div>
-                <div v-else-if="item.tokenAccountAddress">
-                  {{ item.balance.fixed() }}
-                </div>
-                <div v-else></div>
+                <p></p>
               </div>
             </li>
           </ul>
@@ -250,9 +256,24 @@ export default Vue.extend({
             height: 30px;
             border-radius: 100%;
           }
-          span {
+          // span {
+          //   margin-left: 10px;
+          // }
+          .name-box {
             margin-left: 10px;
+            h3,
+            p {
+              padding: 0px;
+              margin: 0px;
+            }
+            p {
+              font-size: 12px;
+              color: rgba(255, 255, 255, 0.5);
+            }
           }
+        }
+        .balance-box {
+          padding-right: 10px;
         }
         &.unusable {
           color: rgba(255, 255, 255, 0.5);

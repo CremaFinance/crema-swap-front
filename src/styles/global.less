@@ -227,7 +227,7 @@
       padding: 6px;
 
       & + .icon-box {
-        margin-left: 20px;
+        margin-left: 10px;
       }
 
       &:hover {
@@ -240,6 +240,9 @@
       height: 18px;
       fill: #fff;
       // margin-left: 20px;
+    }
+    .is-loading {
+      animation: spin 1s linear infinite;
     }
   }
 }
@@ -286,5 +289,11 @@
     transform: rotate(360deg);
     -ms-transform: rotate(360deg);
     -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
   }
 }

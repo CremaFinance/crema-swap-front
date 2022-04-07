@@ -7,7 +7,7 @@ import {
   Signer,
   TokenAccountsFilter
 } from '@solana/web3.js'
-import { QuarrySDK, PositionWrapper, findActivityMasterAddress } from 'test-quarry-sdk'
+import { QuarrySDK, PositionWrapper, findActivityMasterAddress } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import type { AccountInfo } from '@solana/spl-token'
@@ -162,6 +162,24 @@ export async function fetchStakedPositions(conn: any, wallet: any, wrapper: Publ
   // }
 }
 
+export async function calculateWrapAmount(conn: any, wallet: any, wrapper: PublicKey, nftMint: PublicKey) {
+  const sdk = makeSDK(conn, wallet)
+  const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, sdk.provider.connection)
+  invariant(wrapperInfo !== null, 'wrapper not found')
+
+  const positionInfo = await PositionWrapper.fetchSwapPositionByNFT(
+    wrapperInfo.swapKey,
+    nftMint,
+    sdk.provider.connection
+  )
+  invariant(positionInfo !== null, 'The swap position not found')
+
+  const amount = PositionWrapper.calculateWrapAmount(wrapperInfo, positionInfo)
+
+  console.log(amount.toString())
+  return amount
+}
+
 // activity
 export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
   const sdk = makeSDK(conn, wallet)
@@ -185,4 +203,24 @@ export async function fetchActivitymaster(conn: any, wallet: any, master: Public
   return info
   // console.log(typeof UactivityErrors)
   // printObjectTable(info)
+}
+
+export async function quarryInfo(conn: any, wallet: any, rewarderKey: PublicKey, tokenMint: PublicKey) {
+  const sdk = makeSDK(conn, wallet)
+  const rewarder = await sdk.mine.loadRewarderWrapper(rewarderKey)
+  const token = await Token.load(sdk.provider.connection, tokenMint)
+  invariant(token !== null, 'The token is null')
+  const quarry = await rewarder.getQuarry(token)
+  const info = quarry.quarryData
+  const ts = await currentTs(sdk.provider.connection)
+  // printObjectTable({
+  //   quarry: quarry.key.toBase58(),
+  //   rewardPerToken: quarry.payroll.calculateRewardPerToken(ts).toString(),
+  //   ...info
+  // })
+  return {
+    quarry: quarry.key.toBase58(),
+    rewardPerToken: quarry.payroll.calculateRewardPerToken(ts).toString(),
+    ...info
+  }
 }

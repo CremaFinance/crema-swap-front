@@ -136,7 +136,7 @@ export default Vue.extend({
   data() {
     return {
       direction: true,
-      autoRefreshTime: 60,
+      autoRefreshTime: 20,
       countdown: 0,
       loading: false,
       marketTimer: null as any

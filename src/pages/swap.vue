@@ -14,6 +14,12 @@
                 {{ toCoin && toCoin.mintAddress }}
               </span>
             </template> -->
+          <!-- <div class="icon-box">
+            <svg :class="['icon', loading ? 'is-loading' : '']" aria-hidden="true" @click="refresh">
+              <use xlink:href="#icon-icon-refresh"></use>
+            </svg>
+          </div> -->
+          <RefreshIcon @refresh="refresh" :loading="loading"></RefreshIcon>
           <div class="icon-box">
             <svg class="icon" aria-hidden="true" @click="showAddress = true">
               <use xlink:href="#icon-a-bianzu181"></use>
@@ -99,6 +105,7 @@
         :to-coin-amount="toCoinAmount"
         :pool-info="poolInfo"
         :fixed-from-coin="fixedFromCoin"
+        @refresh="refresh"
       ></SwapInfo>
       <CoinSelect
         v-if="showCoinSelect"
@@ -159,7 +166,8 @@ export default Vue.extend({
       // Insufficient liquidity
       insufficientLiquidity: false,
       // 新sdk测试部分
-      swapSdk: null as any
+      swapSdk: null as any,
+      isLoading: false
     }
   },
   head: {
@@ -274,6 +282,10 @@ export default Vue.extend({
   },
   methods: {
     gt,
+    refresh() {
+      this.$accessor.wallet.getTokenAccounts()
+      this.updateAmounts()
+    },
     updateCoinInfo(tokenAccounts: any) {
       if (this.fromCoin) {
         const fromCoin = tokenAccounts[this.fromCoin.mintAddress]
@@ -294,6 +306,7 @@ export default Vue.extend({
     async updateAmounts() {
       console.log('没进来吗44444#####this.poolInfo####', this.poolInfo)
       if (!this.poolInfo) return
+
       const slippage = Number(this.$accessor.slippage) // 滑点
       const direct =
         this.fromCoin?.mintAddress === this.poolInfo.coin.mintAddress &&

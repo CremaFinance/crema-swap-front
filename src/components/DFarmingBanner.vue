@@ -2,16 +2,21 @@
   <div>
     <div v-if="isFarming == 'Farming'" class="farming-Banner">
       <div class="farming-Banner-title">
-        <span>2022-03-07 18:009 (UTC) to 2022-03-23 18:00 (UTC)</span>
-        <span>Learn more ></span>
+        <!-- <span>Ends on May 30th, 2022 (UTC)</span> -->
+        <a
+          href="https://medium.com/@Crema.finance/caffeine-farming-event-your-prelaunch-opportunity-to-grab-cremas-token-incentives-706425032a88"
+          target="_blank"
+          >Learn more ></a
+        >
       </div>
       <div class="farming-Banner-Btn">
+        <div style="height: 14px; text-align: center; line-height: 14px">My Caffeine</div>
         <div class="farming-Banner-value">
           <img src="../assets/images/icon-caffeine.png" alt="" />
           <!-- <span>100,100,100</span> -->
-          <span>{{ caffeineAmount }}</span>
+          <span>{{ wallet.connected ? caffeineAmount : 0 }}</span>
         </div>
-        <div style="height: 14px; text-align: center; line-height: 14px">My Caffeine</div>
+
         <!-- <nuxt-link to="/active" class="farming-Btn"></nuxt-link> -->
         <a class="farming-Btn" @click="comingsoon"></a>
       </div>
@@ -34,6 +39,7 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
 import { TokenAmount, gt } from '@/utils/safe-math'
+import { fixD, addCommom } from '@/utils'
 // import { Button } from 'ant-design-vue'
 // Vue.use(Button)
 export default Vue.extend({
@@ -61,7 +67,7 @@ export default Vue.extend({
       hour: '',
       min: '',
       sec: '',
-      caffeineMintAddress: '32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'
+      caffeineMintAddress: 'CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw'
       // caffeineAmount: 0
     }
   },
@@ -72,9 +78,9 @@ export default Vue.extend({
         const account: any = this.wallet.tokenAccounts
         // console.log('account###', account)
         let caffeineAmount = new TokenAmount(0)
-        if (account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR']) {
-          caffeineAmount = account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'].balance
-          return caffeineAmount.fixed()
+        if (account['CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw']) {
+          caffeineAmount = account['CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw'].balance
+          return addCommom(caffeineAmount.fixed(), 6)
         }
       }
       return 0
@@ -119,7 +125,7 @@ export default Vue.extend({
 .farming-Banner,
 .farm-Banner {
   width: 1000px;
-  height: 160px;
+  height: 180px;
   background: url('@/assets/images/farming-nav-pc.png');
   background-size: 100% 100%;
   display: flex;
@@ -158,9 +164,10 @@ export default Vue.extend({
 .farming-Banner-title {
   width: 630px;
   height: 100%;
-  padding: 110px 0 0 47px;
-  > span:last-child {
-    margin-left: 20px;
+  padding: 130px 0 0 47px;
+  > a:last-child {
+    color: #fff;
+    // margin-left: 20px;
     cursor: pointer;
   }
 }
@@ -195,7 +202,7 @@ img {
   background-size: 100% 100%;
   cursor: pointer;
   &:hover {
-    background: url('@/assets/images/img-mintnft_btn-hover.png');
+    background: url('@/assets/images/img-mintnft-btn.png');
     background-size: 100% 100%;
   }
 }

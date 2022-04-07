@@ -6,7 +6,7 @@
     <div class="h5-header-container">
       <H5Head></H5Head>
     </div>
-    <div class="body-container">
+    <div class="body-container" :class="$accessor.showNetWorkWarnning ? 'have-network-warnning' : ''">
       <Nuxt />
       <Wallet v-if="!isPc" class="h5-wallet"></Wallet>
     </div>
@@ -45,6 +45,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapState(['transaction', 'url'])
+  },
+  created() {
+    this.$accessor.liquidity.getRates()
   },
   mounted() {
     // const showNotice = sessionStorage.getItem('crema_show_notice')
@@ -86,7 +89,7 @@ export default Vue.extend({
 .pc-header-container {
   display: block;
   background: #22252b;
-  padding: 0px 40px;
+  // padding: 0px 40px;
   z-index: 999;
   position: fixed;
   left: 0px;
@@ -102,6 +105,9 @@ export default Vue.extend({
   padding-bottom: 40px;
   .h5-wallet {
     display: none;
+  }
+  &.have-network-warnning {
+    padding-top: 140px;
   }
 }
 @media screen and (max-width: 1366px) {
@@ -134,6 +140,9 @@ export default Vue.extend({
   }
   .body-container {
     padding: 0 20px 0;
+    &.have-network-warnning {
+      padding-top: 0px;
+    }
     .h5-wallet {
       display: block;
       padding: 60px 0 20px 0px;

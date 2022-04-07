@@ -9,7 +9,7 @@ import { cloneDeep, lt } from 'lodash-es'
 import logger from '@/utils/logger'
 import { findAssociatedTokenAddress } from '@/utils/web3'
 
-const AUTO_REFRESH_TIME = 60
+const AUTO_REFRESH_TIME = 120
 
 export const state = () => ({
   initialized: false,

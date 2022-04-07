@@ -1,10 +1,11 @@
 <template>
   <div class="set-icon-container">
-    <div class="set-icon-box">
+    <div class="set-icon-box" @click="showSetting = true">
       <div class="set-icon-content">
-        <svg class="icon" aria-hidden="true" @click="showSetting = true">
+        <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-a-bianzu81"></use>
         </svg>
+        <span>{{ slippageView }}</span>
       </div>
     </div>
     <Setting v-if="showSetting" @onClose="() => (showSetting = false)"></Setting>
@@ -19,37 +20,50 @@ export default Vue.extend({
     return {
       showSetting: false
     }
+  },
+  computed: {
+    slippageView() {
+      return `${this.$accessor.slippage}%`
+    }
   }
 })
 </script>
 <style lang="less" scoped>
 .set-icon-container {
   .set-icon-box {
-    width: 30px;
-    height: 30px;
-    padding: 1px;
-    border-radius: 15px;
-    background: linear-gradient(137deg, rgba(35, 38, 43, 1), rgba(62, 67, 78, 1));
+    // width: 68px;
+    // height: 28px;
+    // // padding: 1px;
+    // background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
+    // box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+    // border-radius: 8px;
+    // border: 1px solid #3f434e;
     .set-icon-content {
-      width: 28px;
+      // width: 68px;
       height: 28px;
-      border-radius: 14px;
-      background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
-      box-shadow: 2px 4px 12px 0px #23262b, -3px -2px 10px 0px rgba(138, 147, 160, 0.16);
-      // border-radius: 15px;
-      // border: 1px solid;
-      // border-image: linear-gradient(137deg, rgba(35, 38, 43, 1), rgba(62, 67, 78, 1)) 1 1;
+      padding: 0px 8px;
+      // padding: 1px;
+      background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
+      box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+      border-radius: 8px;
+      border: 1px solid #3f434e;
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
       &:hover {
-        background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);
+        // background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);
+        background: #464953;
       }
       .icon {
         width: 16px;
         height: 16px;
         fill: #fff;
         cursor: pointer;
+      }
+      span {
+        font-size: 12px;
+        margin-left: 4px;
       }
     }
   }

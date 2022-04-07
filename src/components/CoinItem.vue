@@ -6,27 +6,34 @@
         <img v-lazy="source.logoURI" />
       </div>
 
-      <span>{{ source.symbol }}</span>
+      <!-- <span>{{ source.symbol }}</span> -->
+      <div class="name-box">
+        <h3>{{ source.symbol }}</h3>
+        <p>{{ source.name }}</p>
+      </div>
     </div>
-    <div v-if="wallet.connected" class="balance">
-      <div v-if="wallet.loading">
-        <Icon type="loading" />
+    <div class="balance-box">
+      <div v-if="wallet.connected" class="balance">
+        <div v-if="wallet.loading">
+          <Icon type="loading" />
+        </div>
+        <div
+          v-else-if="
+            source.address === 'So11111111111111111111111111111111111111112' &&
+            tokenAccounts &&
+            tokenAccounts['11111111111111111111111111111111']
+          "
+        >
+          {{ tokenAccounts['11111111111111111111111111111111'].balance.fixed() }}
+        </div>
+        <div v-else-if="tokenAccounts && tokenAccounts[source.address]">
+          {{ tokenAccounts[source.address].balance.fixed() || '0' }}
+        </div>
+        <div v-else>0</div>
       </div>
-      <div
-        v-else-if="
-          source.address === 'So11111111111111111111111111111111111111112' &&
-          tokenAccounts &&
-          tokenAccounts['11111111111111111111111111111111']
-        "
-      >
-        {{ tokenAccounts['11111111111111111111111111111111'].balance.fixed() }}
-      </div>
-      <div v-else-if="tokenAccounts && tokenAccounts[source.address]">
-        {{ tokenAccounts[source.address].balance.fixed() || '0' }}
-      </div>
-      <div v-else>0</div>
+      <div v-else></div>
+      <p></p>
     </div>
-    <div v-else></div>
   </div>
 </template>
 <script lang="ts">
@@ -107,12 +114,30 @@ export default Vue.extend({
       height: 30px;
       border-radius: 100%;
     }
-    span {
+    // span {
+    //   margin-left: 10px;
+    // }
+    .name-box {
       margin-left: 10px;
+      h3,
+      p {
+        padding: 0px;
+        margin: 0px;
+      }
+      p {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+      }
     }
   }
-  .balance {
-    padding-right: 16px;
+  .balance-box {
+    padding-right: 10px;
+    > p {
+      height: 18px;
+      width: 1px;
+      padding: 0px;
+      margin: 0px;
+    }
   }
   &.unusable {
     color: rgba(255, 255, 255, 0.5);
