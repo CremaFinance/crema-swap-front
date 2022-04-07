@@ -449,6 +449,7 @@ export default Vue.extend({
         console.log('whatWait####', whatWait)
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
+        this.$accessor.transaction.setShowSubmitted(false)
         this.isStaking = false
         this.isDisabled = false
         this.$notify.close(txid + 'loading')
@@ -548,6 +549,7 @@ export default Vue.extend({
         console.log('whatWait####', whatWait)
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
+        this.$accessor.transaction.setShowSubmitted(false)
         this.isUnStaking = false
         this.isDisabled = false
         this.$notify.close(txid + 'loading')
@@ -649,6 +651,7 @@ export default Vue.extend({
         }
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
+        this.$accessor.transaction.setShowSubmitted(false)
         this.isClaiming = false
         this.isDisabled = false
         this.$notify.close(txid + 'loading')
