@@ -451,7 +451,7 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isStaking = false
         this.isDisabled = false
-        this.notify.close(txid + 'loading')
+        this.$notify.close(txid + 'loading')
         this.$notify.error({
           key: 'StakeErr',
           message: 'Transaction failed',
@@ -550,7 +550,7 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isUnStaking = false
         this.isDisabled = false
-        this.notify.close(txid + 'loading')
+        this.$notify.close(txid + 'loading')
         this.$notify.error({
           key: 'UnStakeErr',
           message: 'Transaction failed',
@@ -651,7 +651,7 @@ export default Vue.extend({
         this.$accessor.transaction.setShowWaiting(false)
         this.isClaiming = false
         this.isDisabled = false
-        this.notify.close(txid + 'loading')
+        this.$notify.close(txid + 'loading')
         this.$notify.error({
           key: 'HarvestErr',
           message: 'Transaction failed',
