@@ -5,9 +5,19 @@ import {
   PublicKey,
   AccountInfo as BaseAccountInfo,
   Signer,
-  TokenAccountsFilter
+  TokenAccountsFilter,
+  GetProgramAccountsFilter
 } from '@solana/web3.js'
-import { QuarrySDK, PositionWrapper, findActivityMasterAddress } from '@cremafinance/crema-farming'
+import {
+  QuarrySDK,
+  PositionWrapper,
+  findActivityMasterAddress,
+  QUARRY_CODERS,
+  QUARRY_ADDRESSES,
+  MinerData,
+  QuarryData,
+  Payroll
+} from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import type { AccountInfo } from '@solana/spl-token'
@@ -15,6 +25,7 @@ import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
 import invariant from 'tiny-invariant'
 import { currentTs } from './utils'
 import { Token, TokenAmount } from '@saberhq/token-utils'
+import * as base58 from 'bs58'
 
 export function makeSDK(conn: any, wallet: any) {
   const anchorProvider = new AnchorProvider(conn, wallet, {
@@ -94,19 +105,9 @@ export async function getTokenAccountsByOwnerAndMint(
 }
 
 // 获取池子中我的仓位
-export async function fetchSwapPositionsByOwner(swapKey: PublicKey, authority: PublicKey | null, conn, wallet) {
-  const sdk = makeSDK(conn, wallet)
-  const owner = authority !== null ? authority : sdk.provider.wallet.publicKey
-  const positions = await PositionWrapper.fetchSwapPositionsByOwner(swapKey, owner, conn)
-
-  console.log('fetchSwapPositionsByOwner####positions####', positions)
+export async function fetchSwapPositionsByOwner(swapKey: PublicKey, authority: PublicKey, conn, wallet) {
+  const positions = await PositionWrapper.fetchSwapPositionsByOwner(swapKey, authority, conn)
   return positions
-
-  // if (positions.length > 0) {
-  //   printTable(positions)
-  // } else {
-  //   console.log('The position owner of %s not found', owner.toBase58())
-  // }
 }
 
 // 获取 earned
@@ -138,9 +139,135 @@ export async function minerInfo(conn: any, wallet: any, rewarderKey: PublicKey, 
   }
 }
 
+interface MinerInfo extends MinerData {
+  MinerKey: PublicKey
+  PendingReward: u64
+  BlockTime: u64
+  tokenMintKey: PublicKey
+}
+interface QuarryInfo extends QuarryData {
+  address: PublicKey
+}
+
+async function fetchQuarries(connection: Connection): Promise<Array<QuarryInfo>> {
+  const filters: Array<GetProgramAccountsFilter> = [
+    {
+      memcmp: {
+        offset: 0,
+        bytes: base58.encode(QUARRY_CODERS.Mine.accounts.quarry.discriminator)
+      }
+    }
+  ]
+  const accounts = await connection.getProgramAccounts(QUARRY_ADDRESSES.Mine, {
+    filters
+  })
+  const quarries: QuarryInfo[] = []
+  accounts.forEach((accountInfo) => {
+    const info = QUARRY_CODERS.Mine.coder.accounts.decode<QuarryData>('Quarry', accountInfo.account.data)
+    console.log('这里的accountInfo#####', accountInfo)
+    console.log('accountInfo.account.data#####', info)
+    quarries.push({
+      address: accountInfo.pubkey,
+      ...info
+    })
+  })
+  return quarries
+}
+
+interface NewPayroll {
+  payroll: Payroll
+  tokenMintKey: PublicKey
+}
+
+export async function fetchMiners(authority: PublicKey | null, conn) {
+  // const sdk = makeSDK()
+  const quarries = await fetchQuarries(conn)
+  const payrolls: Map<string, NewPayroll> = new Map()
+  quarries.forEach((quarry) => {
+    console.log('fetchMiners###quarry####', quarry)
+    console.log('fetchMiners###quarry####quarry.tokenMintKey.toString()###', quarry.tokenMintKey.toString())
+    payrolls.set(quarry.address.toBase58(), {
+      payroll: new Payroll(
+        quarry.famineTs,
+        quarry.lastUpdateTs,
+        quarry.annualRewardsRate,
+        quarry.rewardsPerTokenStored,
+        quarry.totalTokensDeposited
+      ),
+      tokenMintKey: quarry.tokenMintKey
+    })
+  })
+  const ts = await currentTs(conn)
+
+  const filters: Array<GetProgramAccountsFilter> = [
+    {
+      memcmp: {
+        offset: 0,
+        bytes: base58.encode(QUARRY_CODERS.Mine.accounts.miner.discriminator)
+      }
+    }
+  ]
+  if (authority !== null) {
+    filters.push({
+      memcmp: {
+        offset: 40,
+        bytes: authority?.toBase58()
+      }
+    })
+  }
+  const accounts = await conn.getProgramAccounts(QUARRY_ADDRESSES.Mine, {
+    filters
+  })
+
+  const miners: MinerInfo[] = []
+
+  accounts.forEach((accountInfo) => {
+    const info = QUARRY_CODERS.Mine.coder.accounts.decode<MinerData>('Miner', accountInfo.account.data)
+    const payroll = payrolls.get(info.quarryKey.toBase58())
+    invariant(payroll !== undefined, `The ${info.quarryKey.toBase58()} payroll not found`)
+    miners.push({
+      MinerKey: accountInfo.pubkey,
+      tokenMintKey: payroll.tokenMintKey,
+      PendingReward: payroll.payroll.calculateRewardsEarned(
+        ts,
+        info.balance,
+        info.rewardsPerTokenPaid,
+        info.rewardsEarned
+      ),
+      BlockTime: ts,
+      ...info
+    })
+  })
+  // printTable(miners)
+  return miners
+}
+
+export async function fetchCremaSwaps(swapList: PublicKey[], conn) {
+  // const sdk = makeSDK();
+  console.log('这里进来了吗##fetchCremaSwaps##')
+  const list = await PositionWrapper.fetchCremaSwaps(
+    swapList,
+    conn
+    // sdk.provider.connection
+  )
+  for (let i = 0; i < swapList.length; i++) {
+    const swap = list[i]
+    if (swap === null || swap === undefined) {
+      console.log('CremaSwap %s not foundl', swapList[i]?.toBase58())
+      return
+    }
+    const data = {
+      ...swap,
+      currentPrice: swap.currentSqrtPrice.pow(2)
+    }
+    return data
+    // printObjectTable(data)
+  }
+}
+
 // 获取池子信息(获取reward range等)
 export async function fetchPositionWrapper(conn, wallet, wrapper: PublicKey) {
-  const sdk = makeSDK(conn, wallet)
+  // const sdk = makeSDK(conn, wallet)
   const info = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
   if (info === null) {
     console.log('PositionWrapper %s not found', wrapper.toBase58())
@@ -151,15 +278,9 @@ export async function fetchPositionWrapper(conn, wallet, wrapper: PublicKey) {
 }
 
 // 获取已质押的池子列表
-export async function fetchStakedPositions(conn: any, wallet: any, wrapper: PublicKey, owner: PublicKey | null) {
-  const sdk = makeSDK(conn, wallet)
+export async function fetchStakedPositions(conn: any, wrapper: PublicKey, owner: PublicKey) {
   const positions = await PositionWrapper.fetchStakePositions(wrapper, owner, conn)
   return positions
-  // if (positions.length > 0) {
-  //   printTable(positions);
-  // } else {
-  //   console.log("No position in this wrapper:%s", wrapper.toBase58());
-  // }
 }
 
 export async function calculateWrapAmount(conn: any, wallet: any, wrapper: PublicKey, nftMint: PublicKey) {

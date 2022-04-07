@@ -839,6 +839,7 @@ export default Vue.extend({
     h3 {
       color: rgba(255, 255, 255, 0.5);
       margin-bottom: 0px;
+      margin-right: 4px;
     }
   }
 }

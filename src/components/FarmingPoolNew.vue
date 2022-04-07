@@ -63,9 +63,9 @@
             <div v-if="wallet.connected && !farming.earningLoading" class="td-text">
               {{
                 (farming.earningObj &&
-                  farming.earningObj[item.positionWrapper] &&
-                  farming.earningObj[item.positionWrapper].view) ||
-                '--'
+                  farming.earningObj[item.positionWrapperWrapMint] &&
+                  farming.earningObj[item.positionWrapperWrapMint].view) ||
+                '0'
               }}
             </div>
 
@@ -96,14 +96,14 @@
               :loading="isClaiming && currentPool.positionWrapper === item.positionWrapper"
               :disabled="
                 !farming.earningObj ||
-                !farming.earningObj[item.positionWrapper] ||
-                !Number(farming.earningObj[item.positionWrapper].value) ||
+                !farming.earningObj[item.positionWrapperWrapMint] ||
+                !Number(farming.earningObj[item.positionWrapperWrapMint].value) ||
                 isDisabled
               "
               @click="toClaim(item)"
-              >Harvest all
-            </Button>
-            <Tooltip overlay-class-name="the-more-tooltip" placement="top">
+              >Harvest all</Button
+            >
+            <Tooltip overlay-class-name="the-more-tooltip" placement="top" trigger="click">
               <div class="the-more-icon-box">
                 <svg class="stern-icon set-dot" aria-hidden="true">
                   <use xlink:href="#icon-icon-Pack-Deposit"></use>
@@ -209,7 +209,7 @@ import { mapState } from 'vuex'
 import { Button } from 'ant-design-vue'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
-import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
+import { BroadcastOptions, SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import {
   clusterApiUrl,
   Connection,
@@ -326,46 +326,9 @@ export default Vue.extend({
     importIcon,
     tvlDataWatch(newVal) {
       if (newVal) {
-        // const result: any = {}
-        // for (let key in newVal) {
-        //   const item = newVal[key]
-        //   const apr = item.apr * 100
-        //   const tvl = item.tvl
-        //   result[key] = {
-        //     ...item,
-        //     aprView: apr > 10000 ? Infinity : `${fixD(apr, 2)}%`,
-        //     tvlView: tvl ? `$ ${addCommom(tvl, 2)}` : '--'
-        //   }
-        // }
         this.tvlDataObjNew = newVal
       }
     },
-    // getTvl(item: any) {
-    //   let apr
-    //   if (item && this.tvlData && this.tvlData[item.positionWrapper]) {
-    //     apr = this.tvlData[item.positionWrapper].apr * 100
-    //     if (apr > 10000) {
-    //       apr = Infinity
-    //     } else {
-    //       apr = `${apr}%`
-    //     }
-    //   } else {
-    //     apr = '--'
-    //   }
-    //   return apr
-    // },
-    // getLiquidity(item: any) {
-    //   let tvl
-    //   if (item && this.tvlData && this.tvlData[item.positionWrapper]) {
-    //     tvl = this.tvlData[item.positionWrapper].tvl
-    //     if (tvl) {
-    //       tvl = '$ ' + fixD(tvl, 2)
-    //     }
-    //   } else {
-    //     tvl = '--'
-    //   }
-    //   return tvl
-    // },
     gotoLp(item: any) {
       if (item) {
         console.log('gotoLp###item####', item)
@@ -397,7 +360,6 @@ export default Vue.extend({
         [index]: !obj[index]
       }
       if (!obj[index]) {
-        console.log('positionsObj####setPositionsObj######obj[index]', obj[index])
         this.$accessor.farming.getPositionObj({ tvlData: this.tvlData, farmingInfo: item, rates: this.liquidity.rates })
       }
     },
@@ -422,16 +384,39 @@ export default Vue.extend({
       this.$accessor.transaction.setTransactionDesc(`Stake ${poolInfo.name} NFT`)
       this.$accessor.transaction.setShowWaiting(true)
 
+      let txid = ''
+
       try {
         const res = await sdk.positionWrapper.mintAndStake({
           wrapper: wrapperInfo,
           nftMint,
           rewarderKey
         })
+
+        // const receipt: any = await res.tx.confirm()
+
+        const opt: BroadcastOptions = {
+          skipPreflight: true,
+          commitment: 'confirmed',
+          preflightCommitment: 'confirmed',
+          maxRetries: 30,
+          printLogs: true
+        }
+
+        const receipt: any = await res.tx.send(opt)
         this.$accessor.transaction.setShowWaiting(false)
-        const receipt: any = await res.tx.confirm()
+        console.log('whattest####', receipt)
+
+        // const receipt = await (
+        //   await res.tx.send(opt)
+        // ).wait({
+        //   commitment: 'confirmed',
+        //   useWebsocket: true,
+        //   retries: 30
+        // })
+
         if (receipt && receipt.signature) {
-          const txid = receipt.signature
+          txid = receipt.signature
           const description = `Stake ${poolInfo.name} NFT`
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
@@ -454,29 +439,20 @@ export default Vue.extend({
               _this.isDisabled = false
             }
           })
-
-          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-          //   _this.isStaking = false
-          //   _this.isDisabled = false
-          //   if (!signatureResult.err) {
-          //     // setTimeout(() => {
-          //     // _this.$accessor.farming.getFarmingList()
-          //     // _this.$accessor.farming.getEarningsObj()
-
-          //     // }, 1500)
-          //     _this.$emit('refreshData')
-          //     _this.$accessor.farming.getPositionObj({
-          //       tvlData: _this.tvlData,
-          //       farmingInfo: poolInfo,
-          //       rates: _this.liquidity.rates
-          //     })
-          //   }
-          // })
         }
+        const whatWait = await receipt.wait({
+          commitment: 'confirmed',
+          useWebsocket: true,
+          retries: 30
+        })
+
+        console.log('whatWait####', whatWait)
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
+        this.$accessor.transaction.setShowSubmitted(false)
         this.isStaking = false
         this.isDisabled = false
+        this.$notify.close(txid + 'loading')
         this.$notify.error({
           key: 'StakeErr',
           message: 'Transaction failed',
@@ -515,6 +491,8 @@ export default Vue.extend({
       const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
       invariant(wrapperInfo !== null, 'wrapper not found')
 
+      let txid = ''
+
       try {
         const tx = await sdk.positionWrapper.unstakeAndBurn({
           wrapper: wrapperInfo,
@@ -523,10 +501,21 @@ export default Vue.extend({
           rewarderKey,
           isClaim
         })
-        const receipt = await tx.confirm()
+
+        const opt: BroadcastOptions = {
+          skipPreflight: true,
+          commitment: 'confirmed',
+          preflightCommitment: 'confirmed',
+          maxRetries: 30,
+          printLogs: true
+        }
+        // const receipt = await tx.confirm()
+        const receipt: any = await tx.send(opt)
+        console.log('whattest####', receipt)
+
         this.$accessor.transaction.setShowWaiting(false)
         if (receipt && receipt.signature) {
-          const txid = receipt.signature
+          txid = receipt.signature
           const description = `Unstake ${poolInfo.name} NFT`
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
@@ -549,28 +538,21 @@ export default Vue.extend({
               _this.isDisabled = false
             }
           })
-
-          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-          //   _this.isUnStaking = false
-          //   _this.isDisabled = false
-          //   if (!signatureResult.err) {
-          //     // setTimeout(() => {
-          //     // _this.$accessor.farming.getFarmingList()
-          //     // _this.$accessor.farming.getEarningsObj()
-          //     // }, 1500)
-          //     _this.$emit('refreshData')
-          //     _this.$accessor.farming.getPositionObj({
-          //       tvlData: _this.tvlData,
-          //       farmingInfo: poolInfo,
-          //       rates: _this.liquidity.rates
-          //     })
-          //   }
-          // })
         }
+
+        const whatWait = await receipt.wait({
+          commitment: 'confirmed',
+          useWebsocket: true,
+          retries: 30
+        })
+
+        console.log('whatWait####', whatWait)
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
+        this.$accessor.transaction.setShowSubmitted(false)
         this.isUnStaking = false
         this.isDisabled = false
+        this.$notify.close(txid + 'loading')
         this.$notify.error({
           key: 'UnStakeErr',
           message: 'Transaction failed',
@@ -599,18 +581,27 @@ export default Vue.extend({
       this.$accessor.transaction.setTransactionDesc('Harvest all rewards')
       this.$accessor.transaction.setShowWaiting(true)
 
+      let txid = ''
       try {
         const miner = await this.minerWrapper(rewarderKey, mint)
         console.log('toClaim###miner###', miner)
         const tx = await miner.claim()
-        console.log('toClaim###tx###', tx)
+        // const receipt = await tx.confirm()
 
-        const receipt = await tx.confirm({ maxRetries: 10 })
+        const opt: BroadcastOptions = {
+          skipPreflight: true,
+          commitment: 'confirmed',
+          preflightCommitment: 'confirmed',
+          maxRetries: 30,
+          printLogs: true
+        }
+        // const receipt = await tx.confirm()
+        const receipt: any = await tx.send(opt)
+        console.log('whattest####', receipt)
         this.$accessor.transaction.setShowWaiting(false)
-        console.log('toClaim###receipt###', receipt)
 
         if (receipt && receipt.signature) {
-          const txid = receipt.signature
+          txid = receipt.signature
           const description = `Harvest all rewards`
           const _this = this
           this.$accessor.transaction.setShowSubmitted(true)
@@ -634,6 +625,14 @@ export default Vue.extend({
             }
           })
 
+          const whatWait = await receipt.wait({
+            commitment: 'confirmed',
+            useWebsocket: true,
+            retries: 30
+          })
+
+          console.log('whatWait####', whatWait)
+
           // const _this = this
           // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
           //   _this.isClaiming = false
@@ -652,8 +651,10 @@ export default Vue.extend({
         }
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
+        this.$accessor.transaction.setShowSubmitted(false)
         this.isClaiming = false
         this.isDisabled = false
+        this.$notify.close(txid + 'loading')
         this.$notify.error({
           key: 'HarvestErr',
           message: 'Transaction failed',
