@@ -33,7 +33,7 @@
           <th>Volume (24H)</th>
           <th>
             <div class="middle left-adr">
-              <span>APR</span>
+              <span>Total APR</span>
               <svg
                 class="icon"
                 aria-hidden="true"
@@ -42,10 +42,7 @@
               >
                 <use xlink:href="#icon-a-icon-MarketAdress"></use>
               </svg>
-              <div v-if="isShowPop">
-                Estimated by the pool’s current total data. Actual performance depends on each user’s own liquidity
-                settings.
-              </div>
+              <div v-if="isShowPop">Estimated based on trading activity in the past 7D plus farming rewards.</div>
             </div>
           </th>
           <th>Recommend Range</th>
@@ -69,7 +66,7 @@
             />
             <span>
               <a
-                :href="`https://explorer.solana.com/address/${item.swap_account}`"
+                :href="`https://solscan.io/address/${item.swap_account}`"
                 target="_blank"
                 @mouseenter="item.isShowSwap = !item.isShowSwap"
                 @mouseleave="item.isShowSwap = !item.isShowSwap"
@@ -93,11 +90,36 @@
           </td>
           <td>$ {{ addCommom(item.tvl_in_usd, 2) }}</td>
           <td>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</td>
-          <td>{{ item.apr }}</td>
+          <!-- <td>{{ item.apr }}</td> -->
           <td>
-            {{
+            <Tooltip overlay-class-name="td-title-tooltip" placement="bottom">
+              <!-- <div v-if="farming.setStatisticsDataObj && farming.setStatisticsDataObj[item.swap_account]">123</div> -->
+              <div class="have-pointer">
+                {{ getTotalApr(item) }}
+              </div>
+
+              <template slot="title">
+                <ul class="apr-list">
+                  <li>
+                    <h3>Fees</h3>
+                    <p>{{ item.apr }}</p>
+                  </li>
+                  <li>
+                    <h3>Farm</h3>
+                    <p v-if="farming.statisticsDataObj && farming.statisticsDataObj[item.swap_account]">
+                      {{ fixD(Number(farming.statisticsDataObj[item.swap_account].apr) * 100, 2) }}%
+                    </p>
+                    <p v-else>N/A</p>
+                  </li>
+                </ul>
+              </template>
+            </Tooltip>
+          </td>
+          <td>
+            <span>{{
               item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : '- -'
-            }}
+            }}</span>
+            <Button class="deposit-btn" @click="gotoLp(item)">Deposit</Button>
           </td>
         </tr>
       </tbody>
@@ -129,7 +151,7 @@
             >
             <span v-if="item.isShowFee" class="Fee">Fee tier</span>
             <!-- <p v-if="item.isShowSwap">
-              <a :href="`https://explorer.solana.com/address/${item.swap_account}`" target="_blank">
+              <a :href="`https://solscan.io/address/${item.swap_account}`" target="_blank">
                 {{ processNftAddress(item.swap_account) }}
                 <svg class="icon" aria-hidden="true">
                   <use xlink:href="#icon-icon-Jump"></use>
@@ -139,7 +161,7 @@
           </div>
           <div class="right">
             <h3>
-              APR
+              Total APR
               <svg
                 class="icon"
                 aria-hidden="true"
@@ -149,7 +171,29 @@
                 <use xlink:href="#icon-a-icon-MarketAdress"></use>
               </svg>
             </h3>
-            <p>{{ item.apr }}</p>
+            <!-- <p>{{ item.apr }}</p> -->
+            <Tooltip overlay-class-name="td-title-tooltip" placement="bottom">
+              <!-- <div v-if="farming.setStatisticsDataObj && farming.setStatisticsDataObj[item.swap_account]">123</div> -->
+              <div class="have-pointer">
+                {{ getTotalApr(item) }}
+              </div>
+
+              <template slot="title">
+                <ul class="apr-list">
+                  <li>
+                    <h3>Fees</h3>
+                    <p>{{ item.apr }}</p>
+                  </li>
+                  <li>
+                    <h3>Farm</h3>
+                    <p v-if="farming.statisticsDataObj && farming.statisticsDataObj[item.swap_account]">
+                      {{ fixD(Number(farming.statisticsDataObj[item.swap_account].apr) * 100, 2) }}%
+                    </p>
+                    <p v-else>N/A</p>
+                  </li>
+                </ul>
+              </template>
+            </Tooltip>
           </div>
         </div>
         <div class="block">
@@ -171,8 +215,9 @@
           </div>
         </div>
         <div v-if="item.isShowPop" class="top-title">
-          Estimated by the pool’s current total data. Actual performance depends on each user’s own liquidity settings.
+          Estimated based on trading activity in the past 7D plus farming rewards.
         </div>
+        <Button class="deposit-btn-h5" @click="gotoLp(item)">Deposit</Button>
       </li>
     </ul>
     <h3 class="title">Top Tokens</h3>
@@ -266,15 +311,19 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
 import { number } from 'echarts'
 import { decimalFormat, addCommom } from '@/utils'
 import importIcon from '@/utils/import-icon'
+import { Tooltip } from 'ant-design-vue'
+import { fixD } from '@/utils'
 // import { Spin } from 'ant-design-vue';
 // Vue.use(Spin)
 export default Vue.extend({
   components: {
     // Spin
+    Tooltip
   },
   data() {
     return {
@@ -292,7 +341,13 @@ export default Vue.extend({
       wdAll: {}
     }
   },
+  computed: {
+    ...mapState(['farming'])
+  },
   watch: {},
+  created() {
+    this.$accessor.farming.getStatisticsDataObj()
+  },
   mounted() {
     this.getUct()
     this.getDatum()
@@ -301,9 +356,26 @@ export default Vue.extend({
     this.sortList('tokens')
   },
   methods: {
+    fixD,
     importIcon,
     decimalFormat,
     addCommom,
+    getTotalApr(item: any) {
+      if (this.farming.statisticsDataObj && this.farming.statisticsDataObj[item.swap_account]) {
+        const farmApr = Number(this.farming.statisticsDataObj[item.swap_account].apr) * 100
+        const currentApr = Number(item.apr.split('%')[0])
+        return `${fixD(String(farmApr + currentApr), 2)}%`
+      } else {
+        return item.apr
+      }
+    },
+    gotoLp(item: any) {
+      console.log('gotoLp####item###', item)
+      if (item) {
+        const arr = item.name.split('-')
+        this.$router.push(`/pool?from=${arr[0]}&to=${arr[1]}`)
+      }
+    },
     getDatum() {
       // let basic = "abc,def,ghi,"
       // let a = ''
@@ -411,9 +483,14 @@ export default Vue.extend({
     },
     // 添加计位符
     thousands(num: any) {
-      const str = num.toString()
-      const reg = str.includes('.') > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g
-      return str.replace(reg, '$1,')
+      if (Math.floor(num) === num) {
+        const numStr = (num || 0).toString()
+        return numStr.replace(/(\d)(?=(?:\d{3})+$)/g, '$1,')
+      } else {
+        const str = num.toString()
+        const reg = str.includes('.') > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g
+        return str.replace(reg, '$1,')
+      }
     },
     getNum(value) {
       if (!value) return 0
@@ -601,6 +678,9 @@ export default Vue.extend({
       &:last-child {
         text-align: right;
       }
+      .have-pointer {
+        cursor: pointer;
+      }
 
       img {
         width: 36px;
@@ -663,6 +743,24 @@ export default Vue.extend({
           border-radius: 10px;
         }
       }
+      .deposit-btn {
+        width: 68px;
+        height: 28px;
+        background: linear-gradient(270deg, #3e434e 0%, #333740 100%);
+        box-shadow: 0px 2px 10px 0px rgba(26, 28, 31, 0.37);
+        border-radius: 8px;
+        border: 1px solid #3f434e;
+        color: #07ebad;
+        font-size: 14px;
+        margin-left: 12px;
+        &:hover {
+          background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 100%);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          // border-image: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58)) 1 1;
+          color: #fff;
+        }
+      }
     }
     .th-ri {
       width: 260px;
@@ -719,6 +817,29 @@ export default Vue.extend({
   }
   .h5-data-list {
     display: none;
+  }
+}
+.apr-list {
+  padding: 0px;
+  margin: 0px;
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 100px;
+    margin-top: 6px;
+    p,
+    h3 {
+      margin: 0px;
+      padding: 0px;
+    }
+    &:first-child {
+      margin-top: 0px;
+    }
+    h3 {
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 0px;
+    }
   }
 }
 
@@ -901,6 +1022,25 @@ export default Vue.extend({
           font-style: normal;
           margin-left: 8px;
           padding: 0 2px;
+        }
+        .deposit-btn-h5 {
+          width: 100%;
+          height: 30px;
+          background: linear-gradient(270deg, #3e434e 0%, #333740 100%);
+          box-shadow: 0px 2px 10px 0px rgba(26, 28, 31, 0.37);
+          border-radius: 8px;
+          border: 1px solid #3f434e;
+          color: #07ebad;
+          font-size: 14px;
+          margin-top: 20px;
+          // margin-left: 12px;
+          &:hover {
+            background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 100%);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            // border-image: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58)) 1 1;
+            color: #fff;
+          }
         }
       }
     }

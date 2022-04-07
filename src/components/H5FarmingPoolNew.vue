@@ -4,7 +4,7 @@
       <div
         v-if="isStaked === 'All' || isStaked === item.isStaked"
         class="farming-pool-card"
-        :class="isShowTableTr == index && index == 0 ? 'is-open' : ''"
+        :class="isOpenArr[index] ? 'is-open' : ''"
       >
         <div class="symbol-info">
           <div class="symbol-left">
@@ -15,13 +15,12 @@
             />
             <div class="symbol-text">
               <div class="symbol-name">{{ item.name }}</div>
-              <div class="fee-rate">Fee Rate {{ item.fee }}%</div>
+              <!-- <div class="fee-rate">Fee Rate {{ item.fee }}%</div> -->
             </div>
           </div>
           <div class="symbol-right">
             <div class="open-or-close" :class="index !== 0 ? 'open-or-close-disabled' : ''">
-              <!-- Details -->
-              <div @mouseenter="changeRel = !changeRel" @mouseleave="changeRel = !changeRel">
+              <!-- <div @mouseenter="changeRel = !changeRel" @mouseleave="changeRel = !changeRel">
                 <svg class="stern-icon set-dot" aria-hidden="true">
                   <use xlink:href="#icon-more"></use>
                 </svg>
@@ -40,43 +39,82 @@
                     Show Contract
                   </div>
                 </div>
+              </div> -->
+
+              <Tooltip overlay-class-name="the-more-tooltip" placement="top">
+                <div class="the-more-icon-box">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-icon-Pack-Deposit"></use>
+                  </svg>
+                </div>
+
+                <template slot="title">
+                  <div class="symbol-relation" @click="gotoLp(item)">
+                    <div>Add Liquidity</div>
+                  </div>
+                </template>
+              </Tooltip>
+
+              <div class="toggle-icon-box" @click="toogleData(index)">
+                <svg class="icon" aria-hidden="true">
+                  <use :xlink:href="isOpenArr[index] ? '#icon-icon-Pack-up' : '#icon-icon-Pack-on'"></use>
+                </svg>
               </div>
-              <svg
-                class="icon"
-                :class="isShowTableTr == index ? 'icon-open' : ''"
-                aria-hidden="true"
-                @click="updateIsShowTableTr(index)"
-              >
-                <use xlink:href="#icon-icon-on"></use>
-              </svg>
+
+              <!-- <svg class="stern-icon" aria-hidden="true" @click="toogleData()">
+                <use :xlink:href="isOpen ? '#icon-icon-Pack-on' : '#icon-icon-Pack-up'"></use>
+              </svg> -->
             </div>
           </div>
         </div>
         <div class="trade-info">
           <div class="trade-info-item">
-            <div class="trade-info-title">APR</div>
-            <div class="trade-info-text">{{ getTvl(item) }}</div>
+            <div class="trade-info-title">
+              <span>APR</span>
+              <Tooltip overlay-class-name="td-title-tooltip" placement="top">
+                <div>
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-a-bianzu181"></use>
+                  </svg>
+                </div>
+                <template slot="title">
+                  <div>Only the effective liquidity within the reward range is taken into account.</div>
+                </template>
+              </Tooltip>
+            </div>
+            <div class="trade-info-text">
+              {{ (tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].aprView) || '--' }}
+            </div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Liquidity</div>
-            <div class="trade-info-text">{{ getLiquidity(item) }}</div>
+            <div class="trade-info-text">
+              {{ (tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].tvlView) || '--' }}
+            </div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Reward Range</div>
-            <div v-if="item.pinfo" class="trade-info-text">
-              {{ item.pinfo.etrMinPrice }} - {{ item.pinfo.etrMaxPrice }}
+            <div class="trade-info-text">
+              {{ item.minPrice }} -
+              {{ item.maxPrice }}
             </div>
-            <div v-else>--</div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">
-              Earned
+              Caffeine Earned
               <!-- <svg class="icon" aria-hidden="true" @click="toogleData()"> -->
-              <svg class="icon" aria-hidden="true">
+              <!-- <svg class="icon" aria-hidden="true">
                 <use xlink:href="#icon-a-bianzu181"></use>
-              </svg>
+              </svg> -->
             </div>
-            <div class="trade-info-text">{{ item.miner ? item.miner.PendingRewardView : '--' }}</div>
+            <div class="trade-info-text">
+              {{
+                (farming.earningObj &&
+                  farming.earningObj[item.positionWrapper] &&
+                  farming.earningObj[item.positionWrapper].view) ||
+                '--'
+              }}
+            </div>
           </div>
         </div>
         <div class="get-lp">
@@ -85,7 +123,12 @@
             v-else
             class="action-btn"
             :loading="isClaiming"
-            :disabled="!item.miner || !Number(item.miner.PendingRewardView) || isDisabled"
+            :disabled="
+              !farming.earningObj ||
+              !farming.earningObj[item.positionWrapper] ||
+              !Number(farming.earningObj[item.positionWrapper].value) ||
+              isDisabled
+            "
             @click="toClaim(item)"
           >
             <!-- <div>Harvest all</div> -->
@@ -97,12 +140,9 @@
             <div class="trade-info-item">
               <div class="trade-info-title">NFT</div>
               <div class="trade-info-text">
-                <a
-                  class="td-text"
-                  :href="`https://explorer.solana.com/address/${pitem.nftMintAddress}`"
-                  target="_blank"
-                  >{{ processNftAddress(pitem.nftMintAddress) }}</a
-                >
+                <a class="td-text" :href="`https://solscan.io/account/${pitem.nftAccountAddress}`" target="_blank">{{
+                  processNftAddress(pitem.nftMintAddress)
+                }}</a>
               </div>
             </div>
             <div class="trade-info-item">
@@ -135,6 +175,10 @@
               Unstake
             </Button>
           </div>
+          <!-- <div v-if="!item.positions || item.positions.length < 1" class="no-positions">
+            <p>No positions</p>
+            <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
+          </div> -->
           <!-- <div class="stake-box trade-info unstake-box">
             <div class="trade-info-item">
               <div class="trade-info-title">NFT ID</div>
@@ -182,7 +226,7 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { Button } from 'ant-design-vue'
 import { mapState } from 'vuex'
-import { QuarrySDK, MinerWrapper, PositionWrapper } from 'test-quarry-sdk'
+import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import {
@@ -202,10 +246,11 @@ import invariant from 'tiny-invariant'
 import { makeSDK, getTokenAccountsByOwnerAndMint } from '@/contract/farming'
 import { Token, TokenAmount } from '@saberhq/token-utils'
 import { Tooltip } from 'ant-design-vue'
-import { fixD } from '@/utils'
+import { fixD, addCommom } from '@/utils'
 Vue.use(Button)
 export default Vue.extend({
   components: {
+    Tooltip
     // Button
   },
   props: {
@@ -250,7 +295,16 @@ export default Vue.extend({
       isUnStaking: false,
       isClaiming: false,
       isDisabled: false,
-      currentPosition: null as any
+      currentPosition: null as any,
+      tvlDataObjNew: {} as any,
+      isOpenArr: {
+        // 0: false,
+        // 1: false,
+        // 2: false,
+        // 3: false,
+        // 4: false,
+        // 5: false
+      } as any
     }
   },
   computed: {
@@ -275,13 +329,40 @@ export default Vue.extend({
       handler: 'watchFarmingList',
       immediate: true
     },
-    'wallet.connected': {
-      handler: 'walletWatch',
+    // 'wallet.connected': {
+    //   handler: 'walletWatch',
+    //   immediate: true
+    // },
+    tvlData: {
+      handler: 'tvlDataWatch',
       immediate: true
     }
   },
   methods: {
     importIcon,
+    toogleData(index: number) {
+      const obj = JSON.parse(JSON.stringify(this.isOpenArr))
+      this.isOpenArr = {
+        ...obj,
+        [index]: !obj[index]
+      }
+    },
+    tvlDataWatch(newVal) {
+      if (newVal) {
+        const result: any = {}
+        for (let key in newVal) {
+          const item = newVal[key]
+          const apr = item.apr * 100
+          const tvl = item.tvl
+          result[key] = {
+            ...item,
+            aprView: apr > 10000 ? Infinity : `${fixD(apr, 2)}%`,
+            tvlView: tvl ? `$ ${addCommom(tvl, 2)}` : '--'
+          }
+        }
+        this.tvlDataObjNew = result
+      }
+    },
     getTvl(item: any) {
       let apr
       if (item && this.tvlData && this.tvlData[item.positionWrapper]) {
@@ -319,28 +400,28 @@ export default Vue.extend({
         description: (h: any) => h('div', [`${title} Success`])
       })
     },
-    updateIsShowTableTr(index: any) {
-      if (index == 0 && this.isShowTableTr != 0) {
-        this.isShowTableTr = 0
-      } else if (index == 0 && this.isShowTableTr == 0) {
-        this.isShowTableTr = -1
-      }
-    },
-    toogleData(index: number) {
-      const info = this.tableDataArr[index]
-      const tempcoinA = info.coinB
-      const tempcoinB = info.coinA
-      const rewardRange = info.rewardRange
-      const temprewardRange = info.rewardRange.split('').reverse().join('')
-      const data = {
-        ...info,
-        coinA: tempcoinA,
-        coinB: tempcoinB,
-        rewardRange: temprewardRange
-      }
-      this.tableDataArr[index] = data
-      this.$forceUpdate()
-    },
+    // updateIsShowTableTr(index: any) {
+    //   if (index == 0 && this.isShowTableTr != 0) {
+    //     this.isShowTableTr = 0
+    //   } else if (index == 0 && this.isShowTableTr == 0) {
+    //     this.isShowTableTr = -1
+    //   }
+    // },
+    // toogleData(index: number) {
+    //   const info = this.tableDataArr[index]
+    //   const tempcoinA = info.coinB
+    //   const tempcoinB = info.coinA
+    //   const rewardRange = info.rewardRange
+    //   const temprewardRange = info.rewardRange.split('').reverse().join('')
+    //   const data = {
+    //     ...info,
+    //     coinA: tempcoinA,
+    //     coinB: tempcoinB,
+    //     rewardRange: temprewardRange
+    //   }
+    //   this.tableDataArr[index] = data
+    //   this.$forceUpdate()
+    // },
     gotoLp(item: any) {
       if (item) {
         this.$router.push(`/pool?from=${item.tokenA.symbol}&to=${item.tokenB.symbol}`)
@@ -357,11 +438,11 @@ export default Vue.extend({
       console.log('watchFarmingList####list####', list)
       this.dataList = list
     },
-    walletWatch(newValue) {
-      // if (newValue) {
-      this.$accessor.farming.getFarmingList()
-      // }
-    },
+    // walletWatch(newValue) {
+    //   // if (newValue) {
+    //   this.$accessor.farming.getFarmingList()
+    //   // }
+    // },
     async toStake(poolInfo: any, positionInfo: any) {
       this.currentPosition = positionInfo
       this.isStaking = true
@@ -403,8 +484,10 @@ export default Vue.extend({
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
             if (!signatureResult.err) {
               // setTimeout(() => {
-              _this.$accessor.farming.getFarmingList()
+              // _this.$accessor.farming.getFarmingList()
+              // _this.$accessor.farming.getEarningsObj()
               // }, 1500)
+              _this.$emit('refreshData')
             }
           })
         }
@@ -468,8 +551,10 @@ export default Vue.extend({
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
             if (!signatureResult.err) {
               // setTimeout(() => {
-              _this.$accessor.farming.getFarmingList()
+              // _this.$accessor.farming.getFarmingList()
+              // _this.$accessor.farming.getEarningsObj()
               // }, 1500)
+              _this.$emit('refreshData')
             }
           })
         }
@@ -514,7 +599,9 @@ export default Vue.extend({
           const _this = this
           conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
             if (!signatureResult.err) {
-              _this.$accessor.farming.getFarmingList()
+              // _this.$accessor.farming.getFarmingList()
+              // _this.$accessor.farming.getEarningsObj()
+              _this.$emit('refreshData')
             }
           })
         }
@@ -529,6 +616,32 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style lang="less">
+.the-more-tooltip {
+  .ant-tooltip-inner {
+    padding: 0px !important;
+    background: rgba(#000, 0) !important;
+  }
+  .ant-tooltip-arrow {
+    &::before {
+      background: rgba(#000, 0) !important;
+    }
+  }
+}
+
+.td-title-tooltip {
+  .ant-tooltip-inner {
+    background: rgba(#000, 0.2) !important;
+    backdrop-filter: blur(10px);
+  }
+  .ant-tooltip-arrow {
+    &::before {
+      background: rgba(#000, 0) !important;
+    }
+  }
+}
+</style>
 <style lang="less" scoped>
 @import '../styles/base.less';
 * {
@@ -555,6 +668,9 @@ export default Vue.extend({
   & + .farming-pool-card-box {
     margin-top: 20px;
   }
+  &:last-child {
+    margin-bottom: 0px;
+  }
 }
 .farming-pool-card {
   padding: 22px 12px;
@@ -571,7 +687,7 @@ export default Vue.extend({
         font-size: 12px;
         color: #d8d8d8;
         display: flex;
-        // align-items: center;
+        align-items: center;
         // justify-content: center;
         line-height: 20px;
         .icon {
@@ -653,7 +769,7 @@ export default Vue.extend({
   }
   .stake-and-unstake {
     margin-top: 28px;
-    background: #282c33;
+    // background: #282c33;
     border-radius: 10px;
     .stake-box {
       padding: 0 16px 40px;
@@ -707,66 +823,17 @@ export default Vue.extend({
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      .icon {
-        width: 20px;
-        height: 20px;
-        // transform: rotate(180deg);
-        margin-left: 8px;
-        fill: #b5b8c2 !important;
-        &:hover {
-          fill: #fff !important;
-        }
-      }
-      .icon-open {
-        transform: rotate(180deg);
-      }
-      > div {
-        width: 14px;
-        height: 14px;
-        background: #b5b8c2;
+      .toggle-icon-box,
+      .the-more-icon-box {
+        background: none !important;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #b5b8c2;
         border-radius: 50%;
         display: flex;
-        position: relative;
-        > svg {
-          width: 14px;
-          height: 14px;
-        }
-        .symbol-relation {
-          position: absolute;
-          width: 140px;
-          left: -140px;
-          top: 20px;
-          height: 90px;
-          background: rgba(#000, 0.2);
-          backdrop-filter: blur(10px);
-          z-index: 20;
-          padding: 10px;
-          display: flex;
-          flex-wrap: wrap;
-          align-content: space-around;
-          border-radius: 6px;
-          > div {
-            background: none;
-            color: #b5b8c2;
-            width: 100%;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            padding-left: 8px;
-            font-size: 12px;
-            border-radius: 10px;
-            svg {
-              margin-right: 4px;
-              width: 20px;
-              height: 20px;
-              fill: #fff;
-              cursor: pointer;
-            }
-            &:hover {
-              background: #30343c;
-            }
-          }
-        }
+        align-items: center;
+        justify-content: center;
+        margin-left: 8px;
       }
     }
     .open-or-close-disabled {
@@ -777,6 +844,42 @@ export default Vue.extend({
         fill: #5f667c;
       }
     }
+  }
+}
+.symbol-relation {
+  // position: absolute;
+  // width: 140px;
+  // left: -20px;
+  // height: 90px;
+  background: rgba(#000, 0.2);
+  backdrop-filter: blur(10px);
+  z-index: 20;
+  padding: 6px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-around;
+  border-radius: 10px;
+  > div {
+    background: none;
+    color: #b5b8c2;
+    width: 100%;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    // padding-left: 8px;
+    font-size: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    svg {
+      margin-right: 4px;
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+      cursor: pointer;
+    }
+    // &:hover {
+    //   background: #30343c;
+    // }
   }
 }
 .farming-pool-card-hide-box {
@@ -797,6 +900,19 @@ export default Vue.extend({
     -webkit-background-clip: text;
     color: transparent;
     font-family: 'Arial-BoldMT', Arial;
+  }
+
+  .no-positions {
+    height: 150px !important;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    button {
+      height: 40px;
+      width: 150px;
+    }
   }
 }
 </style>

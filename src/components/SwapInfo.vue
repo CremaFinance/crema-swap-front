@@ -2,17 +2,29 @@
   <div class="swap-info">
     <div class="block">
       <span>Exchange Rate</span>
-      <div v-if="fromCoin && toCoin && Number(fromCoinAmount) && Number(toCoinAmount) && defaultRates" class="right">
-        <span v-if="Number(fromCoinAmount) && Number(toCoinAmount)">
-          1 {{ fromCoin.symbol }} = {{ fixD(Number(toCoinAmount) / Number(fromCoinAmount), toCoin.decimals) }}
-          {{ toCoin.symbol }}
-        </span>
-        <span v-else
-          >1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span
-        >
-      </div>
-      <div v-if="fromCoin && toCoin && (!Number(fromCoinAmount) || !Number(toCoinAmount))">
-        <span>1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span>
+
+      <div class="right">
+        <div v-if="fromCoin && toCoin && Number(fromCoinAmount) && Number(toCoinAmount) && defaultRates">
+          <span v-if="Number(fromCoinAmount) && Number(toCoinAmount)">
+            1 {{ fromCoin.symbol }} = {{ fixD(Number(toCoinAmount) / Number(fromCoinAmount), toCoin.decimals) }}
+            {{ toCoin.symbol }}
+          </span>
+          <span v-else
+            >1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span
+          >
+        </div>
+        <div v-if="fromCoin && toCoin && (!Number(fromCoinAmount) || !Number(toCoinAmount))">
+          <span>1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span>
+        </div>
+        <Progress
+          type="circle"
+          :width="14"
+          :stroke-width="10"
+          :percent="(100 / autoRefreshTime) * countdown"
+          :show-info="false"
+          :class="dataIsLoading ? 'disabled' : ''"
+          @click="toRefreshData"
+        />
       </div>
     </div>
     <template v-if="toCoinAmount && fromCoinAmount && Number(toCoinAmount) > 0">
@@ -40,9 +52,14 @@
 <script lang="ts">
 import Vue from 'vue'
 import { fixD, getUnixTs } from '@/utils/index'
+import { Progress } from 'ant-design-vue'
+
 export default Vue.extend({
   // eslint-disable-next-line vue/require-prop-types
   // props: ['poolInfo', 'fromCoin', 'toCoin', 'fromCoinAmount', 'toCoinAmount'],
+  components: {
+    Progress
+  },
   props: {
     poolInfo: {
       type: Object,
@@ -73,11 +90,18 @@ export default Vue.extend({
     fixedFromCoin: {
       type: Boolean,
       default: true
+    },
+    dataIsLoading: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
     return {
-      defaultRates: ''
+      defaultRates: '',
+      autoRefreshTime: 20,
+      countdown: 0,
+      refreshTimer: null
     }
   },
   // computed: {
@@ -103,6 +127,13 @@ export default Vue.extend({
       }
     }
   },
+  mounted() {
+    this.setRefreshTimer()
+  },
+  destroyed() {
+    clearInterval(this.refreshTimer)
+    this.refreshTimer = null
+  },
   methods: {
     fixD,
     poolInfoWatch(poolInfo: any) {
@@ -118,6 +149,23 @@ export default Vue.extend({
         // this.defaultRates = String(1 / Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
         this.defaultRates = poolInfo.currentPriceViewReverse
       }
+    },
+    toRefreshData() {
+      this.countdown = 0
+      this.$emit('refresh')
+    },
+    setRefreshTimer() {
+      this.refreshTimer = setInterval(() => {
+        if (!this.loading) {
+          if (this.countdown < this.autoRefreshTime) {
+            this.countdown += 1
+
+            if (this.countdown === this.autoRefreshTime) {
+              this.toRefreshData()
+            }
+          }
+        }
+      }, 1000)
     }
   }
 })
@@ -137,6 +185,10 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       color: #fff;
+      .ant-progress {
+        margin-left: 6px;
+        margin-bottom: 3px;
+      }
       svg {
         width: 20px;
         height: 20px;

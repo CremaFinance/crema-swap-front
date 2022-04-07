@@ -491,6 +491,7 @@ export default Vue.extend({
           [0, 0],
           [width, height]
         ])
+        .handleSize(30)
         .on('end', brushend)
 
       console.log('D3Chart####minPriceTick####', minPriceTick)

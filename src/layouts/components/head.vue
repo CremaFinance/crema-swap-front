@@ -1,69 +1,74 @@
 <template>
   <div class="header-container">
-    <a class="logo" href="https://www.crema.finance/" target="_blank">
-      <img src="../../assets/images/logo@2x@2x.png" />
-      <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
-    </a>
-    <div class="left">
-      <nav>
-        <!-- <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
+    <NetworkWarnning v-if="$accessor.showNetWorkWarnning" @close="closeNetworkWarning"></NetworkWarnning>
+    <div class="header-content-container">
+      <div class="header-content">
+        <a class="logo" href="https://www.crema.finance/" target="_blank">
+          <img src="../../assets/images/logo@2x@2x.png" />
+          <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
+        </a>
+        <div class="left">
+          <nav>
+            <!-- <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
           <img src="../../assets/images/icon-Trading@2x.png" />
           <span>Trading</span>
         </a> -->
-        <nuxt-link
-          to="/swap"
-          :class="$route.path === '/swap' || $route.path === '/' ? 'nuxt-link-exact-active nuxt-link-active' : ''"
-        >
-          <img src="../../assets/images/icon-Swap@2x.png" />
-          <span>Swap</span>
-        </nuxt-link>
-        <nuxt-link
-          to="/pool"
-          :class="
-            $route.path === '/position' ||
-            $route.name === 'increase-id' ||
-            $route.name === 'remove-id' ||
-            $route.name === 'detail-id'
-              ? 'nuxt-link-exact-active nuxt-link-active'
-              : ''
-          "
-        >
-          <img src="../../assets/images/icon-Pools@2x.png" />
-          <span>Pools</span>
-        </nuxt-link>
-        <!-- <nuxt-link to="/farming">
-          <img src="../../assets/images/icon-Farming@2x.png" />
-          <span>Farming</span>
-        </nuxt-link> -->
-        <!-- <nuxt-link to="/staking">
+            <nuxt-link
+              to="/swap"
+              :class="$route.path === '/swap' || $route.path === '/' ? 'nuxt-link-exact-active nuxt-link-active' : ''"
+            >
+              <img src="../../assets/images/icon-Swap@2x.png" />
+              <span>Swap</span>
+            </nuxt-link>
+            <nuxt-link
+              to="/pool"
+              :class="
+                $route.path === '/position' ||
+                $route.name === 'increase-id' ||
+                $route.name === 'remove-id' ||
+                $route.name === 'detail-id'
+                  ? 'nuxt-link-exact-active nuxt-link-active'
+                  : ''
+              "
+            >
+              <img src="../../assets/images/icon-Pools@2x.png" />
+              <span>Pools</span>
+            </nuxt-link>
+            <nuxt-link to="/farming">
+              <img src="../../assets/images/icon-Farming@2x.png" />
+              <span>Farming</span>
+            </nuxt-link>
+            <!-- <nuxt-link to="/staking">
           <img src="../../assets/images/icon-Staking@2x.png" />
           <span>Staking</span>
         </nuxt-link> -->
-        <nuxt-link to="/stats">
-          <img src="../../assets/images/stats.png" />
-          <span>Stats</span>
-        </nuxt-link>
-        <a href="https://gitbook.crema.finance/" target="_blank">
+            <nuxt-link to="/stats">
+              <img src="../../assets/images/stats.png" />
+              <span>Stats</span>
+            </nuxt-link>
+            <!-- <a href="https://gitbook.crema.finance/" target="_blank">
           <img class="docs-img" src="../../assets/images/icon-Docs.png" />
           <span>Docs</span>
-        </a>
-      </nav>
-    </div>
-    <div class="right">
-      <!-- <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
+        </a> -->
+          </nav>
+        </div>
+        <div class="right">
+          <!-- <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon_guide"></use>
         </svg>
         <span>Test Guide</span>
       </a> -->
-      <!-- <a class="test-guide" href="https://gitbook.crema.finance/" target="_blank">
+          <!-- <a class="test-guide" href="https://gitbook.crema.finance/" target="_blank">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-Docs"></use>
         </svg>
         <span>Docs</span>
       </a> -->
-      <Wallet />
-      <Contactus></Contactus>
+          <Wallet />
+          <Contactus></Contactus>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -77,6 +82,11 @@ export default Vue.extend({
   components: {
     Contactus
   },
+  // data() {
+  //   return {
+  //     showNetworkWarning: true
+  //   }
+  // },
   computed: {
     ...mapState(['wallet', 'position', 'liquidity']),
     liquidityInfosAndWalletTokenAccount() {
@@ -100,12 +110,22 @@ export default Vue.extend({
   mounted() {
     const slippage = localStorage.getItem('crema-slippage') || '1'
     this.$accessor.setSlippage(slippage)
-    this.$accessor.liquidity.getRates()
+  },
+  methods: {
+    closeNetworkWarning() {
+      this.$accessor.setNetWorkWarnning(false)
+    }
   }
 })
 </script>
 <style lang="less" scoped>
 .header-container {
+  width: 100%;
+}
+.header-content-container {
+  padding: 0px 40px;
+}
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -115,6 +135,7 @@ export default Vue.extend({
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: #22252b;
   position: relative;
+  // padding: 0px 40px;
   > .left {
     flex: 1;
     display: flex;

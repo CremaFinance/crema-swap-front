@@ -30,7 +30,8 @@ export const state = () => ({
   infos: {} as any,
   myPositions: [],
   currentPositon: {},
-  rates: {}
+  rates: null as any,
+  poolsDefaultPriceRangeObj: {} as any
   // userPositionAccountObj: {} as any
 })
 
@@ -77,6 +78,9 @@ export const mutations = mutationTree(state, {
   },
   setRates(state, value) {
     state.rates = value
+  },
+  setPoolsDefaultPriceRangeObj(state, value) {
+    state.poolsDefaultPriceRangeObj = value
   }
 })
 
@@ -84,6 +88,7 @@ export const actions = actionTree(
   { state, getters, mutations },
   {
     async requestInfos({ commit }) {
+      commit('setLoading', true)
       const liquidityPools = {} as any // 池子信息
       // let userPositionAccountObj: any = {} // 用户仓位列表
       const myPosionList = [] as any // 我的仓位列表
@@ -203,23 +208,37 @@ export const actions = actionTree(
         return list
       }
 
+      // let unstakeObj: any = {}
+      // for (const key in infos) {
+      //   const stakedPositons = await fetchSwapPositionsByOwner(
+      //     new PublicKey(infos[key].tokenSwapAccount),
+      //     wallet.publicKey,
+      //     conn,
+      //     wallet
+      //   )
+      //   // statedList = [...statedList, ...stakedPositons]
+      //   for (let j = 0; j < stakedPositons.length; j++) {
+      //     unstakeObj[stakedPositons[j].nftTokenId.toString()] = stakedPositons[j]
+      //   }
+      // }
+
       for (const coinPair in infos) {
         const poolInfo = cloneDeep(infos[coinPair])
         const userPositionAccountObj = poolInfo.userPositionAccountObj
 
         let unstakeObj: any = {}
-        for (let i = 0; i < LPFARMS.length; i++) {
-          const stakedPositons = await fetchSwapPositionsByOwner(
-            new PublicKey(poolInfo.tokenSwapAccount),
-            wallet.publicKey,
-            conn,
-            wallet
-          )
-          // statedList = [...statedList, ...stakedPositons]
-          for (let j = 0; j < stakedPositons.length; j++) {
-            unstakeObj[stakedPositons[j].nftTokenId.toString()] = stakedPositons[j]
-          }
+        // for (const key in infos) {
+        const stakedPositons = await fetchSwapPositionsByOwner(
+          new PublicKey(infos[coinPair].tokenSwapAccount),
+          wallet.publicKey,
+          conn,
+          wallet
+        )
+        // statedList = [...statedList, ...stakedPositons]
+        for (let j = 0; j < stakedPositons.length; j++) {
+          unstakeObj[stakedPositons[j].nftTokenId.toString()] = stakedPositons[j]
         }
+        // }
 
         for (const key in tokenAccounts) {
           if (userPositionAccountObj[key]) {
@@ -258,7 +277,7 @@ export const actions = actionTree(
           res.data.prices.forEach((item) => {
             result[item.base_symbol] = Number(item.price)
           })
-
+          console.log('getRates###result####', result)
           commit('setRates', result)
         }
       })
@@ -351,6 +370,10 @@ export const actions = actionTree(
           } catch (err) {}
         }
 
+        if (currentData.poolInfo.pc.symbol.toUpperCase() === 'CUSDC') {
+          pcSymbolRate = RATES[currentData.poolInfo.pc.symbol]
+        }
+
         const amountUSDBig = toNum.multipliedBy(pcSymbolRate)
 
         const amountUSD = decimalFormat(amountUSDBig.toFixed(), 4)
@@ -418,6 +441,26 @@ export const actions = actionTree(
         console.log('sdsfsdfd')
         commit('setCurrentPosition', {})
       }
+    },
+
+    getPoolsDefaultPriceRange({ state, commit }) {
+      this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
+        let pools: any = []
+        const result: any = {}
+        if (res && res.data && res.data.pools) {
+          pools = res.data.pools
+        }
+
+        // for (const key in pools) {
+        //   result[key] = pools[key]
+        // }
+        pools.forEach((item: any) => {
+          result[item.name] = item
+        })
+
+        console.log('getPoolsDefaultPriceInterval###result#####', result)
+        commit('setPoolsDefaultPriceRangeObj', result)
+      })
     }
   }
 )
