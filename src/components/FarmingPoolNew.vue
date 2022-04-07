@@ -433,26 +433,45 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Stake ${poolInfo.name} NFT`
-          this.$accessor.transaction.sub({ txid, description, type: 'Stake' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
-          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-            _this.isStaking = false
-            _this.isDisabled = false
-            if (!signatureResult.err) {
-              // setTimeout(() => {
-              // _this.$accessor.farming.getFarmingList()
-              // _this.$accessor.farming.getEarningsObj()
-
-              // }, 1500)
+          this.$accessor.transaction.sub({
+            txid,
+            description,
+            type: 'Stake',
+            successCallback: () => {
+              _this.isStaking = false
+              _this.isDisabled = false
               _this.$emit('refreshData')
               _this.$accessor.farming.getPositionObj({
                 tvlData: _this.tvlData,
                 farmingInfo: poolInfo,
                 rates: _this.liquidity.rates
               })
+            },
+            errorCallback: () => {
+              _this.isStaking = false
+              _this.isDisabled = false
             }
           })
+
+          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+          //   _this.isStaking = false
+          //   _this.isDisabled = false
+          //   if (!signatureResult.err) {
+          //     // setTimeout(() => {
+          //     // _this.$accessor.farming.getFarmingList()
+          //     // _this.$accessor.farming.getEarningsObj()
+
+          //     // }, 1500)
+          //     _this.$emit('refreshData')
+          //     _this.$accessor.farming.getPositionObj({
+          //       tvlData: _this.tvlData,
+          //       farmingInfo: poolInfo,
+          //       rates: _this.liquidity.rates
+          //     })
+          //   }
+          // })
         }
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
@@ -509,25 +528,44 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Unstake ${poolInfo.name} NFT`
-          this.$accessor.transaction.sub({ txid, description, type: 'Unstake' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
-          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-            _this.isUnStaking = false
-            _this.isDisabled = false
-            if (!signatureResult.err) {
-              // setTimeout(() => {
-              // _this.$accessor.farming.getFarmingList()
-              // _this.$accessor.farming.getEarningsObj()
-              // }, 1500)
+          this.$accessor.transaction.sub({
+            txid,
+            description,
+            type: 'Unstake',
+            successCallback: () => {
+              _this.isUnStaking = false
+              _this.isDisabled = false
               _this.$emit('refreshData')
               _this.$accessor.farming.getPositionObj({
                 tvlData: _this.tvlData,
                 farmingInfo: poolInfo,
                 rates: _this.liquidity.rates
               })
+            },
+            errorCallback: () => {
+              _this.isUnStaking = false
+              _this.isDisabled = false
             }
           })
+
+          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+          //   _this.isUnStaking = false
+          //   _this.isDisabled = false
+          //   if (!signatureResult.err) {
+          //     // setTimeout(() => {
+          //     // _this.$accessor.farming.getFarmingList()
+          //     // _this.$accessor.farming.getEarningsObj()
+          //     // }, 1500)
+          //     _this.$emit('refreshData')
+          //     _this.$accessor.farming.getPositionObj({
+          //       tvlData: _this.tvlData,
+          //       farmingInfo: poolInfo,
+          //       rates: _this.liquidity.rates
+          //     })
+          //   }
+          // })
         }
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
@@ -574,23 +612,43 @@ export default Vue.extend({
         if (receipt && receipt.signature) {
           const txid = receipt.signature
           const description = `Harvest all rewards`
-          this.$accessor.transaction.sub({ txid, description, type: 'Harvest' })
-          this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
-          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-            _this.isClaiming = false
-            _this.isDisabled = false
-            if (!signatureResult.err) {
-              // _this.$accessor.farming.getFarmingList()
-              // _this.$accessor.farming.getEarningsObj()
+          this.$accessor.transaction.setShowSubmitted(true)
+          this.$accessor.transaction.sub({
+            txid,
+            description,
+            type: 'Harvest',
+            successCallback: () => {
+              _this.isClaiming = false
+              _this.isDisabled = false
               _this.$emit('refreshData')
               _this.$accessor.farming.getPositionObj({
                 tvlData: _this.tvlData,
                 farmingInfo: poolInfo,
                 rates: _this.liquidity.rates
               })
+            },
+            errorCallback: () => {
+              _this.isClaiming = false
+              _this.isDisabled = false
             }
           })
+
+          // const _this = this
+          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+          //   _this.isClaiming = false
+          //   _this.isDisabled = false
+          //   if (!signatureResult.err) {
+          //     // _this.$accessor.farming.getFarmingList()
+          //     // _this.$accessor.farming.getEarningsObj()
+          //     _this.$emit('refreshData')
+          //     _this.$accessor.farming.getPositionObj({
+          //       tvlData: _this.tvlData,
+          //       farmingInfo: poolInfo,
+          //       rates: _this.liquidity.rates
+          //     })
+          //   }
+          // })
         }
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)

@@ -105,7 +105,16 @@ export const actions = actionTree(
     setTransactionDesc({ commit }, desc: string) {
       commit('setTransactionDesc', desc)
     },
-    sub({ commit }, { txid, description, type = '' }: { txid: string; description: string; type: string }) {
+    sub(
+      { commit },
+      {
+        txid,
+        description,
+        type = '',
+        successCallback,
+        errorCallback
+      }: { txid: string; description: string; type: string; successCallback: any; errorCallback: any }
+    ) {
       const walletAddress = this.$accessor.wallet?.address
       commit('pushTx', { txid, description, walletAddress })
       logger('Sub', txid)
@@ -161,6 +170,9 @@ export const actions = actionTree(
               message: (h: any) => h('div', { style: 'color: #07EBAD' }, 'Transaction has been confirmed'),
               description
             })
+            if (successCallback) {
+              successCallback()
+            }
           } else {
             // fail
             commit('setTxStatus', { txid, status: 'fail', block: slot, walletAddress })
@@ -170,6 +182,9 @@ export const actions = actionTree(
               message: 'Transaction failed',
               description
             })
+            if (errorCallback) {
+              errorCallback()
+            }
           }
         },
         'single'
