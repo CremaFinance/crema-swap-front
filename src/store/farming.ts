@@ -1,6 +1,13 @@
 import { getterTree, mutationTree, actionTree } from 'typed-vuex'
 import { LPFARMS } from '@/utils/farming'
-import { fetchSwapPositionsByOwner, minerInfo, fetchPositionWrapper, fetchStakedPositions } from '@/contract/farming'
+import {
+  fetchSwapPositionsByOwner,
+  minerInfo,
+  fetchPositionWrapper,
+  fetchStakedPositions,
+  fetchMiners,
+  fetchCremaSwaps
+} from '@/contract/farming'
 import {
   clusterApiUrl,
   Connection,
@@ -151,172 +158,8 @@ export const actions = actionTree(
       // const rewardTokenDecimal = rewardTokenInfo.value.decimals
       for (let key in farmingConfig) {
         const { tokenA, tokenB } = farmingConfig[key]
-        // const swap = await new TokenSwap(
-        //   conn,
-        //   new PublicKey(SWAPV3_PROGRAMID),
-        //   new PublicKey(farmingConfig[key].swapKey),
-        //   null
-        // ).load()
-
-        // console.log('farming#####swap####', swap)
-
-        // if (wallet) {
-        //   // const payer = SWAP_PAYER
-        //   // const tokenSwap = await CTokenSwap.getAllAccounts(
-        //   //   conn,
-        //   //   new PublicKey(farmingConfig[key].swapKey),
-        //   //   SWAPV3_PROGRAMID,
-        //   //   payer
-        //   // )
-        //   // const currentPrice = contractPrice2showPrice(
-        //   //   tokenSwap.current_price.toNumber(),
-        //   //   tokenA.decimals,
-        //   //   tokenB.decimals
-        //   // )
-
-        //   // const canStatePositions: any = await fetchSwapPositionsByOwner(
-        //   //   new PublicKey(farmingConfig[key].swapKey),
-        //   //   wallet.publicKey,
-        //   //   conn,
-        //   //   wallet
-        //   // )
-
-        //   // console.log('farming#####canStatePositions####', canStatePositions)
-
-        //   // const cpresult: any = []
-        //   // for (let j = 0; j < canStatePositions.length; j++) {
-        //   //   const amount = await calculateTokenAmount(
-        //   //     canStatePositions[j].lowerTick,
-        //   //     canStatePositions[j].upperTick,
-        //   //     new Decimal(canStatePositions[j].liquity),
-        //   //     swap.tokenSwapInfo.currentSqrtPrice
-        //   //   )
-
-        //   //   const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
-        //   //   const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
-
-        //   //   let liquityUSD = amountA.plus(amountB)
-        //   //   liquityUSD = liquityUSD.mul(RATES[tokenB.symbol])
-
-        //   //   let withinRange = true
-
-        //   //   // 判断是否在有效tick范围内
-        //   //   const etrMax =
-        //   //     (tvlData &&
-        //   //       tvlData[farmingConfig[key].positionWrapper] &&
-        //   //       tvlData[farmingConfig[key].positionWrapper].etrMax) ||
-        //   //     0
-        //   //   const etrMin =
-        //   //     (tvlData &&
-        //   //       tvlData[farmingConfig[key].positionWrapper] &&
-        //   //       tvlData[farmingConfig[key].positionWrapper].etrMin) ||
-        //   //     0
-        //   //   if (canStatePositions[j].lowerTick >= etrMax || canStatePositions[j].upperTick <= etrMin) {
-        //   //     withinRange = false
-        //   //   }
-
-        //   //   console.log('canStatePositions[j].lowerTick###', canStatePositions[j].lowerTick)
-        //   //   console.log('canStatePositions[j].upperTick###', canStatePositions[j].upperTick)
-
-        //   //   cpresult.push({
-        //   //     ...canStatePositions[j],
-        //   //     nftMintAddress: canStatePositions[j].nftTokenId.toString(),
-        //   //     nftAccountAddress: canStatePositions[j].nftAccount.toString(),
-        //   //     liquityToString: canStatePositions[j].liquity.toString(),
-        //   //     liquityUSD: addCommom(liquityUSD.toString(), 4),
-        //   //     lowerPrice:
-        //   //       canStatePositions[j].lowerTick !== -443632
-        //   //         ? decimalFormat(tick2Price(canStatePositions[j].lowerTick).toString(), 6)
-        //   //         : '0',
-        //   //     upperPrice:
-        //   //       canStatePositions[j].upperTick !== 443632
-        //   //         ? decimalFormat(tick2Price(canStatePositions[j].upperTick).toString(), 6)
-        //   //         : '∞',
-        //   //     isStaked: false,
-        //   //     withinRange
-        //   //   })
-        //   // }
-
-        //   // const stakedPositons = await fetchStakedPositions(
-        //   //   conn,
-        //   //   wallet,
-        //   //   new PublicKey(farmingConfig[key].positionWrapper),
-        //   //   wallet.publicKey
-        //   // )
-
-        //   // console.log('farming#####stakedPositons####', stakedPositons)
-
-        //   // const sdresult: any = []
-        //   // for (let k = 0; k < stakedPositons.length; k++) {
-        //   //   const item: any = stakedPositons[k]
-        //   //   const amount = await calculateTokenAmount(
-        //   //     stakedPositons[k].lowerTick,
-        //   //     stakedPositons[k].upperTick,
-        //   //     new Decimal(stakedPositons[k].liquity.toString()),
-        //   //     swap.tokenSwapInfo.currentSqrtPrice
-        //   //   )
-
-        //   //   const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
-        //   //   const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
-
-        //   //   // const liquityUSD = amountA.mul(RATES[tokenA.symbol]).plus(amountB.mul(RATES[tokenB.symbol]))
-        //   //   let liquityUSD = amountA.plus(amountB)
-        //   //   liquityUSD = liquityUSD.mul(RATES[tokenB.symbol])
-        //   //   sdresult.push({
-        //   //     ...stakedPositons[k],
-        //   //     nftMintAddress: stakedPositons[k].nftMint.toString(),
-        //   //     nftAccountAddress: item.nftVault.toString(),
-        //   //     liquityToString: stakedPositons[k].liquity.toString(),
-        //   //     liquityUSD: addCommom(liquityUSD.toString(), 4),
-        //   //     lowerPrice:
-        //   //       stakedPositons[k].lowerTick !== -443632
-        //   //         ? decimalFormat(tick2Price(stakedPositons[k].lowerTick).toString(), 6)
-        //   //         : '0',
-        //   //     upperPrice:
-        //   //       stakedPositons[k].upperTick !== 443632
-        //   //         ? decimalFormat(tick2Price(stakedPositons[k].upperTick).toString(), 6)
-        //   //         : '∞',
-        //   //     isStaked: true
-        //   //   })
-        //   // }
-
-        //   // cpresult.sort(function (a, b) {
-        //   //   return b.withinRange - a.withinRange
-        //   // })
-        //   console.log('farmingConfig[key]####', farmingConfig[key])
-        //   result.push({
-        //     ...farmingConfig[key],
-        //     // positions: [...sdresult, ...cpresult],
-        //     positions: [],
-        //     minPrice:
-        //       (farmingConfig[key] && farmingConfig[key].effectivePrice && farmingConfig[key].effectivePrice[0]) || 0,
-        //     maxPrice:
-        //       (farmingConfig[key] && farmingConfig[key].effectivePrice && farmingConfig[key].effectivePrice[1]) || 0
-        //     // miner: miner
-        //     //   ? {
-        //     //       ...miner,
-        //     //       PendingRewardView: new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
-        //     //     }
-        //     //   : null,
-        //     // pinfo: {
-        //     //   ...pinfo,
-        //     //   etrMinPrice: decimalFormat(tick2Price(pinfo.etrMin).toString(), 6),
-        //     //   etrMaxPrice: decimalFormat(tick2Price(pinfo.etrMax).toString(), 6)
-        //     // },
-        //     // fee: swap.tokenSwapInfo.fee.mul(100).toString()
-        //   })
-        // } else {
-        //   result.push({
-        //     ...farmingConfig[key],
-        //     positions: []
-        //     // miner: null,
-        //     // pinfo: null,
-        //     // fee: swap.tokenSwapInfo.fee.mul(100).toString()
-        //   })
-        // }
         result.push({
           ...farmingConfig[key],
-          // positions: [...sdresult, ...cpresult],
           positions: [],
           minPrice:
             (farmingConfig[key] && farmingConfig[key].effectivePrice && farmingConfig[key].effectivePrice[0]) || 0,
@@ -339,26 +182,39 @@ export const actions = actionTree(
       const RATES = { ...rates, CUSDC: 1 }
       const { tokenA, tokenB } = farmingInfo
       commit('setPositionsLoadingObj', { key: farmingInfo.positionWrapper, value: true })
-      const swap = await new TokenSwap(
-        conn,
-        new PublicKey(SWAPV3_PROGRAMID),
-        new PublicKey(farmingInfo.swapKey),
-        null
-      ).load()
+
+      // const list = [
+
+      //   // new PublicKey('FESPUeMZLHPGqQvpyJe2QCbNmqCtYPEr1fw2oUDGJN9Z'),
+      //   // new PublicKey('B1eNrQEExnPPmVbM3jiEAd89nW7tXUiArrk81JtUz6H8'),
+      //   // new PublicKey('C52SfQELE8kAUES36fAfBcvCkoWLgHTrANqMdFXqEnm8'),
+      //   // new PublicKey('QNZScPBQzskAPvYVipVeUBSkGVQ4vrkXyowcibXdi7V'),
+      //   // new PublicKey('GL2LxzsNLkttgaD46dQjSWycQSmf252TAPfK4tTuqjg7')
+      // ]
+      const swap: any = await fetchCremaSwaps([new PublicKey(farmingInfo.swapKey)], conn)
+
+      console.log('getPositionObj###swap####', swap)
+
+      // const swap = await new TokenSwap(
+      //   conn,
+      //   new PublicKey(SWAPV3_PROGRAMID),
+      //   new PublicKey(farmingInfo.swapKey),
+      //   null
+      // ).load()
 
       if (wallet) {
-        const payer = SWAP_PAYER
-        const tokenSwap = await CTokenSwap.getAllAccounts(
-          conn,
-          new PublicKey(farmingInfo.swapKey),
-          SWAPV3_PROGRAMID,
-          payer
-        )
-        const currentPrice = contractPrice2showPrice(
-          tokenSwap.current_price.toNumber(),
-          tokenA.decimals,
-          tokenB.decimals
-        )
+        // const payer = SWAP_PAYER
+        // const tokenSwap = await CTokenSwap.getAllAccounts(
+        //   conn,
+        //   new PublicKey(farmingInfo.swapKey),
+        //   SWAPV3_PROGRAMID,
+        //   payer
+        // )
+        // const currentPrice = contractPrice2showPrice(
+        //   tokenSwap.current_price.toNumber(),
+        //   tokenA.decimals,
+        //   tokenB.decimals
+        // )
 
         const canStatePositions: any = await fetchSwapPositionsByOwner(
           new PublicKey(farmingInfo.swapKey),
@@ -375,10 +231,12 @@ export const actions = actionTree(
             canStatePositions[j].lowerTick,
             canStatePositions[j].upperTick,
             new Decimal(canStatePositions[j].liquity),
-            swap.tokenSwapInfo.currentSqrtPrice
+            // swap.tokenSwapInfo.currentSqrtPrice
+            swap.currentSqrtPrice
           )
 
-          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
+          // const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(swap.currentPrice)
           const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
 
           let liquityUSD = amountA.plus(amountB)
@@ -421,7 +279,6 @@ export const actions = actionTree(
 
         const stakedPositons = await fetchStakedPositions(
           conn,
-          wallet,
           new PublicKey(farmingInfo.positionWrapper),
           wallet.publicKey
         )
@@ -435,10 +292,11 @@ export const actions = actionTree(
             stakedPositons[k].lowerTick,
             stakedPositons[k].upperTick,
             new Decimal(stakedPositons[k].liquity.toString()),
-            swap.tokenSwapInfo.currentSqrtPrice
+            swap.currentSqrtPrice
           )
 
-          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
+          // const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(swap.currentPrice)
           const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
 
           // const liquityUSD = amountA.mul(RATES[tokenA.symbol]).plus(amountB.mul(RATES[tokenB.symbol]))
@@ -501,34 +359,60 @@ export const actions = actionTree(
         commit('setEarningLoading', true)
       }
 
-      console.log('123getFarmingList###getEarningsObj####进来了吗###', LPFARMS)
-
-      for (const key in LPFARMS) {
-        const miner: any = await minerInfo(
-          conn,
-          wallet,
-          new PublicKey(LPFARMS[key].rewarderKey),
-          new PublicKey(LPFARMS[key].positionWrapperWrapMint)
-        )
-
-        if (miner && miner.PendingReward) {
-          const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(LPFARMS[key].rewardTokenMint))
-          const rewardTokenDecimal = rewardTokenInfo.value.decimals
-
-          console.log('123getFarmingList###getEarningsObj####miner###', miner)
-          const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
-
-          result[LPFARMS[key].positionWrapper] = {
+      console.log('wallet.publicKey####', wallet.publicKey)
+      const minerList: any = (await fetchMiners(wallet.publicKey, conn)) || []
+      minerList.forEach((item) => {
+        console.log('#item.PendingReward.toNumber()###', item.PendingReward.toNumber())
+        console.log('#item.PendingReward###', item.PendingReward)
+        if (item.PendingReward && item.PendingReward.toNumber()) {
+          const earning = new Decimal(item.PendingReward.toString()).div(Math.pow(10, 6)).toString()
+          console.log('earning####', earning)
+          result[item.tokenMintKey.toString()] = {
             value: earning,
             view: addCommom(earning, 6)
           }
         } else {
-          result[LPFARMS[key].positionWrapper] = {
+          result[item.tokenMintKey.toString()] = {
             value: '0',
             view: '0'
           }
         }
-      }
+
+        // console.log('minnerkey###', item.MinerKey.toString())
+        // console.log('quarryKey###', item.quarryKey.toString())
+        // console.log('tokenVaultKey###', item.tokenVaultKey.toString())
+        // console.log('tokenMintKey###', item.tokenMintKey.toString())
+      })
+      console.log('getEarnings###test###', minerList)
+
+      // console.log('123getFarmingList###getEarningsObj####进来了吗###', LPFARMS)
+
+      // for (const key in LPFARMS) {
+      //   const miner: any = await minerInfo(
+      //     conn,
+      //     wallet,
+      //     new PublicKey(LPFARMS[key].rewarderKey),
+      //     new PublicKey(LPFARMS[key].positionWrapperWrapMint)
+      //   )
+
+      //   if (miner && miner.PendingReward) {
+      //     const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(LPFARMS[key].rewardTokenMint))
+      //     const rewardTokenDecimal = rewardTokenInfo.value.decimals
+
+      //     console.log('123getFarmingList###getEarningsObj####miner###', miner)
+      //     const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
+
+      //     result[LPFARMS[key].positionWrapper] = {
+      //       value: earning,
+      //       view: addCommom(earning, 6)
+      //     }
+      //   } else {
+      //     result[LPFARMS[key].positionWrapper] = {
+      //       value: '0',
+      //       view: '0'
+      //     }
+      //   }
+      // }
 
       console.log('123getFarmingList###getEarningsObj###result####', result)
 
