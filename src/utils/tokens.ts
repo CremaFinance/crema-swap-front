@@ -162,15 +162,15 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   },
-  // '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm': {
-  //   symbol: 'scnSOL',
-  //   name: 'Socean staked SOL',
-  //   mintAddress: '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm',
-  //   decimals: 9,
-  //   referrer: '',
-  //   official: true,
-  //   showDefault: true
-  // },
+  '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm': {
+    symbol: 'scnSOL',
+    name: 'Socean staked SOL',
+    mintAddress: '5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm',
+    decimals: 9,
+    referrer: '',
+    official: true,
+    showDefault: true
+  },
   mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So: {
     symbol: 'mSOL',
     name: 'Marinade staked SOL(mSOL)',
