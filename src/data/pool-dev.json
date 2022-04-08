@@ -1,0 +1,85 @@
+{
+  "data": [
+    {
+      "name": "CNSOL-CNUSDC",
+      "fee": "0.0005",
+      "token_swap_account": "7JEGfvmHNecSV826CAAwoeaf2tY55jM9vQJrt1avALmy",
+      "pool_coin_token_account": "6rkEWzsnPWny9jQtaWprut9LFjtRKr81SLGMNnvNeeEt",
+      "pool_pc_token_account": "A3uuWwokP28xsSafnTj3g8a3UHvVLqnZWfcifhPWBB4Y",
+      "program_id": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "swap_program_id": "6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319",
+      "tick_detail_key": "6pGk93WVJG1pqB6u6ohj2cJEBFdcjzXscxesoVMdWmLz",
+      "user_position_key": "11111111111111111111111111111111",
+      "coin": {
+        "symbol": "CNSOL",
+        "name": "CNSOL test",
+        "token_mint": "8CZUSdQu5A6jE4oWMVYRZ29QVpYXigostjnYbWjXuCYs",
+        "decimal": 9
+      },
+      "pc": {
+        "symbol": "CNUSDC",
+        "name": "CNUSDC test",
+        "token_mint": "BVwhuJSmKCTXVCP6y1Vyso46Z8tktD3LBBkBGtcESvji",
+        "decimal": 6
+      },
+      "price_interval": {
+        "lower_price": "0.9995",
+        "upper_price": "1.001"
+      }
+    },
+    {
+      "name": "CSOL-CUSDC",
+      "fee": "",
+      "token_swap_account": "Gz113eAqg5FPJr3mnB2EhmDrGkUBHfsaY4xtbExd53nv",
+      "pool_coin_token_account": "",
+      "pool_pc_token_account": "",
+      "program_id": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "swap_program_id": "6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319",
+      "tick_detail_key": "",
+      "user_position_key": "",
+      "coin": {
+        "symbol": "",
+        "name": "",
+        "token_mint": "",
+        "decimal": 9
+      },
+      "pc": {
+        "symbol": "",
+        "name": "",
+        "token_mint": "",
+        "decimal": 6
+      },
+      "price_interval": {
+        "lower_price": "",
+        "upper_price": ""
+      }
+    },
+    {
+      "name": "CSOL-CUSDC",
+      "fee": "",
+      "token_swap_account": "",
+      "pool_coin_token_account": "",
+      "pool_pc_token_account": "",
+      "program_id": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "swap_program_id": "6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319",
+      "tick_detail_key": "",
+      "user_position_key": "",
+      "coin": {
+        "symbol": "",
+        "name": "",
+        "token_mint": "",
+        "decimal": 9
+      },
+      "pc": {
+        "symbol": "",
+        "name": "",
+        "token_mint": "",
+        "decimal": 6
+      },
+      "price_interval": {
+        "lower_price": "",
+        "upper_price": ""
+      }
+    }
+  ]
+}

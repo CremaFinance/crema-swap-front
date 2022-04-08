@@ -620,7 +620,7 @@ export default Vue.extend({
         // maxPrice = Number(max)
         console.log('pool###updateAmounts###this.direction####', this.direction)
         console.log('pool###updateAmounts###direction####', direction)
-        if (direction === 0) {
+        if (this.direction) {
           minPrice = Number(min)
           maxPrice = Number(max)
         } else {
@@ -707,6 +707,7 @@ export default Vue.extend({
         const dst = desiredAmountDst.toNumber()
         const delta_liquity = deltaLiquity.toNumber()
         console.log('delta_liquity#####', delta_liquity)
+        console.log('dst####', dst)
 
         this.showFromCoinLock = false
         this.showToCoinLock = false
