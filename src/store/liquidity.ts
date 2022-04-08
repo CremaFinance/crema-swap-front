@@ -87,6 +87,9 @@ export const mutations = mutationTree(state, {
 export const actions = actionTree(
   { state, getters, mutations },
   {
+    // async getPoolConfig({ commit }) {
+    //   this.$axios.get('')
+    // },
     async requestInfos({ commit }) {
       commit('setLoading', true)
       const liquidityPools = {} as any // 池子信息
@@ -155,72 +158,15 @@ export const actions = actionTree(
       commit('setInitialized')
       commit('setLoading', false)
     },
-    // getMyPositions({ state, commit }, tokenAccounts) {
-    //   const list: any = []
-    //   const infos = state.infos
-    //   if (checkNullObj(tokenAccounts)) {
-    //     return list
-    //   }
-    //   for (const coinPair in infos) {
-    //     const poolInfo = cloneDeep(infos[coinPair])
-    //     const userPositionAccountObj = poolInfo.userPositionAccountObj
-
-    //     for (const key in tokenAccounts) {
-    //       if (userPositionAccountObj[key]) {
-    //         const myPos = userPositionAccountObj[key]
-    //         const minPrice = tick2price(myPos.lower_tick)
-    //         const maxPrice = tick2price(myPos.upper_tick)
-
-    //         console.log('myPos###liquity####', myPos.liquity.toString())
-    //         list.push({
-    //           nftTokenId: myPos.nft_token_id.toString(),
-    //           nftTokenMint: key,
-    //           minPrice: fixD(Math.pow(minPrice, 2), 12),
-    //           maxPrice: fixD(Math.pow(maxPrice, 2), 12),
-    //           ...myPos,
-    //           poolInfo
-    //         })
-    //       }
-    //     }
-    //   }
-
-    //   console.log('myPositions#####', list)
-    //   commit('setMyPositions', list)
-    // },
     async getMyPositions({ state, commit }, tokenAccounts) {
       const conn = this.$web3
       const wallet = (this as any)._vm.$wallet
-      // for (let i = 0; i < LPFARMS.length; i++) {
-      //   const canStatePositions: any = await fetchSwapPositionsByOwner(
-      //     new PublicKey(LPFARMS[i].address),
-      //     wallet.publicKey,
-      //     conn,
-      //     wallet
-      //   )
-      //   for (let j = 0; j < canStatePositions.length; j++) {
-
-      //   }
-      // }
 
       const list: any = []
       const infos = state.infos
       if (checkNullObj(tokenAccounts)) {
         return list
       }
-
-      // let unstakeObj: any = {}
-      // for (const key in infos) {
-      //   const stakedPositons = await fetchSwapPositionsByOwner(
-      //     new PublicKey(infos[key].tokenSwapAccount),
-      //     wallet.publicKey,
-      //     conn,
-      //     wallet
-      //   )
-      //   // statedList = [...statedList, ...stakedPositons]
-      //   for (let j = 0; j < stakedPositons.length; j++) {
-      //     unstakeObj[stakedPositons[j].nftTokenId.toString()] = stakedPositons[j]
-      //   }
-      // }
 
       for (const coinPair in infos) {
         const poolInfo = cloneDeep(infos[coinPair])
@@ -450,10 +396,6 @@ export const actions = actionTree(
         if (res && res.data && res.data.pools) {
           pools = res.data.pools
         }
-
-        // for (const key in pools) {
-        //   result[key] = pools[key]
-        // }
         pools.forEach((item: any) => {
           result[item.name] = item
         })
