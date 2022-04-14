@@ -248,7 +248,12 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   {
     coinPair: 'NIRV-USDC',
     tokenSwapAccount: 'iLZsEBav2ne27YZinaPBRtPLjpZbWAB8FBGjMWbdScM'
+  },
+  {
+    coinPair: 'NIRV-USDH',
+    tokenSwapAccount: '3EyWKcrRfTWvc6j95Y3uB2RfQoxS2zkvRLdUAiqp3fSs'
   }
+
   // {
   //   coinPair: ''
   // }
