@@ -458,7 +458,10 @@ export default Vue.extend({
           // console.log('poolInfoWatch###value###', value)
           // 设置价格区间默认值
 
-          if (this.liquidity.poolsDefaultPriceRangeObj[value.coinPair]) {
+          if (
+            this.liquidity.poolsDefaultPriceRangeObj[value.coinPair] &&
+            this.liquidity.poolsDefaultPriceRangeObj[value.coinPair].price_interval
+          ) {
             const priceInterval = this.liquidity.poolsDefaultPriceRangeObj[value.coinPair].price_interval
             // const tick = getNearestTickByPrice(new Decimal(this.pValue), this.tickSpace)
             // console.log('onBlur###tick####', tick)
