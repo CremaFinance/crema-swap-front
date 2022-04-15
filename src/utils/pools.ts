@@ -244,7 +244,16 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   {
     coinPair: 'mSOL-SOL',
     tokenSwapAccount: 'GL2LxzsNLkttgaD46dQjSWycQSmf252TAPfK4tTuqjg7'
+  },
+  // {
+  //   coinPair: 'NIRV-USDC',
+  //   tokenSwapAccount: 'iLZsEBav2ne27YZinaPBRtPLjpZbWAB8FBGjMWbdScM'
+  // },
+  {
+    coinPair: 'NIRV-USDH',
+    tokenSwapAccount: '3EyWKcrRfTWvc6j95Y3uB2RfQoxS2zkvRLdUAiqp3fSs'
   }
+
   // {
   //   coinPair: 'scnSOL-SOL',
   //   tokenSwapAccount: '4i4QctWjgDPRZfe62PVmJw1Lf5iirAKBDjQccim427hY'
