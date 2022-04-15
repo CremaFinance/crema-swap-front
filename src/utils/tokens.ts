@@ -197,6 +197,15 @@ export const TOKENS: Tokens = {
     referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
     official: true,
     showDefault: false
+  },
+  NRVwhjBQiUPYtfDT5zRBVJajzFQHaBUNtC7SNVvqRFa: {
+    symbol: 'NIRV',
+    name: 'NIRV',
+    mintAddress: 'NRVwhjBQiUPYtfDT5zRBVJajzFQHaBUNtC7SNVvqRFa',
+    decimals: 6,
+    referrer: '',
+    official: true,
+    showDefault: true
   }
   // main net end *************
   // test net start ***************
