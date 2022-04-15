@@ -117,7 +117,7 @@
           </td>
           <td>
             <span>{{
-              item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : '- -'
+              item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : ''
             }}</span>
             <Button class="deposit-btn" @click="gotoLp(item)">Deposit</Button>
           </td>
@@ -208,9 +208,7 @@
           <div class="right">
             <h3>Recommend Range</h3>
             <p>
-              {{
-                item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : '- -'
-              }}
+              {{ item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : '' }}
             </p>
           </div>
         </div>
