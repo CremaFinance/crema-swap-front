@@ -20,6 +20,7 @@
       v-if="$accessor.transaction.showSubmitted"
       @onClose="$accessor.transaction.setShowSubmitted(false)"
     ></Success>
+    <!-- <div class="positon-container-bottom"></div> -->
   </div>
 </template>
 
@@ -47,6 +48,7 @@ export default Vue.extend({
     ...mapState(['transaction', 'url'])
   },
   created() {
+    console.log(this.$route)
     this.$accessor.liquidity.getRates()
   },
   mounted() {
@@ -103,6 +105,8 @@ export default Vue.extend({
   // padding-top: 200px;
   padding-top: 100px;
   padding-bottom: 40px;
+  position: relative;
+  z-index: 20;
   .h5-wallet {
     display: none;
   }
@@ -148,7 +152,18 @@ export default Vue.extend({
       padding: 60px 0 20px 0px;
       width: 198px;
       margin: auto;
+      position: relative;
+      z-index: 5;
     }
   }
+}
+.positon-container-bottom {
+  width: 100%;
+  height: 201px;
+  position: absolute;
+  bottom: 0;
+  background: linear-gradient(180deg, rgb(#0ec5fa, 0.58) 0%, rgba(#dd06f4, 0.58) 100%);
+  filter: blur(32px);
+  z-index: 16;
 }
 </style>

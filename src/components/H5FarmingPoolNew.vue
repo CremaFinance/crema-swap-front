@@ -573,15 +573,15 @@ export default Vue.extend({
       const sdk = makeSDK(conn, wallet)
 
       // Get nft account
-      const tokenAccounts = await getTokenAccountsByOwnerAndMint(
-        sdk.provider.connection,
-        sdk.provider.wallet.publicKey,
-        nftMint
-      )
-      if (tokenAccounts.length <= 0) {
-        console.log('The nft token account not foundkj')
-      }
-      invariant(tokenAccounts[0] !== undefined, 'The nft token accuont is undefined')
+      // const tokenAccounts = await getTokenAccountsByOwnerAndMint(
+      //   sdk.provider.connection,
+      //   sdk.provider.wallet.publicKey,
+      //   nftMint
+      // )
+      // if (tokenAccounts.length <= 0) {
+      //   console.log('The nft token account not foundkj')
+      // }
+      // invariant(tokenAccounts[0] !== undefined, 'The nft token accuont is undefined')
 
       this.$accessor.transaction.setTransactionDesc(`Unstake ${poolInfo.name} NFT`)
       this.$accessor.transaction.setShowWaiting(true)
@@ -594,7 +594,7 @@ export default Vue.extend({
         const tx = await sdk.positionWrapper.unstakeAndBurn({
           wrapper: wrapperInfo,
           nftMint,
-          nftAccount: tokenAccounts[0].address,
+          // nftAccount: tokenAccounts[0].address,
           rewarderKey,
           isClaim
         })
