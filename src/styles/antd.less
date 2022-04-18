@@ -200,15 +200,14 @@ button.ant-btn-background-ghost[disabled] {
 }
 
 .layout-container {
+
   .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-title,
-  .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph > li {
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph>li {
     // background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 37%, #f2f2f2 63%);
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.1) 25%,
-      rgba(255, 255, 255, 0.2) 37%,
-      rgba(255, 255, 255, 0.1) 63%
-    );
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.2) 37%,
+        rgba(255, 255, 255, 0.1) 63%);
     background-size: 400% 100%;
     // -webkit-animation: ant-skeleton-loading 1.4s ease infinite !important;
     animation: skeletonLoading 1.5s ease infinite;
@@ -265,3 +264,33 @@ button.ant-btn-background-ghost[disabled] {
 //   top: 50%;
 //   transform: translate(-50%);
 // }
+
+.ant-carousel .slick-dots li {
+  width: 12px;
+  height: 12px;
+  border-radius: 5px;
+
+  &+li {
+    margin-left: 10px;
+  }
+}
+
+
+.ant-carousel .slick-dots li button:hover,
+.ant-carousel .slick-dots li button:focus {
+  opacity: 1;
+}
+
+.ant-carousel .slick-dots li button {
+  display: block !important;
+  width: 12px !important;
+  border-radius: 5px !important;
+  height: 12px !important;
+  background: #009cc1 !important;
+  border: 1px solid #FFF !important;
+
+  &:hover {
+    background: #76FFF4 !important;
+
+  }
+}
