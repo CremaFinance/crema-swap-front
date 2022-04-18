@@ -49,7 +49,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in pools" :key="index">
+        <tr v-for="(item, index) in poolsvas" :key="index">
           <td>
             <!-- <img src="../assets/coins/usdt.png" />
             <img src="../assets/coins/usdc.png" /> -->
@@ -123,9 +123,28 @@
           </td>
         </tr>
       </tbody>
+      <tbody style="height: 60px; position: relative">
+        <div class="page-table-pc">
+          <div>
+            <svg class="icon" aria-hidden="true" @click="poolSource('red')" :class="poolsLeft ? 'icon-dis' : ''">
+              <use xlink:href="#icon-icon-solid-left-copy"></use>
+            </svg>
+            <span class="highlight">
+              {{ poolsPage.page }}
+            </span>
+            /
+            <span>
+              {{ poolsPage.total ? poolsPage.total : '-' }}
+            </span>
+            <svg class="icon" aria-hidden="true" @click="poolSource('add')" :class="poolsRight ? 'icon-dis' : ''">
+              <use xlink:href="#icon-icon-solid-right-copy"></use>
+            </svg>
+          </div>
+        </div>
+      </tbody>
     </table>
     <ul class="h5-data-list">
-      <li v-for="(item, index) in pools" :key="index">
+      <li v-for="(item, index) in poolsvas" :key="index">
         <div class="top">
           <div>
             <img
@@ -218,6 +237,23 @@
         <Button class="deposit-btn-h5" @click="gotoLp(item)">Deposit</Button>
       </li>
     </ul>
+    <div class="page-table-h5">
+      <div>
+        <svg class="icon" aria-hidden="true" @click="poolSource('red')" :class="poolsLeft ? 'icon-dis' : ''">
+          <use xlink:href="#icon-icon-solid-left-copy"></use>
+        </svg>
+        <span class="highlight">
+          {{ poolsPage.page }}
+        </span>
+        /
+        <span>
+          {{ poolsPage.total }}
+        </span>
+        <svg class="icon" aria-hidden="true" @click="poolSource('add')" :class="poolsLeft ? 'icon-dis' : ''">
+          <use xlink:href="#icon-icon-solid-right-copy"></use>
+        </svg>
+      </div>
+    </div>
     <h3 class="title">Top Tokens</h3>
     <table class="data-table">
       <thead>
@@ -238,7 +274,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in tokens" :key="index">
+        <tr v-for="(item, index) in tokenvas" :key="index">
           <td>
             <img class="last" :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
             <span>{{ item.name }}</span>
@@ -263,9 +299,28 @@
           <td>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</td>
         </tr>
       </tbody>
+      <tbody style="height: 60px; position: relative">
+        <div class="page-table-pc">
+          <div>
+            <svg class="icon" aria-hidden="true" @click="tokenSource('red')" :class="tokenLeft ? 'icon-dis' : ''">
+              <use xlink:href="#icon-icon-solid-left-copy"></use>
+            </svg>
+            <span class="highlight">
+              {{ tokenPage.page }}
+            </span>
+            /
+            <span>
+              {{ tokenPage.total ? tokenPage.total : '-' }}
+            </span>
+            <svg class="icon" aria-hidden="true" @click="tokenSource('add')" :class="tokenRight ? 'icon-dis' : ''">
+              <use xlink:href="#icon-icon-solid-right-copy"></use>
+            </svg>
+          </div>
+        </div>
+      </tbody>
     </table>
     <ul class="h5-data-list">
-      <li v-for="(item, index) in tokens" :key="index">
+      <li v-for="(item, index) in tokenvas" :key="index">
         <div class="top">
           <div>
             <img :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
@@ -305,9 +360,27 @@
         </div>
       </li>
     </ul>
+    <div class="page-table-h5">
+      <div>
+        <svg class="icon" aria-hidden="true" @click="tokenSource('red')" :class="tokenRight ? 'icon-dis' : ''">
+          <use xlink:href="#icon-icon-solid-left-copy"></use>
+        </svg>
+        <span class="highlight">
+          {{ tokenPage.page }}
+        </span>
+        /
+        <span>
+          {{ tokenPage.total }}
+        </span>
+        <svg class="icon" aria-hidden="true" @click="tokenSource('add')" :class="tokenRight ? 'icon-dis' : ''">
+          <use xlink:href="#icon-icon-solid-right-copy"></use>
+        </svg>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts">
+//
 import Vue from 'vue'
 import { mapState } from 'vuex'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
@@ -320,14 +393,15 @@ import { fixD } from '@/utils'
 // Vue.use(Spin)
 export default Vue.extend({
   components: {
+    // Pagination
     // Spin
     Tooltip
   },
   data() {
     return {
       // list: [],
-      pools: [],
-      tokens: [],
+      pools: [], //pools数据
+      tokens: [], //token数据
       TVL: 0,
       Volume: 0,
       APR: 0,
@@ -336,13 +410,67 @@ export default Vue.extend({
       showEchart: 'small',
       drop: false,
       litre: false,
-      wdAll: {}
+      wdAll: {},
+      tokenPage: {
+        page: 1,
+        total: null
+      },
+      tokenLeft: true,
+      tokenRight: false,
+      poolsLeft: true,
+      poolsRight: false,
+      tokenvas: [],
+      poolsPage: {
+        page: 1,
+        total: null
+      },
+      poolsvas: [],
+      state: {
+        current: 1, //列表 -- 当前页码
+        total: 50, //列表 -- 数据总数
+        pages: 0, //列表 -- 页数总数
+        pageSize: 10 //列表 -- 页码大小
+      }
+      // current: 6
     }
   },
   computed: {
     ...mapState(['farming'])
   },
-  watch: {},
+  watch: {
+    'tokenPage.page'(newVal, oldVal) {
+      if (this.tokenPage.page == this.tokenPage.total) {
+        if (this.tokenPage.total > 1) {
+          this.tokenLeft = false
+        }
+        this.tokenRight = true
+      } else if (this.tokenPage.page == 1) {
+        if (this.tokenPage.total > 1) {
+          this.tokenRight = false
+        }
+        this.tokenLeft = true
+      } else {
+        this.tokenRight = false
+        this.tokenLeft = false
+      }
+    },
+    'poolsPage.page'(newVal, oldVal) {
+      if (this.poolsPage.page == this.poolsPage.total) {
+        if (this.poolsPage.total > 1) {
+          this.poolsLeft = false
+        }
+        this.poolsRight = true
+      } else if (this.poolsPage.page == 1) {
+        if (this.poolsPage.total > 1) {
+          this.poolsRight = false
+        }
+        this.poolsLeft = true
+      } else {
+        this.poolsRight = false
+        this.poolsLeft = false
+      }
+    }
+  },
   created() {
     this.$accessor.farming.getStatisticsDataObj()
   },
@@ -382,6 +510,66 @@ export default Vue.extend({
       this.timer = setInterval(() => {
         this.getUct()
       }, 60000)
+    },
+    poolSource(val) {
+      // this.sortList('pools')
+      let data = this.pools
+      if (val == 'add') {
+        if (this.poolsPage.total == this.poolsPage.page) return false
+        let valu: any = []
+        data.forEach((item, index) => {
+          valu[index] = item
+        })
+        let start = 10 * (this.poolsPage.page + 1) - 10
+        let end = 10 * (this.poolsPage.page + 1)
+        let ultimately = valu.slice(start, end)
+        this.poolsvas = ultimately
+        this.poolsPage.page = this.poolsPage.page + 1
+      } else {
+        if (this.poolsPage.page == 1) return false
+        // let data = this.pools
+        let valu: any = []
+        data.forEach((item, index) => {
+          valu[index] = item
+        })
+        let start = 10 * (this.poolsPage.page - 1) - 10
+        let end = 10 * (this.poolsPage.page - 1)
+        let ultimately = valu.slice(start, end)
+        this.poolsvas = ultimately
+        this.poolsPage.page = this.poolsPage.page - 1
+      }
+    },
+    tokenSource(val) {
+      // this.sortList('tokens')
+      // this.litre = false
+      // this.sortList('tokens')
+      let data = this.tokens
+      // console.log(this.tokens)
+
+      if (val == 'add') {
+        if (this.tokenPage.total == this.tokenPage.page) return false
+        let valu: any = []
+        data.forEach((item, index) => {
+          valu[index] = item
+        })
+        let start = 10 * (this.tokenPage.page + 1) - 10
+        let end = 10 * (this.tokenPage.page + 1)
+        let ultimately = valu.slice(start, end)
+        this.tokenvas = ultimately
+        this.tokenPage.page = this.tokenPage.page + 1
+      } else {
+        if (this.tokenPage.page == 1) return false
+        // let data = this.tokens
+        let valu: any = []
+        data.forEach((item, index) => {
+          valu[index] = item
+        })
+        let start = 10 * (this.tokenPage.page - 1) - 10
+        let end = 10 * (this.tokenPage.page - 1)
+        let ultimately = valu.slice(start, end)
+        this.tokenvas = ultimately
+        this.tokenPage.page = this.tokenPage.page - 1
+      }
     },
     getUct() {
       this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
@@ -432,7 +620,22 @@ export default Vue.extend({
         }
         this.pools = result
         this.tokens = values
+        this.tokenPage.total = Math.ceil(values.length / 10)
+        this.poolsPage.total = Math.ceil(result.length / 10)
+        if (this.tokenPage.total == 1) {
+          this.tokenLeft = true
+          this.tokenRight = true
+        }
+        if (this.poolsPage.total == 1) {
+          this.poolsLeft = true
+          this.poolsRight = true
+        }
+        this.tokenvas = values.slice(0, 10)
+        this.poolsvas = result.slice(0, 10)
+
         this.sortList()
+        this.tokenPage.page = 1
+        this.poolsPage.page = 1
       })
     },
     // drop       // 将
@@ -444,24 +647,33 @@ export default Vue.extend({
         if (this.drop) {
           let val = this.pools.sort(this.changeArr('tvl'))
           this.pools = val
+          this.poolsvas = val.slice(0, 10)
           this.drop = !this.drop
         } else {
           let val = this.pools.sort(this.changeArrs('tvl'))
           this.pools = val
+          this.poolsvas = val.slice(0, 10)
           this.drop = !this.drop
         }
       } else if (vol == 'tokens') {
         if (this.litre) {
           let val = this.tokens.sort(this.changeArr('tvl'))
           this.tokens = val
+          let start = 10 * (this.tokenPage.page + 1) - 10
+          let end = 10 * (this.tokenPage.page + 1)
+          this.tokenvas = val.slice(start, end)
           this.litre = !this.litre
         } else {
           let val = this.tokens.sort(this.changeArrs('tvl'))
           this.tokens = val
+          let start = 10 * (this.tokenPage.page + 1) - 10
+          let end = 10 * (this.tokenPage.page + 1)
+          this.tokenvas = val.slice(start, end)
           this.litre = !this.litre
         }
       } else {
         let val = this.tokens.sort(this.changeArrs('vol_in_usd_24h'))
+        this.tokenvas = val.slice(0, 10)
         this.tokens = val
       }
     },
@@ -656,10 +868,8 @@ export default Vue.extend({
   }
   .data-table {
     width: 100%;
-    // background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
     background: #30343c;
     border-radius: 20px;
-    // margin-top: 20px;
     overflow: hidden;
     tr {
       &:nth-of-type(2n) {
@@ -813,9 +1023,79 @@ export default Vue.extend({
       }
     }
   }
+  .page-table-pc {
+    position: absolute;
+    width: 1000px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    font-size: 12px;
+    color: #909db4 !important;
+    > div .highlight {
+      // font-size: 12px;
+      color: #fff !important;
+    }
+    .icon {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      fill: #909db4;
+      &:hover {
+        fill: #fff;
+      }
+    }
+    .icon-dis {
+      fill: rgba(#909db4, 0.4) !important;
+      &:hover {
+        fill: rgba(#909db4, 0.4) !important;
+      }
+    }
+    > div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      width: 160px;
+      height: 100%;
+      background: #363a41;
+      border-radius: 8px;
+      padding: 0 12px;
+    }
+  }
+  .page-table-h5 {
+    display: none;
+  }
   .h5-data-list {
     display: none;
   }
+  .action-pag {
+    margin: 30px auto;
+    text-align: center;
+    /deep/ li .ant-pagination-item-link {
+      background: none !important;
+    }
+    /deep/ .ant-pagination-item-ellipsis {
+      color: #fff !important;
+      &:hover {
+        display: block;
+        color: #07ebad !important;
+      }
+    }
+    /deep/ .ant-pagination-item {
+      background: none !important;
+    }
+    /deep/ .anticon-right {
+      color: #fff;
+      &:hover {
+        color: #07ebad;
+      }
+    }
+  }
+  // .stats-pag {
+  //   width: 100%;
+  //   display: flex;
+  //   justify-content: center;
+  // }
 }
 .apr-list {
   padding: 0px;
@@ -881,8 +1161,6 @@ export default Vue.extend({
       width: 100%;
       background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
       border-radius: 20px;
-      // border: 1px solid #565c6a;
-      // margin-top: 20px;
       li {
         padding: 20px;
         position: relative;
@@ -1041,6 +1319,45 @@ export default Vue.extend({
             color: #fff;
           }
         }
+      }
+    }
+    .page-table-pc {
+      display: none;
+    }
+    .page-table-h5 {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      font-size: 16px;
+      color: #909db4 !important;
+      > div .highlight {
+        color: #fff !important;
+      }
+      .icon {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        fill: #909db4;
+        // &:hover {
+        //   fill: #fff;
+        // }
+      }
+      .icon-dis {
+        fill: rgba(#909db4, 0.4) !important;
+        // &:hover {
+        //   fill: rgba(#909db4, 0.4) !important;
+        // }
+      }
+      > div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: center;
+        width: 200px;
+        height: 100%;
+        background: #30343c;
+        border-radius: 8px;
+        padding: 0 12px;
       }
     }
   }

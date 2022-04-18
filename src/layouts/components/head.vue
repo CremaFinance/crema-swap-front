@@ -38,6 +38,10 @@
               <img src="../../assets/images/icon-Farming@2x.png" />
               <span>Farming</span>
             </nuxt-link>
+            <!-- <nuxt-link to="/fair">
+              <img src="../../assets/images/icon-Farming@2x.png" />
+              <span>Fair</span>
+            </nuxt-link> -->
             <!-- <nuxt-link to="/staking">
           <img src="../../assets/images/icon-Staking@2x.png" />
           <span>Staking</span>
@@ -82,11 +86,11 @@ export default Vue.extend({
   components: {
     Contactus
   },
-  // data() {
-  //   return {
-  //     showNetworkWarning: true
-  //   }
-  // },
+  data() {
+    return {
+      fairShow: ''
+    }
+  },
   computed: {
     ...mapState(['wallet', 'position', 'liquidity']),
     liquidityInfosAndWalletTokenAccount() {
@@ -107,6 +111,13 @@ export default Vue.extend({
         }
       },
       deep: true
+    },
+    $route(to, from) {
+      if (to.path == '/fair') {
+        this.fairShow = 'header-fair'
+      } else {
+        this.fairShow = ''
+      }
     }
   },
   mounted() {
@@ -270,5 +281,8 @@ export default Vue.extend({
       }
     }
   }
+}
+.header-fair {
+  background: none;
 }
 </style>
