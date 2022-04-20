@@ -256,6 +256,10 @@ export const LIQUIDITY_POOLS: LiquidityPoolInfo[] = [
   {
     coinPair: 'USDT-USDH',
     tokenSwapAccount: '268ysLhHgzyR4cUJjdjz1hBmuGTbD39Riv3YUueJLzL1'
+  },
+  {
+    coinPair: 'stSOL-SOL',
+    tokenSwapAccount: 'EjgzM1oPVicc6QufvceAUbY79YvmW3Je8cVyH55ZxyJz'
   }
 
   // {
