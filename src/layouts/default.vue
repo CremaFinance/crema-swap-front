@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-container">
+  <div class="layout-container" :class="fairShow">
     <div class="pc-header-container">
       <Head v-if="isPc"></Head>
     </div>
@@ -41,11 +41,23 @@ export default Vue.extend({
   data() {
     return {
       showNotice: false,
-      isPc: true
+      isPc: true,
+      fairShow: ''
     }
   },
   computed: {
     ...mapState(['transaction', 'url'])
+  },
+  watch: {
+    $route(to, from) {
+      if (to.path == '/fair') {
+        console.log('进去了####')
+        this.fairShow = 'layout-fair'
+      } else {
+        this.fairShow = ''
+        return false
+      }
+    }
   },
   created() {
     console.log(this.$route)
@@ -98,6 +110,13 @@ export default Vue.extend({
   top: 0px;
   width: 100%;
   box-sizing: border-box !important;
+}
+.layout-fair {
+  background: url('@/assets/images/img-fair-bg.png');
+  background-size: 100% 100%;
+  .pc-header-container {
+    background: none;
+  }
 }
 .body-container {
   width: 100%;
@@ -160,10 +179,10 @@ export default Vue.extend({
 .positon-container-bottom {
   width: 100%;
   height: 201px;
-  position: absolute;
+  position: fixed;
   bottom: 0;
   background: linear-gradient(180deg, rgb(#0ec5fa, 0.58) 0%, rgba(#dd06f4, 0.58) 100%);
   filter: blur(32px);
-  z-index: 16;
+  // z-index: 16;
 }
 </style>

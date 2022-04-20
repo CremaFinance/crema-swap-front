@@ -4,14 +4,16 @@
       <div class="positon-title">
         Concentrated Liquidity
         <Button class="my-pisiton-h5-btn">
-          <img src="../assets/images/icon-new-position@2x.png" alt="" />
+          <div class="my-pisiton-logo"></div>
+          <!-- <img src="../assets/images/icon-new-position@2x.png" alt="" /> -->
           <span>My Position</span>
         </Button>
       </div>
       <div class="my-pisiton">
         <div class="my-pisiton-box">
           <Button class="my-pisiton-btn">
-            <img src="../assets/images/icon-new-position@2x.png" alt="" />
+            <div class="my-pisiton-logo"></div>
+            <!-- <img src="../assets/images/icon-new-position@2x.png" alt="" /> -->
             <span>My Position</span>
           </Button>
         </div>
@@ -51,26 +53,30 @@
         <div class="coin-tab">
           <span :class="direct ? 'active' : ''" @click="changeDirect(true)">USD</span>
           <span :class="!direct ? 'active' : ''" @click="changeDirect(false)">SOL</span>
+          <!-- <div class="check-content" v-for="(item, index) in coinList" :key="index">
+            <div class="check-box">
+              <div v-show="selectCoin == item" class="check-box-active"></div>
+            </div>
+            <div class="check-name">{{ item }}</div>
+          </div> -->
         </div>
       </div>
     </div>
     <!-- 轮播图形式 -->
-    <div class="positon-list-box">
-      <!-- <Carousel ref="positonLeft" :after-change="onChange" dotsClass="dot-position"> -->
-      <div v-if="list && list.length >= 4" class="left-btn" @click="toLeft"></div>
-      <div v-if="list && list.length >= 4" class="right-btn" @click="toRight"></div>
-      <div class="positon-list-content">
-        <div
-          class="positon-list"
-          ref="positonLeft"
-          :style="list && list.length >= 4 ? { position: 'absolute', left: 0 } : {}"
-        >
-          <MyPositonItem v-for="(item, index) in list" :key="index" :p-item="item"></MyPositonItem>
-        </div>
-      </div>
-    </div>
-    <div class="positon-container-share-left"></div>
-    <div class="positon-container-share-right"></div>
+    <!-- <div class="positon-list-box"> -->
+    <!-- <Carousel ref="positonLeft" :after-change="onChange" dotsClass="dot-position"> -->
+    <!-- <div v-if="list && list.length >= 4" class="left-btn" @click="toLeft"></div>
+      <div v-if="list && list.length >= 4" class="right-btn" @click="toRight"></div> -->
+    <!-- <div class="positon-list-content"> -->
+    <!-- :style="list && list.length >= 4 ? { position: 'absolute', left: 0 } : {}" -->
+    <!-- <div class="positon-list" ref="positonLeft"> -->
+    <!-- <MyPositonItem v-for="(item, index) in list" :key="index" :p-item="item"></MyPositonItem> -->
+    <!-- </div> -->
+    <!-- </div> -->
+    <!-- </div> -->
+    <MyPositonItem></MyPositonItem>
+    <!-- <div class="positon-container-share-left"></div>
+    <div class="positon-container-share-right"></div> -->
     <!-- 列表形式 -->
     <!-- <div class="positon-list-box">
       <div class="positon-list">
@@ -98,124 +104,12 @@ export default Vue.extend({
       value: '',
       direct: true,
       step: 0,
-      list: [
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'USDC'
-            },
-            pc: {
-              symbol: 'USDT'
-            },
-            name: 'USDC-USDT'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'USDC'
-            },
-            pc: {
-              symbol: 'USDT'
-            },
-            name: 'USDC-USDT'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'USDC'
-            },
-            pc: {
-              symbol: 'USDT'
-            },
-            name: 'USDC-USDT'
-          }
-        },
-        {
-          nftTokenMint: '11111111111111',
-          poolInfo: {
-            coin: {
-              symbol: 'UST'
-            },
-            pc: {
-              symbol: 'USDC'
-            },
-            name: 'UST-USDC'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'mSOL'
-            },
-            pc: {
-              symbol: 'SOL'
-            },
-            name: 'mSOL-SOL'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'USDH'
-            },
-            pc: {
-              symbol: 'USDC'
-            },
-            name: 'USDH-USDC'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'UST'
-            },
-            pc: {
-              symbol: 'USDH'
-            },
-            name: 'UST-USDH'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'pUSDT'
-            },
-            pc: {
-              symbol: 'pUSDC'
-            },
-            name: 'pUSDT-pUSDC'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'pUSDT'
-            },
-            pc: {
-              symbol: 'pUSDC'
-            },
-            name: 'pUSDT-pUSDC'
-          }
-        },
-        {
-          poolInfo: {
-            coin: {
-              symbol: 'pUSDT'
-            },
-            pc: {
-              symbol: 'pUSDC'
-            },
-            name: 'pUSDT-pUSDC'
-          }
-        }
-      ]
+      coinList: ['All', 'SOL', 'USDC'],
+      selectCoin: 'All'
     }
   },
   computed: {
     groupList() {
-      console.log(this.group(this.list, 4), 'this.group(this.list, 4)##')
       return this.group(this.list, 4)
     }
   },
@@ -277,7 +171,8 @@ export default Vue.extend({
   width: 100%;
   position: relative;
   z-index: 5;
-  overflow: hidden;
+  overflow-y: scroll;
+  margin-top: 20px;
   .positon-center {
     // width: 800px;
     width: 1050px;
@@ -301,24 +196,40 @@ export default Vue.extend({
         background: linear-gradient(90deg, rgba(183, 98, 255, 1), rgba(93, 193, 221, 1));
         border-radius: 18px;
         // border: 1px solid;
-        padding: 1px;
+        padding: 2px;
         .my-pisiton-btn {
-          width: 130px;
-          height: 34px;
+          width: 128px;
+          height: 32px;
           background: #000;
           box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
           border-radius: 17px;
           display: flex;
           align-items: center;
-          img {
-            width: 40px;
-            height: 40px;
+          justify-content: center;
+          .my-pisiton-logo {
+            width: 28px;
+            height: 28px;
+            background: url(../assets/images/icon-new-position@2x.png);
+            background-size: 100% 100%;
+            margin-right: 5px;
           }
           span {
             font-size: 14px;
             font-family: Arial-BoldMT, Arial;
             font-weight: normal;
             color: #fff;
+          }
+        }
+        &:hover {
+          background: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58));
+          .my-pisiton-btn {
+            background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
+            .my-pisiton-logo {
+              width: 28px;
+              height: 28px;
+              background: url(../assets/images/icon-position-hover.png);
+              background-size: 100% 100%;
+            }
           }
         }
       }
@@ -401,17 +312,42 @@ export default Vue.extend({
             border: 1px solid #666b77;
           }
         }
+        // display: flex;
+        // align-items: center;
+        // .check-content {
+        //   display: flex;
+        //   align-items: center;
+        //   flex-wrap: nowrap;
+        //   .check-box {
+        //     width: 18px;
+        //     height: 18px;
+        //     background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
+        //     box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+        //     border-radius: 4px;
+        //     border: 1px solid #666b77;
+        //     margin-right: 8px;
+        //     margin-left: 20px;
+        //     padding: 3px;
+        //     .check-box-active {
+        //       width: 12px;
+        //       height: 12px;
+        //       background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
+        //       box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+        //       border-radius: 2px;
+        //     }
+        //   }
+        // }
       }
     }
   }
   .positon-list-box {
     // 滚动形式
-    // width: 1110px;
+    width: 1110px;
     // overflow: hidden;
     //轮播图形式
     // width: 100%;
-    height: 600px;
-    width: 1100px;
+    // height: 600px;
+    // width: 1100px;
     // overflow-x: hidden;
     position: relative;
     margin: 0 auto;
@@ -426,7 +362,7 @@ export default Vue.extend({
       position: absolute;
       z-index: 16;
       top: 30%;
-      left: -30px;
+      // left: -30px;
       transform: translateY(-50%);
     }
     .right-btn {
@@ -435,18 +371,20 @@ export default Vue.extend({
       position: absolute;
       z-index: 16;
       top: 30%;
-      right: -40px;
+      // right: -40px;
+      right: 0;
       transform: translateY(-50%);
     }
     .positon-list-content {
-      width: 1090px;
+      // width: 1090px;
+      width: 100%;
       height: 100%;
       margin: 30px 0 auto;
       position: relative;
       // overflow-x: visible;
       // overflow-y: visible;
-      display: flex;
-      justify-content: center;
+      // display: flex;
+      // justify-content: center;
     }
     // overflow-x: auto;
   }
@@ -456,18 +394,17 @@ export default Vue.extend({
     // padding: 0 30px;
     // width: 1090px;
     // overflow: hidden;
-
-    display: flex !important;
-    justify-content: center;
+    width: 1100px;
+    // display: flex !important;
+    // flex-wrap: wrap;
+    // justify-content: center;
     margin: 0px auto 0;
     transition: transform 1s;
     // 滚动形式
     // position: absolute;
     // left: 0;
-    .positon-item-container {
-      margin-left: 20px;
-    }
   }
+
   .positon-list-box::-webkit-scrollbar {
     display: none;
   }
@@ -522,9 +459,11 @@ export default Vue.extend({
           border-radius: 17px;
           display: flex;
           align-items: center;
-          img {
+          .my-pisiton-logo {
             width: 40px;
             height: 40px;
+            background: url(../assets/images/icon-new-position@2x.png);
+            background-size: 100% 100%;
           }
           span {
             font-size: 14px;
@@ -546,11 +485,12 @@ export default Vue.extend({
       }
     }
     .positon-list {
-      display: block !important;
+      display: flex !important;
       width: 100% !important;
       height: 100%;
       // position: unset;
       // left: 0;
+      justify-content: center;
       margin: auto;
       padding: 0;
       padding-bottom: 94px;

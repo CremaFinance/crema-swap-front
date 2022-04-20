@@ -207,6 +207,16 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   }
+  // '7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj': {
+  //   symbol: 'stSOL',
+  //   name: 'Lido Staked SOL',
+  //   mintAddress: '7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj',
+  //   decimals: 9,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // }
+
   // main net end *************
   // test net start ***************
   // '1msZrgEMrhEzhLWjGvEpqo3RUuzMWGs4x9S6j3Nk1hK': {
