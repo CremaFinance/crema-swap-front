@@ -11,7 +11,7 @@
               </p>
             </div>
             <div class="chart-title-right">
-              <div>
+              <!-- <div>
                 <div class="title-day" :class="echartsVal == 'D' ? 'title-active' : ''" @click="changeEcharts('D')">
                   D
                 </div>
@@ -21,11 +21,11 @@
                 <div class="title-mouth" :class="echartsVal == 'M' ? 'title-active' : ''" @click="changeEcharts('M')">
                   M
                 </div>
-              </div>
+              </div> -->
               <!-- <p>02 JUN , 2021</p> -->
               <p v-if="tvlTime.day">
                 {{ tvlTime.day }} {{ tvlTime.month }} , {{ tvlTime.year }}
-                {{ tvlTime.current ? ' - ' + tvlTime.current : '' }}
+                <!-- {{ tvlTime.current ? ' - ' + tvlTime.current : '' }} -->
               </p>
             </div>
           </div>
@@ -56,7 +56,7 @@
               <!-- <p>02 JUN , 2021</p> -->
               <p v-if="volTime.day">
                 {{ volTime.day }} {{ volTime.month }} , {{ volTime.year }}
-                {{ volTime.current ? ' - ' + volTime.current : '' }}
+                <!-- {{ volTime.current ? ' - ' + volTime.current : '' }} -->
               </p>
               <p v-else>Past 24H</p>
             </div>

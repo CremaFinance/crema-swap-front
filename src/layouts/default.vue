@@ -179,10 +179,10 @@ export default Vue.extend({
 .positon-container-bottom {
   width: 100%;
   height: 201px;
-  position: absolute;
+  position: fixed;
   bottom: 0;
   background: linear-gradient(180deg, rgb(#0ec5fa, 0.58) 0%, rgba(#dd06f4, 0.58) 100%);
   filter: blur(32px);
-  z-index: 16;
+  // z-index: 16;
 }
 </style>

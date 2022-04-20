@@ -14,7 +14,7 @@
             </div>
             <div class="chart-title-right">
               <div>
-                <div class="title-day" :class="echartsVal == 'D' ? 'title-active' : ''" @click="changeEcharts('D')">
+                <!-- <div class="title-day" :class="echartsVal == 'D' ? 'title-active' : ''" @click="changeEcharts('D')">
                   D
                 </div>
                 <div class="title-week" :class="echartsVal == 'W' ? 'title-active' : ''" @click="changeEcharts('W')">
@@ -22,13 +22,16 @@
                 </div>
                 <div class="title-mouth" :class="echartsVal == 'M' ? 'title-active' : ''" @click="changeEcharts('M')">
                   M
-                </div>
+                </div> -->
               </div>
               <!-- <p>02 JUN , 2021</p> -->
               <p v-if="tvlTime.day">
                 <!-- {{ tvlTime.beforeDay }} {{ tvlTime.beforeMonth ? tvlTime.beforeMonth + '-' : '' }} -->
                 {{ tvlTime.day }} {{ tvlTime.month }} ,{{ tvlTime.year }}
-                {{ tvlTime.current ? ' - ' + tvlTime.current : '' }}
+                <!-- {{ tvlTime.current ? tvlTime.current : '' }} -->
+              </p>
+              <p v-if="tvlTime.current">
+                {{ tvlTime.current ? tvlTime.current : '' }}
               </p>
             </div>
           </div>
@@ -75,7 +78,10 @@
               <!-- <p>02 JUN , 2021</p> -->
               <p v-if="volTime.day">
                 {{ volTime.day }} {{ volTime.month }} , {{ volTime.year }}
-                {{ volTime.current ? ' - ' + volTime.current : '' }}
+                <!-- {{ volTime.current ? ' - ' + volTime.current : '' }} -->
+              </p>
+              <p v-else-if="volTime.current">
+                {{ volTime.current ? volTime.current : '' }}
               </p>
               <p v-else>Past 24H</p>
             </div>
@@ -290,11 +296,18 @@ export default Vue.extend({
                 ? 'Nov'
                 : 'Dec'
 
+            // let nxt = params[0].dataIndex == this.list.categoryData.length - 1
+            // this.tvlTime = {
+            //   day: nxt ? '' : params[0].axisValue.slice(8, 10),
+            //   month: nxt ? '' : value,
+            //   year: nxt ? '' : params[0].axisValue.slice(0, 4),
+            //   current: nxt ? 'current' : ''
+            // }
+
             this.tvlTime = {
               day: params[0].axisValue.slice(8, 10),
               month: value,
-              year: params[0].axisValue.slice(0, 4),
-              current: params[0].dataIndex == this.list.categoryData.length - 1 ? 'current' : ''
+              year: params[0].axisValue.slice(0, 4)
               // beforeDay: beforeDays,
               // beforeMonth: beforeMonths
             }
@@ -430,11 +443,21 @@ export default Vue.extend({
                 : months == 11
                 ? 'Nov'
                 : 'Dec'
+
+            // let nxt = params[0].dataIndex == this.pillar.categoryData.length - 1
+            // this.volTime = {
+            //   day: nxt ? '' : params[0].axisValue.slice(8, 10),
+            //   month: nxt ? '' : value,
+            //   year: nxt ? '' : params[0].axisValue.slice(0, 4),
+            //   current: nxt ? 'current' : ''
+            //   // beforeDay: beforeDays,
+            //   // beforeMonth: beforeMonths
+            // }
             this.volTime = {
               day: params[0].axisValue.slice(8, 10),
               month: value,
-              year: params[0].axisValue.slice(0, 4),
-              current: params[0].dataIndex == this.list.categoryData.length - 1 ? 'current' : ''
+              year: params[0].axisValue.slice(0, 4)
+              // current: params[0].dataIndex == this.list.categoryData.length - 1 ? 'current' : ''
             }
             this.TradingVolume = this.thousands(Math.round(params[0].value * 100) / 100)
             // return params[0].value;
@@ -658,13 +681,14 @@ export default Vue.extend({
   z-index: 100;
 }
 .chart-title > div {
-  width: 140px;
+  // width: 140px;
   height: 80px;
   p {
     font-weight: bold;
   }
 }
 .chart-title-left {
+  white-space: nowrap;
   p {
     margin: 0 !important;
   }
@@ -679,14 +703,19 @@ export default Vue.extend({
   }
 }
 .chart-title-right {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  // display: flex;
+  // flex-wrap: wrap;
+  // justify-content: flex-end;
+  p {
+    white-space: nowrap;
+    margin-top: 10px;
+  }
 }
 .chart-title-right > div {
   width: 90px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  // justify-content: space-between;
   margin: 0;
   > div {
     width: 24px;
@@ -699,6 +728,9 @@ export default Vue.extend({
     color: #747679;
     &:hover {
       color: #fff;
+    }
+    & + div {
+      margin-left: 10px;
     }
   }
 }
