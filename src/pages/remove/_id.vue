@@ -170,6 +170,7 @@ export default Vue.extend({
       // }
     },
     watchCurrentPositon(currentPositon: any) {
+      console.log('remove##watchCurrentPositon###currentPositon###', currentPositon)
       const id = this.$route.params.id
 
       if (currentPositon && currentPositon.nftTokenMint === id) {
@@ -316,6 +317,7 @@ export default Vue.extend({
         }
       } catch (error: any) {
         console.log('toRemoveLiquidity###error####', error)
+        this.isLoading = false
         this.$accessor.transaction.setShowWaiting(false)
         this.$accessor.transaction.setShowSubmitted(false)
         this.$notify.close(txid + 'loading')
@@ -326,7 +328,6 @@ export default Vue.extend({
           class: 'error',
           icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
         })
-        this.isLoading = false
       }
     }
   }

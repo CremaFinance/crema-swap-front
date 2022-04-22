@@ -255,7 +255,7 @@ export const actions = actionTree(
       const poolsList: any = Object.values(poolsObj)
       const promiseArr: any = []
       console.log('getMyPositionsNew####tokenAccounts####', tokenAccounts)
-      console.log('getMyPositionsNew####poolsList####', poolsList)
+      console.log('getMyPositionsNew####poolsObj####', poolsObj)
       console.log('getMyPositionsNew####poolsList####', poolsList)
       for (let key in poolsObj) {
         promiseArr.push(fetchSwapPositions(new PublicKey(key), connection))
@@ -358,10 +358,9 @@ export const actions = actionTree(
 
       console.log('setCurrentPositon####currentData###', currentData)
 
-      const swap: any = await loadSwapPair(currentData.tokenSwapKey, wallet)
-      console.log('setCurrentPositon####swap####', swap)
-
       if (isFind) {
+        const swap: any = await loadSwapPair(currentData.tokenSwapKey, wallet)
+        console.log('setCurrentPositon####swap####', swap)
         const { amountA, amountB } = calculateTokenAmount(
           currentData.lowerTick,
           currentData.upperTick,
@@ -372,8 +371,8 @@ export const actions = actionTree(
         console.log(currentData, 'currentData##368')
 
         console.log('setCurrentPositon####currentData.liquity#####', currentData.liquity.toString())
-        console.log('setCurrentPositon####amountA####', amountA)
-        console.log('setCurrentPositon####amountB####', amountB)
+        console.log('setCurrentPositon####amountA####', amountA.toString())
+        console.log('setCurrentPositon####amountB####', amountB.toString())
 
         const fromCoinAmount = fixD(amountA.div(Math.pow(10, currentData.token_a.decimal)), currentData.token_a.decimal)
         const toCoinAmount = fixD(amountB.div(Math.pow(10, currentData.token_b.decimal)), currentData.token_b.decimal)
