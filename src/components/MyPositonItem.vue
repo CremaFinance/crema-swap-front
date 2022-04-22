@@ -1,53 +1,57 @@
 <template>
   <div class="positon-list-box">
     <div class="positon-list-content">
-      <div
-        v-if="list && list.length > 0"
-        class="positon-list"
-        :class="list && list.length < 3 ? 'positon-list-flex' : ''"
-      >
-        <!-- @mouseover="mouseOver(index)"
+      <template v-if="poolListLoading">
+        <Spin size="big" />
+      </template>
+      <template v-else>
+        <div
+          v-if="list && list.length > 0"
+          class="positon-list"
+          :class="list && list.length < 3 ? 'positon-list-flex' : ''"
+        >
+          <!-- @mouseover="mouseOver(index)"
           @mouseleave="mouseLeave(index)" -->
-        <div v-for="(pItem, index) in list" :key="index" class="positon-item-container">
-          <div class="positon-item-box">
-            <div class="positon-item">
-              <div class="positon-box"></div>
-              <div class="circle">
-                <div class="circle-center">
-                  <div class="circle-center-pic"></div>
-                  <!-- <svg class="circle-center-pic" aria-hidden="true">
+          <div v-for="(pItem, index) in list" :key="index" class="positon-item-container">
+            <div class="positon-item-box">
+              <div class="positon-item">
+                <div class="positon-box"></div>
+                <div class="circle">
+                  <div class="circle-center">
+                    <div class="circle-center-pic"></div>
+                    <!-- <svg class="circle-center-pic" aria-hidden="true">
                     <use xlink:href="#icon-pop"></use>
                   </svg> -->
-                  <div class="coin-box">
-                    <div class="coin-before-box">
-                      <img class="coin-before" :src="importIcon(`/coins/${pItem.tokenA.toLowerCase()}.png`)" />
+                    <div class="coin-box">
+                      <div class="coin-before-box">
+                        <img class="coin-before" :src="importIcon(`/coins/${pItem.tokenA.toLowerCase()}.png`)" />
+                      </div>
+                      <div class="coin-after-box">
+                        <img class="coin-after" :src="importIcon(`/coins/${pItem.tokenB.toLowerCase()}.png`)" />
+                      </div>
                     </div>
-                    <div class="coin-after-box">
-                      <img class="coin-after" :src="importIcon(`/coins/${pItem.tokenB.toLowerCase()}.png`)" />
-                    </div>
+                    <div class="symbol-name">{{ pItem.tokenA }} - {{ pItem.tokenB }}</div>
                   </div>
-                  <div class="symbol-name">{{ pItem.tokenA }} - {{ pItem.tokenB }}</div>
+                  <Button class="add-liquidity" @click="gotoPool(pItem)">
+                    <span>Add Liquidity</span>
+                  </Button>
                 </div>
-                <Button class="add-liquidity" @click="gotoPool(pItem)">
-                  <span>Add Liquidity</span>
-                </Button>
-              </div>
-              <div class="total-deposits">
-                <div class="leabl">Total Deposits</div>
-                <div class="text">${{ pItem && pItem.tvl_in_usd && thousands(pItem.tvl_in_usd) }}</div>
-              </div>
-              <div class="volume-24h">
-                <div class="leabl">Volume (24H)</div>
-                <div class="text">${{ pItem && pItem.vol_in_usd_24h && thousands(pItem.vol_in_usd_24h) }}</div>
+                <div class="total-deposits">
+                  <div class="leabl">Total Deposits</div>
+                  <div class="text">${{ pItem && pItem.tvl_in_usd && thousands(pItem.tvl_in_usd) }}</div>
+                </div>
+                <div class="volume-24h">
+                  <div class="leabl">Volume (24H)</div>
+                  <div class="text">${{ pItem && pItem.vol_in_usd_24h && thousands(pItem.vol_in_usd_24h) }}</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <transition name="slide-fade" appear>
-            <div class="my-positon-box">
-              <div v-if="wallet.connected && pItem.nftTokenMint" class="my-positon">
-                <!-- <div class="my-nft-title">My NFT</div> -->
-                <!-- <div class="address">
+            <transition name="slide-fade" appear>
+              <div class="my-positon-box">
+                <div v-if="wallet.connected && pItem.nftTokenMint" class="my-positon">
+                  <!-- <div class="my-nft-title">My NFT</div> -->
+                  <!-- <div class="address">
                   <span class="active"></span>
                   <span>
                     {{ myPosition[pItem.name].nftTokenMint.substr(0, 4) }}
@@ -55,39 +59,40 @@
                     {{ myPosition[pItem.name].nftTokenMint.substr(myPosition[pItem.name].nftTokenMint.length - 4, 4) }}
                   </span>
                 </div> -->
-                <div class="address" @click="gotoDetail(pItem)">
-                  <span class="active"></span>
-                  <span class="active-text">Position</span>
-                  <span>
-                    {{ pItem.nftTokenMint.substr(0, 4) }}
-                    ...
-                    {{ pItem.nftTokenMint.substr(pItem.nftTokenMint.length - 4, 4) }}
-                  </span>
+                  <div class="address" @click="gotoDetail(pItem)">
+                    <span class="active"></span>
+                    <span class="active-text">Position</span>
+                    <span>
+                      {{ pItem.nftTokenMint.substr(0, 4) }}
+                      ...
+                      {{ pItem.nftTokenMint.substr(pItem.nftTokenMint.length - 4, 4) }}
+                    </span>
+                  </div>
+                  <svg class="icon" aria-hidden="true" @click="toPosition">
+                    <use xlink:href="#icon-icon-on"></use>
+                  </svg>
                 </div>
-                <svg class="icon" aria-hidden="true" @click="toPosition">
-                  <use xlink:href="#icon-icon-on"></use>
-                </svg>
-              </div>
-              <div v-if="!wallet.connected" class="my-positon">
-                <div class="my-nft-text">Please connect a wallet</div>
-                <svg class="icon" aria-hidden="true" @click="toPosition">
-                  <use xlink:href="#icon-icon-on"></use>
-                </svg>
-              </div>
-              <div v-if="wallet.connected && !pItem.nftTokenMint" class="my-positon">
-                <div class="my-nft-text">No liquidity position</div>
-                <!-- <svg class="icon" aria-hidden="true" @click="isShow = false">
+                <div v-if="!wallet.connected" class="my-positon">
+                  <div class="my-nft-text">Please connect a wallet</div>
+                  <svg class="icon" aria-hidden="true" @click="toPosition">
+                    <use xlink:href="#icon-icon-on"></use>
+                  </svg>
+                </div>
+                <div v-if="wallet.connected && !pItem.nftTokenMint" class="my-positon">
+                  <div class="my-nft-text">No liquidity position</div>
+                  <!-- <svg class="icon" aria-hidden="true" @click="isShow = false">
             <use xlink:href="#icon-icon-on"></use>
           </svg> -->
+                </div>
               </div>
-            </div>
-          </transition>
+            </transition>
+          </div>
         </div>
-      </div>
-      <div v-else class="no-data">
-        <img src="../assets/images/icon_NoDate@2x.png" />
-        <p>No liquidity pools</p>
-      </div>
+        <div v-else class="no-data">
+          <img src="../assets/images/icon_NoDate@2x.png" />
+          <p>No liquidity pools</p>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -130,6 +135,9 @@ export default Vue.extend({
         return true
       }
       return false
+    },
+    poolListLoading() {
+      return this.liquidity.poolListLoading
     }
   },
   watch: {

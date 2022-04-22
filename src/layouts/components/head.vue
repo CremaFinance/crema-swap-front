@@ -26,7 +26,7 @@
               <span>Swap</span>
             </nuxt-link>
             <nuxt-link
-              to="/pools"
+              to="/deposit"
               :class="
                 $route.path === '/position' ||
                 $route.name === 'increase-id' ||

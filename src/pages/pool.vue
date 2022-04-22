@@ -1006,7 +1006,7 @@ export default Vue.extend({
       }
     },
     gotoPoolList() {
-      this.$router.push('/pools')
+      this.$router.push('/deposit')
     }
   }
 })
@@ -1183,6 +1183,7 @@ export default Vue.extend({
 @media screen and (max-width: 750px) {
   .pool-container {
     .link-block {
+      width: 100%;
       margin-top: 20px;
     }
     .pool-body {

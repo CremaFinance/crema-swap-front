@@ -142,7 +142,11 @@ export default Vue.extend({
   methods: {
     fixD,
     toPosition() {
-      this.$router.push('/position')
+      if (this.wallet.connected) {
+        this.$router.push('/position')
+      } else {
+        this.$accessor.wallet.openModal()
+      }
     },
     handleInput(e: any) {
       this.value = e.target.value
@@ -482,6 +486,7 @@ export default Vue.extend({
     margin: auto;
     text-align: center;
     .volume {
+      margin-top: 10px;
       margin-left: 0;
     }
   }

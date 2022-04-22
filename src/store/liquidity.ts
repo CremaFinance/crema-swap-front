@@ -40,7 +40,8 @@ export const state = () => ({
   poolsObj: null as any,
   liquidityPools: [] as any,
   myPositionObj: {},
-  statisticsInfo: {}
+  statisticsInfo: {},
+  poolListLoading: true
   // userPositionAccountObj: {} as any
 })
 
@@ -112,6 +113,9 @@ export const mutations = mutationTree(state, {
   },
   setStatisticsInfo(state, res) {
     state.statisticsInfo = res
+  },
+  setPoolListLoading(state, res) {
+    state.poolListLoading = res
   }
 })
 
@@ -489,12 +493,14 @@ export const actions = actionTree(
     getPoolsDefaultPriceRange({ state, commit }) {
       // this.$axios.get(`https://dev-api-crema.bitank.com/v1/swap/count`).then((res) => {
       this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
+        commit('setPoolListLoading', true)
         let pools: any = []
         let statisticsInfo = {}
         const result: any = {}
         if (res && res.data && res.data.pools) {
           pools = res.data.pools
           statisticsInfo = res.data
+          commit('setPoolListLoading', false)
         }
         pools.forEach((item: any) => {
           result[item.name] = item

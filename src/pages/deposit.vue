@@ -1,11 +1,11 @@
 <template>
   <div class="pool-container">
     <div class="link-block">
-      <div class="go-back" @click="gotoPoolList">
+      <!-- <div class="go-back" @click="gotoPoolList">
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-return"></use>
         </svg>
-      </div>
+      </div> -->
       <nuxt-link to="/position" v-if="wallet.connected">
         <img src="../assets/images/icon-position@2x.png" />
         <span>My Position</span>
@@ -1006,7 +1006,7 @@ export default Vue.extend({
       }
     },
     gotoPoolList() {
-      this.$router.push('/pools')
+      this.$router.push('/deposit')
     }
   }
 })
@@ -1140,7 +1140,8 @@ export default Vue.extend({
     margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    // justify-content: space-between;
     margin-bottom: 20px;
     > a {
       width: 150px;
@@ -1183,6 +1184,7 @@ export default Vue.extend({
 @media screen and (max-width: 750px) {
   .pool-container {
     .link-block {
+      width: 100%;
       margin-top: 20px;
     }
     .pool-body {
