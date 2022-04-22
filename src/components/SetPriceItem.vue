@@ -25,8 +25,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { price2tick } from '@/tokenSwap/swapv3'
-import { getNearestTickByPrice, tick2Price } from '@cremafinance/crema-sdk'
+import { getNearestTickByPrice, tick2Price } from 'test-crema-sdk'
 import { decimalFormat } from '@/utils'
 import Decimal from 'decimal.js'
 

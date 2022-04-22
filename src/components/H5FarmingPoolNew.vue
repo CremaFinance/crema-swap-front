@@ -447,7 +447,7 @@ export default Vue.extend({
         if (item.tokenB.symbol === 'WSOL') {
           tokenB = 'SOL'
         }
-        this.$router.push(`/pool?from=${tokenA}&to=${tokenB}`)
+        this.$router.push(`/deposit?from=${tokenA}&to=${tokenB}`)
       }
     },
     processNftAddress(address: string) {

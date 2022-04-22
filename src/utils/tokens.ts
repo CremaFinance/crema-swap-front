@@ -14,7 +14,9 @@ export const RATES: any = {
   pUSDC: 1,
   mSOL: 0,
   scnSOL: 0,
-  SOL: 0
+  SOL: 0,
+  CNUSDC: 1,
+  CNSOL: 1
 }
 export interface TokenInfo {
   symbol: string

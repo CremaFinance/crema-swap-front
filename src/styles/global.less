@@ -1,5 +1,10 @@
 @import './variables.less';
 
+html {
+  background: #22252b;
+
+}
+
 ::-webkit-scrollbar {
   // width: 8px;
 }
@@ -206,7 +211,7 @@
   justify-content: space-between;
   padding-bottom: 20px;
 
-  > span {
+  >span {
     font-size: 20px;
     font-weight: 700;
     color: #fff;
@@ -226,7 +231,7 @@
       // border-image: linear-gradient(137deg, rgba(35, 38, 43, 1), rgba(62, 67, 78, 1)) 1 1;
       padding: 6px;
 
-      & + .icon-box {
+      &+.icon-box {
         margin-left: 10px;
       }
 
@@ -241,6 +246,7 @@
       fill: #fff;
       // margin-left: 20px;
     }
+
     .is-loading {
       animation: spin 1s linear infinite;
     }
@@ -256,6 +262,7 @@
 
 .notify-link {
   cursor: pointer;
+
   &:hover {
     color: #fff !important;
   }
@@ -285,6 +292,7 @@
     -ms-transform: rotate(0deg);
     -webkit-transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
     -ms-transform: rotate(360deg);

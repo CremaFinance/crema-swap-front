@@ -23,8 +23,11 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
+import { checkNullObj } from '@/utils'
+import mixin from '@/mixin/position'
 
 export default Vue.extend({
+  mixins: [mixin],
   data() {
     return {
       isShowClosedPositions: false,
@@ -33,7 +36,13 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['wallet', 'liquidity'])
+    ...mapState(['wallet', 'liquidity']),
+    walletConnectedAndHavePoolsObj(): boolean {
+      if (this.liquidity.poolsObj && this.wallet.connected && !checkNullObj(this.wallet.tokenAccounts)) {
+        return true
+      }
+      return false
+    }
   },
   watch: {
     'liquidity.myPositions': {
@@ -44,15 +53,24 @@ export default Vue.extend({
       if (!newVal) {
         this.list = []
       }
+    },
+    walletConnectedAndHavePoolsObj: {
+      handler: 'walletConnectedAndHavePoolsObjWatch',
+      immediate: true
     }
   },
   mounted() {},
   methods: {
     gotoPool() {
-      this.$router.push('/pool')
+      this.$router.push('/deposit')
     },
     watchMyPositions(list: any) {
       this.list = list
+    },
+    walletConnectedAndHavePoolsObjWatch(newVal) {
+      if (newVal) {
+        this.$accessor.liquidity.getMyPositionsNew(this.wallet.tokenAccounts)
+      }
     }
   }
 })
