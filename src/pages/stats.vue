@@ -50,7 +50,7 @@
       </thead>
       <tbody>
         <tr v-for="(item, index) in poolsvas" :key="index">
-          <td class="fee-top">
+          <td>
             <!-- <img src="../assets/coins/usdt.png" />
             <img src="../assets/coins/usdc.png" /> -->
             <img
@@ -85,15 +85,10 @@
               class="show-fee"
               @mouseenter="item.isShowFee = !item.isShowFee"
               @mouseleave="item.isShowFee = !item.isShowFee"
-              >{{
-                (liquidity.coinPairConfigObj &&
-                  liquidity.coinPairConfigObj[item.swap_account] &&
-                  liquidity.coinPairConfigObj[item.swap_account].fee * 100 + '%') ||
-                '0.01%'
-              }}</i
+              >0.01%</i
             >
           </td>
-          <td class="fee-bot">$ {{ addCommom(item.tvl_in_usd, 2) }}</td>
+          <td>$ {{ addCommom(item.tvl_in_usd, 2) }}</td>
           <td>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</td>
           <!-- <td>{{ item.apr }}</td> -->
           <td>
@@ -131,7 +126,7 @@
       <tbody style="height: 60px; position: relative">
         <div class="page-table-pc">
           <div>
-            <svg class="icon" :class="poolsLeft ? 'icon-dis' : ''" aria-hidden="true" @click="poolSource('red')">
+            <svg class="icon" aria-hidden="true" @click="poolSource('red')" :class="poolsLeft ? 'icon-dis' : ''">
               <use xlink:href="#icon-icon-solid-left-copy"></use>
             </svg>
             <span class="highlight">
@@ -141,7 +136,7 @@
             <span>
               {{ poolsPage.total ? poolsPage.total : '-' }}
             </span>
-            <svg class="icon" :class="poolsRight ? 'icon-dis' : ''" aria-hidden="true" @click="poolSource('add')">
+            <svg class="icon" aria-hidden="true" @click="poolSource('add')" :class="poolsRight ? 'icon-dis' : ''">
               <use xlink:href="#icon-icon-solid-right-copy"></use>
             </svg>
           </div>
@@ -244,7 +239,7 @@
     </ul>
     <div class="page-table-h5">
       <div>
-        <svg class="icon" :class="poolsLeft ? 'icon-dis' : ''" aria-hidden="true" @click="poolSource('red')">
+        <svg class="icon" aria-hidden="true" @click="poolSource('red')" :class="poolsLeft ? 'icon-dis' : ''">
           <use xlink:href="#icon-icon-solid-left-copy"></use>
         </svg>
         <span class="highlight">
@@ -254,7 +249,7 @@
         <span>
           {{ poolsPage.total }}
         </span>
-        <svg class="icon" :class="poolsLeft ? 'icon-dis' : ''" aria-hidden="true" @click="poolSource('add')">
+        <svg class="icon" aria-hidden="true" @click="poolSource('add')" :class="poolsLeft ? 'icon-dis' : ''">
           <use xlink:href="#icon-icon-solid-right-copy"></use>
         </svg>
       </div>
@@ -307,7 +302,7 @@
       <tbody style="height: 60px; position: relative">
         <div class="page-table-pc">
           <div>
-            <svg class="icon" :class="tokenLeft ? 'icon-dis' : ''" aria-hidden="true" @click="tokenSource('red')">
+            <svg class="icon" aria-hidden="true" @click="tokenSource('red')" :class="tokenLeft ? 'icon-dis' : ''">
               <use xlink:href="#icon-icon-solid-left-copy"></use>
             </svg>
             <span class="highlight">
@@ -317,7 +312,7 @@
             <span>
               {{ tokenPage.total ? tokenPage.total : '-' }}
             </span>
-            <svg class="icon" :class="tokenRight ? 'icon-dis' : ''" aria-hidden="true" @click="tokenSource('add')">
+            <svg class="icon" aria-hidden="true" @click="tokenSource('add')" :class="tokenRight ? 'icon-dis' : ''">
               <use xlink:href="#icon-icon-solid-right-copy"></use>
             </svg>
           </div>
@@ -367,7 +362,7 @@
     </ul>
     <div class="page-table-h5">
       <div>
-        <svg class="icon" :class="tokenRight ? 'icon-dis' : ''" aria-hidden="true" @click="tokenSource('red')">
+        <svg class="icon" aria-hidden="true" @click="tokenSource('red')" :class="tokenRight ? 'icon-dis' : ''">
           <use xlink:href="#icon-icon-solid-left-copy"></use>
         </svg>
         <span class="highlight">
@@ -377,7 +372,7 @@
         <span>
           {{ tokenPage.total }}
         </span>
-        <svg class="icon" :class="tokenRight ? 'icon-dis' : ''" aria-hidden="true" @click="tokenSource('add')">
+        <svg class="icon" aria-hidden="true" @click="tokenSource('add')" :class="tokenRight ? 'icon-dis' : ''">
           <use xlink:href="#icon-icon-solid-right-copy"></use>
         </svg>
       </div>
@@ -390,10 +385,10 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
 import { number } from 'echarts'
-import { decimalFormat, addCommom, fixD } from '@/utils'
+import { decimalFormat, addCommom } from '@/utils'
 import importIcon from '@/utils/import-icon'
 import { Tooltip } from 'ant-design-vue'
-// import { fixD } from '@/utils'
+import { fixD } from '@/utils'
 // import { Spin } from 'ant-design-vue';
 // Vue.use(Spin)
 export default Vue.extend({
@@ -440,7 +435,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['farming', 'liquidity'])
+    ...mapState(['farming'])
   },
   watch: {
     'tokenPage.page'(newVal, oldVal) {
@@ -504,7 +499,7 @@ export default Vue.extend({
       console.log('gotoLp####item###', item)
       if (item) {
         const arr = item.name.split('-')
-        this.$router.push(`/deposit?from=${arr[0]}&to=${arr[1]}`)
+        this.$router.push(`/pool?from=${arr[0]}&to=${arr[1]}`)
       }
     },
     getDatum() {
@@ -517,7 +512,6 @@ export default Vue.extend({
       }, 60000)
     },
     poolSource(val) {
-      this.changeAbout(760)
       // this.sortList('pools')
       let data = this.pools
       if (val == 'add') {
@@ -548,7 +542,9 @@ export default Vue.extend({
     tokenSource(val) {
       // this.sortList('tokens')
       // this.litre = false
+      // this.sortList('tokens')
       let data = this.tokens
+      // console.log(this.tokens)
 
       if (val == 'add') {
         if (this.tokenPage.total == this.tokenPage.page) return false
@@ -574,12 +570,6 @@ export default Vue.extend({
         this.tokenvas = ultimately
         this.tokenPage.page = this.tokenPage.page - 1
       }
-    },
-    changeAbout(e) {
-      window.scrollTo({
-        top: e,
-        behavior: 'smooth'
-      })
     },
     getUct() {
       this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
@@ -958,8 +948,6 @@ export default Vue.extend({
           right: -130px;
           padding: 5px 10px;
           background: rgba(#000, 0.1);
-          -webkit-backdrop-filter: blur(10px);
-          backdrop-filter: blur(10px);
           border-radius: 10px;
         }
       }
@@ -981,12 +969,6 @@ export default Vue.extend({
           color: #fff;
         }
       }
-    }
-    .fee-top {
-      z-index: 8;
-    }
-    .fee-bot {
-      z-index: 5;
     }
     .th-ri {
       width: 260px;

@@ -52,8 +52,6 @@
     color: #b5b8c2;
     // padding-top: 8px;
     margin-left: 48px !important;
-    // padding-right: 10px;
-    word-break: break-all;
   }
 
   .ant-notification-notice-close {
@@ -202,15 +200,14 @@ button.ant-btn-background-ghost[disabled] {
 }
 
 .layout-container {
+
   .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-title,
-  .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph > li {
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph>li {
     // background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 37%, #f2f2f2 63%);
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.1) 25%,
-      rgba(255, 255, 255, 0.2) 37%,
-      rgba(255, 255, 255, 0.1) 63%
-    );
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.2) 37%,
+        rgba(255, 255, 255, 0.1) 63%);
     background-size: 400% 100%;
     // -webkit-animation: ant-skeleton-loading 1.4s ease infinite !important;
     animation: skeletonLoading 1.5s ease infinite;
@@ -220,93 +217,6 @@ button.ant-btn-background-ghost[disabled] {
 .ant-tooltip-open {
   border: none !important;
   outline: none !important;
-}
-
-.ant-select-dropdown {
-  z-index: 2000 !important;
-  color: rgba(255, 255, 255, 0.5) !important;
-  background: #353840 !important;
-  border-radius: 8px !important;
-}
-
-.ant-select-dropdown-menu-item-selected {
-  color: #fff !important;
-  background-color: #353840 !important;
-}
-
-.ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  &.rpc-option {
-    background-color: #353840 !important;
-  }
-}
-
-.ant-select-dropdown-menu-item:hover:not(.ant-select-dropdown-menu-item-disabled) {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  &.rpc-option {
-    background-color: #353840 !important;
-  }
-}
-
-.ant-select-dropdown-menu-item-selected {
-  &.rpc-option {
-    position: relative;
-    font-weight: 400 !important;
-    &::after {
-      content: '';
-      width: 8px;
-      height: 8px;
-      background: #07ebad;
-      border-radius: 100%;
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translate(0%, -50%);
-    }
-  }
-}
-
-.ant-select {
-  color: #fff !important;
-}
-.ant-select-selection {
-  background: none !important;
-  border: 1px solid #3f434e !important;
-  box-shadow: 0px 4px 12px 0px #25282c !important;
-  border-radius: 8px !important;
-}
-
-.ant-select-selection--single {
-  height: 40px !important;
-}
-
-.ant-select-selection__rendered {
-  line-height: 38px !important;
-}
-
-.ant-select-arrow .ant-select-arrow-icon {
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 5px;
-  border-color: rgba(255, 255, 255, 0.5) transparent transparent transparent;
-  font-size: 0;
-  line-height: 0;
-  margin-top: 5px;
-}
-.ant-select-open {
-  .ant-select-arrow .ant-select-arrow-icon {
-    transform: rotate(180deg);
-    margin-top: 0px;
-  }
-}
-
-.ant-select-arrow {
-  .anticon-loading {
-    svg {
-      fill: rgba(255, 255, 255, 0.5);
-    }
-  }
 }
 
 @keyframes skeletonLoading {
@@ -360,10 +270,11 @@ button.ant-btn-background-ghost[disabled] {
   height: 12px;
   border-radius: 5px;
 
-  & + li {
+  &+li {
     margin-left: 10px;
   }
 }
+
 
 .ant-carousel .slick-dots li button:hover,
 .ant-carousel .slick-dots li button:focus {
@@ -376,9 +287,10 @@ button.ant-btn-background-ghost[disabled] {
   border-radius: 5px !important;
   height: 12px !important;
   background: #009cc1 !important;
-  border: 1px solid #fff !important;
+  border: 1px solid #FFF !important;
 
   &:hover {
-    background: #76fff4 !important;
+    background: #76FFF4 !important;
+
   }
 }

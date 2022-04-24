@@ -130,8 +130,7 @@ export default Vue.extend({
 @media screen and (max-width: 750px) {
   .fair-container {
     width: 100%;
-    margin-top: 20px;
-    padding: 0px 0px 0;
+    padding: 40px 0px 0;
     background: none;
     .fair-container-center {
       width: 100%;

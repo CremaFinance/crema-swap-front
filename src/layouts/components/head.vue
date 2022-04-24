@@ -2,16 +2,11 @@
   <div class="header-container">
     <NetworkWarnning v-if="$accessor.showNetWorkWarnning" @close="closeNetworkWarning"></NetworkWarnning>
     <div class="header-content-container">
-      <div class="header-content" style="background: none">
+      <div class="header-content">
         <a class="logo" href="https://www.crema.finance/" target="_blank">
           <img src="../../assets/images/logo@2x@2x.png" />
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </a>
-        <!-- <div v-if="fairShow == 'header-fair'" class="fair-gi"> -->
-        <!-- <div class="fair-gi">
-          <img src="@/assets/images/Fire-lans.gif" alt="" />
-          <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span>
-        </div> -->
         <div class="left">
           <nav>
             <!-- <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
@@ -26,7 +21,7 @@
               <span>Swap</span>
             </nuxt-link>
             <nuxt-link
-              to="/deposit"
+              to="/pool"
               :class="
                 $route.path === '/position' ||
                 $route.name === 'increase-id' ||
@@ -75,7 +70,6 @@
         <span>Docs</span>
       </a> -->
           <Wallet />
-          <!-- <SystemSetting></SystemSetting> -->
           <Contactus></Contactus>
         </div>
       </div>
@@ -112,9 +106,9 @@ export default Vue.extend({
         const { infos, tokenAccounts } = _newObj
 
         console.log('liquidityInfosAndWalletTokenAccount###this.$route####', this.$route)
-        // if (!checkNullObj(infos) && !checkNullObj(tokenAccounts)) {
-        //   if (this.$route.name !== 'farming') this.$accessor.liquidity.getMyPositions(tokenAccounts)
-        // }
+        if (!checkNullObj(infos) && !checkNullObj(tokenAccounts)) {
+          if (this.$route.name !== 'farming') this.$accessor.liquidity.getMyPositions(tokenAccounts)
+        }
       },
       deep: true
     },
@@ -173,31 +167,6 @@ export default Vue.extend({
       // width: 60px;
       height: 16px;
       margin-left: 10px;
-    }
-  }
-  .fair-gi {
-    position: absolute;
-    left: 160px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    img {
-      width: 36px;
-    }
-    span {
-      font-size: 16px;
-      margin-top: 2px;
-      font-weight: bold;
-      background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      // font-family: 'DIN-Regular';
-      cursor: pointer;
-      &:hover {
-        background: linear-gradient(48deg, #df86fa 0%, #b8d3ff 40%, #83e9fd 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
     }
   }
   nav {

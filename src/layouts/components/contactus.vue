@@ -58,7 +58,7 @@ export default Vue.extend({
 </script>
 <style lang="less" scoped>
 .contactus-box {
-  margin-left: 12px;
+  margin-left: 20px;
 }
 .contactus-icon {
   width: 36px;
@@ -68,14 +68,10 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   svg {
     fill: #fff;
     width: 24px;
     height: 24px;
-  }
-  &:hover {
-    background: #464953;
   }
 }
 .contactus-list {

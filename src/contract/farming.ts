@@ -16,10 +16,7 @@ import {
   QUARRY_ADDRESSES,
   MinerData,
   QuarryData,
-  Payroll,
-  SwapPosition,
-  POSITIONS_ACCOUNT_SIZE as SWAP_POSITION_ACCOUNT_SIZE,
-  parsePositionsAccount
+  Payroll
 } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
@@ -111,33 +108,6 @@ export async function getTokenAccountsByOwnerAndMint(
 export async function fetchSwapPositionsByOwner(swapKey: PublicKey, authority: PublicKey, conn, wallet) {
   const positions = await PositionWrapper.fetchSwapPositionsByOwner(swapKey, authority, conn)
   return positions
-}
-
-// 获取仓位
-export async function fetchSwapPositions(swapKey: PublicKey, connection: Connection): Promise<Array<SwapPosition>> {
-  const positionAccounts = await connection.getProgramAccounts(QUARRY_ADDRESSES.CremaSwap, {
-    filters: [
-      { dataSize: SWAP_POSITION_ACCOUNT_SIZE },
-      {
-        memcmp: {
-          offset: 1,
-          bytes: swapKey.toBase58()
-        }
-      }
-    ]
-  })
-  const swapPositions: any = []
-  for (const accountInfo of positionAccounts) {
-    const list = parsePositionsAccount(accountInfo.pubkey, accountInfo.account)
-    if (list?.data.positions === undefined) continue
-    for (const p of list.data.positions) {
-      swapPositions.push({
-        positionKey: accountInfo.pubkey,
-        ...p
-      })
-    }
-  }
-  return swapPositions
 }
 
 // 获取 earned

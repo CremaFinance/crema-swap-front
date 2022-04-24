@@ -89,7 +89,7 @@ export default Vue.extend({
   watch: {},
   mounted() {
     window.setInterval(() => {
-      this.countDown('2022-4-30 0:0:0')
+      this.countDown('2022-3-30 0:0:0')
     }, 1000)
   },
   methods: {
@@ -99,23 +99,18 @@ export default Vue.extend({
       let inputTime = +new Date(time)
       let times: string | number = (inputTime - nowTime) / 1000
       let d: string | number = parseInt(String(times / 60 / 60 / 24))
-      d = Number(String(d).substr(1))
       d = d < 10 ? '0' + d : d
       let h: string | number = parseInt(String((times / 60 / 60) % 24))
-      h = Number(String(h).substr(1))
       h = h < 10 ? '0' + h : h
       let m: string | number = parseInt(String((times / 60) % 60))
-      m = Number(String(m).substr(1))
       m = m < 10 ? '0' + m : m
       let s: string | number = parseInt(String(times % 60))
-      s = Number(String(s).substr(1))
       s = s < 10 ? '0' + s : s
       // return d + '天' + h + '时' + m + '分' + s + '秒';
       this.day = d
       this.hour = h
       this.min = m
       this.sec = s
-      // console.log(d, h, m, s)
     },
     comingsoon() {
       this.$notify.success({

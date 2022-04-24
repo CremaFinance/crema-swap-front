@@ -61,7 +61,7 @@
           </div>
         </div>
         <div class="get-lp">
-          <Button class="get-lp-btn"> <nuxt-link to="/deposit">Get LP NFT</nuxt-link></Button>
+          <Button class="get-lp-btn"> <nuxt-link to="/pool">Get LP NFT</nuxt-link></Button>
           <Button class="view-contract-btn">View Contract</Button>
         </div>
         <div class="stake-and-unstake">

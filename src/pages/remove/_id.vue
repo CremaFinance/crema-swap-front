@@ -5,17 +5,14 @@
         <use xlink:href="#icon-icon-return"></use>
       </svg>
     </div>
-    <div class="title">
-      <span class="left">Remove Liquidity</span>
-      <RefreshIcon :loading="liquidity.currentPositonLoading" @refresh="refresh"></RefreshIcon>
-    </div>
+    <div class="title">Remove Liquidity</div>
 
     <div class="pool-settings">
       <div class="top-box">
         <div v-if="poolInfo" class="left">
-          <img :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" />
-          <img class="last" :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" />
-          <span>{{ poolInfo.token_a.symbol }} - {{ poolInfo.token_b.symbol }}</span>
+          <img :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)" />
+          <img class="last" :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)" />
+          <span>{{ poolInfo.coin.symbol }} - {{ poolInfo.pc.symbol }}</span>
           <StatusBlock :current-status="currentData.currentStatus" />
         </div>
         <div class="right">
@@ -47,63 +44,58 @@
       </div>
       <div class="liquidity-coins">
         <div class="before-coin">
-          <div v-if="poolInfo" class="coin-label">Pooled {{ poolInfo.token_a.symbol }}:</div>
-          <div v-if="poolInfo" class="coin-num">
-            {{ decimalFormat(fromCoinAmount, poolInfo.token_a.decimal) }}
+          <div v-if="poolInfo" class="coin-label">Pooled {{ poolInfo.coin.symbol }}:</div>
+          <div class="coin-num">
+            {{ decimalFormat(fromCoinAmount, poolInfo.coin.decimals) }}
           </div>
         </div>
         <div class="before-coin after-coin">
-          <div v-if="poolInfo" class="coin-label">Pooled {{ poolInfo.token_b.symbol }}:</div>
-          <div v-if="poolInfo" class="coin-num">
-            {{ decimalFormat(toCoinAmount, poolInfo.token_b.decimal) }}
+          <div v-if="poolInfo" class="coin-label">Pooled {{ poolInfo.pc.symbol }}:</div>
+          <div class="coin-num">
+            {{ decimalFormat(toCoinAmount, poolInfo.pc.decimals) }}
           </div>
         </div>
         <template v-if="Number(currentData.tokenaFee) !== 0 || Number(currentData.tokenbFee) !== 0">
           <div class="coin-line"></div>
           <div class="before-coin">
-            <div v-if="poolInfo" class="coin-label">{{ poolInfo.token_a.symbol }} Fees Earned:</div>
+            <div v-if="poolInfo" class="coin-label">{{ poolInfo.coin.symbol }} Fees Earned:</div>
             <div class="coin-num">
               {{ currentData.tokenaFee }}
             </div>
           </div>
           <div class="before-coin after-coin">
-            <div v-if="poolInfo" class="coin-label">{{ poolInfo.token_b.symbol }} Fees Earned :</div>
+            <div v-if="poolInfo" class="coin-label">{{ poolInfo.pc.symbol }} Fees Earned :</div>
             <div class="coin-num">
               {{ currentData.tokenbFee }}
             </div>
           </div>
         </template>
       </div>
-      <Button class="remove-btn" :disabled="isLoading" :loading="isLoading" @click="toRemoveNew">Remove</Button>
+      <Button class="remove-btn" :disabled="isLoading" :loading="isLoading" @click="toRemove">Remove</Button>
     </div>
     <Setting v-if="showSetting" @onClose="() => (showSetting = false)"></Setting>
-    <div v-show="liquidity.currentPositonLoading" class="loading-global"><Spin /></div>
-    <!-- <div class="loading-global"><Spin />></div> -->
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { Slider, Button, Spin } from 'ant-design-vue'
+import { Modal, Slider, Button } from 'ant-design-vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
-import { checkNullObj, decimalFormat, fixD } from '@/utils'
-import { cloneDeep } from 'lodash-es'
+import { checkNullObj, getUnixTs, decimalFormat, fixD } from '@/utils'
+import { clone, cloneDeep, get } from 'lodash-es'
+import { removeLiquidity } from '@/utils/liquidity'
+import { calculateSlidTokenAmount, TokenSwap } from '@cremafinance/crema-sdk'
 import { PublicKey } from '@solana/web3.js'
+import { SWAPV3_PROGRAMID } from '@/utils/ids'
 import Decimal from 'decimal.js'
-import { getATAAddress } from '@saberhq/token-utils'
-import { BroadcastOptions } from '@saberhq/solana-contrib'
-import { loadSwapPair } from '@/contract/pool'
-import mixin from '@/mixin/position'
 
 Vue.use(Slider).use(Button)
 
 export default Vue.extend({
   components: {
     Slider,
-    Button,
-    Spin
+    Button
   },
-  mixins: [mixin],
   data() {
     return {
       title: 'CRM',
@@ -167,18 +159,17 @@ export default Vue.extend({
       this.$router.push('/position')
     },
     watchMyPosions(myPosions: any) {
-      // const id = this.$route.params.id
+      const id = this.$route.params.id
       // if (this.liquidity.currentPositon && this.liquidity.currentPositon.id !== id) {
-      // this.$accessor.liquidity.setCurrentPositon({
-      //   myPosions,
-      //   id: this.$route.params.id
-      // })
+      this.$accessor.liquidity.setCurrentPositon({
+        myPosions,
+        id: this.$route.params.id
+      })
       // }
     },
     watchCurrentPositon(currentPositon: any) {
       const id = this.$route.params.id
-
-      if (currentPositon && currentPositon.nftTokenMint === id) {
+      if (!checkNullObj(currentPositon) && currentPositon.id === id) {
         this.currentData = currentPositon
         if (currentPositon.fromCoinAmount) {
           this.fromCoinAmount = String(currentPositon.fromCoinAmount * Number(this.sliderValue / 100))
@@ -186,11 +177,10 @@ export default Vue.extend({
         if (currentPositon.toCoinAmount) {
           this.toCoinAmount = String(currentPositon.toCoinAmount * Number(this.sliderValue / 100))
         }
-        const poolInfo = currentPositon
+        const poolInfo = currentPositon.poolInfo
         this.poolInfo = poolInfo
-        console.log('remove####watchCurrentPositon###poolInfo######', poolInfo)
       } else {
-        // this.gotoPosition()
+        this.gotoPosition()
       }
     },
     setPercent(item: any, index: any) {
@@ -208,132 +198,130 @@ export default Vue.extend({
       this.amountPercentageIndex = -1
       this.setPercent({ value: this.sliderValue / 100 }, -1)
     },
-    async toRemoveNew() {
+    async toRemove() {
       this.sliderChangeFlag = false
+      // console.log('这里滑点是多少呢####', this.$accessor.slippage)
+      // console.log('考虑滑点前####this.fromCoinAmount####', this.fromCoinAmount)
+      // console.log('考虑滑点前####this.toCoinAmount####', this.toCoinAmount)
+      // console.log('(1 + 100 / Number(this.$accessor.slippage))#####', 1 + Number(this.$accessor.slippage) / 100)
+      let fromCoinAmount: any
+      if (this.fromCoinAmount) {
+        fromCoinAmount = Number(this.fromCoinAmount) / (1 + Number(this.$accessor.slippage) / 100)
+      }
+      let toCoinAmount: any
+      if (this.toCoinAmount) {
+        toCoinAmount = Number(this.toCoinAmount) / (1 + Number(this.$accessor.slippage) / 100)
+      }
+      this.$emit('remove', fromCoinAmount, toCoinAmount, this.sliderValue)
+
       this.isLoading = true
+      // this.showRemoveLiquidityHint = false
+
       const conn = this.$web3
       const wallet = (this as any).$wallet
+
       const poolInfo = cloneDeep(this.poolInfo)
       const currentData = cloneDeep(this.currentData)
-      // const nftAccount = get(this.wallet.tokenAccounts, `${currentData.nft_token_id}.tokenAccountAddress`)
 
-      const swap = await loadSwapPair(poolInfo.tokenSwapKey, wallet)
-      // const userTokenA = await getATAAddress({
-      //   mint: swap.tokenSwapInfo.tokenAMint,
-      //   owner: swap.provider.wallet.publicKey
-      // })
-      // const userTokenB = await getATAAddress({
-      //   mint: swap.tokenSwapInfo.tokenBMint,
-      //   owner: swap.provider.wallet.publicKey
-      // })
+      // @ts-ignore
+      const fromCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.coin.mintAddress}.tokenAccountAddress`)
+      // @ts-ignore
+      const toCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.pc.mintAddress}.tokenAccountAddress`)
 
-      console.log('toRemoveNew####this.sliderValue / 100###', this.sliderValue / 100)
-      console.log('toRemoveNew####Number(this.$accessor.slippage) / 100###', Number(this.$accessor.slippage) / 100)
-      const positionValue = swap.calculatePositionValueWithSlid(
-        currentData.nftTokenId,
-        new Decimal(this.sliderValue / 100),
+      const nftAccount = get(this.wallet.tokenAccounts, `${currentData.nft_token_id}.tokenAccountAddress`)
+
+      const key = getUnixTs().toString()
+      this.$notify.info({
+        key,
+        message: 'Making transaction...',
+        description: '',
+        duration: 0,
+        icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
+      })
+
+      const swap = await new TokenSwap(
+        this.$web3,
+        new PublicKey(SWAPV3_PROGRAMID),
+        // new PublicKey(LPFARMS[i].swapKey),
+        this.poolInfo.tokenSwap,
+        null
+      ).load()
+      // console.log('currentData####123!!!!@@@', currentData)
+      const slidTokenAmountObj = calculateSlidTokenAmount(
+        currentData.lower_tick,
+        currentData.upper_tick,
+        // new Decimal(currentData.liquity.toString()),
+        this.sliderValue === 100
+          ? new Decimal(currentData.liquity.toString())
+          : new Decimal(fixD(new Decimal(currentData.liquity.toString()).mul(this.sliderValue / 100).toString(), 0)),
+        swap.tokenSwapInfo.currentSqrtPrice,
         new Decimal(Number(this.$accessor.slippage) / 100)
       )
 
-      this.$accessor.transaction.setTransactionDesc('Remove liquidity')
+      console.log('slidTokenAmountObj.minAmountA.toString()####', slidTokenAmountObj.minAmountA.toString())
+      console.log('slidTokenAmountObj.minAmountB.toString()####', slidTokenAmountObj.minAmountB.toString())
 
-      this.$accessor.transaction.setShowWaiting(true)
+      fromCoinAmount = fixD(slidTokenAmountObj.minAmountA.toString(), 0)
+      toCoinAmount = fixD(slidTokenAmountObj.minAmountB.toString(), 0)
+      console.log('currentData.liquity.toString()####', currentData.liquity.toString())
+      console.log('this.sliderValue#####', this.sliderValue)
+      removeLiquidity(
+        conn,
+        wallet,
+        poolInfo,
+        currentData.nft_token_id,
+        nftAccount,
+        fromCoinAccount,
+        toCoinAccount,
+        poolInfo.coin,
+        poolInfo.pc,
+        fromCoinAmount,
+        toCoinAmount,
+        // String(currentData.liquity),
+        this.sliderValue === 100
+          ? currentData.liquity.toString()
+          : fixD(new Decimal(currentData.liquity.toString()).mul(this.sliderValue / 100).toString(), 0)
+      )
+        .then((txid) => {
+          this.$notify.info({
+            key,
+            message: 'Transaction has been sent',
+            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } }),
+            description: (h: any) =>
+              h('div', [
+                'Confirmation is in progress.  Check your transaction on ',
+                h('a', { attrs: { href: `${this.url.explorer}/tx/${txid}`, target: '_blank' } }, 'here')
+              ])
+          })
 
-      let txid = ''
+          this.isLoading = false
+          const description = `Remove  ${this.fromCoinAmount} ${poolInfo.coin?.symbol} and ${this.toCoinAmount} ${poolInfo.pc?.symbol} from the pool`
 
-      let positionMinAmountA: any
-      let positionMinAmountB: any
-      if (positionValue.minAmountA.toString() && positionValue.minAmountA.toString() !== '0') {
-        positionMinAmountA = positionValue.minAmountA.sub(
-          Math.pow(10, Math.floor(Number(currentData.token_a.decimal / 2)))
-        )
-      } else {
-        positionMinAmountA = positionValue.minAmountA
-      }
+          this.$accessor.transaction.sub({ txid, description, type: 'Remove liquidity' })
 
-      if (positionValue.minAmountB.toString() && positionValue.minAmountB.toString() !== '0') {
-        positionMinAmountB = positionValue.minAmountB.sub(
-          Math.pow(10, Math.floor(Number(currentData.token_b.decimal / 2)))
-        )
-      } else {
-        positionMinAmountB = positionValue.minAmountB
-      }
-
-      try {
-        console.log('toRemoveNew####currentData.nftTokenId###', currentData.nftTokenId)
-        // console.log('toRemoveNew####userTokenA###', userTokenA)
-        // console.log('toRemoveNew####userTokenB###', userTokenB)
-        console.log('toRemoveNew####positionValue.liquity###', positionValue.liquity.toString())
-        console.log('toRemoveNew####positionValue.minAmountA###', positionValue.minAmountA.toString())
-        console.log('toRemoveNew####positionValue.minAmountB###', positionValue.minAmountB.toString())
-        console.log('toRemoveNew####currentData.nftTokenAccount###', currentData.nftTokenAccount)
-        const tx = await swap.decreaseLiquityAtomic(
-          currentData.nftTokenId,
-          // userTokenA,
-          // userTokenB,
-          positionValue.liquity,
-          positionMinAmountA,
-          positionMinAmountB,
-          // positionValue.minAmountA,
-          // positionValue.minAmountB,
-          new PublicKey(currentData.nftTokenAccount)
-        )
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-
-        const receipt: any = await tx.send(opt)
-
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
-          const description = `Remove  ${this.fromCoinAmount} ${poolInfo.token_a?.symbol} and ${this.toCoinAmount} ${poolInfo.token_b?.symbol} from the pool`
-          this.$accessor.transaction.setShowSubmitted(true)
-          const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Remove liquidity',
-            successCallback: () => {
-              _this.isLoading = false
-              // _this.$accessor.liquidity.requestInfos()
-
-              if (_this.sliderValue === 100) {
-                _this.gotoPosition()
-              } else {
-                _this.$accessor.liquidity.getMyPositionsNew(this.wallet.tokenAccounts)
-                _this.$accessor.transaction.setShowSubmitted(false)
-              }
-            },
-            errorCallback: () => {
-              _this.isLoading = false
+          setTimeout(() => {
+            this.$accessor.liquidity.requestInfos()
+            if (this.sliderValue === 100) {
+              this.gotoPosition()
             }
-          })
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-        }
-      } catch (error: any) {
-        console.log('toRemoveLiquidity###error####', error)
-        this.isLoading = false
-        this.$accessor.transaction.setShowWaiting(false)
-        this.$accessor.transaction.setShowSubmitted(false)
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'RemoveLiquidityFailed',
-          message: 'Remove liquidity failed',
-          description: error.message,
-          class: 'error',
-          icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
+          }, 2000)
+          this.$accessor.transaction.setShowSubmitted(true)
         })
-      }
+        .catch((error) => {
+          console.log('error#####', error)
+          this.$notify.error({
+            key,
+            message: 'Remove liquidity failed',
+            description: error.message,
+            class: 'error',
+            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
+          })
+        })
+        .finally(() => {
+          this.isLoading = false
+          // this.fromCoinAmount = ''
+          // this.toCoinAmount = ''
+        })
     }
   }
 })
@@ -361,9 +349,6 @@ export default Vue.extend({
     font-size: 20px;
     margin-top: 10px;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
   }
   .pool-settings {
     margin-top: 20px;
@@ -517,7 +502,6 @@ export default Vue.extend({
     margin-top: 40px;
   }
 }
-
 @media screen and (max-width: 750px) {
   .remove-container {
     padding: 20px 0px 0;

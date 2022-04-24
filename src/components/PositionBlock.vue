@@ -3,11 +3,11 @@
     <div class="left">
       <div class="pos-info">
         <div class="icon-box">
-          <img :src="importIcon(`/coins/${pItem.token_a.symbol.toLowerCase()}.png`)" />
-          <img :src="importIcon(`/coins/${pItem.token_b.symbol.toLowerCase()}.png`)" />
-          <div class="name">{{ pItem.name }}</div>
+          <img :src="importIcon(`/coins/${pItem.poolInfo.coin.symbol.toLowerCase()}.png`)" />
+          <img :src="importIcon(`/coins/${pItem.poolInfo.pc.symbol.toLowerCase()}.png`)" />
+          <div class="name">{{ pItem.poolInfo.name }}</div>
         </div>
-        <div class="fee">{{ pItem.feeView }}%</div>
+        <div class="fee">{{ pItem.poolInfo.feeView }}%</div>
         <div v-if="pItem.nftTokenMint" class="nft-address" @click.stop="">
           <a :href="`https://solscan.io/account/${pItem.nftTokenAccount}`" target="_blank">
             {{ pItem.nftTokenMint.substr(0, 4) }}
@@ -44,7 +44,6 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
 import importIcon from '@/utils/import-icon'
 import { decimalFormat } from '@/utils'
 
@@ -61,33 +60,27 @@ export default Vue.extend({
       }
     }
   },
-  computed: {
-    ...mapState({
-      liquidity: (state: any) => state.liquidity
-    })
-  },
-  watch: {
-    pItem: {
-      handler: 'pItemWatch',
-      immediate: true
-    }
-  },
+  // watch: {
+  //   pItem: {
+  //     handler: 'pItemWatch',
+  //     immediate: true
+  //   }
+  // },
   methods: {
     importIcon,
     decimalFormat,
-    pItemWatch(value: any) {
-      console.log('positionBlock###pItemWatch####value####', value)
-    },
+    // pItemWatch(value: any) {
+    //   console.log('pItemWatch####value####', value)
+    // },
     gotoDetail(item: any) {
-      this.$accessor.liquidity.setCurrentPositon(null)
       this.$router.push(`/detail/${item.nftTokenId}`)
     },
     getCurrentStatus(pItem: any) {
-      if (!pItem.liquity || pItem.liquity.toString() == '0') {
+      if (!pItem.liquity) {
         return 'Closed'
       } else if (
-        (Number(pItem.currentPriceView) >= Number(pItem.minPrice) &&
-          Number(pItem.currentPriceView) <= Number(pItem.maxPrice)) ||
+        (Number(pItem.poolInfo.currentPriceView) >= Number(pItem.minPrice) &&
+          Number(pItem.poolInfo.currentPriceView) <= Number(pItem.maxPrice)) ||
         (!Number(pItem.minPrice) && isNaN(Number(pItem.maxPrice)))
       ) {
         return 'Active'
@@ -118,7 +111,7 @@ export default Vue.extend({
   cursor: pointer;
   margin-top: 20px;
   &:hover {
-    background: #393e48;
+    background: rgba(255, 255, 255, 0.05);
   }
   // filter: blur(50px);
   > .left {
