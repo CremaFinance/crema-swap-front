@@ -41,7 +41,8 @@ export const state = () => ({
   liquidityPools: [] as any,
   myPositionObj: {},
   statisticsInfo: {},
-  poolListLoading: true
+  poolListLoading: true,
+  currentPositonLoading: false
   // userPositionAccountObj: {} as any
 })
 
@@ -85,6 +86,9 @@ export const mutations = mutationTree(state, {
 
   setCurrentPosition(state, obj: object) {
     state.currentPositon = cloneDeep(obj)
+  },
+  setCurrentPositonLoading(state, value: boolean) {
+    state.currentPositonLoading = value
   },
   setRates(state, value) {
     state.rates = value
@@ -335,10 +339,13 @@ export const actions = actionTree(
     },
 
     async setCurrentPositon({ state, commit }, data) {
+      commit('setCurrentPositonLoading', true)
       if (!data) {
         commit('setCurrentPosition', {})
+        commit('setCurrentPositonLoading', false)
         return
       }
+
       const conn = this.$web3
       const wallet = (this as any)._vm.$wallet
       const { myPosions, id } = data
@@ -355,6 +362,7 @@ export const actions = actionTree(
           break
         }
       }
+      commit('setCurrentPositonLoading', true)
 
       console.log('setCurrentPositon####currentData###', currentData)
 
@@ -487,6 +495,7 @@ export const actions = actionTree(
         console.log('sdsfsdfd')
         commit('setCurrentPosition', {})
       }
+      commit('setCurrentPositonLoading', false)
     },
 
     getPoolsDefaultPriceRange({ state, commit }) {

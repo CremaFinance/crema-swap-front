@@ -74,11 +74,13 @@
       <Button class="remove-btn" :disabled="isLoading" :loading="isLoading" @click="toRemoveNew">Remove</Button>
     </div>
     <Setting v-if="showSetting" @onClose="() => (showSetting = false)"></Setting>
+    <div v-show="liquidity.currentPositonLoading" class="loading-global"><Spin /></div>
+    <!-- <div class="loading-global"><Spin />></div> -->
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { Slider, Button } from 'ant-design-vue'
+import { Slider, Button, Spin } from 'ant-design-vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
 import { checkNullObj, decimalFormat, fixD } from '@/utils'
@@ -95,7 +97,8 @@ Vue.use(Slider).use(Button)
 export default Vue.extend({
   components: {
     Slider,
-    Button
+    Button,
+    Spin
   },
   mixins: [mixin],
   data() {
@@ -509,6 +512,7 @@ export default Vue.extend({
     margin-top: 40px;
   }
 }
+
 @media screen and (max-width: 750px) {
   .remove-container {
     padding: 20px 0px 0;

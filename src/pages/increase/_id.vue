@@ -132,12 +132,13 @@
         </div>
       </div>
     </div>
+    <div v-show="liquidity.currentPositonLoading" class="loading-global"><Spin /></div>
   </div>
 </template>
 <script lang="ts">
 import { Vue } from 'nuxt-property-decorator'
 import { mapState } from 'vuex'
-import { Button } from 'ant-design-vue'
+import { Button, Spin } from 'ant-design-vue'
 import importIcon from '@/utils/import-icon'
 import { fixD, decimalFormat, checkNullObj } from '@/utils'
 import { TokenInfo } from '@/utils/tokens'
@@ -153,10 +154,11 @@ import mixin from '@/mixin/position'
 import { loadSwapPair } from '@/contract/pool'
 
 export default Vue.extend({
-  mixins: [mixin],
   components: {
-    Button
+    Button,
+    Spin
   },
+  mixins: [mixin],
   data() {
     return {
       currentData: {} as any,

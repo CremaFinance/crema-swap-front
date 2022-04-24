@@ -150,6 +150,7 @@
         </Skeleton>
       </div>
       <!-- </Skeleton> -->
+      <div v-show="liquidity.currentPositonLoading" class="loading-global"><Spin /></div>
     </div>
     <Claim
       v-if="showClaimHint"
@@ -178,13 +179,14 @@ import { BroadcastOptions, SolanaProvider } from '@saberhq/solana-contrib'
 import type { Provider } from '@saberhq/solana-contrib'
 import mixin from '@/mixin/position'
 import { loadSwapPair } from '@/contract/pool'
-import { Skeleton } from 'ant-design-vue'
+import { Skeleton, Spin } from 'ant-design-vue'
 
 export default Vue.extend({
-  mixins: [mixin],
   components: {
-    Skeleton
+    Skeleton,
+    Spin
   },
+  mixins: [mixin],
   data() {
     return {
       isShowTitleOne: true,
