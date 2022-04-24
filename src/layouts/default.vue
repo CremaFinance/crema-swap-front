@@ -20,7 +20,7 @@
       v-if="$accessor.transaction.showSubmitted"
       @onClose="$accessor.transaction.setShowSubmitted(false)"
     ></Success>
-    <div v-show="fairShow != 'layout-fair'" class="positon-container-bottom"></div>
+    <!-- <div class="positon-container-bottom"></div> -->
   </div>
 </template>
 
@@ -46,19 +46,9 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['transaction', 'url', 'wallet', 'liquidity'])
-    // walletConnectedAndHaveCoinPairConfig(): boolean {
-    //   if (this.liquidity.coinPairConfigObj && this.wallet.connected) {
-    //     return true
-    //   }
-    //   return false
-    // }
+    ...mapState(['transaction', 'url'])
   },
   watch: {
-    'liquidity.coinPairConfigObj': {
-      handler: 'coinPairConfigObjWatch',
-      immediate: true
-    },
     $route(to, from) {
       if (to.path == '/fair') {
         console.log('进去了####')
@@ -72,7 +62,6 @@ export default Vue.extend({
   created() {
     console.log(this.$route)
     this.$accessor.liquidity.getRates()
-    this.$accessor.liquidity.getPairConfigApi()
   },
   mounted() {
     // const showNotice = sessionStorage.getItem('crema_show_notice')
@@ -97,13 +86,6 @@ export default Vue.extend({
   },
   destroyed() {
     window.onresize = null
-  },
-  methods: {
-    coinPairConfigObjWatch(newVal) {
-      if (newVal) {
-        this.$accessor.liquidity.getPoolList()
-      }
-    }
   }
 })
 </script>
@@ -117,7 +99,6 @@ export default Vue.extend({
   min-height: 100vh;
   background: #22252b;
   min-width: 1128px;
-  position: relative;
 }
 .pc-header-container {
   display: block;
@@ -131,8 +112,6 @@ export default Vue.extend({
   box-sizing: border-box !important;
 }
 .layout-fair {
-  position: relative;
-  z-index: 5;
   background: url('@/assets/images/img-fair-bg.png');
   background-size: 100% 100%;
   .pc-header-container {
@@ -199,10 +178,10 @@ export default Vue.extend({
 }
 .positon-container-bottom {
   width: 100%;
-  height: 160px;
+  height: 201px;
   position: fixed;
   bottom: 0;
-  background: linear-gradient(180deg, #063c5a 0%, #231b55 100%);
+  background: linear-gradient(180deg, rgb(#0ec5fa, 0.58) 0%, rgba(#dd06f4, 0.58) 100%);
   filter: blur(32px);
   // z-index: 16;
 }

@@ -29,11 +29,8 @@ export default Vue.extend({
   background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
   box-shadow: 2px 4px 12px 0px #23262b, -3px -2px 10px 0px rgba(138, 147, 160, 0.16);
   border-radius: 15px;
-  // padding: 6px;
+  padding: 6px;
   margin-left: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
   &:hover {
     background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);

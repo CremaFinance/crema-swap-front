@@ -1,53 +1,45 @@
 <template>
   <div class="position-detail-container">
     <div class="go-back">
-      <div class="left">
-        <svg class="icon" aria-hidden="true" @click="gotoMyPosition">
-          <use xlink:href="#icon-icon-return"></use>
-        </svg>
-        Back to Pools Overview
-      </div>
-
-      <RefreshIcon :loading="liquidity.currentPositonLoading" @refresh="refresh"></RefreshIcon>
+      <svg class="icon" aria-hidden="true" @click="gotoMyPosition">
+        <use xlink:href="#icon-icon-return"></use>
+      </svg>
+      Back to Pools Overview
     </div>
-    <Skeleton :loading="!poolInfo" active :paragraph="false">
-      <div class="top">
-        <div class="left" style="display: flex">
-          <div class="coin-name">
-            <template v-if="direction">
-              <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" alt="" />
-              <img
-                v-if="poolInfo"
-                class="last"
-                :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
-                alt=""
-              />
-            </template>
-            <template v-else>
-              <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" alt="" />
-              <img
-                v-if="poolInfo"
-                class="last"
-                :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
-                alt=""
-              />
-            </template>
-            <span v-if="poolInfo && direction">{{ poolInfo.token_a.symbol }} - {{ poolInfo.token_b.symbol }}</span>
-            <span v-else-if="poolInfo && !direction"
-              >{{ poolInfo.token_b.symbol }} - {{ poolInfo.token_a.symbol }}</span
-            >
-          </div>
-          <span class="fee">{{ poolInfo && poolInfo.feeView }} %</span>
-          <StatusBlock :current-status="currentData.currentStatus" />
+    <div class="top">
+      <div class="left">
+        <div class="coin-name">
+          <template v-if="direction">
+            <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)" alt="" />
+            <img
+              v-if="poolInfo"
+              class="last"
+              :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)"
+              alt=""
+            />
+          </template>
+          <template v-else>
+            <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)" alt="" />
+            <img
+              v-if="poolInfo"
+              class="last"
+              :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)"
+              alt=""
+            />
+          </template>
+          <span v-if="poolInfo && direction">{{ poolInfo.coin.symbol }} - {{ poolInfo.pc.symbol }}</span>
+          <span v-else-if="poolInfo && !direction">{{ poolInfo.pc.symbol }} - {{ poolInfo.coin.symbol }}</span>
         </div>
-        <div class="right">
-          <button v-if="poolInfo" class="remove-btn" :disabled="!wallet.connected" @click="gotoRemove">Remove</button>
-          <button v-if="poolInfo" class="increase-btn" :disabled="!wallet.connected" @click="gotoIncrease">
-            Increase
-          </button>
-        </div>
+        <span class="fee">{{ poolInfo && poolInfo.feeView }} %</span>
+        <StatusBlock :current-status="currentData.currentStatus" />
       </div>
-    </Skeleton>
+      <div class="right">
+        <button v-if="poolInfo" class="remove-btn" :disabled="!wallet.connected" @click="gotoRemove">Remove</button>
+        <button v-if="poolInfo" class="increase-btn" :disabled="!wallet.connected" @click="gotoIncrease">
+          Increase
+        </button>
+      </div>
+    </div>
     <div class="pool-info-box">
       <DetailInfoBlock
         title="Liquidity"
@@ -100,61 +92,51 @@
         </div>
         <div v-if="poolInfo" class="right">
           <div v-if="direction" class="price-box">
-            1 {{ poolInfo.token_a.symbol }} ≈ {{ fixD(poolInfo.currentPriceView, poolInfo.token_b.decimal) }}
-            {{ poolInfo.token_b.symbol }}
+            1 {{ poolInfo.coin.symbol }} ≈ {{ fixD(poolInfo.currentPriceView, poolInfo.pc.decimals) }}
+            {{ poolInfo.pc.symbol }}
           </div>
           <div v-else class="price-box">
-            1 {{ poolInfo.token_b.symbol }} ≈ {{ fixD(poolInfo.currentPriceViewReverse, poolInfo.token_a.decimal) }}
-            {{ poolInfo.token_a.symbol }}
+            1 {{ poolInfo.pc.symbol }} ≈ {{ fixD(poolInfo.currentPriceViewReverse, poolInfo.coin.decimals) }}
+            {{ poolInfo.coin.symbol }}
           </div>
           <div class="coin-tab-box">
             <CoinTab :list="coinTabList" :current="currentCoin" @onChange="changeDirection"></CoinTab>
           </div>
         </div>
       </div>
-      <!-- <Skeleton :loading="!poolInfo" active> -->
       <div class="range-info-box">
-        <Skeleton :loading="!poolInfo" active>
-          <div v-if="poolInfo" class="range-item">
-            <div class="title">Min Price</div>
-            <div v-if="direction" class="price">{{ decimalFormat(currentData.minPrice, 6) }}</div>
-            <div v-else class="price">{{ decimalFormat(1 / currentData.maxPrice, 6) }}</div>
-            <div class="per">
-              {{ direction ? poolInfo.token_b.symbol : poolInfo.token_a.symbol }} per
-              {{ direction ? poolInfo.token_a.symbol : poolInfo.token_b.symbol }}
-            </div>
-
-            <div class="note">
-              Your position will be 100% {{ direction ? poolInfo.token_a.symbol : poolInfo.token_b.symbol }} at this
-              price
-            </div>
+        <div v-if="poolInfo" class="range-item">
+          <div class="title">Min Price</div>
+          <div v-if="direction" class="price">{{ decimalFormat(currentData.minPrice, 6) }}</div>
+          <div v-else class="price">{{ decimalFormat(1 / currentData.maxPrice, 6) }}</div>
+          <div class="per">
+            {{ direction ? poolInfo.pc.symbol : poolInfo.coin.symbol }} per
+            {{ direction ? poolInfo.coin.symbol : poolInfo.pc.symbol }}
           </div>
-        </Skeleton>
+          <div class="note">
+            Your position will be 100% {{ direction ? poolInfo.coin.symbol : poolInfo.pc.symbol }} at this price
+          </div>
+        </div>
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-link"></use>
         </svg>
-        <Skeleton :loading="!poolInfo" active>
-          <div v-if="poolInfo" class="range-item">
-            <div class="title">Max Price</div>
-            <div v-if="direction" class="price">
-              {{ currentData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(currentData.maxPrice, 6) }}
-            </div>
-            <div v-else class="price">
-              {{ currentData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(1 / currentData.minPrice, 6) }}
-            </div>
-            <div class="per">
-              {{ direction ? poolInfo.token_b.symbol : poolInfo.token_a.symbol }} per
-              {{ direction ? poolInfo.token_a.symbol : poolInfo.token_b.symbol }}
-            </div>
-            <div class="note">
-              Your position will be 100% {{ direction ? poolInfo.token_b.symbol : poolInfo.token_a.symbol }} at this
-              price
-            </div>
+        <div v-if="poolInfo" class="range-item">
+          <div class="title">Max Price</div>
+          <div v-if="direction" class="price">
+            {{ currentData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(currentData.maxPrice, 6) }}
           </div>
-        </Skeleton>
+          <div v-else class="price">
+            {{ currentData.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(1 / currentData.minPrice, 6) }}
+          </div>
+          <div class="per">
+            {{ direction ? poolInfo.pc.symbol : poolInfo.coin.symbol }} per
+            {{ direction ? poolInfo.coin.symbol : poolInfo.pc.symbol }}
+          </div>
+          <div class="note">
+            Your position will be 100% {{ direction ? poolInfo.pc.symbol : poolInfo.coin.symbol }} at this price
+          </div>
+        </div>
       </div>
-      <!-- </Skeleton> -->
-      <div v-show="liquidity.currentPositonLoading" class="loading-global"><Spin /></div>
     </div>
     <Claim
       v-if="showClaimHint"
@@ -164,7 +146,7 @@
       :tokenb-fee="String(currentData.tokenbFee)"
       :is-loading="isLoading"
       @onClose="() => (showClaimHint = false)"
-      @toClaim="toClaimNew"
+      @toClaim="toClaim"
     ></Claim>
   </div>
 </template>
@@ -175,22 +157,8 @@ import { fixD, getUnixTs, decimalFormat, checkNullObj } from '@/utils'
 import { cloneDeep, get } from 'lodash-es'
 import { claim, removeLiquidity } from '@/utils/liquidity'
 import importIcon from '@/utils/import-icon'
-import { PublicKey, Connection } from '@solana/web3.js'
-import Decimal from 'decimal.js'
-import { TokenSwap as TokenSwapNew } from 'test-crema-sdk'
-import { getATAAddress } from '@saberhq/token-utils'
-import { BroadcastOptions, SolanaProvider } from '@saberhq/solana-contrib'
-import type { Provider } from '@saberhq/solana-contrib'
-import mixin from '@/mixin/position'
-import { loadSwapPair } from '@/contract/pool'
-import { Skeleton, Spin } from 'ant-design-vue'
 
 export default Vue.extend({
-  components: {
-    Skeleton,
-    Spin
-  },
-  mixins: [mixin],
   data() {
     return {
       isShowTitleOne: true,
@@ -248,11 +216,11 @@ export default Vue.extend({
       console.log('currentPositon#####', currentPositon)
       this.currentData = currentPositon
       if (!checkNullObj(currentPositon)) {
-        const poolInfo = currentPositon
+        const poolInfo = currentPositon.poolInfo
         this.poolInfo = poolInfo
-        if (poolInfo.token_a && poolInfo.token_b) {
-          this.coinTabList = [poolInfo.token_a.symbol, poolInfo.token_b.symbol]
-          this.currentCoin = poolInfo.token_a.symbol
+        if (poolInfo.coin && poolInfo.pc) {
+          this.coinTabList = [poolInfo.coin.symbol, poolInfo.pc.symbol]
+          this.currentCoin = poolInfo.coin.symbol
         }
       }
     },
@@ -276,11 +244,11 @@ export default Vue.extend({
       this.showRemoveLiquidityHint = true
     },
     watchMyPosions(myPosions: any) {
-      // console.log('123myPosions###', myPosions)
-      // this.$accessor.liquidity.setCurrentPositon({
-      //   myPosions,
-      //   id: this.$route.params.id
-      // })
+      console.log('myPosions###', myPosions)
+      this.$accessor.liquidity.setCurrentPositon({
+        myPosions,
+        id: this.$route.params.id
+      })
     },
     openAddLiquiditySecondConfirm() {
       const currentPriceP = Number(Math.pow(Number(this.currentData.currentPrice) / Math.pow(10, 12), 2))
@@ -304,98 +272,77 @@ export default Vue.extend({
       this.secondConfirmData = {}
       this.showAddLiquiditySecondConfirm = false
     },
-    async toClaimNew() {
+    toClaim() {
       this.isLoading = true
       const conn = this.$web3
       const wallet = (this as any).$wallet
 
       const poolInfo = cloneDeep(this.poolInfo)
       const currentData = cloneDeep(this.currentData)
-      // const nftAccount = get(this.wallet.tokenAccounts, `${currentData.nftTokenMint}.tokenAccountAddress`)
-      const swap = await loadSwapPair(poolInfo.tokenSwapKey, wallet)
 
-      // const userTokenA = await getATAAddress({
-      //   mint: swap.tokenSwapInfo.tokenAMint,
-      //   owner: swap.provider.wallet.publicKey
-      // })
-      // const userTokenB = await getATAAddress({
-      //   mint: swap.tokenSwapInfo.tokenBMint,
-      //   owner: swap.provider.wallet.publicKey
-      // })
+      // @ts-ignore
+      const fromCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.coin.mintAddress}.tokenAccountAddress`)
+      // @ts-ignore
+      const toCoinAccount = get(this.wallet.tokenAccounts, `${poolInfo.pc.mintAddress}.tokenAccountAddress`)
 
-      // const feeAmount = swap.preClaim(currentData.nftTokenMint)
-      this.showClaimHint = false
-      this.$accessor.transaction.setTransactionDesc('Claim')
+      const nftAccount = get(this.wallet.tokenAccounts, `${currentData.nft_token_id}.tokenAccountAddress`)
 
-      this.$accessor.transaction.setShowWaiting(true)
+      const key = getUnixTs().toString()
+      this.$notify.info({
+        key,
+        message: 'Making transaction...',
+        description: '',
+        duration: 0,
+        icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
+      })
 
-      let txid = ''
+      claim(conn, wallet, poolInfo, fromCoinAccount, toCoinAccount, currentData.nft_token_id, nftAccount)
+        .then((txid) => {
+          this.$notify.info({
+            key,
+            message: 'Transaction has been sent',
+            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } }),
+            description: (h: any) =>
+              h('div', [
+                'Confirmation is in progress.  Check your transaction on ',
+                h('a', { attrs: { href: `${this.url.explorer}/tx/${txid}`, target: '_blank' } }, 'here')
+              ])
+          })
 
-      try {
-        const tx = await swap.claimAtomic(
-          currentData.nftTokenId,
-          // userTokenA,
-          // userTokenB,
-          new PublicKey(currentData.nftTokenAccount)
-        )
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-
-        const receipt: any = await tx.send(opt)
-
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
+          // let description = `claim liquidity is ${currentData.liquity}`
           let description = ''
           if (currentData.tokenaFee && currentData.tokenbFee) {
-            description = `Claimed ${currentData.tokenaFee} ${poolInfo.token_a.symbol} and ${currentData.tokenbFee} ${poolInfo.token_b.symbol}`
+            description = `Claimed ${currentData.tokenaFee} ${poolInfo.coin.symbol} and ${currentData.tokenbFee} ${poolInfo.pc.symbol}`
           } else if (currentData.tokenaFee) {
-            description = `Claimed ${currentData.tokenaFee} ${poolInfo.token_a.symbol}`
+            description = `Claimed ${currentData.tokenaFee} ${poolInfo.coin.symbol}`
           } else if (currentData.tokenbFee) {
-            description = `Claimed ${currentData.tokenbFee} ${poolInfo.token_b.symbol}`
+            description = `Claimed ${currentData.tokenbFee} ${poolInfo.pc.symbol}`
           }
-          this.$accessor.transaction.setShowSubmitted(true)
-          const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Claim',
-            successCallback: () => {
-              _this.isLoading = false
-              _this.$accessor.liquidity.getMyPositionsNew(this.wallet.tokenAccounts)
-              _this.$accessor.transaction.setShowSubmitted(false)
-              // _this.$accessor.liquidity.requestInfos()
-            },
-            errorCallback: () => {
-              _this.isLoading = false
-            }
-          })
 
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-        }
-      } catch (error: any) {
-        console.log('toRemoveLiquidity###error####', error)
-        this.$accessor.transaction.setShowWaiting(false)
-        this.$accessor.transaction.setShowSubmitted(false)
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'ClaimFailed',
-          message: 'Claim failed',
-          description: error.message,
-          class: 'error',
-          icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
+          this.showClaimHint = false
+          this.$accessor.transaction.sub({ txid, description, type: 'Claim' })
+          setTimeout(() => {
+            this.$accessor.liquidity.requestInfos()
+          }, 2000)
+          // this.$accessor.transaction.sub({ txid: 'txid问题？', description: '难道是这个问题吗' })
         })
-        this.isLoading = false
-      }
+        .catch((error) => {
+          console.log('error#####', error)
+          this.$notify.error({
+            key,
+            message: 'Claim failed',
+            description: error.message,
+            class: 'error',
+            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
+          })
+        })
+        .finally(() => {
+          this.isLoading = false
+          // this.suppling = false
+          // this.fromCoinAmount = ''
+          // this.toCoinAmount = ''
+          console.log('结束了###')
+        })
     }
   }
 })
@@ -408,7 +355,6 @@ export default Vue.extend({
   .go-back {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     .icon {
       width: 20px;
       height: 20px;
@@ -420,12 +366,8 @@ export default Vue.extend({
     }
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
-    > .left {
-      display: flex;
-      align-items: center;
-    }
   }
-  .top {
+  > .top {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -606,7 +548,7 @@ export default Vue.extend({
     .range-info-box {
       display: flex;
       align-items: center;
-      // margin-top: 20px;
+      margin-top: 20px;
       .range-item {
         width: 308px;
         height: 119px;
@@ -619,7 +561,6 @@ export default Vue.extend({
         font-size: 14px;
         color: rgba(255, 255, 255, 0.5);
         padding: 10px 0px;
-        margin-top: 20px;
         .price {
           font-size: 16px;
           color: #fff;
@@ -636,7 +577,6 @@ export default Vue.extend({
         width: 20px;
         height: 20px;
         fill: rgba(255, 255, 255, 0.5);
-        margin-top: 32px;
       }
     }
   }

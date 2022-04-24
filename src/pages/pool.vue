@@ -1,12 +1,7 @@
 <template>
   <div class="pool-container">
-    <div class="link-block">
-      <div class="go-back" @click="gotoPoolList">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-icon-return"></use>
-        </svg>
-      </div>
-      <nuxt-link to="/position" v-if="wallet.connected">
+    <div v-if="wallet.connected" class="link-block">
+      <nuxt-link to="/position">
         <img src="../assets/images/icon-position@2x.png" />
         <span>My Position</span>
         <!-- <svg class="icon" aria-hidden="true">
@@ -47,7 +42,7 @@
                 type="circle"
                 :width="14"
                 :stroke-width="10"
-                :percent="(100 / autoRefreshTime) * countdown"
+                :percent="(100 / liquidity.autoRefreshTime) * liquidity.countdown"
                 :show-info="false"
                 :class="liquidity.loading ? 'disabled' : ''"
                 @click="refresh"
@@ -96,15 +91,22 @@
         </div>
         <div class="right">
           <div class="set-price-range-chart-box">
-            <D3Chart
-              v-if="poolInfo"
+            <!-- <SetPriceRangeChart
+              v-if="poolInfo && !checkNullObj(poolInfo.userPositionAccountObj)"
               :pool-info="poolInfo"
               :min-price="minPrice"
               :max-price="maxPrice"
               :direction="direction"
-              :tick-list="tickList"
-              :current-tick="currentTick"
-              :chart-loading="chartLoading"
+              @onChangeMinPrice="priceRangeChangeMin"
+              @onChangeMaxPrice="priceRangeChangeMax"
+            ></SetPriceRangeChart> -->
+
+            <D3Chart
+              v-if="poolInfo && !checkNullObj(poolInfo.userPositionAccountObj)"
+              :pool-info="poolInfo"
+              :min-price="minPrice"
+              :max-price="maxPrice"
+              :direction="direction"
               @onChangeMinPrice="priceRangeChangeMin"
               @onChangeMaxPrice="priceRangeChangeMax"
             ></D3Chart>
@@ -120,7 +122,7 @@
               :direction="direction"
               :invalid-price-range="invalidPriceRange"
               :default-max-price="defaultMaxPrice"
-              :tick-space="poolInfo.tickSpace"
+              :tick-space="poolInfo.tick_space"
               @onChangeMinPrice="priceRangeChangeMin"
               @onChangeMaxPrice="priceRangeChangeMax"
             ></SetPriceBlock>
@@ -156,7 +158,7 @@
       :min-price="minPrice"
       :max-price="maxPrice"
       :second-confirm-data="secondConfirmData"
-      @supply="toAddLiquidity"
+      @supply="supply"
       @onClose="closeAddLiquiditySecondConfirm"
     ></AddLiquidityConfirm>
   </div>
@@ -165,11 +167,23 @@
 <script lang="ts">
 import { Vue } from 'nuxt-property-decorator'
 import { mapState } from 'vuex'
-import { Button, Progress } from 'ant-design-vue'
-import { fixD, decimalFormat, checkNullObj } from '../utils/index'
-import { cloneDeep, debounce } from 'lodash-es'
-import { TokenInfo, getTokenBySymbol } from '@/utils/tokens'
+import { Button, Icon, Progress } from 'ant-design-vue'
+// import AddLiquidity from '../layouts/components/AddLiquidity.vue'
+// import WaitingHint from '@/components/waiting.vue'
+// import SuccessHint from '@/components/success.vue'
+import { fixD, getUnixTs, decimalFormat, checkNullObj } from '../utils/index'
+import { cloneDeep, get } from 'lodash-es'
+import { TokenInfo, TOKENS, NATIVE_SOL, getTokenBySymbol } from '@/utils/tokens'
+import { addLiquidityNew } from '@/utils/liquidity'
 import { inputRegex, escapeRegExp } from '@/utils/regex'
+import {
+  tick2price,
+  price2tick,
+  getNearestTick,
+  deposit_src_calulate_dst,
+  deposit_only_token_b,
+  deposit_only_token_a
+} from '@/tokenSwap/swapv3'
 import { TokenAmount, gt } from '@/utils/safe-math'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
 import {
@@ -179,14 +193,12 @@ import {
   calculateLiquityOnlyA,
   calculateLiquityOnlyB,
   calculateLiquity,
-  uiPrice2LamportPrice,
-  lamportPrice2uiPrice
-} from 'test-crema-sdk'
+  TokenSwap,
+  calculateSlidTokenAmount
+} from '@cremafinance/crema-sdk'
 import Decimal from 'decimal.js'
-import { getATAAddress } from '@saberhq/token-utils'
-import { BroadcastOptions } from '@saberhq/solana-contrib'
-import { loadSwapPair } from '@/contract/pool'
-import mixin from '@/mixin/pool'
+import { PublicKey } from '@solana/web3.js'
+import { SWAPV3_PROGRAMID } from '@/utils/ids'
 
 const USDT = getTokenBySymbol('USDT')
 const USDC = getTokenBySymbol('USDC')
@@ -196,7 +208,6 @@ export default Vue.extend({
     Button,
     Progress
   },
-  mixins: [mixin],
   data() {
     return {
       showAddLiquidity: true,
@@ -231,14 +242,8 @@ export default Vue.extend({
       coinTabList: [] as any,
       currentCoinTab: '',
       currentFeeTier: 0,
-      ifFirstDirectionChange: false,
-      tickList: [] as any,
-      currentTick: 0,
-      autoRefreshTime: 20,
-      countdown: 0,
-      refreshTimer: null,
-      chartLoading: false,
-      isUpdateAmount: true
+      ifFirstDirectionChange: false
+      // poolInfo: null as any
     }
   },
   computed: {
@@ -250,13 +255,16 @@ export default Vue.extend({
       'liquidity'
     ]),
     addLiquidityBtnText() {
+      // {{ noEnterAmount ? 'Enter an amount' : insufficientBalance ? 'Insufficient balance' : 'Add Liquidity' }}
+      console.log('this.minPrice#####', this.minPrice)
+      console.log('this.maxPrice#####', this.maxPrice)
       if (!this.fromCoin && !this.toCoin) {
         return 'Select a token'
       } else if (!this.poolInfo) {
         return 'Pool not found'
       } else if (this.noEnterAmount) {
         return 'Enter an amount'
-      } else if (this.maxPrice !== '∞' && Number(this.minPrice) >= Number(this.maxPrice)) {
+      } else if (this.maxPrice !== '∞' && Number(fixD(this.minPrice, 4)) >= Number(fixD(this.maxPrice, 4))) {
         return 'Invalid Range'
       } else if (this.insufficientBalance) {
         return 'Insufficient balance'
@@ -265,19 +273,13 @@ export default Vue.extend({
       return 'Add Liquidity'
     },
     poolInfo() {
-      if (this.liquidity.poolsObj) {
-        const info: any = Object.values(this.liquidity.poolsObj).find((p: any) => {
-          return (
-            (p.token_a.symbol === this.fromCoin?.symbol && p.token_b.symbol === this.toCoin?.symbol) ||
-            (p.token_b.symbol === this.fromCoin?.symbol && p.token_a.symbol === this.toCoin?.symbol)
-          )
-        })
-        if (info && !checkNullObj(info)) {
-          return info
-        }
-        return null
-      }
-      return null
+      const info: any = Object.values(this.$accessor.liquidity.infos).find((p: any) => {
+        return (
+          (p.coin.symbol === this.fromCoin?.symbol && p.pc.symbol === this.toCoin?.symbol) ||
+          (p.coin.symbol === this.toCoin?.symbol && p.pc.symbol === this.fromCoin?.symbol)
+        )
+      })
+      return info
     },
     fromCoinBalance(): any {
       if (this.fromCoin && this.fromCoin.mintAddress && this.wallet.tokenAccounts) {
@@ -362,7 +364,7 @@ export default Vue.extend({
       handler: 'poolInfoWatch',
       immediate: true
     },
-    fromCoinAmount: debounce(function (newAmount: string, oldAmount: string) {
+    fromCoinAmount(newAmount: string, oldAmount: string) {
       this.$nextTick(() => {
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.fromCoinAmount = oldAmount
@@ -374,8 +376,9 @@ export default Vue.extend({
           }
         }
       })
-    }, 500),
-    toCoinAmount: debounce(function (newAmount: string, oldAmount: string) {
+    },
+
+    toCoinAmount(newAmount: string, oldAmount: string) {
       this.$nextTick(() => {
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.toCoinAmount = oldAmount
@@ -385,13 +388,15 @@ export default Vue.extend({
           }
         }
       })
-    }, 500),
+    },
     minPrice(value: string) {
+      // if ((Number(value) || Number(this.maxPrice)) && this.poolInfo) {
       if (value) {
         this.updateAmounts()
       }
     },
     maxPrice(value: string) {
+      // if ((Number(value) || Number(this.minPrice)) && this.poolInfo) {
       if (value) {
         this.updateAmounts()
       }
@@ -417,15 +422,13 @@ export default Vue.extend({
         }
       }
     },
-
     $route: {
       handler: 'routeWatch',
       immediate: true
     }
   },
   created() {
-    // this.$accessor.liquidity.getPoolsDefaultPriceRange()
-    this.setRefreshTimer()
+    this.$accessor.liquidity.getPoolsDefaultPriceRange()
   },
   mounted() {
     this.updateCoinInfo(this.wallet.tokenAccounts)
@@ -435,56 +438,45 @@ export default Vue.extend({
     fixD,
     decimalFormat,
     checkNullObj,
-    setRefreshTimer() {
-      this.refreshTimer = setInterval(() => {
-        if (!this.liquidity.loading) {
-          if (this.countdown < this.autoRefreshTime) {
-            this.countdown += 1
-
-            if (this.countdown === this.autoRefreshTime) {
-              this.refresh(false)
-            }
-          }
-        }
-      }, 1000)
-    },
-    refresh(refreshChart: boolean = true) {
-      this.countdown = 0
-      this.$accessor.liquidity.getPoolList()
-      if (refreshChart) this.getChartData()
+    refresh() {
+      this.$accessor.liquidity.requestInfos()
     },
     poolInfoWatch(value: any, oldValue: any) {
       if (value) {
         // 第一次刷新或，替换交易对
         if (!oldValue || oldValue.name !== value.name) {
-          this.chartLoading = true
           this.ifFirstDirectionChange = true
           let direction = true
-
           // 设置默认方向
-          if (value.token_a.symbol === this.fromCoin?.symbol && value.token_b.symbol === this.toCoin?.symbol) {
+          if (value.coin.symbol === this.fromCoin?.symbol && value.pc.symbol === this.toCoin?.symbol) {
             direction = true
           } else {
             direction = false
           }
           this.direction = direction
 
+          // console.log('poolInfoWatch###value###', value)
           // 设置价格区间默认值
 
-          if (value.price_interval) {
-            const priceInterval = value.price_interval
-
-            const minTick = getNearestTickByPrice(new Decimal(priceInterval.lower_price), value.tickSpace)
-            const maxTick = getNearestTickByPrice(new Decimal(priceInterval.upper_price), value.tickSpace)
+          if (
+            this.liquidity.poolsDefaultPriceRangeObj[value.coinPair] &&
+            this.liquidity.poolsDefaultPriceRangeObj[value.coinPair].price_interval
+          ) {
+            const priceInterval = this.liquidity.poolsDefaultPriceRangeObj[value.coinPair].price_interval
+            // const tick = getNearestTickByPrice(new Decimal(this.pValue), this.tickSpace)
+            // console.log('onBlur###tick####', tick)
+            // const price = tick2Price(tick)
+            const minTick = getNearestTickByPrice(new Decimal(priceInterval.lower_price), value.tick_space)
+            const maxTick = getNearestTickByPrice(new Decimal(priceInterval.upper_price), value.tick_space)
 
             this.minPrice = tick2Price(minTick).toString()
             this.maxPrice = tick2Price(maxTick).toString()
             this.defaultMinPrice = tick2Price(minTick).toString()
             this.defaultMaxPrice = tick2Price(maxTick).toString()
           } else {
-            const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tickSpace)
-            const minTick = tick - value.tickSpace
-            const maxTick = tick + value.tickSpace
+            const tick = getNearestTickByPrice(new Decimal(value.currentPriceView), value.tick_space)
+            const minTick = tick - value.tick_space
+            const maxTick = tick + value.tick_space
 
             const minPrice = tick2Price(minTick).toString()
             const maxPrice = tick2Price(maxTick).toString()
@@ -503,22 +495,17 @@ export default Vue.extend({
           //   this.currentFeeTier = 2
           // }
           this.currentFeeTier = value.feeView
-          this.coinTabList = [value.token_a.symbol, value.token_b.symbol]
-          this.currentCoinTab = direction ? value.token_a.symbol : value.token_b.symbol
+          this.coinTabList = [value.coin.symbol, value.pc.symbol]
+          this.currentCoinTab = direction ? value.coin.symbol : value.pc.symbol
         }
-        this.getTokenSwap()
+
         this.updateAmounts()
-        this.currentTick = 0
-        this.tickList = []
-        this.getChartData(value)
       } else {
         this.currentFeeTier = -1
         this.minPrice = ''
         this.maxPrice = ''
         this.showFromCoinLock = false
         this.showToCoinLock = false
-        this.currentTick = 0
-        this.tickList = []
       }
     },
     routeWatch(newVal, oldVal) {
@@ -537,9 +524,10 @@ export default Vue.extend({
       this.currentCoinTab = value
     },
     openAddLiquiditySecondConfirm() {
-      // const currentPriceP = Number(Math.pow(Number(this.poolInfo.current_price) / Math.pow(10, 12), 2))
+      const currentPriceP = Number(Math.pow(Number(this.poolInfo.current_price) / Math.pow(10, 12), 2))
 
-      const dPrice = this.direction ? this.poolInfo.currentPriceView : this.poolInfo.currentPriceViewReverse
+      const dPrice = this.direction ? currentPriceP : 1 / currentPriceP
+
       let currentStatus = 'Active'
       if (!this.deltaLiquity) {
         currentStatus = 'Closed'
@@ -557,7 +545,7 @@ export default Vue.extend({
         toCoin: this.toCoin,
         fromCoinAmount: this.fromCoinAmount,
         toCoinAmount: this.toCoinAmount,
-        currentPrice: dPrice,
+        currentPrice: currentPriceP,
         minPrice: this.minPrice,
         maxPrice: this.maxPrice,
         showFromCoinLock: this.showFromCoinLock,
@@ -596,21 +584,20 @@ export default Vue.extend({
     },
     // updateAmounts(price: string, min: string, max: string) {
     async updateAmounts() {
-      if (!this.isUpdateAmount || !this.poolInfo) return
+      if (!this.poolInfo) return
       if (!this.fromCoinAmount && !this.toCoinAmount && !this.minPrice && !this.maxPrice) return
 
-      // const swap = await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet)
-      let swap: any
-      if (this.tokenSwap) {
-        swap = this.tokenSwap
-      } else {
-        swap = await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet)
-        this.tokenSwap = swap
-      }
+      const swap = await new TokenSwap(
+        this.$web3,
+        new PublicKey(SWAPV3_PROGRAMID),
+        // new PublicKey(LPFARMS[i].swapKey),
+        this.poolInfo.tokenSwap,
+        null
+      ).load()
 
-      console.log('changeCoinPosition####updateAmount#####')
       // 处理过的current price , 与前端价格区间比较时用
       const currentPriceP = this.direction ? this.poolInfo.currentPriceView : this.poolInfo.currentPriceViewReverse
+      // const currentPriceP = this.poolInfo.currentPriceView
       let currentPriceTick = 0
       const min = this.minPrice
       const max = this.maxPrice
@@ -620,21 +607,23 @@ export default Vue.extend({
       let tick_upper: number
       let direction: any
       if (this.fixedFromCoin) {
+        // coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
         direction =
-          this.fromCoin?.symbol === this.poolInfo.token_a.symbol && this.toCoin?.symbol === this.poolInfo.token_b.symbol
-            ? 0
-            : 1
+          this.fromCoin?.symbol === this.poolInfo.coin.symbol && this.toCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
       } else {
+        // coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
         direction =
-          this.toCoin?.symbol === this.poolInfo.token_a.symbol && this.fromCoin?.symbol === this.poolInfo.token_b.symbol
-            ? 0
-            : 1
+          this.toCoin?.symbol === this.poolInfo.coin.symbol && this.fromCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
       }
 
       if (min === '0' && max === '∞') {
         tick_lower = -443632
         tick_upper = 443632
       } else {
+        // minPrice = Number(min)
+        // maxPrice = Number(max)
+        console.log('pool###updateAmounts###this.direction####', this.direction)
+        console.log('pool###updateAmounts###direction####', direction)
         if (this.direction) {
           minPrice = Number(min)
           maxPrice = Number(max)
@@ -643,18 +632,36 @@ export default Vue.extend({
           maxPrice = 1 / Number(min)
         }
 
+        // tick_lower = getNearestTick(Math.sqrt(minPrice), this.poolInfo.tick_space, true)
+        // tick_upper = getNearestTick(Math.sqrt(maxPrice), this.poolInfo.tick_space, false)
         if (this.fromCoin?.decimals === this.toCoin?.decimals) {
+          console.log('走到这里了吗####currentPriceP#####', currentPriceP)
+          console.log('走到这里了吗####minPrice#####', minPrice)
+          console.log('走到这里了吗####maxPrice#####', maxPrice)
           currentPriceTick = price2Tick(new Decimal(currentPriceP))
-          tick_lower = getNearestTickByPrice(new Decimal(minPrice), this.poolInfo.tickSpace)
-          tick_upper = getNearestTickByPrice(new Decimal(maxPrice), this.poolInfo.tickSpace)
+          tick_lower = getNearestTickByPrice(new Decimal(minPrice), this.poolInfo.tick_space)
+          tick_upper = getNearestTickByPrice(new Decimal(maxPrice), this.poolInfo.tick_space)
         } else {
-          const { lowerTick, upperTick } = swap.calculateEffectivTick(new Decimal(minPrice), new Decimal(maxPrice))
-          tick_lower = lowerTick
-          tick_upper = upperTick
+          const f_t = this.poolInfo.coin?.decimals - this.poolInfo.pc?.decimals
+          const t_f = this.poolInfo.pc?.decimals - this.poolInfo.coin?.decimals
+
+          console.log('f_t#####', f_t)
+          console.log('t_f#####', t_f)
+
+          // if (direction === 0) {
+          // 正向
+          currentPriceTick = price2Tick(new Decimal(currentPriceP * Math.pow(10, t_f)))
+          tick_lower = getNearestTickByPrice(new Decimal(minPrice * Math.pow(10, t_f)), this.poolInfo.tick_space)
+          tick_upper = getNearestTickByPrice(new Decimal(maxPrice * Math.pow(10, t_f)), this.poolInfo.tick_space)
+          // } else {
+          //   // 反向
+          //   currentPriceTick = price2Tick(new Decimal(currentPriceP * Math.pow(10, f_t)))
+          //   tick_lower = getNearestTickByPrice(new Decimal(minPrice * Math.pow(10, t_f)), this.poolInfo.tick_space)
+          //   tick_upper = getNearestTickByPrice(new Decimal(maxPrice * Math.pow(10, t_f)), this.poolInfo.tick_space)
+          // }
         }
       }
       if (max !== '∞' && tick_lower >= tick_upper) {
-        console.log('changeCoinPosition###是走到这里了吗####123')
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
         this.showToCoinLock = true
@@ -662,28 +669,38 @@ export default Vue.extend({
         return
       }
 
-      console.log('changeCoinPosition###updateAmount###currentPriceP###', currentPriceP)
-      console.log('changeCoinPosition###updateAmount###min###', min)
-      console.log('changeCoinPosition###updateAmount###max###', max)
+      // console.log('this.fromCoinAmount######', this.fromCoinAmount)
+      // console.log('this.toCoinAmount######', this.toCoinAmount)
+      console.log('currentPriceTick######', currentPriceTick)
+      console.log('tick_lower#####', tick_lower)
+      console.log('tick_upper#####', tick_upper)
 
+      console.log('min#####', min)
+      console.log('max#####', max)
+      // console.log('min#####', min)
       // 区间中包含当前价格, 一种资产返回另外一种资产，并且返回liquity
       if (max === '∞' || (Number(currentPriceP) > Number(min) && Number(currentPriceP) < Number(max))) {
-        console.log('changeCoinPosition####666666')
         let coinAmount: any
 
-        console.log('changeCoinPosition###updateAmount###fixedFromCoin###', this.fixedFromCoin)
-
-        console.log('changeCoinPosition###updateAmount###this.fromCoinAmount####', this.fromCoinAmount)
-        console.log('changeCoinPosition###updateAmount###this.fromCoin?.decimals####', this.fromCoin?.decimals)
-
         if (this.fixedFromCoin) {
-          coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+          coinAmount = new TokenAmount(fixD(this.fromCoinAmount, 2), this.fromCoin?.decimals, false).wei.toNumber()
+          // direction =
+          //   this.fromCoin?.symbol === this.poolInfo.coin.symbol && this.toCoin?.symbol === this.poolInfo.pc.symbol
+          //     ? 0
+          //     : 1
         } else {
-          coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+          coinAmount = new TokenAmount(fixD(this.toCoinAmount, 2), this.toCoin?.decimals, false).wei.toNumber()
+          // direction =
+          //   this.toCoin?.symbol === this.poolInfo.coin.symbol && this.fromCoin?.symbol === this.poolInfo.pc.symbol
+          //     ? 0
+          //     : 1
         }
 
-        console.log('changeCoinPosition###updateAmount###coinAmount###', coinAmount)
-
+        console.log('tick_lower####', tick_lower)
+        console.log('tick_upper####', tick_upper)
+        console.log('coinAmount#####', coinAmount)
+        console.log('swap.tokenSwapInfo.currentSqrtPrice####', swap.tokenSwapInfo.currentSqrtPrice.toNumber())
+        console.log('direction####', direction)
         const { desiredAmountDst, deltaLiquity } = calculateLiquity(
           tick_lower,
           tick_upper,
@@ -693,44 +710,44 @@ export default Vue.extend({
         )
         const dst = desiredAmountDst.toNumber()
         const delta_liquity = deltaLiquity.toNumber()
-
-        console.log('changeCoinPosition###updateAmount###dst###', dst)
+        console.log('delta_liquity#####', delta_liquity)
+        console.log('dst####', dst)
 
         this.showFromCoinLock = false
         this.showToCoinLock = false
+        const decimal = this.toCoin?.decimals || 6
 
         if (this.fixedFromCoin) {
-          const decimal = this.toCoin?.decimals || 6
           const toCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
           this.toCoinAmount = toCoinAmount === '--' ? '' : toCoinAmount
         } else {
-          const decimal = this.fromCoin?.decimals || 6
           const fromCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
           this.fromCoinAmount = fromCoinAmount === '--' ? '' : fromCoinAmount
         }
 
         this.deltaLiquity = delta_liquity
       } else if (Number(currentPriceP) >= Number(max)) {
-        console.log('changeCoinPosition####777777')
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-        const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+        const coinAmount = new TokenAmount(fixD(this.toCoinAmount, 2), this.toCoin?.decimals, false).wei.toNumber()
+        // const delta_liquity = deposit_only_token_b(tick_lower, tick_upper, coinAmount)
         const delta_liquity = calculateLiquityOnlyB(tick_lower, tick_upper, new Decimal(coinAmount))
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
         this.showToCoinLock = false
         this.deltaLiquity = delta_liquity.toString()
       } else if (Number(currentPriceP) <= Number(min)) {
-        console.log('changeCoinPosition####888888')
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-        const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+        const coinAmount = new TokenAmount(fixD(this.fromCoinAmount, 2), this.fromCoin?.decimals, false).wei.toNumber()
+        // const delta_liquity = deposit_only_token_a(tick_lower, tick_upper, coinAmount)
         const delta_liquity = calculateLiquityOnlyA(tick_lower, tick_upper, new Decimal(coinAmount))
 
+        // const coinAmount = 1000000000
+        // const delta_liquity = deposit_only_token_a(50112, 50752, coinAmount)
         this.showFromCoinLock = false
         this.showToCoinLock = true
         this.toCoinAmount = ''
         this.deltaLiquity = delta_liquity.toString()
       } else {
-        console.log('changeCoinPosition######333333')
         // 重叠的情况
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
@@ -750,16 +767,16 @@ export default Vue.extend({
       this.showCoinSelect = true
     },
     checkIsHaveCoinPair(coinA: any, coinB: any) {
-      const poolsObj: any = this.liquidity.poolsObj
-      for (let key in poolsObj) {
-        const item = poolsObj[key]
-        if (`${coinA}-${coinB}` === item.name || `${coinB}-${coinA}` === item.name) {
+      for (let i = 0; i < LIQUIDITY_POOLS.length; i++) {
+        const coinPair = LIQUIDITY_POOLS[i].coinPair
+        if (`${coinA}-${coinB}` === coinPair || `${coinB}-${coinA}` === coinPair) {
           return true
         }
       }
       return false
     },
     onCoinSelect(token: any) {
+      // if (token.unusable) return
       if (this.currentCoinKey === 'fromCoin') {
         if (token.symbol === this.toCoin?.symbol || !this.checkIsHaveCoinPair(token.symbol, this.toCoin?.symbol)) {
           this.toCoin = null
@@ -788,7 +805,6 @@ export default Vue.extend({
       }
     },
     changeCoinPosition() {
-      this.isUpdateAmount = false
       this.direction = !this.direction
       const tempFromCoin = this.fromCoin
       const tempToCoin = this.toCoin
@@ -798,39 +814,52 @@ export default Vue.extend({
       const tempFromCoinAmount = this.fromCoinAmount
       const tempToCoinAmount = this.toCoinAmount
 
-      console.log('changeCoinPosition###tempFromCoinAmount####', tempFromCoinAmount)
-      console.log('changeCoinPosition###tempToCoinAmount####', tempToCoinAmount)
-
       this.fromCoinAmount = tempToCoinAmount
       this.toCoinAmount = tempFromCoinAmount
-
-      this.fixedFromCoin = !this.fixedFromCoin
-
-      this.currentCoinTab = this.direction ? this.poolInfo.token_a.symbol : this.poolInfo.token_b.symbol
-
-      setTimeout(() => {
-        this.isUpdateAmount = true
-        this.updateAmounts()
-      }, 1000)
+      this.currentCoinTab = this.direction ? this.poolInfo.coin.symbol : this.poolInfo.pc.symbol
     },
-
-    async toAddLiquidity() {
-      // mintPosition
+    async supply() {
+      // console.log('this.wallet.tokenAccounts#####', this.wallet.tokenAccounts)
       this.suppling = true
+
+      const conn = this.$web3
       const wallet = (this as any).$wallet
 
-      const poolInfo: any = cloneDeep(this.poolInfo)
+      const poolInfo: any = Object.values(this.$accessor.liquidity.infos).find((p: any) => {
+        return (
+          (p.coin.symbol === this.fromCoin?.symbol && p.pc.symbol === this.toCoin?.symbol) ||
+          (p.coin.symbol === this.toCoin?.symbol && p.pc.symbol === this.fromCoin?.symbol)
+        )
+      })
+
+      // @ts-ignore
+      const fromCoinAccount = get(this.wallet.tokenAccounts, `${this.fromCoin.mintAddress}.tokenAccountAddress`)
+      // @ts-ignore
+      const toCoinAccount = get(this.wallet.tokenAccounts, `${this.toCoin.mintAddress}.tokenAccountAddress`)
+
+      const processedFromCoinAccount =
+        typeof fromCoinAccount === 'string' ? new PublicKey(fromCoinAccount) : fromCoinAccount
+      const processedToCoinAccount = typeof fromCoinAccount === 'string' ? new PublicKey(toCoinAccount) : toCoinAccount
+
+      const key = getUnixTs().toString()
+      // this.$notify.info({
+      //   key,
+      //   message: 'Making transaction...',
+      //   description: '',
+      //   duration: 0,
+      //   icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
+      // })
 
       let direction: any
       if (this.fixedFromCoin) {
+        // coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
         direction =
-          this.fromCoin?.symbol === poolInfo.token_a.symbol && this.toCoin?.symbol === poolInfo.token_b.symbol ? 0 : 1
+          this.fromCoin?.symbol === this.poolInfo.coin.symbol && this.toCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
       } else {
+        // coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
         direction =
-          this.toCoin?.symbol === poolInfo.token_a.symbol && this.fromCoin?.symbol === poolInfo.token_b.symbol ? 0 : 1
+          this.toCoin?.symbol === this.poolInfo.coin.symbol && this.fromCoin?.symbol === this.poolInfo.pc.symbol ? 0 : 1
       }
-
-      const swap = await loadSwapPair(poolInfo.tokenSwapKey, wallet)
 
       let tick_lower: number
       let tick_upper: number
@@ -838,67 +867,67 @@ export default Vue.extend({
         tick_lower = -443632
         tick_upper = 443632
       } else {
-        // const { lowerTick, upperTick } = swap.calculateEffectivTick(minPrice, maxPrice)
-        let minPrice: any
-        let maxPrice: any
-        if (this.direction) {
-          minPrice = this.minPrice
-          maxPrice = this.maxPrice
+        const f_t = this.fromCoin?.decimals - this.toCoin?.decimals
+        const t_f = this.toCoin?.decimals - this.fromCoin?.decimals
+        console.log('supply####f_t####', f_t)
+        console.log('supply####t_f####', t_f)
+        if (direction === 0) {
+          tick_lower = getNearestTickByPrice(new Decimal(this.minPrice * Math.pow(10, t_f)), poolInfo.tick_space)
+          tick_upper = getNearestTickByPrice(new Decimal(this.maxPrice * Math.pow(10, t_f)), poolInfo.tick_space)
         } else {
-          minPrice = 1 / Number(this.maxPrice)
-          maxPrice = 1 / Number(this.minPrice)
+          tick_lower = getNearestTickByPrice(
+            new Decimal((1 / Number(this.maxPrice)) * Math.pow(10, f_t)),
+            poolInfo.tick_space
+          )
+          tick_upper = getNearestTickByPrice(
+            new Decimal((1 / Number(this.minPrice)) * Math.pow(10, f_t)),
+            poolInfo.tick_space
+          )
         }
-        const { lowerTick, upperTick } = swap.calculateEffectivTick(new Decimal(minPrice), new Decimal(maxPrice))
-        tick_lower = lowerTick
-        tick_upper = upperTick
       }
 
-      const amountA = this.direction ? new Decimal(this.fromCoinAmount || 0) : new Decimal(this.toCoinAmount || 0)
-      const amountB = this.direction ? new Decimal(this.toCoinAmount || 0) : new Decimal(this.fromCoinAmount || 0)
-      const slid = new Decimal(Number(this.$accessor.slippage) / 100)
-
-      let balanceA: any
-      let balanceB: any
-      if (this.direction) {
-        balanceA = new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimals))
-        balanceB = new Decimal(this.toCoinBalance.fixed()).mul(Math.pow(10, this.toCoin.decimals))
-      } else {
-        balanceA = new Decimal(this.toCoinBalance.fixed()).mul(Math.pow(10, this.toCoin.decimals))
-        balanceB = new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimals))
+      let fromCoinAmount: any
+      if (this.fromCoinAmount) {
+        // fromCoinAmount = !this.fixedFromCoin
+        //   ? Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        //   : Number(this.fromCoinAmount)
+        fromCoinAmount = Number(this.fromCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
       }
 
-      let liquityResult: any
+      let toCoinAmount: any
+      if (this.toCoinAmount) {
+        // toCoinAmount = this.fixedFromCoin
+        //   ? Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        //   : Number(this.toCoinAmount)
 
-      if (direction === 0) {
-        liquityResult = swap.calculateFixSideTokenAmount(
-          tick_lower,
-          tick_upper,
-          amountA,
-          null,
-          balanceA,
-          balanceB,
-          slid
-        )
-      } else {
-        liquityResult = swap.calculateFixSideTokenAmount(
-          tick_lower,
-          tick_upper,
-          null,
-          amountB,
-          balanceA,
-          balanceB,
-          slid
-        )
+        // if (!fromCoinAmount) {
+        //   toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
+        // }
+        toCoinAmount = Number(this.toCoinAmount) * (1 + Number(this.$accessor.slippage) / 100)
       }
 
-      const userTokenA = await getATAAddress({
-        mint: swap.tokenSwapInfo.tokenAMint,
-        owner: swap.provider.wallet.publicKey
-      })
-      const userTokenB = await getATAAddress({
-        mint: swap.tokenSwapInfo.tokenBMint,
-        owner: swap.provider.wallet.publicKey
-      })
+      const swap = await new TokenSwap(
+        this.$web3,
+        new PublicKey(SWAPV3_PROGRAMID),
+        // new PublicKey(LPFARMS[i].swapKey),
+        this.poolInfo.tokenSwap,
+        null
+      ).load()
+
+      const slidTokenAmountObj = calculateSlidTokenAmount(
+        tick_lower,
+        tick_upper,
+        new Decimal(this.deltaLiquity),
+        swap.tokenSwapInfo.currentSqrtPrice,
+        new Decimal(Number(this.$accessor.slippage) / 100)
+      )
+
+      fromCoinAmount = fixD(slidTokenAmountObj.maxAmountA.toString(), 0)
+      toCoinAmount = fixD(slidTokenAmountObj.maxAmountB.toString(), 0)
+      console.log('fromCoinAmount####', fromCoinAmount)
+      console.log('fromCoinAmount####', toCoinAmount)
+      console.log('this.$accessor.slippage####', this.$accessor.slippage)
+      console.log('test123####', slidTokenAmountObj)
 
       this.$accessor.transaction.setTransactionDesc(
         `Add liquidity  ${this.fromCoinAmount && this.fromCoinAmount} ${this.fromCoinAmount && this.fromCoin?.symbol} ${
@@ -907,79 +936,55 @@ export default Vue.extend({
       )
       this.$accessor.transaction.setShowWaiting(true)
       const deltaLiquity = fixD(this.deltaLiquity, 0)
-      let txid = ''
-      try {
-        const res = await swap.mintPositionFixToken(
-          userTokenA,
-          userTokenB,
-          liquityResult.fixTokenType,
-          tick_lower,
-          tick_upper,
-          liquityResult.maxAmountA,
-          liquityResult.maxAmountB
-        )
 
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
+      // console.log('this.fromCoinBalance####', this.fromCoinBalance.wei.toNumber())
+      // console.log('this.toCoinBalance####', this.toCoinBalance.wei.toNumber())
 
-        const receipt: any = await res.tx.send(opt)
-
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
+      addLiquidityNew(
+        conn,
+        wallet,
+        poolInfo,
+        this.direction ? this.fromCoin : this.toCoin,
+        this.direction ? this.toCoin : this.fromCoin,
+        this.direction ? processedFromCoinAccount : processedToCoinAccount,
+        this.direction ? processedToCoinAccount : processedFromCoinAccount,
+        null,
+        null,
+        tick_lower,
+        tick_upper,
+        fixD(deltaLiquity, 0),
+        // this.direction ? fromCoinAmount : toCoinAmount,
+        // this.direction ? toCoinAmount : fromCoinAmount,
+        fromCoinAmount,
+        toCoinAmount,
+        0,
+        this.fromCoinBalance.wei.toNumber(),
+        this.toCoinBalance.wei.toNumber()
+      )
+        .then((txid) => {
           const description = `Add liquidity  ${this.fromCoinAmount && this.fromCoinAmount} ${
             this.fromCoinAmount && this.fromCoin?.symbol
           }  ${this.fromCoinAmount && this.toCoinAmount ? 'and' : ''} ${this.toCoinAmount && this.toCoinAmount} ${
             this.toCoinAmount && this.toCoin?.symbol
           } to the pool`
+          this.$accessor.transaction.sub({ txid, description, type: 'Add liquidity' })
           this.$accessor.transaction.setShowSubmitted(true)
-          const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Add liquidity',
-            successCallback: () => {
-              // _this.$accessor.liquidity.requestInfos()
-              this.refresh()
-              _this.suppling = false
-              this.$accessor.transaction.setShowSubmitted(false)
-            },
-            errorCallback: () => {
-              _this.suppling = false
-              this.$accessor.transaction.setShowSubmitted(false)
-            }
-          })
-
-          this.fromCoinAmount = ''
-          this.toCoinAmount = ''
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-        }
-      } catch (error: any) {
-        console.log('toAddLiquidity###error####', error)
-        this.$accessor.transaction.setShowWaiting(false)
-        this.$accessor.transaction.setShowSubmitted(false)
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'AddLiquidityFailed',
-          message: 'Add liquidity failed',
-          description: error.message,
-          class: 'error',
-          icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
+          setTimeout(() => {
+            this.$accessor.liquidity.requestInfos()
+          }, 2000)
         })
-        this.suppling = false
-      }
+        .catch((err) => {
+          console.log('err###', err)
+          this.$accessor.transaction.setShowSubmitted(false)
+        })
+        .finally(() => {
+          this.suppling = false
+          this.fromCoinAmount = ''
+
+          this.toCoinAmount = ''
+        })
     },
     clearAll() {
-      console.log('changeCoinPosition###clearAll###')
       this.fromCoin = null
       this.toCoin = null
       this.minPrice = '0'
@@ -988,26 +993,6 @@ export default Vue.extend({
       this.currentFeeTier = -1
       this.fromCoinAmount = ''
       this.toCoinAmount = ''
-    },
-    async getChartData(pool: any) {
-      const poolInfo: any = pool || this.poolInfo
-      if (poolInfo && poolInfo.tokenSwapKey) {
-        let swap: any
-        if (this.tokenSwap && !pool) {
-          swap = this.tokenSwap
-        } else {
-          swap = await loadSwapPair(poolInfo.tokenSwapKey, this.$wallet)
-          this.tokenSwap = swap
-        }
-
-        this.currentTick = swap.currentTick
-        console.log('D3Chart###bug###test###currentTick###', swap.currentTick)
-        this.tickList = swap.ticks
-        this.chartLoading = false
-      }
-    },
-    gotoPoolList() {
-      this.$router.push('/deposit')
     }
   }
 })
@@ -1137,11 +1122,9 @@ export default Vue.extend({
     }
   }
   .link-block {
-    width: 996px;
-    margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     margin-bottom: 20px;
     > a {
       width: 150px;
@@ -1164,27 +1147,11 @@ export default Vue.extend({
         }
       }
     }
-    .go-back {
-      display: flex;
-      align-items: center;
-      .icon {
-        width: 20px;
-        height: 20px;
-        fill: #fff;
-        margin-right: 4px;
-        &:hover {
-          fill: #07ebad;
-        }
-      }
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.5);
-    }
   }
 }
 @media screen and (max-width: 750px) {
   .pool-container {
     .link-block {
-      width: 100%;
       margin-top: 20px;
     }
     .pool-body {

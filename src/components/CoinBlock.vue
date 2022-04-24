@@ -37,7 +37,6 @@
           maxlength="79"
           spellcheck="false"
           :disabled="disabled"
-          oninput="this.value = this.value.replace(/[^\d.]/g,'');"
           @input="$emit('onInput', $event.target.value)"
           @focus="$emit('onFocus')"
         />

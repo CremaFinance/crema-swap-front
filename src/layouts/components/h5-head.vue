@@ -8,11 +8,6 @@
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </div>
         <div class="right">
-          <!-- <div class="fair-gi">
-            <img src="@/assets/images/Fire-lans.gif" alt="" />
-            <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span>
-          </div> -->
-          <!-- <SystemSetting></SystemSetting> -->
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
             <use xlink:href="#icon-a-icon_Menu1"></use>
           </svg>
@@ -193,24 +188,11 @@ export default {
       }
     }
     .right {
-      display: flex;
-      align-items: center;
       .icon {
         width: 20px;
         height: 20px;
         fill: #fff;
         cursor: pointer;
-      }
-      .fair-gi {
-        margin: 4px 18px 0 0;
-        font-size: 14px;
-        font-weight: bold;
-        background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        img {
-          width: 36px;
-        }
       }
     }
   }

@@ -21,7 +21,7 @@
           <div>
             <div>
               <div class="td-title">My Caffeine</div>
-              <div class="td-text">{{ addCommom(caffeineAmount, 4) }}</div>
+              <div class="td-text">{{ caffeineAmount }}</div>
             </div>
             <!-- <div>
               <div class="td-title">Total Earned</div>
@@ -29,7 +29,7 @@
             </div> -->
             <div>
               <div class="td-title">Earnings <span class="title-Harvest">&nbsp;&nbsp;Harvest&nbsp;></span></div>
-              <div class="td-text" style="text-align: right !important">{{ addCommom(earningsAmount, 4) }}</div>
+              <div class="td-text" style="text-align: right !important">{{ farming.earnings }}</div>
             </div>
           </div>
         </div>
@@ -47,12 +47,6 @@
               />
               <!-- <h3 class="congratulations">{{ tipsTowLineText ? 'Congratulations' : '' }}</h3> -->
               <p v-if="wallet.connected" class="tips-text">{{ tipText || tipsTowLineText }}</p>
-              <!-- <div class="nft-rewards"> -->
-              <!-- <div>
-                  <img src="@/assets/images/CRM.png" alt="">
-                  <span>x 1,000</span>
-                </div> -->
-              <!-- </div> -->
             </div>
 
             <!-- tipsTowLineText -->
@@ -148,9 +142,7 @@ import {
   Context,
   SignatureResult
 } from '@solana/web3.js'
-import { addCommom } from '@/utils'
-import { BroadcastOptions } from '@saberhq/solana-contrib'
-
+import { TokenAmount, gt } from '@/utils/safe-math'
 // import { Button } from 'ant-design-vue'
 // Vue.use(Button)
 export default Vue.extend({
@@ -165,14 +157,6 @@ export default Vue.extend({
     searchKey: {
       type: String,
       default: ''
-    },
-    earningsAmount: {
-      type: Number,
-      default: 0
-    },
-    caffeineAmount: {
-      type: String,
-      default: '0'
     }
   },
   data() {
@@ -282,6 +266,18 @@ export default Vue.extend({
   },
   computed: {
     ...mapState(['wallet', 'transaction', 'url', 'farming']),
+    caffeineAmount() {
+      if (this.wallet && this.wallet.tokenAccounts) {
+        const account: any = this.wallet.tokenAccounts
+        // console.log('account###', account)
+        let caffeineAmount = new TokenAmount(0)
+        if (account['CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw']) {
+          caffeineAmount = account['CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw'].balance
+          return caffeineAmount.fixed()
+        }
+      }
+      return 0
+    },
     currentKeyAmount() {
       if (this.keysObj && this.currentKeyItem && this.keysObj[this.currentKeyItem.id]) {
         return this.keysObj[this.currentKeyItem.id].length
@@ -435,7 +431,6 @@ export default Vue.extend({
     this.getFarmingDate()
   },
   methods: {
-    addCommom,
     importIcon,
     // changeHint(value: string) {
     //   this.hint = value
@@ -512,9 +507,9 @@ export default Vue.extend({
         if (activeInfo && activeInfo.openRewardTimestamp) {
           console.log('openRewardTimestamp###', activeInfo.openRewardTimestamp.toString())
           // this.openRewardTimestamp = activeInfo.openRewardTimestamp.toNumber()
-          // 为了测试设置为4月30日
+          // 为了测试设置为3月30日
           // this.openRewardTimestamp = 1648569600
-          this.openRewardTimestamp = 1651248000
+          this.openRewardTimestamp = 1648310400
         }
       } catch (err) {
         console.log('getCanClaimDate###err###', err)
@@ -530,8 +525,8 @@ export default Vue.extend({
         console.log('getFarmingDate###famineTs###', res.famineTs.toString())
         if (res && res.famineTs) {
           // this.farmingEndTimestamp = Number(res.famineTs.toString())  // 目前后端设置的质押活动结束时间是永久 即9223372036854775807
-          // 为了测试，暂设置为4月27
-          this.farmingEndTimestamp = 1650988800
+          // 为了测试，暂设置为3月27
+          this.farmingEndTimestamp = 1648310400
         }
       } catch (err) {
         console.log('getFarmingDate###err###', err)
@@ -560,8 +555,6 @@ export default Vue.extend({
 
       this.$accessor.transaction.setTransactionDesc('Mint NFT')
       this.$accessor.transaction.setShowWaiting(true)
-
-      let txid = ''
       try {
         console.log('到这里了吗#####')
         const res = await sdk.activity.mintCremaKey({
@@ -569,55 +562,24 @@ export default Vue.extend({
           degree
         })
         console.log('res#####', res)
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-
-        const receipt = await res.tx.send(opt)
-        console.log('receipt####', receipt)
+        const receipt = await res.tx.confirm()
         this.$accessor.transaction.setShowWaiting(false)
-
+        console.log('receipt####', receipt)
         if (receipt && receipt.signature) {
-          txid = receipt.signature
+          const txid = receipt.signature
           const description = `Mint NFT`
+          this.$accessor.transaction.sub({ txid, description, type: 'Mint' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Mint',
-            successCallback: () => {
-              _this.isMinting = false
-              _this.isDisabled = false
+          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+            _this.isMinting = false
+            _this.isDisabled = false
+            if (!signatureResult.err) {
+              // _this.$accessor.farming.getFarmingList()
+              // 监听到成功后刷新
               _this.getKeys()
-            },
-            errorCallback: () => {
-              _this.isMinting = false
-              _this.isDisabled = false
             }
           })
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-
-          console.log('whatWait####', whatWait)
-
-          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-          //   _this.isMinting = false
-          //   _this.isDisabled = false
-          //   if (!signatureResult.err) {
-          //     // _this.$accessor.farming.getFarmingList()
-          //     // 监听到成功后刷新
-          //     _this.getKeys()
-          //   }
-          // })
         }
       } catch (err) {
         console.log('toMint ERROR#####', err)
@@ -642,72 +604,36 @@ export default Vue.extend({
 
       this.$accessor.transaction.setTransactionDesc('Upgrade NFT')
       this.$accessor.transaction.setShowWaiting(true)
-      let txid = ''
       try {
         const tx = await sdk.activity.upgrade({
           user: wallet.publicKey,
           mint: new PublicKey(mint)
         })
 
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
+        const receipt = await tx.confirm()
 
-        const receipt = await tx.send(opt)
-        console.log('receipt####', receipt)
         this.$accessor.transaction.setShowWaiting(false)
-
+        console.log('receipt####', receipt)
         if (receipt && receipt.signature) {
-          txid = receipt.signature
+          const txid = receipt.signature
           const description = 'Upgrade NFT'
+          this.$accessor.transaction.sub({ txid, description, type: 'Upgrade' })
           this.$accessor.transaction.setShowSubmitted(true)
           const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Upgrade',
-            successCallback: () => {
-              _this.isUpgrading = false
-              _this.isDisabled = false
+          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+            _this.isUpgrading = false
+            _this.isDisabled = false
+            if (!signatureResult.err) {
+              // _this.$accessor.farming.getFarmingList()
+              // 监听到成功后刷新
               _this.getKeys()
-            },
-            errorCallback: () => {
-              _this.isUpgrading = false
-              _this.isDisabled = false
             }
           })
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-
-          console.log('whatWait####', whatWait)
-
-          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-          //   _this.isUpgrading = false
-          //   _this.isDisabled = false
-          //   if (!signatureResult.err) {
-          //     // _this.$accessor.farming.getFarmingList()
-          //     // 监听到成功后刷新
-          //     _this.getKeys()
-          //   }
-          // })
         }
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
         this.isUpgrading = false
         this.isDisabled = false
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'Upgrade',
-          message: 'Transaction failed',
-          description: ''
-        })
       }
     },
     async toClaim() {
@@ -724,63 +650,33 @@ export default Vue.extend({
       this.$accessor.transaction.setTransactionDesc('Claim NFT')
       this.$accessor.transaction.setShowWaiting(true)
 
-      let txid = ''
       try {
         const tx = await sdk.activity.claimReward({
           user: wallet.publicKey,
           mint: new PublicKey(mint)
         })
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-
-        // const receipt = await tx.confirm()
-        const receipt: any = await tx.send(opt)
-        console.log('receipt####', receipt)
+        const receipt = await tx.confirm()
         this.$accessor.transaction.setShowWaiting(false)
-
+        console.log('receipt####', receipt)
         if (receipt && receipt.signature) {
-          txid = receipt.signature
+          const txid = receipt.signature
           const description = 'Claim NFT'
-          const _this = this
+          this.$accessor.transaction.sub({ txid, description, type: 'Claim' })
           this.$accessor.transaction.setShowSubmitted(true)
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Claim',
-            successCallback: () => {
-              _this.isClaiming = false
-              _this.isDisabled = false
-              _this.$accessor.wallet.getTokenAccounts()
-            },
-            errorCallback: () => {
-              _this.isClaiming = false
-              _this.isDisabled = false
+          const _this = this
+          conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
+            _this.isClaiming = false
+            _this.isDisabled = false
+            if (!signatureResult.err) {
+              // _this.$accessor.farming.getFarmingList()
+              // 监听到成功后刷新
             }
           })
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-
-          console.log('whatWait###', whatWait)
         }
       } catch (err) {
         this.$accessor.transaction.setShowWaiting(false)
         this.isClaiming = false
         this.isDisabled = false
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'Claim',
-          message: 'Transaction failed',
-          description: ''
-        })
       }
     }
   }
@@ -1034,11 +930,6 @@ export default Vue.extend({
     }
     .tips-text {
       width: 100%;
-    }
-    .nft-rewards {
-      width: 100%;
-      height: 100px;
-      background: #000;
     }
   }
 }

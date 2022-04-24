@@ -3,19 +3,19 @@
     <div class="caffeine-banner">
       <div>
         <span>My Caffeine</span>
-        <span>{{ addCommom(caffeineAmount, 4) }}</span>
+        <span>1,884,295.65</span>
       </div>
-      <!-- <div>
+      <div>
         <span>Total Earned</span>
         <span>100,884,295.65</span>
-      </div> -->
+      </div>
       <div>
         <span>Earnings</span>
-        <span>{{ addCommom(earningsAmount, 4) }} <span class="caffeine-clue">Harvest ></span></span>
+        <span>1,884,295.65 <span class="caffeine-clue">Harvest ></span></span>
       </div>
     </div>
     <div class="caffeine-banner-farming">
-      <img src="@/assets/images/caffeine-clueh5.png" alt="" />
+      <img src="@/assets/images/caffeine-clueh5.png" alt="">
       <div>Learn more ></div>
     </div>
     <div class="farm-caffeine-option" :class="changeBtn">
@@ -29,9 +29,9 @@
       </div>
     </div>
     <div class="farm-caffeine-key">
-      <img src="@/assets/images/icon-left-NFT.png" alt="" @click="changeImg('left')" />
+      <img src="@/assets/images/icon-left-NFT.png" alt="" @click="changeImg('left')"/>
       <img :src="`/_nuxt/src/assets/images/${farmCard}.png`" alt="" />
-      <img src="@/assets/images/icon-right-NFT.png" alt="" @click="changeImg('right')" />
+      <img src="@/assets/images/icon-right-NFT.png" alt="" @click="changeImg('right')"/>
       <!-- <div>Rewards up to 300 CRM tokens</div> -->
     </div>
     <p>Congratulations, you can upgrade NFT from Bronze Key to Silver Key</p>
@@ -65,7 +65,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
-import { addCommom } from '@/utils'
 // import { Button } from 'ant-design-vue'
 export default Vue.extend({
   components: {
@@ -79,14 +78,6 @@ export default Vue.extend({
     searchKey: {
       type: String,
       default: ''
-    },
-    earningsAmount: {
-      type: Number,
-      default: 0
-    },
-    caffeineAmount: {
-      type: String,
-      default: '0'
     }
   },
   data() {
@@ -123,14 +114,8 @@ export default Vue.extend({
         { icon: 'Card-Platinum', name: 'option-Platinum', key: 'Platinum', num: '2' },
         { icon: 'Card-Diamond', name: 'option-Diamond', key: 'Diamond', num: '4' }
       ],
-      changeHintData: [
-        { val: 'Bronze' },
-        { val: 'Silver' },
-        { val: 'Golden' },
-        { val: 'Platinum' },
-        { val: 'Diamond' }
-      ],
-      isdir: 'Brass'
+      changeHintData: [{ val: 'Bronze' }, { val: 'Silver' }, { val: 'Golden' }, { val: 'Platinum' }, { val: 'Diamond' }],
+      isdir:'Brass',
     }
   },
   watch: {
@@ -159,7 +144,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    addCommom,
     importIcon,
     changeHint(value: string) {
       this.hint = value
@@ -252,10 +236,10 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   top: 106px;
-  img {
+  img{
     width: 340px;
   }
-  > div {
+  > div{
     width: 100%;
     position: absolute;
     text-align: center;
@@ -423,34 +407,34 @@ export default Vue.extend({
   align-content: flex-start;
   flex-wrap: wrap;
   padding: 0 10px;
-  border: 2px solid #d18945;
+  border: 2px solid #D18945;
   border-radius: 6px;
-  p {
+  p{
     margin: 0 !important;
     font-weight: 800;
-    background: linear-gradient(283deg, #4cffdf 0%, #6676f5 62%, #c400ff 100%);
+    background: linear-gradient(283deg, #4CFFDF 0%, #6676F5 62%, #C400FF 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 }
-.Bronze {
-  border: 2px solid #d18945;
+.Bronze{
+  border: 2px solid #D18945;
 }
-.Silver {
+.Silver{ 
   margin-left: 8px;
-  border: 2px solid #e3f3ff;
+  border: 2px solid #E3F3FF;
 }
-.Golden {
+.Golden{ 
   margin-left: 53px;
-  border: 2px solid #fbff7c;
+  border: 2px solid #FBFF7C;
 }
-.Platinum {
+.Platinum{ 
   margin-left: 133px;
-  border: 2px solid #6efbff;
+  border: 2px solid #6EFBFF;
 }
-.Diamond {
+.Diamond{ 
   margin-left: 180px;
-  border: 2px solid #c495ff;
+  border: 2px solid #C495FF;
 }
 .pmgressbar-detail {
   width: 100%;
@@ -475,25 +459,25 @@ export default Vue.extend({
       }
     }
     > div:nth-child(1) {
-      background: #d18945;
+      background: #D18945;
       left: 17px;
     }
     > div:nth-child(2) {
-      background: #e3f3ff;
+      background: #E3F3FF;
       left: 48px;
     }
     > div:nth-child(3) {
-      background: #fbff7c;
+      background: #FBFF7C;
       left: 94px;
     }
     > div:nth-child(4) {
-      background: #6efbff;
+      background: #6EFBFF;
       left: 174px;
     }
     > div:nth-child(5) {
-      background: #c495ff;
+      background: #C495FF;
       // left: 271px;
-      right: 0px;
+      right:0px;
     }
   }
 }
@@ -512,7 +496,7 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 750px) {
-  .pmgressbar-detail {
+  .pmgressbar-detail{
     margin-top: 12px;
   }
 }

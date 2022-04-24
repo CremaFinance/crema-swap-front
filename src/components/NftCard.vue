@@ -18,15 +18,15 @@
       />
       <text class="circle-text">
         <textPath xlink:href="#text-path1" class="text-content" textLength="500" startOffset="0">
-          {{ poolInfo ? `${poolInfo.token_a.token_mint} ${poolInfo.token_a.symbol}` : '' }}
+          {{ poolInfo ? `${poolInfo.coin.mintAddress} ${poolInfo.coin.symbol}` : '' }}
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          {{ poolInfo ? `${poolInfo.token_b.token_mint} ${poolInfo.token_b.symbol}` : '' }}
+          {{ poolInfo ? `${poolInfo.pc.mintAddress} ${poolInfo.pc.symbol}` : '' }}
           <!-- <animate attributeName="startOffset" from="0" to="314" begin="0s" dur="10s" repeatCount="indefinite" /> -->
         </textPath>
       </text>
     </svg>
     <div v-if="poolInfo" class="nft-info">
-      <div class="coin-name">{{ poolInfo.token_a.symbol }} - {{ poolInfo.token_b.symbol }}</div>
+      <div class="coin-name">{{ poolInfo.coin.symbol }} - {{ poolInfo.pc.symbol }}</div>
       <div class="fee-tier-tag">{{ poolInfo.feeView }}%</div>
       <ul>
         <!-- <li>
@@ -35,11 +35,11 @@
             </li> -->
         <li>
           <span>Min Tick</span>
-          <span>{{ currentData.lowerTick }}</span>
+          <span>{{ currentData.lower_tick }}</span>
         </li>
         <li>
           <span>Max Tick</span>
-          <span>{{ currentData.upperTick }}</span>
+          <span>{{ currentData.upper_tick }}</span>
         </li>
       </ul>
     </div>

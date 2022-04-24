@@ -82,7 +82,7 @@ export default Vue.extend({
   watch: {},
   mounted() {
     window.setInterval(() => {
-      this.countDown('2022-4-30 0:0:0')
+      this.countDown('2022-3-30 0:0:0')
     }, 1000)
   },
   methods: {
