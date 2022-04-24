@@ -56,7 +56,6 @@ import { Progress } from 'ant-design-vue'
 
 export default Vue.extend({
   // eslint-disable-next-line vue/require-prop-types
-  // props: ['poolInfo', 'fromCoin', 'toCoin', 'fromCoinAmount', 'toCoinAmount'],
   components: {
     Progress
   },
@@ -94,6 +93,14 @@ export default Vue.extend({
     dataIsLoading: {
       type: Boolean,
       default: false
+    },
+    currentPriceView: {
+      type: String || Number,
+      default: ''
+    },
+    currentPriceViewReverse: {
+      type: String || Number,
+      default: ''
     }
   },
   data() {
@@ -104,25 +111,13 @@ export default Vue.extend({
       refreshTimer: null
     }
   },
-  // computed: {
-  //   price() {
-  //     if (this.fromCoinAmount && this.toCoinAmount) {
-  //       return 0
-  //     } else {
-  //       if (this.poolInfo && this.poolInfo.currentPrice) {
-  //         return this.getDefaultExchangeRate()
-  //       }
-  //     }
-  //     return 0
-  //   }
-  // },
   watch: {
     poolInfo: {
       handler: 'poolInfoWatch',
       immediate: true
     },
     fromCoin() {
-      if (this.poolInfo && this.poolInfo.coin && this.fromCoin && this.toCoin) {
+      if (this.poolInfo && this.poolInfo.token_a && this.fromCoin && this.toCoin) {
         this.setDefaultExchangeRate(this.poolInfo)
       }
     }
@@ -137,17 +132,15 @@ export default Vue.extend({
   methods: {
     fixD,
     poolInfoWatch(poolInfo: any) {
-      if (poolInfo && poolInfo.coin && this.fromCoin && this.toCoin) {
+      if (poolInfo && poolInfo.token_a && this.fromCoin && this.toCoin) {
         this.setDefaultExchangeRate(poolInfo)
       }
     },
     setDefaultExchangeRate(poolInfo: any) {
-      if (this.fromCoin?.symbol === poolInfo.coin.symbol && this.toCoin?.symbol === poolInfo.pc.symbol) {
-        // this.defaultRates = String(Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
-        this.defaultRates = poolInfo.currentPriceView
+      if (this.fromCoin?.symbol === poolInfo.token_a.symbol && this.toCoin?.symbol === poolInfo.token_b.symbol) {
+        this.defaultRates = this.currentPriceView || poolInfo.currentPriceView
       } else {
-        // this.defaultRates = String(1 / Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
-        this.defaultRates = poolInfo.currentPriceViewReverse
+        this.defaultRates = this.currentPriceViewReverse || poolInfo.currentPriceViewReverse
       }
     },
     toRefreshData() {

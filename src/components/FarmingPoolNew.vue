@@ -340,7 +340,7 @@ export default Vue.extend({
         if (item.tokenB.symbol === 'WSOL') {
           tokenB = 'SOL'
         }
-        this.$router.push(`/pool?from=${tokenA}&to=${tokenB}`)
+        this.$router.push(`/deposit?from=${tokenA}&to=${tokenB}`)
       }
     },
     processNftAddress(address: string) {
@@ -448,6 +448,7 @@ export default Vue.extend({
 
         console.log('whatWait####', whatWait)
       } catch (err) {
+        console.log('stake##err###', err)
         this.$accessor.transaction.setShowWaiting(false)
         this.$accessor.transaction.setShowSubmitted(false)
         this.isStaking = false
