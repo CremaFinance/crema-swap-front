@@ -1,10 +1,14 @@
 <template>
   <div class="position-detail-container">
     <div class="go-back">
-      <svg class="icon" aria-hidden="true" @click="gotoMyPosition">
-        <use xlink:href="#icon-icon-return"></use>
-      </svg>
-      Back to Pools Overview
+      <div class="left">
+        <svg class="icon" aria-hidden="true" @click="gotoMyPosition">
+          <use xlink:href="#icon-icon-return"></use>
+        </svg>
+        Back to Pools Overview
+      </div>
+
+      <RefreshIcon :loading="liquidity.currentPositonLoading" @refresh="refresh"></RefreshIcon>
     </div>
     <Skeleton :loading="!poolInfo" active :paragraph="false">
       <div class="top">
@@ -404,6 +408,7 @@ export default Vue.extend({
   .go-back {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     .icon {
       width: 20px;
       height: 20px;
@@ -415,6 +420,10 @@ export default Vue.extend({
     }
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
+    > .left {
+      display: flex;
+      align-items: center;
+    }
   }
   .top {
     display: flex;

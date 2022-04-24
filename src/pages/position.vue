@@ -23,15 +23,20 @@
       <img src="../assets/images/icon_NoDate@2x.png" />
       <p>No data</p>
     </div>
+    <div v-show="liquidity.myPositionLoading" class="loading-global"><Spin /></div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
 import { checkNullObj } from '@/utils'
+import { Spin } from 'ant-design-vue'
 import mixin from '@/mixin/position'
 
 export default Vue.extend({
+  components: {
+    Spin
+  },
   mixins: [mixin],
   data() {
     return {

@@ -20,6 +20,7 @@
           <StatusBlock :current-status="currentData.currentStatus" />
         </div>
         <div class="right">
+          <RefreshIcon :loading="liquidity.currentPositonLoading" @refresh="refresh"></RefreshIcon>
           <SetIcon></SetIcon>
         </div>
       </div>
@@ -763,6 +764,13 @@ export default Vue.extend({
           color: #fff;
           margin-left: 8px;
           margin-right: 8px;
+        }
+      }
+      .right {
+        display: flex;
+        align-items: center;
+        .set-icon-container {
+          margin-left: 10px;
         }
       }
     }

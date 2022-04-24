@@ -5,7 +5,10 @@
         <use xlink:href="#icon-icon-return"></use>
       </svg>
     </div>
-    <div class="title">Remove Liquidity</div>
+    <div class="title">
+      <span class="left">Remove Liquidity</span>
+      <RefreshIcon :loading="liquidity.currentPositonLoading" @refresh="refresh"></RefreshIcon>
+    </div>
 
     <div class="pool-settings">
       <div class="top-box">
@@ -359,6 +362,9 @@ export default Vue.extend({
     font-size: 20px;
     margin-top: 10px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
   .pool-settings {
     margin-top: 20px;

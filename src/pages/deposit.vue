@@ -91,7 +91,7 @@
             ></CoinBlock>
           </div>
           <div class="fee-tier-box">
-            <FeeTier :current="currentFeeTier"></FeeTier>
+            <FeeTier :currentFee="currentFeeTier"></FeeTier>
           </div>
         </div>
         <div class="right">
@@ -495,13 +495,14 @@ export default Vue.extend({
           }
 
           // 设置当前fee tier
-          if (value.feeView === 0.01) {
-            this.currentFeeTier = 0
-          } else if (value.feeView === 0.3) {
-            this.currentFeeTier = 1
-          } else {
-            this.currentFeeTier = 2
-          }
+          // if (value.feeView === 0.01) {
+          //   this.currentFeeTier = 0
+          // } else if (value.feeView === 0.3) {
+          //   this.currentFeeTier = 1
+          // } else {
+          //   this.currentFeeTier = 2
+          // }
+          this.currentFeeTier = value.feeView
           this.coinTabList = [value.token_a.symbol, value.token_b.symbol]
           this.currentCoinTab = direction ? value.token_a.symbol : value.token_b.symbol
         }
@@ -511,7 +512,7 @@ export default Vue.extend({
         this.tickList = []
         this.getChartData(value)
       } else {
-        this.currentFeeTier = 100
+        this.currentFeeTier = -1
         this.minPrice = ''
         this.maxPrice = ''
         this.showFromCoinLock = false

@@ -85,7 +85,12 @@
               class="show-fee"
               @mouseenter="item.isShowFee = !item.isShowFee"
               @mouseleave="item.isShowFee = !item.isShowFee"
-              >0.01%</i
+              >{{
+                (liquidity.coinPairConfigObj &&
+                  liquidity.coinPairConfigObj[item.swap_account] &&
+                  liquidity.coinPairConfigObj[item.swap_account].fee * 100 + '%') ||
+                '0.01%'
+              }}</i
             >
           </td>
           <td class="fee-bot">$ {{ addCommom(item.tvl_in_usd, 2) }}</td>
@@ -435,7 +440,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['farming'])
+    ...mapState(['farming', 'liquidity'])
   },
   watch: {
     'tokenPage.page'(newVal, oldVal) {

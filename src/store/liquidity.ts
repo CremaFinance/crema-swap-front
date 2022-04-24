@@ -42,7 +42,8 @@ export const state = () => ({
   myPositionObj: {},
   statisticsInfo: {},
   poolListLoading: true,
-  currentPositonLoading: false
+  currentPositonLoading: false,
+  myPositionLoading: false
   // userPositionAccountObj: {} as any
 })
 
@@ -120,6 +121,9 @@ export const mutations = mutationTree(state, {
   },
   setPoolListLoading(state, res) {
     state.poolListLoading = res
+  },
+  setMyPositionLoading(state, value: boolean) {
+    state.myPositionLoading = value
   }
 })
 
@@ -254,6 +258,8 @@ export const actions = actionTree(
     // },
 
     async getMyPositionsNew({ state, commit }, tokenAccounts) {
+      commit('setMyPositionLoading', true)
+      commit('setCurrentPositonLoading', true)
       const connection = this.$web3
       const poolsObj = state.poolsObj
       const poolsList: any = Object.values(poolsObj)
@@ -318,6 +324,7 @@ export const actions = actionTree(
       })
       console.log(myPositionObj, 'myPositionObj##')
       commit('setMyPositionObj', myPositionObj)
+      commit('setMyPositionLoading', false)
     },
 
     // async getMyPositions({ state, commit }) {},

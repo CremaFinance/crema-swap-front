@@ -53,6 +53,9 @@ export default Vue.extend({
           id: this.$route.params.id
         })
       }
+    },
+    refresh() {
+      this.$accessor.liquidity.getMyPositionsNew(this.wallet.tokenAccounts)
     }
   }
 })
