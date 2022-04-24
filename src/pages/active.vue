@@ -16,25 +16,69 @@
         <H5DFarmingBanner class="h5-banner" :is-farming="showFarm" />
       </div>
       <!-- NFT -->
-      <DfarmCaffeine class="pc-farming-pool" />
-      <H5DfarmCaffeine class="h5-farming-pool" />
+      <DfarmCaffeine class="pc-farming-pool" :earnings-amount="earningsAmount" :caffeine-amount="caffeineAmount" />
+      <H5DfarmCaffeine class="h5-farming-pool" :earnings-amount="earningsAmount" :caffeine-amount="caffeineAmount" />
     </div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { Input } from 'ant-design-vue'
+import { mapState } from 'vuex'
+// import { Input } from 'ant-design-vue'
+import { checkNullObj } from '@/utils'
+import { TokenAmount, gt } from '@/utils/safe-math'
+
 export default Vue.extend({
   data() {
     return {
       poolStatus: 'All',
       searchKey: '',
-      showFarm: 'Farm'
+      showFarm: 'Farm',
+      earningsAmount: 0
+    }
+  },
+  computed: {
+    ...mapState(['wallet', 'farming']),
+    caffeineAmount() {
+      if (this.wallet && this.wallet.tokenAccounts) {
+        const account: any = this.wallet.tokenAccounts
+        // console.log('account###', account)
+        let caffeineAmount = new TokenAmount(0)
+        if (account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR']) {
+          caffeineAmount = account['32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'].balance
+          return caffeineAmount.fixed()
+        }
+      }
+      return '0'
+    }
+  },
+  watch: {
+    'wallet.connected': {
+      handler: 'walletWatch',
+      immediate: true
+    },
+    'farming.earningObj': {
+      handler: 'earningObjWatch',
+      immediate: true
     }
   },
   methods: {
     gotoMyPosition() {
       this.$router.push('/farming')
+    },
+    walletWatch(newVal) {
+      if (newVal) {
+        this.$accessor.farming.getEarningsObj()
+      }
+    },
+    earningObjWatch(newVal) {
+      if (!checkNullObj(newVal)) {
+        let result: number = 0
+        for (let key in newVal) {
+          result += Number(newVal[key].value)
+        }
+        this.earningsAmount = result
+      }
     }
   }
 })

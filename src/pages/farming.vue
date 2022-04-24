@@ -41,10 +41,10 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { Input, Spin } from 'ant-design-vue'
+import { Spin } from 'ant-design-vue'
 import { mapState } from 'vuex'
 import { fixD, addCommom, decimalFormat, checkNullObj } from '@/utils'
-import { TokenSwap, calculateTokenAmount, tick2Price } from '@cremafinance/crema-sdk'
+import { tick2Price } from 'test-crema-sdk'
 export default Vue.extend({
   components: {
     Spin
@@ -116,7 +116,7 @@ export default Vue.extend({
   },
   methods: {
     getFarmTvl() {
-      this.$axios.get(`https://pre-api-crema.bitank.com/farm/tvl`).then((res) => {
+      this.$axios.get(`https://api.crema.finance/farm/tvl`).then((res) => {
         // this.$axios.get(`/farm/tvl`).then((res) => {
         console.log('farmingTest####getFarmTvl###res#####', res)
         const result: any = {}

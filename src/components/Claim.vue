@@ -15,7 +15,7 @@
             <img
               v-if="poolInfo"
               class="img-left"
-              :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)"
+              :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
               alt=""
             />
           </div>
@@ -26,12 +26,12 @@
                 ? '<0.00001'
                 : tokenaFee
             }}
-            <span>{{ poolInfo.coin.symbol }}</span>
+            <span>{{ poolInfo.token_a.symbol }}</span>
           </div>
         </div>
         <div class="before-coin after-coin">
           <div v-if="poolInfo" class="coin-num">
-            <img class="img-right" :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)" alt="" />
+            <img class="img-right" :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" alt="" />
           </div>
           <div v-if="poolInfo" class="coin-label">
             {{
@@ -40,7 +40,7 @@
                 ? '<0.00001'
                 : tokenbFee
             }}
-            <span>{{ poolInfo.pc.symbol }}</span>
+            <span>{{ poolInfo.token_b.symbol }}</span>
           </div>
         </div>
       </div>

@@ -3,37 +3,15 @@ import { LPFARMS } from '@/utils/farming'
 import {
   fetchSwapPositionsByOwner,
   minerInfo,
-  fetchPositionWrapper,
   fetchStakedPositions,
   fetchMiners,
   fetchCremaSwaps
 } from '@/contract/farming'
-import {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  PublicKey,
-  AccountInfo as BaseAccountInfo,
-  Signer,
-  TokenAccountsFilter
-} from '@solana/web3.js'
-import { TokenSwap, calculateTokenAmount, tick2Price } from '@cremafinance/crema-sdk'
-import { SWAPV3_PROGRAMID, SWAP_PAYER } from '@/utils/ids'
+import { PublicKey } from '@solana/web3.js'
+import { calculateTokenAmount, tick2Price } from 'test-crema-sdk'
 import Decimal from 'decimal.js'
-import { RATES, TOKENS } from '@/utils/tokens'
+import { TOKENS } from '@/utils/tokens'
 import { decimalFormat, addCommom } from '@/utils'
-import { TokenSwap as CTokenSwap } from '../tokenSwap'
-import { contractPrice2showPrice } from '@/tokenSwap/swapv3'
-
-// import {
-//   getNearestTickByPrice,
-//   tick2Price,
-//   price2Tick,
-//   calculateLiquityOnlyA,
-//   calculateLiquityOnlyB,
-//   calculateLiquity,
-//   TokenSwap
-// } from '@cremafinance/crema-sdk'
 
 export const state = () => ({
   farmingConfig: null as any,
@@ -137,13 +115,6 @@ export const actions = actionTree(
       commit('setFarmingConfigObj', farmingConfig)
     },
     getFarmingList({ state, commit }, { rates, farmingConfig, haveLoading, tvlData }) {
-      console.log('123getFarmingList###rates####', rates)
-      console.log('123getFarmingList###haveLoading####', haveLoading)
-      console.log('123getFarmingList###farmingConfig####', farmingConfig)
-      const RATES = { ...rates, CUSDC: 1 }
-      const LPFARMS = farmingConfig
-      console.log('LPFARMS####', LPFARMS)
-
       commit('setLoading', true)
       if (haveLoading) {
         commit('setFarmingListLoading', true)
@@ -183,39 +154,11 @@ export const actions = actionTree(
       const { tokenA, tokenB } = farmingInfo
       commit('setPositionsLoadingObj', { key: farmingInfo.positionWrapper, value: true })
 
-      // const list = [
-
-      //   // new PublicKey('FESPUeMZLHPGqQvpyJe2QCbNmqCtYPEr1fw2oUDGJN9Z'),
-      //   // new PublicKey('B1eNrQEExnPPmVbM3jiEAd89nW7tXUiArrk81JtUz6H8'),
-      //   // new PublicKey('C52SfQELE8kAUES36fAfBcvCkoWLgHTrANqMdFXqEnm8'),
-      //   // new PublicKey('QNZScPBQzskAPvYVipVeUBSkGVQ4vrkXyowcibXdi7V'),
-      //   // new PublicKey('GL2LxzsNLkttgaD46dQjSWycQSmf252TAPfK4tTuqjg7')
-      // ]
       const swap: any = await fetchCremaSwaps([new PublicKey(farmingInfo.swapKey)], conn)
 
       console.log('getPositionObj###swap####', swap)
 
-      // const swap = await new TokenSwap(
-      //   conn,
-      //   new PublicKey(SWAPV3_PROGRAMID),
-      //   new PublicKey(farmingInfo.swapKey),
-      //   null
-      // ).load()
-
       if (wallet) {
-        // const payer = SWAP_PAYER
-        // const tokenSwap = await CTokenSwap.getAllAccounts(
-        //   conn,
-        //   new PublicKey(farmingInfo.swapKey),
-        //   SWAPV3_PROGRAMID,
-        //   payer
-        // )
-        // const currentPrice = contractPrice2showPrice(
-        //   tokenSwap.current_price.toNumber(),
-        //   tokenA.decimals,
-        //   tokenB.decimals
-        // )
-
         const canStatePositions: any = await fetchSwapPositionsByOwner(
           new PublicKey(farmingInfo.swapKey),
           wallet.publicKey,
@@ -283,8 +226,6 @@ export const actions = actionTree(
           wallet.publicKey
         )
 
-        console.log('farming#####stakedPositons####', stakedPositons)
-
         const sdresult: any = []
         for (let k = 0; k < stakedPositons.length; k++) {
           const item: any = stakedPositons[k]
@@ -350,7 +291,6 @@ export const actions = actionTree(
       commit('setEarnings', earning)
     },
     async getEarningsObj({ state, commit }, haveLoading) {
-      const LPFARMS = state.farmingConfigObj
       const conn = this.$web3
       const wallet = (this as any)._vm.$wallet
       const result: any = {}
