@@ -1,7 +1,7 @@
 <template>
   <div class="fee-tier-container">
     <div class="title">
-      <h3 v-if="current > -1">{{ (list[current] && list[current].value) || '--' }} fee tier</h3>
+      <h3 v-if="currentIndex > -1">{{ (list[currentIndex] && list[currentIndex].value) || '--' }} fee tier</h3>
       <h3 v-else>fee tier</h3>
       <svg
         aria-hidden="true"
@@ -14,7 +14,7 @@
       <!-- <a @click="showFeeSelect = !showFeeSelect">{{ showFeeSelect ? 'Hide' : 'Edit' }}</a> -->
     </div>
     <ul v-if="showFeeSelect">
-      <li v-for="(item, index) in list" :key="index" :class="current === index ? 'active' : 'disabled'">
+      <li v-for="(item, index) in list" :key="index" :class="currentIndex === index ? 'active' : 'disabled'">
         <h3>{{ item.fee }}</h3>
         <p>{{ item.text }}</p>
       </li>
@@ -26,9 +26,9 @@ import { Vue } from 'nuxt-property-decorator'
 
 export default Vue.extend({
   props: {
-    current: {
+    currentFee: {
       type: Number,
-      default: 0
+      default: -1
     }
   },
   data() {
@@ -50,7 +50,59 @@ export default Vue.extend({
           value: '1%'
         }
       ],
-      showFeeSelect: true
+      showFeeSelect: true,
+      currentIndex: 1
+    }
+  },
+  watch: {
+    currentFee: {
+      handler: 'currentFeeWatch',
+      immediate: true
+    }
+    // current(newVal) {
+    //   console.log('FeeTier####currentWatch###newVal###', newVal)
+    // }
+  },
+  methods: {
+    currentFeeWatch(newVal) {
+      console.log('FeeTier####currentWatch###newVal###', newVal)
+      let list = [
+        {
+          fee: '0.01% fee',
+          text: 'Best for stable pairs',
+          value: '0.01%'
+        },
+        {
+          fee: '0.3% fee',
+          text: 'Best for most pairs',
+          value: '0.3%'
+        },
+        {
+          fee: '1% fee',
+          text: 'Best for exotic pairs',
+          value: '1%'
+        }
+      ]
+      if (newVal > 0.3) {
+        list[2] = {
+          fee: `${newVal}% fee`,
+          text: 'Best for exotic pairs',
+          value: `${newVal}%`
+        }
+        this.currentIndex = 2
+      } else if (newVal < 0.3 && newVal > 0) {
+        list[0] = {
+          fee: `${newVal}% fee`,
+          text: 'Best for stable pairs',
+          value: `${newVal}%`
+        }
+        this.currentIndex = 0
+      } else if (newVal === 0.3) {
+        this.currentIndex = 1
+      } else {
+        this.currentIndex = -1
+      }
+      this.list = list
     }
   }
 })
