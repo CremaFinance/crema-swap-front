@@ -85,7 +85,7 @@ export default Vue.extend({
   },
   watch: {
     keyword(newKeyword) {
-      this.createTokenList(null, newKeyword)
+      this.createTokenList(undefined, newKeyword)
     },
     'wallet.tokenAccounts': {
       handler(_newTokenAccounts: any, _oldTokenAccounts: any) {

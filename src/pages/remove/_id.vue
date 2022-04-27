@@ -248,17 +248,23 @@ export default Vue.extend({
       let positionMinAmountA: any
       let positionMinAmountB: any
       if (positionValue.minAmountA.toString() && positionValue.minAmountA.toString() !== '0') {
-        positionMinAmountA = positionValue.minAmountA.sub(
-          Math.pow(10, Math.floor(Number(currentData.token_a.decimal / 2)))
-        )
+        const unit = Math.pow(10, Math.floor(Number(currentData.token_a.decimal / 2)))
+        if (positionValue.minAmountA.toNumber() <= unit) {
+          positionMinAmountA = new Decimal(1)
+        } else {
+          positionMinAmountA = positionValue.minAmountA.sub(unit)
+        }
       } else {
         positionMinAmountA = positionValue.minAmountA
       }
 
       if (positionValue.minAmountB.toString() && positionValue.minAmountB.toString() !== '0') {
-        positionMinAmountB = positionValue.minAmountB.sub(
-          Math.pow(10, Math.floor(Number(currentData.token_b.decimal / 2)))
-        )
+        const unit = Math.pow(10, Math.floor(Number(currentData.token_b.decimal / 2)))
+        if (positionValue.minAmountB.toNumber() <= unit) {
+          positionMinAmountB = new Decimal(1)
+        } else {
+          positionMinAmountB = positionValue.minAmountB.sub(unit)
+        }
       } else {
         positionMinAmountB = positionValue.minAmountB
       }
@@ -271,6 +277,9 @@ export default Vue.extend({
         console.log('toRemoveNew####positionValue.minAmountA###', positionValue.minAmountA.toString())
         console.log('toRemoveNew####positionValue.minAmountB###', positionValue.minAmountB.toString())
         console.log('toRemoveNew####currentData.nftTokenAccount###', currentData.nftTokenAccount)
+
+        console.log('toRemoveNew####positionMinAmountA####', positionMinAmountA.toString())
+        console.log('toRemoveNew####positionMinAmountB####', positionMinAmountB.toString())
         const tx = await swap.decreaseLiquityAtomic(
           currentData.nftTokenId,
           // userTokenA,
