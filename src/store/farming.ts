@@ -3,37 +3,15 @@ import { LPFARMS } from '@/utils/farming'
 import {
   fetchSwapPositionsByOwner,
   minerInfo,
-  fetchPositionWrapper,
   fetchStakedPositions,
   fetchMiners,
   fetchCremaSwaps
 } from '@/contract/farming'
-import {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  PublicKey,
-  AccountInfo as BaseAccountInfo,
-  Signer,
-  TokenAccountsFilter
-} from '@solana/web3.js'
-import { TokenSwap, calculateTokenAmount, tick2Price } from '@cremafinance/crema-sdk'
-import { SWAPV3_PROGRAMID, SWAP_PAYER } from '@/utils/ids'
+import { PublicKey } from '@solana/web3.js'
+import { calculateTokenAmount, tick2Price } from 'test-crema-sdk'
 import Decimal from 'decimal.js'
-import { RATES, TOKENS } from '@/utils/tokens'
+import { TOKENS } from '@/utils/tokens'
 import { decimalFormat, addCommom } from '@/utils'
-import { TokenSwap as CTokenSwap } from '../tokenSwap'
-import { contractPrice2showPrice } from '@/tokenSwap/swapv3'
-
-// import {
-//   getNearestTickByPrice,
-//   tick2Price,
-//   price2Tick,
-//   calculateLiquityOnlyA,
-//   calculateLiquityOnlyB,
-//   calculateLiquity,
-//   TokenSwap
-// } from '@cremafinance/crema-sdk'
 
 export const state = () => ({
   farmingConfig: null as any,
@@ -118,32 +96,28 @@ export const actions = actionTree(
       commit('setStatisticsDataObj', result)
       console.log('getStatisticsDataObj####result###', result)
     },
-    async getFarmingConfig({ commit }) {
+    async getFarmingConfig({ commit }, tokenObj) {
       // https://api.crema.finance/config?name=farming  生产
       // https://pre-api-crema.bitank.com/config?name=farming 预发布
       // const configRes = await this.$axios.get('https://dev-api-crema.bitank.com/config?name=farming')
       const configRes = await this.$axios.get('https://api.crema.finance/config?name=farming')
       console.log('getFarmingConfig###res####', configRes)
+      console.log('getFarmingConfig####tokenObj###', tokenObj)
       const farmingConfig: any = []
       if (configRes && configRes.data) {
         configRes.data.forEach((item) => {
           farmingConfig.push({
             ...item,
-            tokenA: TOKENS[item.tokenA],
-            tokenB: TOKENS[item.tokenB]
+            tokenA: tokenObj[item.tokenA],
+            tokenB: tokenObj[item.tokenB]
           })
         })
       }
+
+      console.log('getFarmingConfig####farmingConfig####', farmingConfig)
       commit('setFarmingConfigObj', farmingConfig)
     },
     getFarmingList({ state, commit }, { rates, farmingConfig, haveLoading, tvlData }) {
-      console.log('123getFarmingList###rates####', rates)
-      console.log('123getFarmingList###haveLoading####', haveLoading)
-      console.log('123getFarmingList###farmingConfig####', farmingConfig)
-      const RATES = { ...rates, CUSDC: 1 }
-      const LPFARMS = farmingConfig
-      console.log('LPFARMS####', LPFARMS)
-
       commit('setLoading', true)
       if (haveLoading) {
         commit('setFarmingListLoading', true)
@@ -154,8 +128,6 @@ export const actions = actionTree(
       console.log('wallet####', wallet)
 
       const result: any = []
-      // const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(farmingConfig[0].rewardTokenMint))
-      // const rewardTokenDecimal = rewardTokenInfo.value.decimals
       for (let key in farmingConfig) {
         const { tokenA, tokenB } = farmingConfig[key]
         result.push({
@@ -181,41 +153,17 @@ export const actions = actionTree(
       const wallet = (this as any)._vm.$wallet
       const RATES = { ...rates, CUSDC: 1 }
       const { tokenA, tokenB } = farmingInfo
+
+      console.log('getPositionObj####tokenA####', tokenA)
+      console.log('getPositionObj####tokenB####', tokenB)
+
       commit('setPositionsLoadingObj', { key: farmingInfo.positionWrapper, value: true })
 
-      // const list = [
-
-      //   // new PublicKey('FESPUeMZLHPGqQvpyJe2QCbNmqCtYPEr1fw2oUDGJN9Z'),
-      //   // new PublicKey('B1eNrQEExnPPmVbM3jiEAd89nW7tXUiArrk81JtUz6H8'),
-      //   // new PublicKey('C52SfQELE8kAUES36fAfBcvCkoWLgHTrANqMdFXqEnm8'),
-      //   // new PublicKey('QNZScPBQzskAPvYVipVeUBSkGVQ4vrkXyowcibXdi7V'),
-      //   // new PublicKey('GL2LxzsNLkttgaD46dQjSWycQSmf252TAPfK4tTuqjg7')
-      // ]
       const swap: any = await fetchCremaSwaps([new PublicKey(farmingInfo.swapKey)], conn)
 
       console.log('getPositionObj###swap####', swap)
 
-      // const swap = await new TokenSwap(
-      //   conn,
-      //   new PublicKey(SWAPV3_PROGRAMID),
-      //   new PublicKey(farmingInfo.swapKey),
-      //   null
-      // ).load()
-
       if (wallet) {
-        // const payer = SWAP_PAYER
-        // const tokenSwap = await CTokenSwap.getAllAccounts(
-        //   conn,
-        //   new PublicKey(farmingInfo.swapKey),
-        //   SWAPV3_PROGRAMID,
-        //   payer
-        // )
-        // const currentPrice = contractPrice2showPrice(
-        //   tokenSwap.current_price.toNumber(),
-        //   tokenA.decimals,
-        //   tokenB.decimals
-        // )
-
         const canStatePositions: any = await fetchSwapPositionsByOwner(
           new PublicKey(farmingInfo.swapKey),
           wallet.publicKey,
@@ -235,9 +183,11 @@ export const actions = actionTree(
             swap.currentSqrtPrice
           )
 
-          // const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
-          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(swap.currentPrice)
-          const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimal)).mul(swap.currentPrice)
+          const amountB = amount.amountB.div(Math.pow(10, tokenB.decimal))
+
+          console.log('getPositionObj####amountA###', amountA.toString())
+          console.log('getPositionObj####amountB###', amountB.toString())
 
           let liquityUSD = amountA.plus(amountB)
           const tokenBSymbol = tokenB.symbol.toUpperCase() === 'WSOL' ? 'SOL' : tokenB.symbol.toUpperCase()
@@ -283,8 +233,6 @@ export const actions = actionTree(
           wallet.publicKey
         )
 
-        console.log('farming#####stakedPositons####', stakedPositons)
-
         const sdresult: any = []
         for (let k = 0; k < stakedPositons.length; k++) {
           const item: any = stakedPositons[k]
@@ -295,9 +243,8 @@ export const actions = actionTree(
             swap.currentSqrtPrice
           )
 
-          // const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(currentPrice)
-          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimals)).mul(swap.currentPrice)
-          const amountB = amount.amountB.div(Math.pow(10, tokenB.decimals))
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimal)).mul(swap.currentPrice)
+          const amountB = amount.amountB.div(Math.pow(10, tokenB.decimal))
 
           // const liquityUSD = amountA.mul(RATES[tokenA.symbol]).plus(amountB.mul(RATES[tokenB.symbol]))
           const tokenBSymbol = tokenB.symbol.toUpperCase() === 'WSOL' ? 'SOL' : tokenB.symbol.toUpperCase()
@@ -344,13 +291,13 @@ export const actions = actionTree(
       )
 
       const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(LPFARMS[0].rewardTokenMint))
+      console.log('getEarnings###rewardTokenInfo####', rewardTokenInfo)
       const rewardTokenDecimal = rewardTokenInfo.value.decimals
 
       const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
       commit('setEarnings', earning)
     },
     async getEarningsObj({ state, commit }, haveLoading) {
-      const LPFARMS = state.farmingConfigObj
       const conn = this.$web3
       const wallet = (this as any)._vm.$wallet
       const result: any = {}
@@ -359,14 +306,10 @@ export const actions = actionTree(
         commit('setEarningLoading', true)
       }
 
-      console.log('wallet.publicKey####', wallet.publicKey)
       const minerList: any = (await fetchMiners(wallet.publicKey, conn)) || []
       minerList.forEach((item) => {
-        console.log('#item.PendingReward.toNumber()###', item.PendingReward.toNumber())
-        console.log('#item.PendingReward###', item.PendingReward)
         if (item.PendingReward && item.PendingReward.toNumber()) {
           const earning = new Decimal(item.PendingReward.toString()).div(Math.pow(10, 6)).toString()
-          console.log('earning####', earning)
           result[item.tokenMintKey.toString()] = {
             value: earning,
             view: addCommom(earning, 6)
@@ -377,45 +320,7 @@ export const actions = actionTree(
             view: '0'
           }
         }
-
-        // console.log('minnerkey###', item.MinerKey.toString())
-        // console.log('quarryKey###', item.quarryKey.toString())
-        // console.log('tokenVaultKey###', item.tokenVaultKey.toString())
-        // console.log('tokenMintKey###', item.tokenMintKey.toString())
       })
-      console.log('getEarnings###test###', minerList)
-
-      // console.log('123getFarmingList###getEarningsObj####进来了吗###', LPFARMS)
-
-      // for (const key in LPFARMS) {
-      //   const miner: any = await minerInfo(
-      //     conn,
-      //     wallet,
-      //     new PublicKey(LPFARMS[key].rewarderKey),
-      //     new PublicKey(LPFARMS[key].positionWrapperWrapMint)
-      //   )
-
-      //   if (miner && miner.PendingReward) {
-      //     const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(LPFARMS[key].rewardTokenMint))
-      //     const rewardTokenDecimal = rewardTokenInfo.value.decimals
-
-      //     console.log('123getFarmingList###getEarningsObj####miner###', miner)
-      //     const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
-
-      //     result[LPFARMS[key].positionWrapper] = {
-      //       value: earning,
-      //       view: addCommom(earning, 6)
-      //     }
-      //   } else {
-      //     result[LPFARMS[key].positionWrapper] = {
-      //       value: '0',
-      //       view: '0'
-      //     }
-      //   }
-      // }
-
-      console.log('123getFarmingList###getEarningsObj###result####', result)
-
       commit('setEarningObj', result)
       if (haveLoading) {
         commit('setEarningLoading', false)

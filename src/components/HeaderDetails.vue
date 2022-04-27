@@ -5,13 +5,13 @@
       <img
         v-if="currentData.coin"
         class="img-left"
-        :src="importIcon(`/coins/${currentData.coin.symbol.toLowerCase()}.png`)"
+        :src="currentData.coin.icon || importIcon(`/coins/${currentData.coin.symbol.toLowerCase()}.png`)"
         alt=""
       />
       <img
         v-if="currentData.pc"
         class="img-right"
-        :src="importIcon(`/coins/${currentData.pc.symbol.toLowerCase()}.png`)"
+        :src="currentData.pc.icon || importIcon(`/coins/${currentData.pc.symbol.toLowerCase()}.png`)"
         alt=""
       />
     </div>

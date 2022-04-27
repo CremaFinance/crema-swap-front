@@ -5,21 +5,7 @@
       <div class="c-title">
         <span>Swap</span>
         <div class="buttons">
-          <!-- <Tooltip placement="bottomRight">
-            <template slot="title">
-              <span>
-                {{ fromCoin && fromCoin.mintAddress }}
-              </span>
-              <span>
-                {{ toCoin && toCoin.mintAddress }}
-              </span>
-            </template> -->
-          <!-- <div class="icon-box">
-            <svg :class="['icon', loading ? 'is-loading' : '']" aria-hidden="true" @click="refresh">
-              <use xlink:href="#icon-icon-refresh"></use>
-            </svg>
-          </div> -->
-          <RefreshIcon @refresh="refresh" :loading="loading"></RefreshIcon>
+          <RefreshIcon :loading="loading" @refresh="refresh"></RefreshIcon>
           <div class="icon-box">
             <svg class="icon" aria-hidden="true" @click="showAddress = true">
               <use xlink:href="#icon-a-bianzu181"></use>
@@ -35,6 +21,7 @@
           v-model="fromCoinAmount"
           :coin-name="fromCoin ? fromCoin.symbol : null"
           :balance="fromCoin ? fromCoin.balance : null"
+          :coin-icon="fromCoin ? fromCoin.icon : ''"
           :swap-direction="'From'"
           @onInput="(amount) => (fromCoinAmount = amount)"
           @onFocus="
@@ -54,6 +41,7 @@
           :balance="toCoin ? toCoin.balance : null"
           :swap-direction="'To'"
           :disabled="false"
+          :coin-icon="toCoin ? toCoin.icon : ''"
           :show-max="false"
           @onInput="(amount) => (toCoinAmount = amount)"
           @onFocus="
@@ -82,18 +70,8 @@
             swaping ||
             gt(fromCoinAmount, fromCoin && fromCoin.balance ? fromCoin.balance.fixed() : '0')
           "
-          @click="placeOrder"
+          @click="toSwap"
         >
-          <!-- Swap -->
-          <!-- {{
-            Number(fromCoinAmount) == 0
-              ? 'Enter an amount'
-              : insufficientLiquidity
-              ? 'Insufficient Liquidity'
-              : gt(fromCoinAmount, fromCoin && fromCoin.balance ? fromCoin.balance.fixed() : '0')
-              ? 'Insufficient balance'
-              : 'Swap'
-          }} -->
           {{ swapBtnText }}
         </Button>
       </div>
@@ -104,6 +82,8 @@
         :from-coin-amount="fromCoinAmount"
         :to-coin-amount="toCoinAmount"
         :pool-info="poolInfo"
+        :currentPriceViewReverse="currentPriceViewReverse"
+        :currentPriceView="currentPriceView"
         :fixed-from-coin="fixedFromCoin"
         @refresh="refresh"
       ></SwapInfo>
@@ -126,22 +106,19 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
-// import { Tooltip } from 'ant-design-vue'
-import { TokenInfo, getTokenBySymbol } from '@/utils/tokens'
-import { getUnixTs, checkNullObj, decimalFormat } from '@/utils'
-import { get, cloneDeep, clone } from 'lodash-es'
-import { swap, getOutAmount } from '@/utils/swap'
+import { TokenInfo } from '@/utils/tokens'
+import { checkNullObj, decimalFormat, fixD, getTokenBySymbol } from '@/utils'
+import { cloneDeep, debounce } from 'lodash-es'
 import { inputRegex, escapeRegExp } from '@/utils/regex'
-import { TokenAmount, gt } from '@/utils/safe-math'
+import { gt } from '@/utils/safe-math'
 import { Button } from 'ant-design-vue'
-// import { Numberu64, Numberu128, TokenSwap } from '@/tokenSwap'
 
-import { TokenSwap } from '@cremafinance/crema-sdk'
-import { Connection, PublicKey, Keypair, Account } from '@solana/web3.js'
+import { BroadcastOptions } from '@saberhq/solana-contrib'
 import Decimal from 'decimal.js'
 
-const USDT = getTokenBySymbol('USDT')
-const USDC = getTokenBySymbol('USDC')
+import { TokenSwap, lamportPrice2uiPrice } from 'test-crema-sdk'
+import { getATAAddress } from '@saberhq/token-utils'
+import { loadSwapPair } from '@/contract/pool'
 
 export default Vue.extend({
   components: {
@@ -150,8 +127,8 @@ export default Vue.extend({
   data() {
     return {
       showCoinSelect: false,
-      fromCoin: USDT as TokenInfo | null,
-      toCoin: USDC as TokenInfo | null,
+      fromCoin: null as any,
+      toCoin: null as any,
       fromCoinAmount: '',
       toCoinAmount: '',
       currentCoinKey: 'fromCoin',
@@ -167,24 +144,30 @@ export default Vue.extend({
       insufficientLiquidity: false,
       // 新sdk测试部分
       swapSdk: null as any,
-      isLoading: false
+      isLoading: false,
+      tokenSwap: null as any,
+      currentPriceView: '',
+      currentPriceViewReverse: ''
     }
   },
   head: {
     title: 'Crema Finance | A Powerful Concentrated Liquidity Protocol'
   },
   computed: {
-    ...mapState(['wallet', 'url']),
+    ...mapState(['wallet', 'url', 'liquidity']),
     poolInfo() {
-      const info: any = Object.values(this.$accessor.liquidity.infos).find((p: any) => {
-        return (
-          (p.coin.symbol === this.fromCoin?.symbol && p.pc.symbol === this.toCoin?.symbol) ||
-          (p.coin.symbol === this.toCoin?.symbol && p.pc.symbol === this.fromCoin?.symbol)
-        )
-      })
-      // console.log(info, 'info##')
-      if (info && !checkNullObj(info)) {
-        return info
+      if (this.liquidity.poolsObj) {
+        const info: any = Object.values(this.liquidity.poolsObj).find((p: any) => {
+          return (
+            (p.token_a.symbol === this.fromCoin?.symbol && p.token_b.symbol === this.toCoin?.symbol) ||
+            (p.token_b.symbol === this.fromCoin?.symbol && p.token_a.symbol === this.toCoin?.symbol)
+          )
+        })
+
+        if (info && !checkNullObj(info)) {
+          return info
+        }
+        return null
       }
       return null
     },
@@ -216,37 +199,21 @@ export default Vue.extend({
       },
       deep: true
     },
-    'liquidity.infos': {
-      handler(_newInfos: any) {
-        this.updateAmounts()
-      },
-      deep: true
-    },
     poolInfo: {
-      async handler(value: any) {
-        if (value && value.swapProgramId && value.tokenSwap) {
-          // console.log('value.swapProgramId###', value.swapProgramId.toString())
-          // console.log('value.tokenSwap###', value.tokenSwap.toString())
-          const swap = await new TokenSwap(this.$web3, value.swapProgramId, value.tokenSwap, null)
-          // let url = 'https://mercurial.rpcpool.com'
-          // let conn = new Connection(url, 'recent')
-          // const swap = await new TokenSwap(conn, value.swapProgramId, value.tokenSwap, null)
-          this.swapSdk = swap
-          this.updateAmounts()
+      handler(value: any) {
+        console.log('这里第一次没进来吗####value####', value)
+        if (value && value.tokenSwapKey) {
+          this.getTokenSwap()
           this.updateAmounts()
         } else {
-          // if (this.fixedFromCoin) {
-          //   this.toCoin = null
-          // } else {
-          //   this.fromCoin = null
-          // }
           this.fromCoinAmount = ''
           this.toCoinAmount = ''
+          this.tokenSwap = ''
         }
       },
       deep: true
     },
-    fromCoinAmount(newAmount: string, oldAmount: string) {
+    fromCoinAmount: debounce(function (newAmount: string, oldAmount: string) {
       if (!newAmount || !Number(newAmount)) {
         this.toCoinAmount = ''
         return
@@ -260,8 +227,8 @@ export default Vue.extend({
           }
         }
       })
-    },
-    toCoinAmount(newAmount: string, oldAmount: string) {
+    }, 500),
+    toCoinAmount: debounce(function (newAmount: string, oldAmount: string) {
       if (!newAmount || !Number(newAmount)) {
         this.fromCoinAmount = ''
         return
@@ -275,6 +242,10 @@ export default Vue.extend({
           }
         }
       })
+    }, 500),
+    'liquidity.tokensObj': {
+      handler: 'tokensObjWatch',
+      immediate: true
     }
   },
   mounted() {
@@ -282,13 +253,45 @@ export default Vue.extend({
   },
   methods: {
     gt,
+    tokensObjWatch(newVal) {
+      if (newVal && !checkNullObj(newVal)) {
+        if (this.$route && this.$route.query) {
+          if (this.$route.query.from) {
+            this.fromCoin = getTokenBySymbol(newVal, this.$route.query.from)
+          } else {
+            this.fromCoin = getTokenBySymbol(newVal, 'usdt')
+          }
+          if (this.$route.query.to) {
+            this.toCoin = getTokenBySymbol(newVal, this.$route.query.to)
+          } else {
+            this.toCoin = getTokenBySymbol(newVal, 'usdc')
+          }
+        }
+      }
+    },
+    async getTokenSwap() {
+      if (this.poolInfo && this.poolInfo.tokenSwapKey) {
+        const swap: any = await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet)
+        this.tokenSwap = swap
+        console.log('getTokenSwap###this.poolInfo####', this.poolInfo)
+        const currentPriceView = lamportPrice2uiPrice(
+          swap.tokenSwapInfo.currentSqrtPrice.pow(2),
+          this.poolInfo.token_a.decimal,
+          this.poolInfo.token_b.decimal
+        ).toNumber()
+        const currentPriceViewReverse = String(1 / Number(currentPriceView))
+        this.currentPriceView = String(currentPriceView)
+        this.currentPriceViewReverse = currentPriceViewReverse
+      }
+    },
     refresh() {
       this.$accessor.wallet.getTokenAccounts()
+      this.getTokenSwap()
       this.updateAmounts()
     },
     updateCoinInfo(tokenAccounts: any) {
       if (this.fromCoin) {
-        const fromCoin = tokenAccounts[this.fromCoin.mintAddress]
+        const fromCoin = tokenAccounts[this.fromCoin.token_mint]
 
         if (fromCoin) {
           this.fromCoin = { ...this.fromCoin, ...fromCoin }
@@ -296,7 +299,7 @@ export default Vue.extend({
       }
 
       if (this.toCoin) {
-        const toCoin = tokenAccounts[this.toCoin.mintAddress]
+        const toCoin = tokenAccounts[this.toCoin.token_mint]
 
         if (toCoin) {
           this.toCoin = { ...this.toCoin, ...toCoin }
@@ -304,27 +307,28 @@ export default Vue.extend({
       }
     },
     async updateAmounts() {
-      console.log('没进来吗44444#####this.poolInfo####', this.poolInfo)
       if (!this.poolInfo) return
-
-      const slippage = Number(this.$accessor.slippage) // 滑点
+      const fromCoinMint =
+        this.fromCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.fromCoin?.token_mint
+      const toCoinMint =
+        this.toCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.toCoin?.token_mint
       const direct =
-        this.fromCoin?.mintAddress === this.poolInfo.coin.mintAddress &&
-        this.toCoin?.mintAddress === this.poolInfo.pc.mintAddress
-          ? 0
-          : 1
+        fromCoinMint === this.poolInfo.token_a.token_mint && toCoinMint === this.poolInfo.token_b.token_mint ? 0 : 1
+
+      let swap: any
+      if (this.tokenSwap) {
+        swap = this.tokenSwap
+      } else {
+        swap = await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet)
+        this.tokenSwap = swap
+      }
+
       if (this.fromCoin && this.toCoin && (this.fromCoinAmount || this.toCoinAmount)) {
         this.loading = true
-        let swap: any = this.swapSdk
-        if (this.swapSdk) {
-          swap = await this.swapSdk.load()
-        } else {
-          const swapSdk: any = new TokenSwap(this.$web3, this.poolInfo.swapProgramId, this.poolInfo.tokenSwap, null)
-          this.swapSdk = swapSdk
-          swap = await swapSdk.load()
-        }
-
-        console.log('这里到了没啊@@@swap####', swap)
 
         if (swap && swap.ticks && swap.ticks.length > 1) {
           this.insufficientLiquidity = false
@@ -333,101 +337,41 @@ export default Vue.extend({
           this.loading = false
           return
         }
-
-        console.log('666666')
-        console.log('direct#####', direct)
-
         if (this.fixedFromCoin) {
-          // const source_amount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toString()
-          // console.log('this.fromCoin?.decimals####', this.fromCoin?.decimals)
-          const decimal = new Decimal(Math.pow(10, this.fromCoin?.decimals))
+          if (!Number(this.fromCoinAmount)) return
+          const decimal = new Decimal(Math.pow(10, this.fromCoin?.decimal))
           const source_amount = new Decimal(this.fromCoinAmount).mul(decimal)
-          // const { amountOut, amountOutWithSlippage, dst } = await getOutAmount(
-          //   this.$web3,
-          //   this.poolInfo,
-          //   this.fromCoin?.mintAddress,
-          //   this.toCoin?.mintAddress,
-          //   source_amount,
-          //   slippage
-          // )
-          // if (Number(amountOut.fixed())) {
-          //   this.insufficientLiquidity = false
-          //   this.toCoinAmount = amountOut.fixed()
-          // } else {
-          //   this.insufficientLiquidity = true
-          //   this.toCoinAmount = '0'
-          // }
-          // this.loading = false
-          // console.log('amountOut####', amountOut.fixed())
-          // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
-          console.log('source_amount####', source_amount)
-          console.log('source_amount####', source_amount.toNumber())
-
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
-          // console.log('1111source_amount####', source_amount)
-          // const DECIMALS = new Decimal(1000000)
-          // console.log('res.amountOut.div(DECIMALS).toString()####', res.amountOut.div(DECIMALS).toString())
           const amountOut = (res && res.amountOut.toNumber()) || 0
-          console.log('1111amountOut#####', amountOut, '####direct####', direct)
 
           if (amountOut) {
             this.insufficientLiquidity = false
-            const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimals)
-            this.toCoinAmount = decimalFormat(String(toCoinAmount), this.toCoin?.decimals)
+            const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimal)
+            this.toCoinAmount = decimalFormat(String(toCoinAmount), this.toCoin?.decimal)
           } else {
             this.insufficientLiquidity = true
             this.toCoinAmount = '0'
           }
 
-          console.log('1111111')
           this.loading = false
-
-          // let url = 'https://mercurial.rpcpool.com'
-          // let conn = new Connection(url, 'recent')
-          // let programID = new PublicKey('6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319')
-          // let swapKey = new PublicKey('8J3avAjuRfL2CYFKKDwhhceiRoajhrHv9kN5nUiEnuBG') //CUSDT-CUSDC
-          // const testswap = await new TokenSwap(conn, programID, swapKey, null).load()
-
-          // let testres = testswap.preSwapB(new Decimal(1000000000000000000000000))
-          // console.log('amountOut          :', testres.amountOut.toString())
         } else {
-          // const source_amount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toString()
-          const decimal = new Decimal(Math.pow(10, this.toCoin?.decimals))
+          if (!Number(this.toCoinAmount)) return
+          const decimal = new Decimal(Math.pow(10, this.toCoin?.decimal))
           const source_amount = new Decimal(this.toCoinAmount).mul(decimal)
-          // const { amountOut, amountOutWithSlippage } = await getOutAmount(
-          //   this.$web3,
-          //   this.poolInfo,
-          //   this.toCoin?.mintAddress,
-          //   this.fromCoin?.mintAddress,
-          //   source_amount,
-          //   slippage
-          // )
-          // if (Number(amountOut.fixed())) {
-          //   this.insufficientLiquidity = false
-          //   this.fromCoinAmount = amountOut.fixed()
-          // } else {
-          //   this.insufficientLiquidity = true
-          //   this.fromCoinAmount = '0'
-          // }
-          // this.loading = false
-          // const amountOut: any = await swap.simulateSwap(new Decimal(source_amount), direct)
-          // console.log('2222source_amount####', source_amount)
           const res: any =
             direct === 0 ? swap.preSwapB(new Decimal(source_amount)) : swap.preSwapA(new Decimal(source_amount))
 
           const amountOut = (res && res.amountOut.toNumber()) || 0
-          // console.log('22222amountOut#####', amountOut, '###direct###', direct)
 
           if (amountOut) {
             this.insufficientLiquidity = false
-            const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimals)
-            this.fromCoinAmount = decimalFormat(String(fromCoinAmount), this.fromCoin?.decimals)
+            const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimal)
+            this.fromCoinAmount = decimalFormat(String(fromCoinAmount), this.fromCoin?.decimal)
           } else {
             this.insufficientLiquidity = true
             this.fromCoinAmount = '0'
           }
-          console.log('2222222')
           this.loading = false
         }
       }
@@ -445,14 +389,6 @@ export default Vue.extend({
       this.showCoinSelect = true
     },
     onCoinSelect(token: any) {
-      // if (token.unusable) return
-      // if (this.currentCoinKey === 'fromCoin') {
-      //   this.fromCoin = token
-      // } else {
-      //   this.toCoin = token
-      // }
-      console.log(token)
-
       if (this.currentCoinKey === 'fromCoin') {
         if (token.symbol === this.toCoin?.symbol) {
           this.toCoin = null
@@ -473,11 +409,25 @@ export default Vue.extend({
           this.fromCoin && this.fromCoin.balance
             ? this.fromCoin.symbol !== 'SOL'
               ? this.fromCoin.balance.fixed()
-              : String(Number(this.fromCoin.balance.fixed()) - 0.05)
+              : String(
+                  Number(this.fromCoin.balance.fixed()) - 0.01 < 0
+                    ? 0
+                    : fixD(Number(this.fromCoin.balance.fixed()) - 0.01, 9)
+                )
             : '0'
       } else {
         this.fixedFromCoin = false
-        this.toCoinAmount = this.toCoin?.balance?.fixed() || ''
+        // this.toCoinAmount = this.toCoin?.balance?.fixed() || ''
+        this.toCoinAmount =
+          this.toCoin && this.toCoin.balance
+            ? this.toCoin.symbol !== 'SOL'
+              ? this.toCoin.balance.fixed()
+              : String(
+                  Number(this.toCoin.balance.fixed()) - 0.01 < 0
+                    ? 0
+                    : fixD(Number(this.toCoin.balance.fixed()) - 0.01, 9)
+                )
+            : '0'
       }
     },
     changeCoinPosition() {
@@ -492,89 +442,102 @@ export default Vue.extend({
       this.fromCoinAmount = tempToCoinAmount
       this.toCoinAmount = tempFromCoinAmount
     },
-    placeOrder() {
+    async toSwap() {
       this.swaping = true
+      const poolInfo: any = cloneDeep(this.poolInfo)
 
-      const key = getUnixTs().toString()
-      // this.$notify.info({
-      //   key,
-      //   message: 'Making transaction...',
-      //   description: '',
-      //   duration: 0,
-      //   icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } })
-      // })
+      const fromCoinMint =
+        this.fromCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.fromCoin?.token_mint
+      const toCoinMint =
+        this.toCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.toCoin?.token_mint
+      const direct = fromCoinMint === poolInfo.token_a.token_mint && toCoinMint === poolInfo.token_b.token_mint ? 0 : 1
+
       this.$accessor.transaction.setTransactionDesc(
         `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${this.toCoinAmount} ${this.toCoin?.symbol}`
       )
       this.$accessor.transaction.setShowWaiting(true)
 
-      console.log('this.$accessor.liquidity.infos####', this.$accessor.liquidity.infos)
+      const swap = await loadSwapPair(poolInfo.tokenSwapKey, this.$wallet)
+      const amount = new Decimal(this.fromCoinAmount)
+      const lamports = swap.tokenALamports(amount)
 
-      const poolInfo: any = Object.values(this.$accessor.liquidity.infos).find((p: any) => {
-        return (
-          (p.coin.symbol === this.fromCoin?.symbol && p.pc.symbol === this.toCoin?.symbol) ||
-          (p.coin.symbol === this.toCoin?.symbol && p.pc.symbol === this.fromCoin?.symbol)
-        )
-      })
-
-      console.log('poolInfo#####', poolInfo)
-
-      console.log('this.fromCoinAmount####', this.fromCoinAmount)
-      console.log('this.toCoinAmount####', this.toCoinAmount)
-
-      swap(
-        this.$web3,
-        this.$wallet,
-        poolInfo,
-        this.fromCoin?.mintAddress || '',
-        this.toCoin?.mintAddress || '',
-        // @ts-ignore
-        get(this.wallet.tokenAccounts, `${this.fromCoin.mintAddress}.tokenAccountAddress`),
-        // @ts-ignore
-        get(this.wallet.tokenAccounts, `${this.toCoin.mintAddress}.tokenAccountAddress`),
-        // this.fixedFromCoin ? this.fromCoinAmount : String(Number(this.fromCoinAmount) * 1.01),
-        // this.fixedFromCoin ? this.fromCoinAmount : this.fromCoinWithSlippage,
-        // this.fixedFromCoin ? this.toCoinWithSlippage : this.toCoinAmount
-        this.fromCoinAmount,
-        // this.toCoinAmount
-        // !this.fixedFromCoin
-        //   ? this.toCoinAmount
-        //   : String(Number(this.toCoinAmount) / (1 + Number(this.$accessor.slippage) / 100))
-        String(Number(this.toCoinAmount) / (1 + Number(this.$accessor.slippage) / 100))
+      // const outATA = await getATAAddress({
+      //   mint: !direct ? swap.tokenSwapInfo.tokenAMint : swap.tokenSwapInfo.tokenBMint,
+      //   owner: swap.provider.wallet.publicKey
+      // })
+      // const inATA = await getATAAddress({
+      //   mint: !direct ? swap.tokenSwapInfo.tokenBMint : swap.tokenSwapInfo.tokenAMint,
+      //   owner: swap.provider.wallet.publicKey
+      // })
+      const estimateResult = !direct ? swap.preSwapA(lamports) : swap.preSwapB(lamports)
+      const minIncome = estimateResult.amountOut.div(
+        new Decimal(1).add(new Decimal(Number(this.$accessor.slippage) / 100)).toString()
       )
-        .then((txid: any) => {
-          // this.$accessor.transaction.setShowWaiting(false)
 
-          // this.$notify.info({
-          //   key,
-          //   message: 'Transaction has been sent',
-          //   icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/tanhao@2x.png' } }),
-          //   description: (h: any) =>
-          //     h('div', [
-          //       'Confirmation is in progress.  Check your transaction on ',
-          //       h('a', { attrs: { href: `${this.url.explorer}/tx/${txid}`, target: '_blank' } }, 'here')
-          //     ])
-          // })
+      let txid = ''
 
+      try {
+        // const tx = await swap.swap(outATA, inATA, direct, lamports, new Decimal(fixD(minIncome, 0)))
+        console.log('toswap##direct####', direct)
+        const tx = await swap.swapAtomic(direct, lamports, new Decimal(fixD(minIncome, 0)))
+        // const receipt = await res.confirm()
+        const opt: BroadcastOptions = {
+          skipPreflight: true,
+          commitment: 'confirmed',
+          preflightCommitment: 'confirmed',
+          maxRetries: 30,
+          printLogs: true
+        }
+        const receipt: any = await tx.send(opt)
+
+        if (receipt && receipt.signature) {
+          txid = receipt.signature
           const description = `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${this.toCoinAmount} ${this.toCoin?.symbol}`
-          this.$accessor.transaction.sub({ txid, description, type: 'Swap' })
           this.$accessor.transaction.setShowSubmitted(true)
-          this.fromCoinAmount = ''
-          this.toCoinAmount = ''
-        })
-        .catch((error: any) => {
-          this.$accessor.transaction.setShowWaiting(false)
-          this.$notify.error({
-            key,
-            message: 'Swap failed',
-            description: error.message,
-            class: 'error',
-            icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
+
+          const _this = this
+          this.$accessor.transaction.sub({
+            txid,
+            description,
+            type: 'Swap',
+            successCallback: () => {
+              _this.swaping = false
+              _this.refresh()
+              this.$accessor.transaction.setShowSubmitted(false)
+            },
+            errorCallback: () => {
+              _this.swaping = false
+              this.$accessor.transaction.setShowSubmitted(false)
+            }
           })
+        }
+
+        const whatWait = await receipt.wait({
+          commitment: 'confirmed',
+          useWebsocket: true,
+          retries: 30
         })
-        .finally(() => {
-          this.swaping = false
+
+        this.fromCoinAmount = ''
+        this.toCoinAmount = ''
+      } catch (error: any) {
+        console.log('toSwap###error####', error)
+        this.$accessor.transaction.setShowWaiting(false)
+        this.$accessor.transaction.setShowSubmitted(false)
+        this.$notify.close(txid + 'loading')
+        this.$notify.error({
+          key: 'swap failed',
+          message: 'Swap failed',
+          description: error.message,
+          class: 'error',
+          icon: this.$createElement('img', { class: { 'notify-icon': true }, attrs: { src: '/icon_Error@2x.png' } })
         })
+        this.swaping = false
+      }
     }
   }
 })

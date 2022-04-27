@@ -10,48 +10,48 @@
       @cancel="$emit('onClose')"
     >
       <div class="address-container">
-        <div v-if="fromCoin && fromCoin.symbol && fromCoin.mintAddress" class="pc-address">
-          <img :src="importIcon(`/coins/${fromCoin.symbol.toLowerCase()}.png`)" />
+        <div v-if="fromCoin && fromCoin.symbol && fromCoin.token_mint" class="pc-address">
+          <img :src="fromCoin.icon || importIcon(`/coins/${fromCoin.symbol.toLowerCase()}.png`)" />
           <span>
-            {{ fromCoin.mintAddress && fromCoin.mintAddress.substr(0, 14) }}
+            {{ fromCoin.token_mint && fromCoin.token_mint.substr(0, 14) }}
             ...
-            {{ fromCoin.mintAddress && fromCoin.mintAddress.substr(fromCoin.mintAddress.length - 15, 15) }}
+            {{ fromCoin.token_mint && fromCoin.token_mint.substr(fromCoin.token_mint.length - 15, 15) }}
           </span>
-          <svg class="icon" aria-hidden="true" @click="$accessor.copy(fromCoin.mintAddress)">
+          <svg class="icon" aria-hidden="true" @click="$accessor.copy(fromCoin.token_mint)">
             <use xlink:href="#icon-icon_copy"></use>
           </svg>
         </div>
-        <div v-if="toCoin && toCoin.symbol && toCoin.mintAddress" class="pc-address">
-          <img :src="importIcon(`/coins/${toCoin.symbol.toLowerCase()}.png`)" />
+        <div v-if="toCoin && toCoin.symbol && toCoin.token_mint" class="pc-address">
+          <img :src="toCoin.icon || importIcon(`/coins/${toCoin.symbol.toLowerCase()}.png`)" />
           <span>
-            {{ toCoin.mintAddress && toCoin.mintAddress.substr(0, 14) }}
+            {{ toCoin.token_mint && toCoin.token_mint.substr(0, 14) }}
             ...
-            {{ toCoin.mintAddress && toCoin.mintAddress.substr(toCoin.mintAddress.length - 15, 15) }}
+            {{ toCoin.token_mint && toCoin.token_mint.substr(toCoin.token_mint.length - 15, 15) }}
           </span>
-          <svg class="icon" aria-hidden="true" @click="$accessor.copy(toCoin.mintAddress)">
+          <svg class="icon" aria-hidden="true" @click="$accessor.copy(toCoin.token_mint)">
             <use xlink:href="#icon-icon_copy"></use>
           </svg>
         </div>
 
-        <div v-if="fromCoin && fromCoin.symbol && fromCoin.mintAddress" class="h5-address">
-          <img :src="importIcon(`/coins/${fromCoin.symbol.toLowerCase()}.png`)" />
+        <div v-if="fromCoin && fromCoin.symbol && fromCoin.token_mint" class="h5-address">
+          <img :src="fromCoin.icon || importIcon(`/coins/${fromCoin.symbol.toLowerCase()}.png`)" />
           <span>
-            {{ fromCoin.mintAddress && fromCoin.mintAddress.substr(0, 11) }}
+            {{ fromCoin.token_mint && fromCoin.token_mint.substr(0, 11) }}
             ...
-            {{ fromCoin.mintAddress && fromCoin.mintAddress.substr(fromCoin.mintAddress.length - 11, 11) }}
+            {{ fromCoin.token_mint && fromCoin.token_mint.substr(fromCoin.token_mint.length - 11, 11) }}
           </span>
-          <svg class="icon" aria-hidden="true" @click="$accessor.copy(fromCoin.mintAddress)">
+          <svg class="icon" aria-hidden="true" @click="$accessor.copy(fromCoin.token_mint)">
             <use xlink:href="#icon-icon_copy"></use>
           </svg>
         </div>
-        <div v-if="toCoin && toCoin.symbol && toCoin.mintAddress" class="h5-address">
-          <img :src="importIcon(`/coins/${toCoin.symbol.toLowerCase()}.png`)" />
+        <div v-if="toCoin && toCoin.symbol && toCoin.token_mint" class="h5-address">
+          <img :src="toCoin.icon || importIcon(`/coins/${toCoin.symbol.toLowerCase()}.png`)" />
           <span>
-            {{ toCoin.mintAddress && toCoin.mintAddress.substr(0, 11) }}
+            {{ toCoin.token_mint && toCoin.token_mint.substr(0, 11) }}
             ...
-            {{ toCoin.mintAddress && toCoin.mintAddress.substr(toCoin.mintAddress.length - 11, 11) }}
+            {{ toCoin.token_mint && toCoin.token_mint.substr(toCoin.token_mint.length - 11, 11) }}
           </span>
-          <svg class="icon" aria-hidden="true" @click="$accessor.copy(toCoin.mintAddress)">
+          <svg class="icon" aria-hidden="true" @click="$accessor.copy(toCoin.token_mint)">
             <use xlink:href="#icon-icon_copy"></use>
           </svg>
         </div>

@@ -2,7 +2,7 @@
   <div class="coin-block">
     <div class="coin-box">
       <div class="coin-name" @click="selectCoin">
-        <img v-if="coinName" :src="importIcon(`/coins/${coinName.toLowerCase()}.png`)" />
+        <img v-if="coinName" :src="coinIcon || importIcon(`/coins/${coinName.toLowerCase()}.png`)" />
         <img v-else src="../assets/images/icon_missing.png" />
         <span>{{ coinName || 'Select' }}</span>
         <svg v-if="!notSelect" class="icon" aria-hidden="true">
@@ -37,6 +37,7 @@
           maxlength="79"
           spellcheck="false"
           :disabled="disabled"
+          oninput="this.value = this.value.replace(/[^\d.]/g,'');"
           @input="$emit('onInput', $event.target.value)"
           @focus="$emit('onFocus')"
         />
@@ -93,6 +94,10 @@ export default Vue.extend({
       default: () => {
         return {}
       }
+    },
+    coinIcon: {
+      type: String,
+      default: ''
     }
   },
   computed: {

@@ -4,6 +4,11 @@
       <span v-if="wallet.connected">Your Positions {{ list.length > 0 ? `( ${list.length} )` : '' }}</span>
       <span v-else>Your Positions（0）</span>
       <div class="btn-list">
+        <div class="go-back" @click="gotoPoolList">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-icon-return"></use>
+          </svg>
+        </div>
         <button>
           <div @click="gotoPool">
             <span>Add Liquidity</span>
@@ -18,13 +23,21 @@
       <img src="../assets/images/icon_NoDate@2x.png" />
       <p>No data</p>
     </div>
+    <div v-show="liquidity.myPositionLoading" class="loading-global"><Spin /></div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
+import { checkNullObj } from '@/utils'
+import { Spin } from 'ant-design-vue'
+import mixin from '@/mixin/position'
 
 export default Vue.extend({
+  components: {
+    Spin
+  },
+  mixins: [mixin],
   data() {
     return {
       isShowClosedPositions: false,
@@ -33,7 +46,13 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['wallet', 'liquidity'])
+    ...mapState(['wallet', 'liquidity']),
+    walletConnectedAndHavePoolsObj(): boolean {
+      if (this.liquidity.poolsObj && this.wallet.connected && !checkNullObj(this.wallet.tokenAccounts)) {
+        return true
+      }
+      return false
+    }
   },
   watch: {
     'liquidity.myPositions': {
@@ -44,15 +63,27 @@ export default Vue.extend({
       if (!newVal) {
         this.list = []
       }
+    },
+    walletConnectedAndHavePoolsObj: {
+      handler: 'walletConnectedAndHavePoolsObjWatch',
+      immediate: true
     }
   },
   mounted() {},
   methods: {
     gotoPool() {
-      this.$router.push('/pool')
+      this.$router.push('/deposit')
     },
     watchMyPositions(list: any) {
       this.list = list
+    },
+    walletConnectedAndHavePoolsObjWatch(newVal) {
+      if (newVal) {
+        this.$accessor.liquidity.getMyPositionsNew(this.wallet.tokenAccounts)
+      }
+    },
+    gotoPoolList() {
+      this.$router.push('/deposit')
     }
   }
 })
@@ -73,6 +104,7 @@ export default Vue.extend({
     .btn-list {
       display: flex;
       align-items: center;
+
       button {
         background: none;
         > div {
@@ -87,6 +119,9 @@ export default Vue.extend({
             background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
           }
         }
+      }
+      .go-back {
+        display: none;
       }
     }
   }
@@ -118,8 +153,24 @@ export default Vue.extend({
     .position-title {
       display: block;
       .btn-list {
-        justify-content: flex-end;
+        // justify-content: flex-end;
+        justify-content: space-between;
         margin-top: 20px;
+        .go-back {
+          display: flex;
+          align-items: center;
+          .icon {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+            margin-right: 4px;
+            &:hover {
+              fill: #07ebad;
+            }
+          }
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.5);
+        }
       }
     }
   }

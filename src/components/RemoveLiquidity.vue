@@ -29,8 +29,14 @@
           <div class="file-left">
             <div class="deta-block-img">
               <!-- 52 30 -->
-              <img class="img-left" :src="importIcon(`/coins/${currentData.coin.symbol.toLowerCase()}.png`)" />
-              <img class="img-right" :src="importIcon(`/coins/${currentData.pc.symbol.toLowerCase()}.png`)" />
+              <img
+                class="img-left"
+                :src="currentData.coin.icon || importIcon(`/coins/${currentData.coin.symbol.toLowerCase()}.png`)"
+              />
+              <img
+                class="img-right"
+                :src="currentData.pc.icon || importIcon(`/coins/${currentData.pc.symbol.toLowerCase()}.png`)"
+              />
             </div>
             <div v-if="currentData.coin && currentData.pc" class="deta-block-either">
               <!-- 94 16 16 -->
@@ -64,14 +70,20 @@
             <div class="coin-label">Pooled {{ currentData.coin.symbol }}:</div>
             <div class="coin-num">
               {{ fromCoinAmount }}
-              <img class="img-left" :src="importIcon(`/coins/${currentData.coin.symbol.toLowerCase()}.png`)" />
+              <img
+                class="img-left"
+                :src="currentData.coin.icon || importIcon(`/coins/${currentData.coin.symbol.toLowerCase()}.png`)"
+              />
             </div>
           </div>
           <div class="before-coin after-coin">
             <div class="coin-label">Pooled {{ currentData.pc.symbol }}:</div>
             <div class="coin-num">
               {{ toCoinAmount }}
-              <img class="img-right" :src="importIcon(`/coins/${currentData.pc.symbol.toLowerCase()}.png`)" />
+              <img
+                class="img-right"
+                :src="currentData.pc.icon || importIcon(`/coins/${currentData.pc.symbol.toLowerCase()}.png`)"
+              />
             </div>
           </div>
         </div>

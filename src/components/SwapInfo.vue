@@ -6,15 +6,15 @@
       <div class="right">
         <div v-if="fromCoin && toCoin && Number(fromCoinAmount) && Number(toCoinAmount) && defaultRates">
           <span v-if="Number(fromCoinAmount) && Number(toCoinAmount)">
-            1 {{ fromCoin.symbol }} = {{ fixD(Number(toCoinAmount) / Number(fromCoinAmount), toCoin.decimals) }}
+            1 {{ fromCoin.symbol }} = {{ fixD(Number(toCoinAmount) / Number(fromCoinAmount), toCoin.decimal) }}
             {{ toCoin.symbol }}
           </span>
           <span v-else
-            >1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span
+            >1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimal) }} {{ toCoin.symbol }}</span
           >
         </div>
         <div v-if="fromCoin && toCoin && (!Number(fromCoinAmount) || !Number(toCoinAmount))">
-          <span>1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span>
+          <span>1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimal) }} {{ toCoin.symbol }}</span>
         </div>
         <Progress
           type="circle"
@@ -33,8 +33,8 @@
         <div class="right">
           {{
             fixedFromCoin
-              ? fixD(Number(toCoinAmount) / (1 + Number($accessor.slippage) / 100), toCoin.decimals)
-              : fixD(fromCoinAmount * (1 + Number($accessor.slippage) / 100), toCoin.decimals)
+              ? fixD(Number(toCoinAmount) / (1 + Number($accessor.slippage) / 100), toCoin.decimal)
+              : fixD(fromCoinAmount * (1 + Number($accessor.slippage) / 100), toCoin.decimal)
           }}
         </div>
       </div>
@@ -56,7 +56,6 @@ import { Progress } from 'ant-design-vue'
 
 export default Vue.extend({
   // eslint-disable-next-line vue/require-prop-types
-  // props: ['poolInfo', 'fromCoin', 'toCoin', 'fromCoinAmount', 'toCoinAmount'],
   components: {
     Progress
   },
@@ -94,6 +93,14 @@ export default Vue.extend({
     dataIsLoading: {
       type: Boolean,
       default: false
+    },
+    currentPriceView: {
+      type: String || Number,
+      default: ''
+    },
+    currentPriceViewReverse: {
+      type: String || Number,
+      default: ''
     }
   },
   data() {
@@ -104,25 +111,13 @@ export default Vue.extend({
       refreshTimer: null
     }
   },
-  // computed: {
-  //   price() {
-  //     if (this.fromCoinAmount && this.toCoinAmount) {
-  //       return 0
-  //     } else {
-  //       if (this.poolInfo && this.poolInfo.currentPrice) {
-  //         return this.getDefaultExchangeRate()
-  //       }
-  //     }
-  //     return 0
-  //   }
-  // },
   watch: {
     poolInfo: {
       handler: 'poolInfoWatch',
       immediate: true
     },
     fromCoin() {
-      if (this.poolInfo && this.poolInfo.coin && this.fromCoin && this.toCoin) {
+      if (this.poolInfo && this.poolInfo.token_a && this.fromCoin && this.toCoin) {
         this.setDefaultExchangeRate(this.poolInfo)
       }
     }
@@ -137,17 +132,15 @@ export default Vue.extend({
   methods: {
     fixD,
     poolInfoWatch(poolInfo: any) {
-      if (poolInfo && poolInfo.coin && this.fromCoin && this.toCoin) {
+      if (poolInfo && poolInfo.token_a && this.fromCoin && this.toCoin) {
         this.setDefaultExchangeRate(poolInfo)
       }
     },
     setDefaultExchangeRate(poolInfo: any) {
-      if (this.fromCoin?.symbol === poolInfo.coin.symbol && this.toCoin?.symbol === poolInfo.pc.symbol) {
-        // this.defaultRates = String(Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
-        this.defaultRates = poolInfo.currentPriceView
+      if (this.fromCoin?.symbol === poolInfo.token_a.symbol && this.toCoin?.symbol === poolInfo.token_b.symbol) {
+        this.defaultRates = this.currentPriceView || poolInfo.currentPriceView
       } else {
-        // this.defaultRates = String(1 / Math.pow(Number(poolInfo.currentPrice) / Math.pow(10, 12), 2))
-        this.defaultRates = poolInfo.currentPriceViewReverse
+        this.defaultRates = this.currentPriceViewReverse || poolInfo.currentPriceViewReverse
       }
     },
     toRefreshData() {

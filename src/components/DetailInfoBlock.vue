@@ -1,68 +1,69 @@
 <template>
   <div :class="['detail-info-block', title !== 'Liquidity' ? 'unclaimed-fees' : '']">
-    <div class="title">
-      <h3>{{ title }}</h3>
-      <button
-        v-if="title !== 'Liquidity'"
-        :disabled="isLoading || !wallet.connected || !(Number(currentData.tokenaFee) || Number(currentData.tokenbFee))"
-        :loading="isLoading"
-        @click="toClaim"
-      >
-        Claim
-      </button>
-    </div>
-    <div class="rates">
-      $
-      {{ title !== 'Liquidity' ? processShowUSD(currentData.feeUSD) : processShowUSD(currentData.amountUSD) }}
-    </div>
-    <div :class="['info-box', !direction ? 'reverse' : '']">
-      <div v-if="poolInfo" class="info-block">
-        <div class="left">
-          <img :src="importIcon(`/coins/${poolInfo.coin.symbol.toLowerCase()}.png`)" />
-          <span>{{ poolInfo.coin.symbol }}</span>
-          <a
-            v-if="title === 'Liquidity'"
-            :href="`${url.explorer}/address/${poolInfo.coin.mintAddress}`"
-            target="_blank"
-          >
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-icon-Jump"></use>
-            </svg>
-          </a>
+    <Skeleton :loading="!poolInfo" active>
+      <div class="title">
+        <h3>{{ title }}</h3>
+        <button
+          v-if="title !== 'Liquidity'"
+          :disabled="
+            isLoading || !wallet.connected || !(Number(currentData.tokenaFee) || Number(currentData.tokenbFee))
+          "
+          :loading="isLoading"
+          @click="toClaim"
+        >
+          Claim
+        </button>
+      </div>
+
+      <div class="rates">
+        $
+        {{ title !== 'Liquidity' ? processShowUSD(currentData.feeUSD) : processShowUSD(currentData.amountUSD) }}
+      </div>
+      <div :class="['info-box', !direction ? 'reverse' : '']">
+        <div v-if="poolInfo" class="info-block">
+          <div class="left">
+            <img :src="poolInfo.token_a.icon || importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" />
+            <span>{{ poolInfo.token_a.symbol }}</span>
+            <a
+              v-if="title === 'Liquidity'"
+              :href="`${url.explorer}/address/${poolInfo.token_a.token_mint}`"
+              target="_blank"
+            >
+              <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-icon-Jump"></use>
+              </svg>
+            </a>
+          </div>
+          <div class="right">
+            <span class="num">{{ tokenaNum }}</span>
+            <span v-if="title === 'Liquidity'" class="percent">{{ currentData.fromPercent }}%</span>
+          </div>
         </div>
-        <div class="right">
-          <span class="num">{{ tokenaNum }}</span>
-          <span v-if="title === 'Liquidity'" class="percent">{{ currentData.fromPercent }}%</span>
+        <div v-if="poolInfo" class="info-block">
+          <div class="left">
+            <img :src="poolInfo.token_b.icon || importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" />
+            <span>{{ poolInfo.token_b.symbol }}</span>
+          </div>
+          <div class="right">
+            <span class="num">{{ tokenbNum }}</span>
+            <span v-if="title === 'Liquidity'" class="percent">{{ currentData.toPercent }}%</span>
+          </div>
         </div>
       </div>
-      <div v-if="poolInfo" class="info-block">
-        <div class="left">
-          <img :src="importIcon(`/coins/${poolInfo.pc.symbol.toLowerCase()}.png`)" />
-          <span>{{ poolInfo.pc.symbol }}</span>
-        </div>
-        <div class="right">
-          <span class="num">{{ tokenbNum }}</span>
-          <span v-if="title === 'Liquidity'" class="percent">{{ currentData.toPercent }}%</span>
-        </div>
-      </div>
-    </div>
+    </Skeleton>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
-// import { RATES } from '@/utils/tokens'
 import { mapState } from 'vuex'
-// import { preclaim, TickWord } from '@/tokenSwap/swapv3'
-// import { loadAccount } from '@/tokenSwap/util/account'
-// import { Account, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
-// import { SWAPV3_PROGRAMID, SWAP_PAYER, PAYER } from '@/utils/ids'
-// import { TokenSwap, TokenSwapLayout, Numberu128, TickInfoLayout, Number128, TickInfo } from '@/tokenSwap'
 import { decimalFormat } from '@/utils/index'
-// import { Button } from 'ant-design-vue'
-// import BigNumber from 'bignumber.js'
+import { Skeleton } from 'ant-design-vue'
 
 export default Vue.extend({
+  components: {
+    Skeleton
+  },
   props: {
     currentData: {
       type: Object,
@@ -95,14 +96,14 @@ export default Vue.extend({
       if (this.currentData && this.poolInfo) {
         if (this.title !== 'Liquidity') {
           if (Number(this.currentData.tokenaFee) > 0.000001) {
-            return decimalFormat(this.currentData.tokenaFee, this.poolInfo.coin.decimals)
+            return decimalFormat(this.currentData.tokenaFee, this.poolInfo.token_a.decimal)
           } else if (Number(this.currentData.tokenaFee) === 0) {
             return '0'
           } else {
             return '<0.00001'
           }
         } else {
-          return decimalFormat(this.currentData.fromCoinAmount, this.poolInfo.coin.decimals)
+          return decimalFormat(this.currentData.fromCoinAmount, this.poolInfo.token_a.decimal)
         }
       }
       return '--'
@@ -111,14 +112,14 @@ export default Vue.extend({
       if (this.currentData && this.poolInfo) {
         if (this.title !== 'Liquidity') {
           if (Number(this.currentData.tokenbFee) > 0.000001) {
-            return decimalFormat(this.currentData.tokenbFee, this.poolInfo.pc.decimals)
+            return decimalFormat(this.currentData.tokenbFee, this.poolInfo.token_b.decimal)
           } else if (Number(this.currentData.tokenbFee) === 0) {
             return '0'
           } else {
             return '<0.00001'
           }
         } else {
-          return decimalFormat(this.currentData.toCoinAmount, this.poolInfo.pc.decimals)
+          return decimalFormat(this.currentData.toCoinAmount, this.poolInfo.token_b.decimal)
         }
       }
       return '--'
@@ -179,7 +180,7 @@ export default Vue.extend({
     background-image: url('../assets/images/pool-detail-info-back2.png');
     background-size: 100% 100%;
   }
-  > .title {
+  .title {
     display: flex;
     align-items: center;
     justify-content: space-between;

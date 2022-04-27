@@ -237,3 +237,14 @@ export const addCommom = (num, len) => {
     })
   }
 }
+
+export const getTokenBySymbol = (tokensObj: any, symbol: string) => {
+  if (!symbol) return null
+  for (let key in tokensObj) {
+    const item = tokensObj[key]
+    if (item.symbol.toUpperCase() === symbol.toUpperCase()) {
+      return item
+    }
+  }
+  return null
+}

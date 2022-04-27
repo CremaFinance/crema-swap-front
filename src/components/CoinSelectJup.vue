@@ -51,9 +51,8 @@
 import Vue from 'vue'
 import { mapState } from 'vuex'
 import { Modal, Icon } from 'ant-design-vue'
-import { TOKENS, TokenInfo, NATIVE_SOL } from '@/utils/tokens'
-import { LIQUIDITY_POOLS } from '@/utils/pools'
-import { cloneDeep, debounce } from 'lodash-es'
+import { TokenInfo } from '@/utils/tokens'
+import { debounce } from 'lodash-es'
 import VirtualList from 'vue-virtual-scroll-list'
 import CoinItem from './CoinItem.vue'
 
