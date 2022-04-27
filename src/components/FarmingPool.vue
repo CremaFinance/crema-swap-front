@@ -12,7 +12,7 @@
               <td width="25%">
                 <div class="symbol-info">
                   <div class="symbol-left">
-                    <img class="coin-before" :src="importIcon(`/coins/${item.coinA.toLowerCase()}.png`)" alt="" ><img
+                    <img class="coin-before" :src="importIcon(`/coins/${item.coinA.toLowerCase()}.png`)" alt="" /><img
                       class="coin-after"
                       :src="importIcon(`/coins/${item.coinB.toLowerCase()}.png`)"
                       alt=""
@@ -74,7 +74,7 @@
             <tr>
               <td class="get-lp-box" rowspan="2">
                 <div class="get-lp">
-                  <Button class="get-lp-btn"> <nuxt-link to="/pool">Get LP NFT</nuxt-link></Button>
+                  <Button class="get-lp-btn"> <nuxt-link to="/deposit">Get LP NFT</nuxt-link></Button>
                 </div>
                 <div class="view-contract">
                   <Button class="view-contract-btn">View Contract</Button>

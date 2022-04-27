@@ -193,7 +193,6 @@ export const actions = actionTree(
             wallet.publicKey
           )
           const { myreward = 0, stakeAmount = 0 } = await getReward(conn, userinfo, farmInfoMore)
-          // const rewardTokenPrice = await getprice(farm.reward.mintAddress)
           const myrewardAmount = new TokenAmount(0, farmInfo.reward.decimals)
           myrewardAmount.wei = myrewardAmount.wei.plus(myreward)
           userInfo.myreward = myrewardAmount

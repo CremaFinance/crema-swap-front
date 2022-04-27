@@ -2,7 +2,7 @@ import { Numberu64 } from '../tokenSwap'
 import * as Layout from '../tokenSwap/layout'
 import * as BufferLayout from 'buffer-layout'
 import { Account, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
-import { NATIVE_SOL, TOKENS, getTokenByMintAddress, WSOL } from './tokens'
+import { NATIVE_SOL, getTokenByMintAddress, WSOL } from './tokens'
 import { TokenAmount } from '@/utils/safe-math'
 import {
   createTokenAccountIfNotExist,

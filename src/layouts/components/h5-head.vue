@@ -8,6 +8,11 @@
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </div>
         <div class="right">
+          <!-- <div class="fair-gi">
+            <img src="@/assets/images/Fire-lans.gif" alt="" />
+            <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span>
+          </div> -->
+          <!-- <SystemSetting></SystemSetting> -->
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
             <use xlink:href="#icon-a-icon_Menu1"></use>
           </svg>
@@ -30,7 +35,7 @@
             <img src="@/assets/images/icon-Swap@2x.png" alt="" />
             <span>Swap</span>
           </li>
-          <li class="have-sub-menu" @click="goUrl('pool')">
+          <li class="have-sub-menu" @click="goUrl('deposit')">
             <div
               :class="{
                 active:
@@ -55,13 +60,13 @@
               </svg>
             </div>
           </li>
-          <li :class="{ active: $route.name === 'stats' }" @click="goUrl('stats')">
-            <img src="@/assets/images/stats.png" alt="" />
-            <span>Stats</span>
-          </li>
           <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
             <img src="@/assets/images/icon-Farming@2x.png" alt="" />
             <span>Farming</span>
+          </li>
+          <li :class="{ active: $route.name === 'stats' }" @click="goUrl('stats')">
+            <img src="@/assets/images/stats.png" alt="" />
+            <span>Stats</span>
           </li>
           <!-- <li>
           <a class="test-guide" href="https://hello-17.gitbook.io/crema-devnet-test-guide/" target="_blank">
@@ -188,11 +193,24 @@ export default {
       }
     }
     .right {
+      display: flex;
+      align-items: center;
       .icon {
         width: 20px;
         height: 20px;
         fill: #fff;
         cursor: pointer;
+      }
+      .fair-gi {
+        margin: 4px 18px 0 0;
+        font-size: 14px;
+        font-weight: bold;
+        background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        img {
+          width: 36px;
+        }
       }
     }
   }
