@@ -128,7 +128,7 @@
           ></CoinBlock>
           <Button
             class="add-more-liquidity"
-            :disabled="isLoading || isDisabled || insufficientBalance"
+            :disabled="isLoading || isDisabled || insufficientBalance || noEnterAmount"
             :loading="isLoading"
             @click="toIncrease"
           >
@@ -428,11 +428,16 @@ export default Vue.extend({
           this.fromCoin && this.fromCoin.balance
             ? this.fromCoin.symbol !== 'SOL'
               ? this.fromCoin.balance.fixed()
-              : String(Number(this.fromCoin.balance.fixed()) - 0.05)
+              : fixD(Number(this.fromCoin.balance.fixed()) - 0.01, 9)
             : '0'
       } else {
         this.fixedFromCoin = false
-        this.toCoinAmount = this.toCoin?.balance?.fixed() || ''
+        this.toCoinAmount =
+          this.toCoin && this.toCoin.balance
+            ? this.toCoin.symbol !== 'SOL'
+              ? this.toCoin.balance.fixed()
+              : fixD(Number(this.toCoin.balance.fixed()) - 0.01, 9)
+            : '0'
       }
     },
     // 增加balance
