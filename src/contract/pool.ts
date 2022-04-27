@@ -31,13 +31,14 @@ export function loadProvider(wallet: any): Provider {
 }
 
 export async function loadSwapPair(pairKey: PublicKey, wallet: any): Promise<TokenSwap> {
-  const provider = loadProvider(wallet)
+  const provider: any = loadProvider(wallet)
   const pair: any = new TokenSwap(provider, SWAPV3_PROGRAMID, pairKey)
   await pair.load()
   return pair
 }
 
 export async function fetchSwapPairs(wallet: any) {
-  const list = await TokenSwap.fetchSwapPairs(loadProvider(wallet), SWAPV3_PROGRAMID)
+  const provider: any = loadProvider(wallet)
+  const list = await TokenSwap.fetchSwapPairs(provider, SWAPV3_PROGRAMID)
   return list
 }

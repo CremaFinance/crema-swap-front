@@ -8,9 +8,13 @@
       >
         <div class="symbol-info">
           <div class="symbol-left">
-            <img class="coin-before" :src="importIcon(`/coins/${item.tokenA.symbol.toLowerCase()}.png`)" alt="" /><img
+            <img
+              class="coin-before"
+              :src="item.tokenA.icon || importIcon(`/coins/${item.tokenA.symbol.toLowerCase()}.png`)"
+              alt=""
+            /><img
               class="coin-after"
-              :src="importIcon(`/coins/${item.tokenB.symbol.toLowerCase()}.png`)"
+              :src="item.tokenB.icon || importIcon(`/coins/${item.tokenB.symbol.toLowerCase()}.png`)"
               alt=""
             />
             <div class="symbol-text">

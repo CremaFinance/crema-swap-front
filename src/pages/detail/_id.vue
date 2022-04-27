@@ -15,20 +15,28 @@
         <div class="left" style="display: flex">
           <div class="coin-name">
             <template v-if="direction">
-              <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" alt="" />
+              <img
+                v-if="poolInfo"
+                :src="poolInfo.token_a.icon || importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
+                alt=""
+              />
               <img
                 v-if="poolInfo"
                 class="last"
-                :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
+                :src="poolInfo.token_b.icon || importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
                 alt=""
               />
             </template>
             <template v-else>
-              <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" alt="" />
+              <img
+                v-if="poolInfo"
+                :src="poolInfo.token_b.icon || importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
+                alt=""
+              />
               <img
                 v-if="poolInfo"
                 class="last"
-                :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
+                :src="poolInfo.token_a.icon || importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
                 alt=""
               />
             </template>

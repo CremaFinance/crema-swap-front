@@ -6,15 +6,15 @@
       <div class="right">
         <div v-if="fromCoin && toCoin && Number(fromCoinAmount) && Number(toCoinAmount) && defaultRates">
           <span v-if="Number(fromCoinAmount) && Number(toCoinAmount)">
-            1 {{ fromCoin.symbol }} = {{ fixD(Number(toCoinAmount) / Number(fromCoinAmount), toCoin.decimals) }}
+            1 {{ fromCoin.symbol }} = {{ fixD(Number(toCoinAmount) / Number(fromCoinAmount), toCoin.decimal) }}
             {{ toCoin.symbol }}
           </span>
           <span v-else
-            >1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span
+            >1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimal) }} {{ toCoin.symbol }}</span
           >
         </div>
         <div v-if="fromCoin && toCoin && (!Number(fromCoinAmount) || !Number(toCoinAmount))">
-          <span>1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimals) }} {{ toCoin.symbol }}</span>
+          <span>1 {{ fromCoin.symbol }} = {{ fixD(Number(defaultRates), toCoin.decimal) }} {{ toCoin.symbol }}</span>
         </div>
         <Progress
           type="circle"
@@ -33,8 +33,8 @@
         <div class="right">
           {{
             fixedFromCoin
-              ? fixD(Number(toCoinAmount) / (1 + Number($accessor.slippage) / 100), toCoin.decimals)
-              : fixD(fromCoinAmount * (1 + Number($accessor.slippage) / 100), toCoin.decimals)
+              ? fixD(Number(toCoinAmount) / (1 + Number($accessor.slippage) / 100), toCoin.decimal)
+              : fixD(fromCoinAmount * (1 + Number($accessor.slippage) / 100), toCoin.decimal)
           }}
         </div>
       </div>

@@ -22,7 +22,7 @@
       <div :class="['info-box', !direction ? 'reverse' : '']">
         <div v-if="poolInfo" class="info-block">
           <div class="left">
-            <img :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" />
+            <img :src="poolInfo.token_a.icon || importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" />
             <span>{{ poolInfo.token_a.symbol }}</span>
             <a
               v-if="title === 'Liquidity'"
@@ -41,7 +41,7 @@
         </div>
         <div v-if="poolInfo" class="info-block">
           <div class="left">
-            <img :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" />
+            <img :src="poolInfo.token_b.icon || importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" />
             <span>{{ poolInfo.token_b.symbol }}</span>
           </div>
           <div class="right">

@@ -19,7 +19,7 @@ import {
   Keypair,
   SystemProgram
 } from '@solana/web3.js'
-import { NATIVE_SOL, TOKENS, TokenInfo, LP_TOKENS, WSOL } from '@/utils/tokens'
+import { NATIVE_SOL, TokenInfo, WSOL } from '@/utils/tokens'
 import { AccountLayout, NATIVE_MINT, Token, TOKEN_PROGRAM_ID, MintLayout } from '@solana/spl-token'
 import { Numberu64, TokenSwap, UserPosition, TokenSwapLayout } from '../tokenSwap'
 import { preview_calculate_liqudity, price2tick } from '../tokenSwap/swapv3'

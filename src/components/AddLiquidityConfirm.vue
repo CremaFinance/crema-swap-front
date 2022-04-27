@@ -34,8 +34,18 @@
         </div>
         <div class="top">
           <div class="coin-pair">
-            <img :src="importIcon(`/coins/${secondConfirmData.fromCoin.symbol.toLowerCase()}.png`)" />
-            <img :src="importIcon(`/coins/${secondConfirmData.toCoin.symbol.toLowerCase()}.png`)" />
+            <img
+              :src="
+                secondConfirmData.fromCoin.icon ||
+                importIcon(`/coins/${secondConfirmData.fromCoin.symbol.toLowerCase()}.png`)
+              "
+            />
+            <img
+              :src="
+                secondConfirmData.toCoin.icon ||
+                importIcon(`/coins/${secondConfirmData.toCoin.symbol.toLowerCase()}.png`)
+              "
+            />
             <span>{{ secondConfirmData.fromCoin.symbol }} - {{ secondConfirmData.toCoin.symbol }}</span>
           </div>
           <StatusBlock :current-status="secondConfirmData.currentStatus" />
@@ -95,12 +105,12 @@
             <!-- <span>Current price</span> -->
             <div v-if="direct">
               1 {{ secondConfirmData.fromCoin.symbol }} ≈
-              {{ fixD(secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
+              {{ fixD(secondConfirmData.currentPrice, secondConfirmData.toCoin.decimal) }}
               {{ secondConfirmData.toCoin.symbol }}
             </div>
             <div v-else>
               1 {{ secondConfirmData.toCoin.symbol }} ≈
-              {{ fixD(1 / secondConfirmData.currentPrice, secondConfirmData.toCoin.decimals) }}
+              {{ fixD(1 / secondConfirmData.currentPrice, secondConfirmData.toCoin.decimal) }}
               {{ secondConfirmData.fromCoin.symbol }}
             </div>
           </div>

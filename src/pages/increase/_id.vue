@@ -9,11 +9,15 @@
     <div class="increase-body">
       <div class="top">
         <div class="coin-pair">
-          <img v-if="poolInfo" :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" alt="" />
+          <img
+            v-if="poolInfo"
+            :src="poolInfo.token_a.icon || importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
+            alt=""
+          />
           <img
             v-if="poolInfo"
             class="last"
-            :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
+            :src="poolInfo.token_b.icon || importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
             alt=""
           />
           <span v-if="poolInfo">{{ poolInfo.token_a.symbol }} - {{ poolInfo.token_b.symbol }}</span>
@@ -95,12 +99,13 @@
             v-model="fromCoinAmount"
             :coin-name="fromCoin ? fromCoin.symbol : ''"
             :balance="fromCoin ? fromCoin.balance : null"
+            :coin-icon="fromCoin.icon"
             :show-lock="showFromCoinLock"
             not-select
-            @onInput="(amount) => (fromCoinAmount = amount)"
-            @onFocus="
-              () => {
+            @onInput="
+              (amount) => {
                 fixedFromCoin = true
+                fromCoinAmount = amount
               }
             "
             @onMax="maxBtnSelect('fromCoin')"
@@ -110,12 +115,13 @@
             v-model="toCoinAmount"
             :coin-name="toCoin ? toCoin.symbol : ''"
             :balance="toCoin ? toCoin.balance : null"
+            :coin-icon="toCoin.icon"
             :show-lock="showToCoinLock"
             not-select
-            @onInput="(amount) => (toCoinAmount = amount)"
-            @onFocus="
-              () => {
+            @onInput="
+              (amount) => {
                 fixedFromCoin = false
+                toCoinAmount = amount
               }
             "
             @onMax="maxBtnSelect('toCoin')"
@@ -372,13 +378,28 @@ export default Vue.extend({
             this.coinTabList = [poolInfo.token_a.symbol, poolInfo.token_b.symbol]
             this.currentCoin = poolInfo.token_a.symbol
 
-            this.fromCoin = {
-              ...poolInfo.token_a,
-              balance: this.wallet.tokenAccounts[poolInfo.token_a.token_mint]?.balance || 0
+            if (poolInfo.token_a.token_mint === 'So11111111111111111111111111111111111111112') {
+              this.fromCoin = {
+                ...poolInfo.token_a,
+                balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+              }
+            } else {
+              this.fromCoin = {
+                ...poolInfo.token_a,
+                balance: this.wallet.tokenAccounts[poolInfo.token_a.token_mint]?.balance || 0
+              }
             }
-            this.toCoin = {
-              ...poolInfo.token_b,
-              balance: this.wallet.tokenAccounts[poolInfo.token_b.token_mint]?.balance || 0
+
+            if (poolInfo.token_b.token_mint === 'So11111111111111111111111111111111111111112') {
+              this.toCoin = {
+                ...poolInfo.token_b,
+                balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+              }
+            } else {
+              this.toCoin = {
+                ...poolInfo.token_b,
+                balance: this.wallet.tokenAccounts[poolInfo.token_b.token_mint]?.balance || 0
+              }
             }
 
             this.updateCoinInfo(this.wallet.tokenAccounts)
@@ -417,7 +438,7 @@ export default Vue.extend({
     // 增加balance
     updateCoinInfo(tokenAccounts: any) {
       if (this.fromCoin) {
-        const fromCoin = tokenAccounts[this.fromCoin.mintAddress]
+        const fromCoin = tokenAccounts[this.fromCoin.token_mint]
 
         if (fromCoin) {
           this.fromCoin = { ...this.fromCoin, ...fromCoin }
@@ -425,7 +446,7 @@ export default Vue.extend({
       }
 
       if (this.toCoin) {
-        const toCoin = tokenAccounts[this.toCoin.mintAddress]
+        const toCoin = tokenAccounts[this.toCoin.token_mint]
 
         if (toCoin) {
           this.toCoin = { ...this.toCoin, ...toCoin }

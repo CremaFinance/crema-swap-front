@@ -36,11 +36,11 @@
             <span>Current Price</span>
             <div v-if="fromCoin && toCoin" class="right">
               <div v-if="direction">
-                1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceView, toCoin.decimals) }}
+                1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceView, toCoin.decimal) }}
                 {{ toCoin.symbol }}
               </div>
               <div v-else>
-                1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimals) }}
+                1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimal) }}
                 {{ toCoin.symbol }}
               </div>
               <Progress
@@ -59,11 +59,12 @@
               v-model="fromCoinAmount"
               :coin-name="fromCoin ? fromCoin.symbol : null"
               :balance="fromCoinBalance || null"
+              :coin-icon="fromCoin ? fromCoin.icon : ''"
               :show-lock="showFromCoinLock"
-              @onInput="(amount) => (fromCoinAmount = amount)"
-              @onFocus="
-                () => {
+              @onInput="
+                (amount) => {
                   fixedFromCoin = true
+                  fromCoinAmount = amount
                 }
               "
               @onSelect="openCoinSelect('fromCoin')"
@@ -79,11 +80,12 @@
               v-model="toCoinAmount"
               :coin-name="toCoin ? toCoin.symbol : null"
               :balance="toCoinBalance || null"
+              :coin-icon="toCoin ? toCoin.icon : ''"
               :show-lock="showToCoinLock"
-              @onInput="(amount) => (toCoinAmount = amount)"
-              @onFocus="
-                () => {
+              @onInput="
+                (amount) => {
                   fixedFromCoin = false
+                  toCoinAmount = amount
                 }
               "
               @onSelect="openCoinSelect('toCoin')"
@@ -168,7 +170,7 @@ import { mapState } from 'vuex'
 import { Button, Progress } from 'ant-design-vue'
 import { fixD, decimalFormat, checkNullObj } from '../utils/index'
 import { cloneDeep, debounce } from 'lodash-es'
-import { TokenInfo, getTokenBySymbol } from '@/utils/tokens'
+import { TokenInfo } from '@/utils/tokens'
 import { inputRegex, escapeRegExp } from '@/utils/regex'
 import { TokenAmount, gt } from '@/utils/safe-math'
 import { LIQUIDITY_POOLS } from '@/utils/pools'
@@ -187,9 +189,10 @@ import { getATAAddress } from '@saberhq/token-utils'
 import { BroadcastOptions } from '@saberhq/solana-contrib'
 import { loadSwapPair } from '@/contract/pool'
 import mixin from '@/mixin/pool'
+import { getTokenBySymbol } from '@/utils'
 
-const USDT = getTokenBySymbol('USDT')
-const USDC = getTokenBySymbol('USDC')
+// const USDT = getTokenBySymbol('USDT')
+// const USDC = getTokenBySymbol('USDC')
 
 export default Vue.extend({
   components: {
@@ -201,10 +204,10 @@ export default Vue.extend({
     return {
       showAddLiquidity: true,
       tokenList: [] as Array<TokenInfo>,
-      fromCoin: USDT as TokenInfo | null,
-      toCoin: USDC as TokenInfo | null,
-      defaultFromCoin: USDT as TokenInfo | null,
-      defaultToCoin: USDC as TokenInfo | null,
+      // fromCoin: USDT as TokenInfo | null,
+      // toCoin: USDC as TokenInfo | null,
+      fromCoin: null as any,
+      toCoin: null as any,
       showSetting: false,
       showWaitingHint: false,
       showSuccessHint: false,
@@ -280,14 +283,14 @@ export default Vue.extend({
       return null
     },
     fromCoinBalance(): any {
-      if (this.fromCoin && this.fromCoin.mintAddress && this.wallet.tokenAccounts) {
-        return this.wallet.tokenAccounts[this.fromCoin.mintAddress]?.balance || 0
+      if (this.fromCoin && this.fromCoin.token_mint && this.wallet.tokenAccounts) {
+        return this.wallet.tokenAccounts[this.fromCoin.token_mint]?.balance || 0
       }
       return 0
     },
     toCoinBalance(): any {
-      if (this.toCoin && this.toCoin.mintAddress && this.wallet.tokenAccounts) {
-        return this.wallet.tokenAccounts[this.toCoin.mintAddress]?.balance || 0
+      if (this.toCoin && this.toCoin.token_mint && this.wallet.tokenAccounts) {
+        return this.wallet.tokenAccounts[this.toCoin.token_mint]?.balance || 0
       }
       return 0
     },
@@ -418,8 +421,12 @@ export default Vue.extend({
       }
     },
 
-    $route: {
-      handler: 'routeWatch',
+    // $route: {
+    //   handler: 'routeWatch',
+    //   immediate: true
+    // },
+    'liquidity.tokensObj': {
+      handler: 'tokensObjWatch',
       immediate: true
     }
   },
@@ -435,6 +442,24 @@ export default Vue.extend({
     fixD,
     decimalFormat,
     checkNullObj,
+    coinInput() {},
+    coinFocus() {},
+    tokensObjWatch(newVal) {
+      if (newVal && !checkNullObj(newVal)) {
+        if (this.$route && this.$route.query) {
+          if (this.$route.query.from) {
+            this.fromCoin = getTokenBySymbol(newVal, this.$route.query.from)
+          } else {
+            this.fromCoin = getTokenBySymbol(newVal, 'usdt')
+          }
+          if (this.$route.query.to) {
+            this.toCoin = getTokenBySymbol(newVal, this.$route.query.to)
+          } else {
+            this.toCoin = getTokenBySymbol(newVal, 'usdc')
+          }
+        }
+      }
+    },
     setRefreshTimer() {
       this.refreshTimer = setInterval(() => {
         if (!this.liquidity.loading) {
@@ -521,16 +546,16 @@ export default Vue.extend({
         this.tickList = []
       }
     },
-    routeWatch(newVal, oldVal) {
-      if (newVal && newVal.query) {
-        if (newVal.query.from) {
-          this.fromCoin = getTokenBySymbol(newVal.query.from)
-        }
-        if (newVal.query.to) {
-          this.toCoin = getTokenBySymbol(newVal.query.to)
-        }
-      }
-    },
+    // routeWatch(newVal, oldVal) {
+    //   if (newVal && newVal.query) {
+    //     if (newVal.query.from) {
+    //       this.fromCoin = getTokenBySymbol(newVal.query.from)
+    //     }
+    //     if (newVal.query.to) {
+    //       this.toCoin = getTokenBySymbol(newVal.query.to)
+    //     }
+    //   }
+    // },
     changeDirection(value: string) {
       // this.direction = !this.direction
       this.changeCoinPosition()
@@ -579,7 +604,7 @@ export default Vue.extend({
     },
     updateCoinInfo(tokenAccounts: any) {
       if (this.fromCoin) {
-        const fromCoin = tokenAccounts[this.fromCoin.mintAddress]
+        const fromCoin = tokenAccounts[this.fromCoin.token_mint]
 
         if (fromCoin) {
           this.fromCoin = { ...this.fromCoin, ...fromCoin }
@@ -587,7 +612,7 @@ export default Vue.extend({
       }
 
       if (this.toCoin) {
-        const toCoin = tokenAccounts[this.toCoin.mintAddress]
+        const toCoin = tokenAccounts[this.toCoin.token_mint]
 
         if (toCoin) {
           this.toCoin = { ...this.toCoin, ...toCoin }
@@ -643,7 +668,7 @@ export default Vue.extend({
           maxPrice = 1 / Number(min)
         }
 
-        if (this.fromCoin?.decimals === this.toCoin?.decimals) {
+        if (this.fromCoin?.decimal === this.toCoin?.decimal) {
           currentPriceTick = price2Tick(new Decimal(currentPriceP))
           tick_lower = getNearestTickByPrice(new Decimal(minPrice), this.poolInfo.tickSpace)
           tick_upper = getNearestTickByPrice(new Decimal(maxPrice), this.poolInfo.tickSpace)
@@ -662,27 +687,15 @@ export default Vue.extend({
         return
       }
 
-      console.log('changeCoinPosition###updateAmount###currentPriceP###', currentPriceP)
-      console.log('changeCoinPosition###updateAmount###min###', min)
-      console.log('changeCoinPosition###updateAmount###max###', max)
-
       // 区间中包含当前价格, 一种资产返回另外一种资产，并且返回liquity
       if (max === '∞' || (Number(currentPriceP) > Number(min) && Number(currentPriceP) < Number(max))) {
-        console.log('changeCoinPosition####666666')
         let coinAmount: any
 
-        console.log('changeCoinPosition###updateAmount###fixedFromCoin###', this.fixedFromCoin)
-
-        console.log('changeCoinPosition###updateAmount###this.fromCoinAmount####', this.fromCoinAmount)
-        console.log('changeCoinPosition###updateAmount###this.fromCoin?.decimals####', this.fromCoin?.decimals)
-
         if (this.fixedFromCoin) {
-          coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+          coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimal, false).wei.toNumber()
         } else {
-          coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+          coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimal, false).wei.toNumber()
         }
-
-        console.log('changeCoinPosition###updateAmount###coinAmount###', coinAmount)
 
         const { desiredAmountDst, deltaLiquity } = calculateLiquity(
           tick_lower,
@@ -700,29 +713,27 @@ export default Vue.extend({
         this.showToCoinLock = false
 
         if (this.fixedFromCoin) {
-          const decimal = this.toCoin?.decimals || 6
+          const decimal = this.toCoin?.decimal || 6
           const toCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
           this.toCoinAmount = toCoinAmount === '--' ? '' : toCoinAmount
         } else {
-          const decimal = this.fromCoin?.decimals || 6
+          const decimal = this.fromCoin?.decimal || 6
           const fromCoinAmount = fixD(Math.abs(dst) / Math.pow(10, decimal), decimal) || '0'
           this.fromCoinAmount = fromCoinAmount === '--' ? '' : fromCoinAmount
         }
 
         this.deltaLiquity = delta_liquity
       } else if (Number(currentPriceP) >= Number(max)) {
-        console.log('changeCoinPosition####777777')
         // 区间在当前价格的左侧时，也就是只有token b这一种资产, 返回liquity
-        const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimals, false).wei.toNumber()
+        const coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimal, false).wei.toNumber()
         const delta_liquity = calculateLiquityOnlyB(tick_lower, tick_upper, new Decimal(coinAmount))
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
         this.showToCoinLock = false
         this.deltaLiquity = delta_liquity.toString()
       } else if (Number(currentPriceP) <= Number(min)) {
-        console.log('changeCoinPosition####888888')
         // 区间在当前价格的右侧时，也就是只有token a这一种资产, 返回liquity
-        const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimals, false).wei.toNumber()
+        const coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimal, false).wei.toNumber()
         const delta_liquity = calculateLiquityOnlyA(tick_lower, tick_upper, new Decimal(coinAmount))
 
         this.showFromCoinLock = false
@@ -730,7 +741,6 @@ export default Vue.extend({
         this.toCoinAmount = ''
         this.deltaLiquity = delta_liquity.toString()
       } else {
-        console.log('changeCoinPosition######333333')
         // 重叠的情况
         this.showFromCoinLock = true
         this.fromCoinAmount = ''
@@ -751,6 +761,7 @@ export default Vue.extend({
     },
     checkIsHaveCoinPair(coinA: any, coinB: any) {
       const poolsObj: any = this.liquidity.poolsObj
+      console.log('onCoinSelect####poolsObj#####', poolsObj)
       for (let key in poolsObj) {
         const item = poolsObj[key]
         if (`${coinA}-${coinB}` === item.name || `${coinB}-${coinA}` === item.name) {
@@ -766,6 +777,8 @@ export default Vue.extend({
         }
         this.fromCoin = token
       } else {
+        console.log('onCoinSelect####token.symbol#####', token.symbol)
+        console.log('onCoinSelect####this.fromCoin?.symbol3####', this.fromCoin?.symbol)
         if (token.symbol === this.fromCoin?.symbol || !this.checkIsHaveCoinPair(token.symbol, this.fromCoin?.symbol)) {
           this.fromCoin = null
         }
@@ -780,11 +793,25 @@ export default Vue.extend({
           this.fromCoin && this.fromCoin.balance
             ? this.fromCoin.symbol !== 'SOL'
               ? this.fromCoin.balance.fixed()
-              : String(Number(this.fromCoin.balance.fixed()) - 0.05)
+              : String(
+                  Number(this.fromCoin.balance.fixed()) - 0.01 < 0
+                    ? 0
+                    : fixD(Number(this.fromCoin.balance.fixed()) - 0.01, 9)
+                )
             : '0'
       } else {
         this.fixedFromCoin = false
-        this.toCoinAmount = this.toCoin?.balance?.fixed() || ''
+        // this.toCoinAmount = this.toCoin?.balance?.fixed() || ''
+        this.toCoinAmount =
+          this.toCoin && this.toCoin.balance
+            ? this.toCoin.symbol !== 'SOL'
+              ? this.toCoin.balance.fixed()
+              : String(
+                  Number(this.toCoin.balance.fixed()) - 0.01 < 0
+                    ? 0
+                    : fixD(Number(this.toCoin.balance.fixed()) - 0.01, 9)
+                )
+            : '0'
       }
     },
     changeCoinPosition() {
@@ -812,6 +839,13 @@ export default Vue.extend({
         this.isUpdateAmount = true
         this.updateAmounts()
       }, 1000)
+    },
+    getSolBalance(amount, fee) {
+      if (amount < fee) {
+        return 0
+      } else {
+        return amount - fee
+      }
     },
 
     async toAddLiquidity() {
@@ -859,15 +893,32 @@ export default Vue.extend({
 
       let balanceA: any
       let balanceB: any
+      let fromBalance: any = this.fromCoinBalance.fixed()
+      let toBalance: any = this.toCoinBalance.fixed()
       if (this.direction) {
-        balanceA = new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimals))
-        balanceB = new Decimal(this.toCoinBalance.fixed()).mul(Math.pow(10, this.toCoin.decimals))
+        balanceA =
+          this.fromCoin?.symbol === 'SOL'
+            ? new Decimal(this.getSolBalance(Number(fromBalance), 0.005)).mul(Math.pow(10, this.fromCoin.decimal))
+            : new Decimal(fromBalance).mul(Math.pow(10, this.fromCoin.decimal))
+        balanceB =
+          this.toCoin?.symbol === 'SOL'
+            ? new Decimal(this.getSolBalance(Number(toBalance), 0.005)).mul(Math.pow(10, this.toCoin.decimal))
+            : new Decimal(toBalance).mul(Math.pow(10, this.toCoin.decimal))
       } else {
-        balanceA = new Decimal(this.toCoinBalance.fixed()).mul(Math.pow(10, this.toCoin.decimals))
-        balanceB = new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimals))
+        balanceA =
+          this.toCoin?.symbol === 'SOL'
+            ? new Decimal(this.getSolBalance(Number(toBalance), 0.005)).mul(Math.pow(10, this.toCoin.decimal))
+            : new Decimal(toBalance).mul(Math.pow(10, this.toCoin.decimal))
+        balanceB =
+          this.fromCoin?.symbol === 'SOL'
+            ? new Decimal(this.getSolBalance(Number(fromBalance), 0.005)).mul(Math.pow(10, this.fromCoin.decimal))
+            : new Decimal(fromBalance).mul(Math.pow(10, this.fromCoin.decimal))
       }
 
       let liquityResult: any
+      console.log('deposit####direction#####', direction)
+      console.log('deposit####balanceA#####', balanceA.toString())
+      console.log('deposit####balanceB#####', balanceB.toString())
 
       if (direction === 0) {
         liquityResult = swap.calculateFixSideTokenAmount(
@@ -909,6 +960,11 @@ export default Vue.extend({
       const deltaLiquity = fixD(this.deltaLiquity, 0)
       let txid = ''
       try {
+        console.log('deposit####liquityResult.fixTokenType###', liquityResult.fixTokenType)
+        console.log('deposit####tick_lower###', tick_lower)
+        console.log('deposit####tick_upper###', tick_upper)
+        console.log('deposit####liquityResult.maxAmountA###', liquityResult.maxAmountA.toString())
+        console.log('deposit####liquityResult.maxAmountB###', liquityResult.maxAmountB.toString())
         const res = await swap.mintPositionFixToken(
           userTokenA,
           userTokenB,
@@ -1007,7 +1063,7 @@ export default Vue.extend({
       }
     },
     gotoPoolList() {
-      this.$router.push('/deposit')
+      this.$router.push('/pools')
     }
   }
 })

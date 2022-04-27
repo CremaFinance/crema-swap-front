@@ -15,7 +15,7 @@
             <img
               v-if="poolInfo"
               class="img-left"
-              :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
+              :src="poolInfo.token_a.icon || importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)"
               alt=""
             />
           </div>
@@ -31,7 +31,11 @@
         </div>
         <div class="before-coin after-coin">
           <div v-if="poolInfo" class="coin-num">
-            <img class="img-right" :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" alt="" />
+            <img
+              class="img-right"
+              :src="poolInfo.token_b.icon || importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
+              alt=""
+            />
           </div>
           <div v-if="poolInfo" class="coin-label">
             {{

@@ -21,6 +21,7 @@
           v-model="fromCoinAmount"
           :coin-name="fromCoin ? fromCoin.symbol : null"
           :balance="fromCoin ? fromCoin.balance : null"
+          :coin-icon="fromCoin ? fromCoin.icon : ''"
           :swap-direction="'From'"
           @onInput="(amount) => (fromCoinAmount = amount)"
           @onFocus="
@@ -40,6 +41,7 @@
           :balance="toCoin ? toCoin.balance : null"
           :swap-direction="'To'"
           :disabled="false"
+          :coin-icon="toCoin ? toCoin.icon : ''"
           :show-max="false"
           @onInput="(amount) => (toCoinAmount = amount)"
           @onFocus="
@@ -104,8 +106,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
-import { TokenInfo, getTokenBySymbol } from '@/utils/tokens'
-import { checkNullObj, decimalFormat, fixD } from '@/utils'
+import { TokenInfo } from '@/utils/tokens'
+import { checkNullObj, decimalFormat, fixD, getTokenBySymbol } from '@/utils'
 import { cloneDeep, debounce } from 'lodash-es'
 import { inputRegex, escapeRegExp } from '@/utils/regex'
 import { gt } from '@/utils/safe-math'
@@ -118,9 +120,6 @@ import { TokenSwap, lamportPrice2uiPrice } from 'test-crema-sdk'
 import { getATAAddress } from '@saberhq/token-utils'
 import { loadSwapPair } from '@/contract/pool'
 
-const USDT = getTokenBySymbol('USDT')
-const USDC = getTokenBySymbol('USDC')
-
 export default Vue.extend({
   components: {
     Button
@@ -128,8 +127,8 @@ export default Vue.extend({
   data() {
     return {
       showCoinSelect: false,
-      fromCoin: USDT as TokenInfo | null,
-      toCoin: USDC as TokenInfo | null,
+      fromCoin: null as any,
+      toCoin: null as any,
       fromCoinAmount: '',
       toCoinAmount: '',
       currentCoinKey: 'fromCoin',
@@ -243,17 +242,38 @@ export default Vue.extend({
           }
         }
       })
-    }, 500)
+    }, 500),
+    'liquidity.tokensObj': {
+      handler: 'tokensObjWatch',
+      immediate: true
+    }
   },
   mounted() {
     this.updateCoinInfo(this.wallet.tokenAccounts)
   },
   methods: {
     gt,
+    tokensObjWatch(newVal) {
+      if (newVal && !checkNullObj(newVal)) {
+        if (this.$route && this.$route.query) {
+          if (this.$route.query.from) {
+            this.fromCoin = getTokenBySymbol(newVal, this.$route.query.from)
+          } else {
+            this.fromCoin = getTokenBySymbol(newVal, 'usdt')
+          }
+          if (this.$route.query.to) {
+            this.toCoin = getTokenBySymbol(newVal, this.$route.query.to)
+          } else {
+            this.toCoin = getTokenBySymbol(newVal, 'usdc')
+          }
+        }
+      }
+    },
     async getTokenSwap() {
       if (this.poolInfo && this.poolInfo.tokenSwapKey) {
         const swap: any = await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet)
         this.tokenSwap = swap
+        console.log('getTokenSwap###this.poolInfo####', this.poolInfo)
         const currentPriceView = lamportPrice2uiPrice(
           swap.tokenSwapInfo.currentSqrtPrice.pow(2),
           this.poolInfo.token_a.decimal,
@@ -271,7 +291,7 @@ export default Vue.extend({
     },
     updateCoinInfo(tokenAccounts: any) {
       if (this.fromCoin) {
-        const fromCoin = tokenAccounts[this.fromCoin.mintAddress]
+        const fromCoin = tokenAccounts[this.fromCoin.token_mint]
 
         if (fromCoin) {
           this.fromCoin = { ...this.fromCoin, ...fromCoin }
@@ -279,7 +299,7 @@ export default Vue.extend({
       }
 
       if (this.toCoin) {
-        const toCoin = tokenAccounts[this.toCoin.mintAddress]
+        const toCoin = tokenAccounts[this.toCoin.token_mint]
 
         if (toCoin) {
           this.toCoin = { ...this.toCoin, ...toCoin }
@@ -288,12 +308,16 @@ export default Vue.extend({
     },
     async updateAmounts() {
       if (!this.poolInfo) return
-
+      const fromCoinMint =
+        this.fromCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.fromCoin?.token_mint
+      const toCoinMint =
+        this.toCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.toCoin?.token_mint
       const direct =
-        this.fromCoin?.mintAddress === this.poolInfo.token_a.token_mint &&
-        this.toCoin?.mintAddress === this.poolInfo.token_b.token_mint
-          ? 0
-          : 1
+        fromCoinMint === this.poolInfo.token_a.token_mint && toCoinMint === this.poolInfo.token_b.token_mint ? 0 : 1
 
       let swap: any
       if (this.tokenSwap) {
@@ -302,11 +326,6 @@ export default Vue.extend({
         swap = await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet)
         this.tokenSwap = swap
       }
-      // const swap = this.tokenSwap || (await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet))
-      // console.log('swap###updateAmount###', swap)
-
-      console.log('swap###updateAmounts###this.fromCoinAmount####', this.fromCoinAmount)
-      console.log('swap###updateAmounts###this.toCoinAmount####', this.toCoinAmount)
 
       if (this.fromCoin && this.toCoin && (this.fromCoinAmount || this.toCoinAmount)) {
         this.loading = true
@@ -318,20 +337,18 @@ export default Vue.extend({
           this.loading = false
           return
         }
-
         if (this.fixedFromCoin) {
-          if (!this.fromCoinAmount) return
-          const decimal = new Decimal(Math.pow(10, this.fromCoin?.decimals))
+          if (!Number(this.fromCoinAmount)) return
+          const decimal = new Decimal(Math.pow(10, this.fromCoin?.decimal))
           const source_amount = new Decimal(this.fromCoinAmount).mul(decimal)
-
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
           const amountOut = (res && res.amountOut.toNumber()) || 0
 
           if (amountOut) {
             this.insufficientLiquidity = false
-            const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimals)
-            this.toCoinAmount = decimalFormat(String(toCoinAmount), this.toCoin?.decimals)
+            const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimal)
+            this.toCoinAmount = decimalFormat(String(toCoinAmount), this.toCoin?.decimal)
           } else {
             this.insufficientLiquidity = true
             this.toCoinAmount = '0'
@@ -339,8 +356,8 @@ export default Vue.extend({
 
           this.loading = false
         } else {
-          if (!this.toCoinAccount) return
-          const decimal = new Decimal(Math.pow(10, this.toCoin?.decimals))
+          if (!Number(this.toCoinAmount)) return
+          const decimal = new Decimal(Math.pow(10, this.toCoin?.decimal))
           const source_amount = new Decimal(this.toCoinAmount).mul(decimal)
           const res: any =
             direct === 0 ? swap.preSwapB(new Decimal(source_amount)) : swap.preSwapA(new Decimal(source_amount))
@@ -349,8 +366,8 @@ export default Vue.extend({
 
           if (amountOut) {
             this.insufficientLiquidity = false
-            const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimals)
-            this.fromCoinAmount = decimalFormat(String(fromCoinAmount), this.fromCoin?.decimals)
+            const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimal)
+            this.fromCoinAmount = decimalFormat(String(fromCoinAmount), this.fromCoin?.decimal)
           } else {
             this.insufficientLiquidity = true
             this.fromCoinAmount = '0'
@@ -392,11 +409,25 @@ export default Vue.extend({
           this.fromCoin && this.fromCoin.balance
             ? this.fromCoin.symbol !== 'SOL'
               ? this.fromCoin.balance.fixed()
-              : String(Number(this.fromCoin.balance.fixed()) - 0.05)
+              : String(
+                  Number(this.fromCoin.balance.fixed()) - 0.01 < 0
+                    ? 0
+                    : fixD(Number(this.fromCoin.balance.fixed()) - 0.01, 9)
+                )
             : '0'
       } else {
         this.fixedFromCoin = false
-        this.toCoinAmount = this.toCoin?.balance?.fixed() || ''
+        // this.toCoinAmount = this.toCoin?.balance?.fixed() || ''
+        this.toCoinAmount =
+          this.toCoin && this.toCoin.balance
+            ? this.toCoin.symbol !== 'SOL'
+              ? this.toCoin.balance.fixed()
+              : String(
+                  Number(this.toCoin.balance.fixed()) - 0.01 < 0
+                    ? 0
+                    : fixD(Number(this.toCoin.balance.fixed()) - 0.01, 9)
+                )
+            : '0'
       }
     },
     changeCoinPosition() {
@@ -415,11 +446,15 @@ export default Vue.extend({
       this.swaping = true
       const poolInfo: any = cloneDeep(this.poolInfo)
 
-      const direct =
-        this.fromCoin?.mintAddress === poolInfo.token_a.token_mint &&
-        this.toCoin?.mintAddress === poolInfo.token_b.token_mint
-          ? 0
-          : 1
+      const fromCoinMint =
+        this.fromCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.fromCoin?.token_mint
+      const toCoinMint =
+        this.toCoin?.token_mint === '11111111111111111111111111111111'
+          ? 'So11111111111111111111111111111111111111112'
+          : this.toCoin?.token_mint
+      const direct = fromCoinMint === poolInfo.token_a.token_mint && toCoinMint === poolInfo.token_b.token_mint ? 0 : 1
 
       this.$accessor.transaction.setTransactionDesc(
         `Swap ${this.fromCoinAmount} ${this.fromCoin?.symbol} to ${this.toCoinAmount} ${this.toCoin?.symbol}`
@@ -427,7 +462,6 @@ export default Vue.extend({
       this.$accessor.transaction.setShowWaiting(true)
 
       const swap = await loadSwapPair(poolInfo.tokenSwapKey, this.$wallet)
-      // const decimal = new Decimal(Math.pow(10, this.fromCoin?.decimals))
       const amount = new Decimal(this.fromCoinAmount)
       const lamports = swap.tokenALamports(amount)
 
@@ -448,6 +482,7 @@ export default Vue.extend({
 
       try {
         // const tx = await swap.swap(outATA, inATA, direct, lamports, new Decimal(fixD(minIncome, 0)))
+        console.log('toswap##direct####', direct)
         const tx = await swap.swapAtomic(direct, lamports, new Decimal(fixD(minIncome, 0)))
         // const receipt = await res.confirm()
         const opt: BroadcastOptions = {

@@ -19,7 +19,7 @@
               @click="toSelect(item)"
             >
               <div class="left">
-                <img :src="importIconNew(`/coins/${item.symbol.toLowerCase()}.png`)" />
+                <img :src="item.icon || importIconNew(`/coins/${item.symbol.toLowerCase()}.png`)" />
                 <div class="name-box">
                   <h3>{{ item.symbol }}</h3>
                   <p>{{ item.name }}</p>
@@ -52,9 +52,9 @@
 import Vue from 'vue'
 import { mapState } from 'vuex'
 import { Modal, Icon } from 'ant-design-vue'
-import { TOKENS, TokenInfo, NATIVE_SOL } from '@/utils/tokens'
-import { LIQUIDITY_POOLS } from '@/utils/pools'
+import { TokenInfo, NATIVE_SOL } from '@/utils/tokens'
 import { cloneDeep } from 'lodash-es'
+import { checkNullObj } from '@/utils'
 
 Vue.use(Modal)
 
@@ -76,7 +76,8 @@ export default Vue.extend({
   data() {
     return {
       keyword: '',
-      tokenList: [] as Array<TokenInfo>
+      // tokenList: [] as Array<TokenInfo>
+      tokenList: [] as any
     }
   },
   computed: {
@@ -84,7 +85,7 @@ export default Vue.extend({
   },
   watch: {
     keyword(newKeyword) {
-      this.createTokenList(newKeyword)
+      this.createTokenList(null, newKeyword)
     },
     'wallet.tokenAccounts': {
       handler(_newTokenAccounts: any, _oldTokenAccounts: any) {
@@ -92,17 +93,27 @@ export default Vue.extend({
       },
       deep: true
     },
-    'liquidity.infos': {
-      handler(_newTokenAccounts: any, _oldTokenAccounts: any) {
-        this.createTokenList()
-      },
-      deep: true
+    // 'liquidity.infos': {
+    //   handler(_newTokenAccounts: any, _oldTokenAccounts: any) {
+    //     this.createTokenList()
+    //   },
+    //   deep: true
+    // },
+    'liquidity.tokensObj': {
+      handler: 'tokensObjWatch',
+      immediate: true
     }
   },
-  mounted() {
-    this.createTokenList()
-  },
+  // mounted() {
+
+  // },
   methods: {
+    tokensObjWatch(newVal) {
+      console.log('没进来吗#####liquidity.tokensObj###newVal###', newVal)
+      if (!checkNullObj(newVal)) {
+        this.createTokenList(newVal)
+      }
+    },
     toSelect(item: any, oldItem: any) {
       this.$emit('onSelect', item)
     },
@@ -114,7 +125,7 @@ export default Vue.extend({
         return require('../assets/icons/unknown.png')
       }
     },
-    createTokenList(keyword = '') {
+    createTokenList(tokensObj = this.liquidity.tokensObj, keyword = '') {
       let tokenList: any = []
 
       let nativeSol = cloneDeep(NATIVE_SOL)
@@ -124,23 +135,9 @@ export default Vue.extend({
 
       let tokenObject: any = {}
       const usableTokenObject: any = {} // 可以配对的币种
-      // if (this.existingCoins) {
-      //   for (const coinPair in this.liquidity.infos) {
-      //     const poolInfo = cloneDeep(this.liquidity.infos[coinPair])
-      //     if (poolInfo.coin.symbol === this.existingCoins) {
-      //       usableTokenObject[poolInfo.pc.symbol] = poolInfo.pc
-      //     }
 
-      //     if (poolInfo.pc.symbol === this.existingCoins) {
-      //       usableTokenObject[poolInfo.coin.symbol] = poolInfo.coin
-      //     }
-      //   }
-      // }
-
-      // else {
-      //   tokenObject = cloneDeep(TOKENS)
-      // }
-      tokenObject = cloneDeep(TOKENS)
+      tokenObject = cloneDeep(tokensObj)
+      console.log('createTokenList###tokenObject###', tokenObject)
 
       for (const address of Object.keys(tokenObject)) {
         let tokenInfo: any = cloneDeep(tokenObject[address])
@@ -151,11 +148,12 @@ export default Vue.extend({
           tokenInfo.unusable = true
         }
 
-        if (!tokenInfo.showDefault) continue
+        // if (!tokenInfo.showDefault) continue
+        if (tokenInfo.symbol === 'SOL') continue
 
         // tokenInfo.symbol = symbol
 
-        const tokenAccount = this.wallet.tokenAccounts[tokenInfo.mintAddress]
+        const tokenAccount = this.wallet.tokenAccounts[tokenInfo.token_mint]
 
         if (tokenAccount) {
           tokenInfo = { ...tokenInfo, ...tokenAccount }
@@ -197,7 +195,7 @@ export default Vue.extend({
           return (
             token.symbol.toUpperCase().includes(keyword.toUpperCase()) ||
             // eslint-disable-next-line unicorn/prefer-includes
-            token.mintAddress.toUpperCase().indexOf(keyword.toUpperCase()) >= 0
+            token.token_mint.toUpperCase().indexOf(keyword.toUpperCase()) >= 0
           )
         })
       }

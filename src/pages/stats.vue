@@ -54,13 +54,13 @@
             <!-- <img src="../assets/coins/usdt.png" />
             <img src="../assets/coins/usdc.png" /> -->
             <img
-              :src="importIcon(`/coins/${item.name.split('-')[0].toLowerCase()}.png`)"
+              :src="getIcon(item.name.split('-')[0])"
               @mouseenter="item.isShowSwap = !item.isShowSwap"
               @mouseleave="item.isShowSwap = !item.isShowSwap"
             />
             <img
               class="last"
-              :src="importIcon(`/coins/${item.name.split('-')[1].toLowerCase()}.png`)"
+              :src="getIcon(item.name.split('-')[1])"
               @mouseenter="item.isShowSwap = !item.isShowSwap"
               @mouseleave="item.isShowSwap = !item.isShowSwap"
             />
@@ -153,13 +153,13 @@
         <div class="top">
           <div>
             <img
-              :src="importIcon(`/coins/${item.name.split('-')[0].toLowerCase()}.png`)"
+              :src="getIcon(item.name.split('-')[0])"
               @mouseenter="item.isShowSwap = !item.isShowSwap"
               @mouseleave="item.isShowSwap = !item.isShowSwap"
             />
             <img
               class="last"
-              :src="importIcon(`/coins/${item.name.split('-')[1].toLowerCase()}.png`)"
+              :src="getIcon(item.name.split('-')[1])"
               @mouseenter="item.isShowSwap = !item.isShowSwap"
               @mouseleave="item.isShowSwap = !item.isShowSwap"
             />
@@ -281,7 +281,7 @@
       <tbody>
         <tr v-for="(item, index) in tokenvas" :key="index">
           <td>
-            <img class="last" :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
+            <img class="last" :src="getIcon(item.name)" />
             <span>{{ item.name }}</span>
           </td>
           <td class="th-ri">
@@ -328,7 +328,7 @@
       <li v-for="(item, index) in tokenvas" :key="index">
         <div class="top">
           <div>
-            <img :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
+            <img :src="getIcon(item.name)" />
             <span>{{ item.name }}</span>
             <!-- <i>0.01%</i> -->
           </div>
@@ -488,9 +488,24 @@ export default Vue.extend({
   },
   methods: {
     fixD,
-    importIcon,
+    // importIcon,
     decimalFormat,
     addCommom,
+    getIcon(name: string) {
+      const tokensObj = this.liquidity.tokensObj
+      if (tokensObj && name) {
+        for (let key in tokensObj) {
+          const item: any = tokensObj[key]
+          if (name.toUpperCase() === item.symbol.toUpperCase()) {
+            if (item.icon) {
+              return item.icon
+            }
+            break
+          }
+        }
+      }
+      return importIcon(`/coins/${name.toLowerCase()}.png`)
+    },
     getTotalApr(item: any) {
       if (this.farming.statisticsDataObj && this.farming.statisticsDataObj[item.swap_account]) {
         const farmApr = Number(this.farming.statisticsDataObj[item.swap_account].apr) * 100

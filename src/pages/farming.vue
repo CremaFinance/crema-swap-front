@@ -94,11 +94,14 @@ export default Vue.extend({
       ) {
         this.$accessor.farming.getEarningsObj(true)
       }
+    },
+    'liquidity.tokensObj': {
+      handler: 'tokensObjWatch',
+      immediate: true
     }
   },
   created() {
     this.getFarmTvl()
-    this.$accessor.farming.getFarmingConfig()
   },
   mounted() {
     const _this = this
@@ -115,6 +118,9 @@ export default Vue.extend({
     // this.earningTimer = null
   },
   methods: {
+    tokensObjWatch(newVal) {
+      if (newVal && !checkNullObj(newVal)) this.$accessor.farming.getFarmingConfig(newVal)
+    },
     getFarmTvl() {
       this.$axios.get(`https://api.crema.finance/farm/tvl`).then((res) => {
         // this.$axios.get(`/farm/tvl`).then((res) => {

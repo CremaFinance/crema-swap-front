@@ -3,8 +3,8 @@
     <div class="left">
       <div class="pos-info">
         <div class="icon-box">
-          <img :src="importIcon(`/coins/${pItem.token_a.symbol.toLowerCase()}.png`)" />
-          <img :src="importIcon(`/coins/${pItem.token_b.symbol.toLowerCase()}.png`)" />
+          <img :src="pItem.token_a.icon || importIcon(`/coins/${pItem.token_a.symbol.toLowerCase()}.png`)" />
+          <img :src="pItem.token_b.icon || importIcon(`/coins/${pItem.token_b.symbol.toLowerCase()}.png`)" />
           <div class="name">{{ pItem.name }}</div>
         </div>
         <div class="fee">{{ pItem.feeView }}%</div>

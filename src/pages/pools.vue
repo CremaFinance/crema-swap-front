@@ -137,7 +137,7 @@ export default Vue.extend({
     }
   },
   created() {
-    this.$accessor.liquidity.getPoolsDefaultPriceRange()
+    this.getList()
   },
   methods: {
     fixD,
@@ -214,6 +214,12 @@ export default Vue.extend({
         const reg = str.includes('.') > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g
         return str.replace(reg, '$1,')
       }
+    },
+    getList() {
+      this.$accessor.liquidity.getPoolsDefaultPriceRange()
+      setInterval(() => {
+        this.$accessor.liquidity.getPoolsDefaultPriceRange()
+      }, 60000)
     }
   }
 })

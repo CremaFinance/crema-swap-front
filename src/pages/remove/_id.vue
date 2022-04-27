@@ -13,8 +13,11 @@
     <div class="pool-settings">
       <div class="top-box">
         <div v-if="poolInfo" class="left">
-          <img :src="importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" />
-          <img class="last" :src="importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)" />
+          <img :src="poolInfo.token_a.icon || importIcon(`/coins/${poolInfo.token_a.symbol.toLowerCase()}.png`)" />
+          <img
+            class="last"
+            :src="poolInfo.token_b.icon || importIcon(`/coins/${poolInfo.token_b.symbol.toLowerCase()}.png`)"
+          />
           <span>{{ poolInfo.token_a.symbol }} - {{ poolInfo.token_b.symbol }}</span>
           <StatusBlock :current-status="currentData.currentStatus" />
         </div>

@@ -2,7 +2,7 @@
   <div class="positon-list-box">
     <div class="positon-list-content">
       <template v-if="poolListLoading">
-        <Spin size="big" />
+        <Spin size="large" />
       </template>
       <template v-else>
         <div
@@ -105,7 +105,7 @@ import mixin from '@/mixin/position'
 import BigNumber from 'bignumber.js'
 import { RATES } from '@/utils/tokens'
 import { getprice } from '@/utils/stake'
-
+import { Spin } from 'ant-design-vue'
 import { lamportPrice2uiPrice, tick2Price, calculateTokenAmount, tick2UiPrice } from 'test-crema-sdk'
 export default Vue.extend({
   mixins: [mixin],
@@ -118,6 +118,9 @@ export default Vue.extend({
       type: String,
       default: ''
     }
+  },
+  components: {
+    Spin
   },
   data() {
     return {
@@ -324,9 +327,16 @@ export default Vue.extend({
   margin: 0 auto;
   .positon-list-content {
     width: 100%;
+    min-height: 500px;
     height: 100%;
     margin: 30px 0 auto;
     position: relative;
+    .ant-spin-spinning {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
 
     .no-data {
       width: 100%;

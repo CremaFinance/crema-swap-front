@@ -36,6 +36,8 @@ export interface TokenInfo {
   balance?: TokenAmount
   official?: boolean
   showDefault?: boolean
+  decimal?: number
+  token_mint?: string
 }
 
 /**
@@ -80,20 +82,24 @@ export interface Tokens {
   [index: number]: any
 }
 
-export const NATIVE_SOL: TokenInfo = {
+export const NATIVE_SOL: any = {
   symbol: 'SOL',
   name: 'Wrapped SOL',
   mintAddress: '11111111111111111111111111111111',
+  token_mint: '11111111111111111111111111111111',
   decimals: 9,
+  decimal: 9,
   official: true,
   showDefault: true
 }
 
-export const WSOL: TokenInfo = {
+export const WSOL: any = {
   symbol: 'WSOL',
   name: 'Wrapped SOL',
   mintAddress: 'So11111111111111111111111111111111111111112',
+  token_mint: 'So11111111111111111111111111111111111111112',
   decimals: 9,
+  decimal: 9,
   referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
   official: true,
   showDefault: false
@@ -218,6 +224,24 @@ export const TOKENS: Tokens = {
     official: true,
     showDefault: true
   }
+  // CSoLEzPj3EWGpZthSwKSHr8U9WQJrg93vCkURGkLEcQH: {
+  //   symbol: 'cSOL',
+  //   name: 'cSOL',
+  //   mintAddress: 'CSoLEzPj3EWGpZthSwKSHr8U9WQJrg93vCkURGkLEcQH',
+  //   decimals: 9,
+  //   referrer: '',
+  //   official: true,
+  //   showDefault: true
+  // }
+  // So11111111111111111111111111111111111111112: {
+  //   symbol: 'WSOL',
+  //   name: 'Wrapped SOL',
+  //   mintAddress: 'So11111111111111111111111111111111111111112',
+  //   decimals: 9,
+  //   referrer: 'AUxC4Y8ns3RmHsjcujZVjv5ioA1LkNfgXPwZjkJT4rz1',
+  //   official: true,
+  //   showDefault: false
+  // }
 
   // main net end *************
   // test net start ***************
