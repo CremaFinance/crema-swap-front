@@ -89,7 +89,7 @@ export default Vue.extend({
     },
     'wallet.tokenAccounts': {
       handler(_newTokenAccounts: any, _oldTokenAccounts: any) {
-        this.createTokenList()
+        this.createTokenList(undefined, this.keyword)
       },
       deep: true
     },

@@ -98,7 +98,7 @@
           <CoinBlock
             v-model="fromCoinAmount"
             :coin-name="fromCoin ? fromCoin.symbol : ''"
-            :balance="fromCoin ? fromCoin.balance : null"
+            :balance="fromCoinBalance || null"
             :coin-icon="fromCoin.icon"
             :show-lock="showFromCoinLock"
             not-select
@@ -114,7 +114,7 @@
           <CoinBlock
             v-model="toCoinAmount"
             :coin-name="toCoin ? toCoin.symbol : ''"
-            :balance="toCoin ? toCoin.balance : null"
+            :balance="toCoinBalance || null"
             :coin-icon="toCoin.icon"
             :show-lock="showToCoinLock"
             not-select
@@ -208,9 +208,8 @@ export default Vue.extend({
       return true
     },
     insufficientBalance(): boolean {
-      const fromCoinBalance =
-        (this.$data.fromCoin && this.$data.fromCoin.balance && this.$data.fromCoin.balance.fixed()) || ''
-      const toCoinBalance = (this.$data.toCoin && this.$data.toCoin.balance && this.$data.toCoin.balance.fixed()) || ''
+      const fromCoinBalance = (this.fromCoinBalance && this.fromCoinBalance.fixed()) || ''
+      const toCoinBalance = (this.$data.toCoin && this.toCoinBalance.fixed()) || ''
 
       const fromCoinInsufficient = gt(this.$data.fromCoinAmount, fromCoinBalance)
       const toCoinInsufficient = gt(this.$data.toCoinAmount, toCoinBalance)
@@ -241,6 +240,49 @@ export default Vue.extend({
       }
 
       return false
+    },
+    // if (poolInfo.token_a.token_mint === 'So11111111111111111111111111111111111111112') {
+    //   this.fromCoin = {
+    //     ...poolInfo.token_a,
+    //     balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+    //   }
+    // } else {
+    //   this.fromCoin = {
+    //     ...poolInfo.token_a,
+    //     balance: this.wallet.tokenAccounts[poolInfo.token_a.token_mint]?.balance || 0
+    //   }
+    // }
+
+    // if (poolInfo.token_b.token_mint === 'So11111111111111111111111111111111111111112') {
+    //   this.toCoin = {
+    //     ...poolInfo.token_b,
+    //     balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+    //   }
+    // } else {
+    //   this.toCoin = {
+    //     ...poolInfo.token_b,
+    //     balance: this.wallet.tokenAccounts[poolInfo.token_b.token_mint]?.balance || 0
+    //   }
+    // }
+    fromCoinBalance(): any {
+      if (this.fromCoin && this.fromCoin.token_mint && this.wallet.tokenAccounts) {
+        if (this.fromCoin.token_mint === 'So11111111111111111111111111111111111111112') {
+          return this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+        } else {
+          return this.wallet.tokenAccounts[this.fromCoin.token_mint]?.balance || 0
+        }
+      }
+      return 0
+    },
+    toCoinBalance(): any {
+      if (this.toCoin && this.toCoin.token_mint && this.wallet.tokenAccounts) {
+        if (this.toCoin.token_mint === 'So11111111111111111111111111111111111111112') {
+          return this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+        } else {
+          return this.wallet.tokenAccounts[this.toCoin.token_mint]?.balance || 0
+        }
+      }
+      return 0
     }
   },
   watch: {
@@ -377,30 +419,32 @@ export default Vue.extend({
           if (poolInfo.token_a && poolInfo.token_b) {
             this.coinTabList = [poolInfo.token_a.symbol, poolInfo.token_b.symbol]
             this.currentCoin = poolInfo.token_a.symbol
+            this.fromCoin = poolInfo.token_a
+            this.toCoin = poolInfo.token_b
 
-            if (poolInfo.token_a.token_mint === 'So11111111111111111111111111111111111111112') {
-              this.fromCoin = {
-                ...poolInfo.token_a,
-                balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
-              }
-            } else {
-              this.fromCoin = {
-                ...poolInfo.token_a,
-                balance: this.wallet.tokenAccounts[poolInfo.token_a.token_mint]?.balance || 0
-              }
-            }
+            // if (poolInfo.token_a.token_mint === 'So11111111111111111111111111111111111111112') {
+            //   this.fromCoin = {
+            //     ...poolInfo.token_a,
+            //     balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+            //   }
+            // } else {
+            //   this.fromCoin = {
+            //     ...poolInfo.token_a,
+            //     balance: this.wallet.tokenAccounts[poolInfo.token_a.token_mint]?.balance || 0
+            //   }
+            // }
 
-            if (poolInfo.token_b.token_mint === 'So11111111111111111111111111111111111111112') {
-              this.toCoin = {
-                ...poolInfo.token_b,
-                balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
-              }
-            } else {
-              this.toCoin = {
-                ...poolInfo.token_b,
-                balance: this.wallet.tokenAccounts[poolInfo.token_b.token_mint]?.balance || 0
-              }
-            }
+            // if (poolInfo.token_b.token_mint === 'So11111111111111111111111111111111111111112') {
+            //   this.toCoin = {
+            //     ...poolInfo.token_b,
+            //     balance: this.wallet.tokenAccounts['11111111111111111111111111111111']?.balance || 0
+            //   }
+            // } else {
+            //   this.toCoin = {
+            //     ...poolInfo.token_b,
+            //     balance: this.wallet.tokenAccounts[poolInfo.token_b.token_mint]?.balance || 0
+            //   }
+            // }
 
             this.updateCoinInfo(this.wallet.tokenAccounts)
             if (Number(currentPositon.fromCoinAmount)) {
@@ -425,18 +469,18 @@ export default Vue.extend({
       if (key === 'fromCoin') {
         this.fixedFromCoin = true
         this.fromCoinAmount =
-          this.fromCoin && this.fromCoin.balance
+          this.fromCoin && this.fromCoinBalance
             ? this.fromCoin.symbol !== 'SOL'
-              ? this.fromCoin.balance.fixed()
-              : fixD(Number(this.fromCoin.balance.fixed()) - 0.01, 9)
+              ? this.fromCoinBalance.fixed()
+              : fixD(Number(this.fromCoinBalance.fixed()) - 0.01, 9)
             : '0'
       } else {
         this.fixedFromCoin = false
         this.toCoinAmount =
-          this.toCoin && this.toCoin.balance
+          this.toCoin && this.toCoinBalance
             ? this.toCoin.symbol !== 'SOL'
-              ? this.toCoin.balance.fixed()
-              : fixD(Number(this.toCoin.balance.fixed()) - 0.01, 9)
+              ? this.toCoinBalance.fixed()
+              : fixD(Number(this.toCoinBalance.fixed()) - 0.01, 9)
             : '0'
       }
     },
@@ -598,8 +642,8 @@ export default Vue.extend({
       let amountB = this.toCoinAmount ? new Decimal(this.toCoinAmount) : null
       const slid = new Decimal(Number(this.$accessor.slippage) / 100)
 
-      let balanceA = new Decimal(this.fromCoin.balance.fixed()).mul(Math.pow(10, this.fromCoin.decimal))
-      let balanceB = new Decimal(this.toCoin.balance.fixed()).mul(Math.pow(10, this.toCoin.decimal))
+      let balanceA = new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimal))
+      let balanceB = new Decimal(this.toCoinBalance.fixed()).mul(Math.pow(10, this.toCoin.decimal))
 
       console.log('increase###this.fromCoin####', this.fromCoin)
       console.log('increase###this.toCoin####', this.toCoin)
@@ -607,8 +651,8 @@ export default Vue.extend({
       console.log('increase###Math.pow(10, this.fromCoin.decimal)###', Math.pow(10, this.fromCoin.decimal))
       console.log('increase###Math.pow(10, this.toCoin.decimal)###', Math.pow(10, this.toCoin.decimal))
 
-      console.log('increase###fromCoin.balance###', this.fromCoin.balance.fixed())
-      console.log('increase###toCoin.balance###', this.toCoin.balance.fixed())
+      console.log('increase###fromCoin.balance###', this.fromCoinBalance.fixed())
+      console.log('increase###toCoin.balance###', this.toCoinBalance.fixed())
 
       console.log('increase###amountA####', amountA?.toString())
       console.log('increase###amountB####', amountB?.toString())
