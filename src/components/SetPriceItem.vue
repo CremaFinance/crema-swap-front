@@ -152,12 +152,12 @@ export default Vue.extend({
 
 <style lang="less" scoped>
 .set-price-item {
-  width: 221px;
+  width: 50%;
   height: 84px;
-  border-radius: 10px;
-  background: linear-gradient(270deg, #3e434e 0%, #2f333b 100%);
-  box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
-  border: 1px solid #3f434e;
+  // border-radius: 10px;
+  // background: linear-gradient(270deg, #3e434e 0%, #2f333b 100%);
+  // box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+  // border: 1px solid #3f434e;
   text-align: center;
   color: #b5b8c2;
   padding: 10px;
@@ -191,7 +191,7 @@ export default Vue.extend({
         align-items: center;
         justify-content: center;
         background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
-        box-shadow: 2px 4px 12px 0px #23262b, -3px -2px 10px 0px rgba(138, 147, 160, 0.16);
+        // box-shadow: 2px 4px 12px 0px #23262b, -3px -2px 10px 0px rgba(138, 147, 160, 0.16);
         border-radius: 14px;
         &:hover {
           background: linear-gradient(141deg, #424953 0%, #2a2e33 100%);

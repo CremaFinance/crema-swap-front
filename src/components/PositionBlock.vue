@@ -3,12 +3,17 @@
     <div class="left">
       <div class="pos-info">
         <div class="icon-box">
-          <img :src="pItem.token_a.icon || importIcon(`/coins/${pItem.token_a.symbol.toLowerCase()}.png`)" />
-          <img :src="pItem.token_b.icon || importIcon(`/coins/${pItem.token_b.symbol.toLowerCase()}.png`)" />
-          <div class="name">{{ pItem.name }}</div>
+          <div class="coin-before-box">
+            <img :src="pItem.token_a.icon || importIcon(`/coins/${pItem.token_a.symbol.toLowerCase()}.png`)" />
+          </div>
+          <div class="coin-after-box">
+            <img :src="pItem.token_b.icon || importIcon(`/coins/${pItem.token_b.symbol.toLowerCase()}.png`)" />
+          </div>
+
+          <div class="name">{{ pItem.token_a.symbol }} - {{ pItem.token_b.symbol }}</div>
         </div>
         <div class="fee">{{ pItem.feeView }}%</div>
-        <div v-if="pItem.nftTokenMint" class="nft-address" @click.stop="">
+        <!-- <div v-if="pItem.nftTokenMint" class="nft-address" @click.stop="">
           <a :href="`https://solscan.io/account/${pItem.nftTokenAccount}`" target="_blank">
             {{ pItem.nftTokenMint.substr(0, 4) }}
             ...
@@ -17,16 +22,18 @@
           <svg class="icon" aria-hidden="true" @click.stop="$accessor.copy(pItem.nftTokenMint)">
             <use xlink:href="#icon-icon_copy"></use>
           </svg>
-        </div>
-        <div class="h5-right right">
-          <StatusBlock :current-status="getCurrentStatus(pItem)" />
-        </div>
+        </div> -->
+        <!-- <div class="h5-right right"> -->
+        <!-- <StatusBlock :current-status="getCurrentStatus(pItem)" /> -->
+        <!-- <NewStatusBlock :current-status="getCurrentStatus(pItem)" :pItem="pItem" @click.stop="" /> -->
+        <!-- </div> -->
       </div>
 
       <div class="min-and-max">
         <p>
           <span>Min:</span>
           {{ decimalFormat(pItem.minPrice, 6) }}
+          {{ pItem.token_a.symbol }} per {{ pItem.token_b.symbol }}
         </p>
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-link"></use>
@@ -34,11 +41,13 @@
         <p>
           <span>Max:</span>
           {{ pItem.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(pItem.maxPrice, 6) }}
+          {{ pItem.token_a.symbol }} per {{ pItem.token_b.symbol }}
         </p>
       </div>
     </div>
     <div class="pc-right right">
-      <StatusBlock :current-status="getCurrentStatus(pItem)" @click.stop="" />
+      <!-- <StatusBlock :current-status="getCurrentStatus(pItem)" /> -->
+      <NewStatusBlock :current-status="getCurrentStatus(pItem)" :pItem="pItem" @click.stop="" />
     </div>
   </div>
 </template>
@@ -47,8 +56,11 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 import importIcon from '@/utils/import-icon'
 import { decimalFormat } from '@/utils'
-
+import NewStatusBlock from '@/components/NewStatusBlcok.vue'
 export default Vue.extend({
+  components: {
+    NewStatusBlock
+  },
   props: {
     btnType: {
       type: String,
@@ -110,15 +122,18 @@ export default Vue.extend({
   align-items: center;
   justify-content: space-between;
   height: 110px;
-  background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+  background: linear-gradient(214deg, #3e434e 0%, #2c303b 100%);
   border-radius: 20px;
-  border: 1px solid #565c6a;
+  // border: 1px solid #565c6a;
   padding: 20px;
   padding-right: 40px;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 12px;
   &:hover {
     background: #393e48;
+    > .left .pos-info .icon-box .coin-after-box {
+      background: #393e48;
+    }
   }
   // filter: blur(50px);
   > .left {
@@ -132,15 +147,22 @@ export default Vue.extend({
           width: 30px;
           height: 30px;
           border-radius: 100%;
-          & + img {
-            margin-left: -4px;
-          }
+          // & + img {
+          //   margin-left: -10px;
+          // }
+        }
+        .coin-after-box {
+          padding: 2px;
+          margin-left: -10px;
+          border-radius: 50%;
+          background: #23262b;
         }
       }
       .name {
         font-size: 16px;
         color: #fff;
         margin-left: 10px;
+        font-weight: 600;
       }
       .fee {
         width: 60px;
@@ -184,8 +206,8 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       margin-top: 12px;
+      font-size: 12px;
       p {
-        font-size: 12px;
         color: #fff;
         margin: 0px;
         span {
@@ -248,7 +270,9 @@ export default Vue.extend({
 }
 @media screen and (max-width: 750px) {
   .pc-right {
-    display: none;
+    width: 160px;
+    margin: 20px auto 0;
+    // display: none;
   }
   .h5-right {
     display: flex;
@@ -257,6 +281,7 @@ export default Vue.extend({
     // justify-content: flex-end;
   }
   .position-block {
+    display: block;
     padding: 14px;
     height: 100%;
     > .left {
@@ -264,15 +289,17 @@ export default Vue.extend({
       .pos-info {
         width: 100%;
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
+        align-items: center;
         flex-wrap: wrap;
+        margin-bottom: 10px;
         .icon-box {
           img {
-            width: 20px;
-            height: 20px;
+            width: 36px;
+            height: 36px;
           }
           .name {
-            font-size: 12px;
+            font-size: 16px;
           }
         }
         .nft-address {
@@ -287,7 +314,7 @@ export default Vue.extend({
         }
         svg {
           transform: rotate(90deg);
-          margin: 20px 0;
+          margin: 5px 0;
         }
       }
     }

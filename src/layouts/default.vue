@@ -151,7 +151,7 @@ export default Vue.extend({
     display: none;
   }
   &.have-network-warnning {
-    padding-top: 140px;
+    padding-top: 160px;
   }
 }
 @media screen and (max-width: 1366px) {

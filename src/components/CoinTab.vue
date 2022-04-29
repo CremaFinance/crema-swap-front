@@ -42,7 +42,7 @@ export default Vue.extend({
 
 <style lang="less" scoped>
 .coin-tab {
-  width: 126px;
+  // width: 126px;
   height: 28px;
   border-radius: 8px;
   display: flex;
@@ -57,7 +57,7 @@ export default Vue.extend({
     color: #fff;
     cursor: pointer;
     &.active {
-      background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 100%);
+      background: linear-gradient(268deg, #60d7f5 0%, #577af5 38%, #a670e6 100%);
     }
   }
 }
