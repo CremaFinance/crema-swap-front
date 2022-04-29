@@ -209,7 +209,6 @@ export default Vue.extend({
         }
         let tepList: any = []
         result.forEach((ele) => {
-          console.log(ele, 'ele##')
           // const amount_usd = this.myPosition[ele.name] ? this.calculate(this.myPosition[ele.name]) : ''
           tepList.push({
             tokenA: ele.name.split('-')[0],

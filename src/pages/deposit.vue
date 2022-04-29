@@ -1,23 +1,37 @@
 <template>
   <div class="pool-container">
-    <div class="link-block">
-      <!-- <div class="go-back" @click="gotoPoolList">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-icon-return"></use>
-        </svg>
-      </div> -->
-      <nuxt-link to="/position" v-if="wallet.connected">
-        <img src="../assets/images/icon-position@2x.png" />
-        <span>My Position</span>
-        <!-- <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-a-bianzu18"></use>
-        </svg> -->
-      </nuxt-link>
+    <div class="back-box">
+      <svg class="icon" aria-hidden="true" @click="gotoPoolList">
+        <use xlink:href="#icon-icon-return"></use>
+      </svg>
     </div>
-    <div class="pool-body">
+    <div class="pool-top">
+      <div class="left">Concentrated Liquidity</div>
+      <div class="right">
+        <div v-if="wallet.connected" class="my-position-btn">
+          <nuxt-link to="/position">
+            <p>
+              <i></i>
+              <span>My Position</span>
+            </p>
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-icon-solid-right-copy"></use>
+            </svg>
+          </nuxt-link>
+        </div>
+
+        <SetIcon></SetIcon>
+        <RefreshIcon :loading="liquidity.loading" @refresh="refresh"></RefreshIcon>
+      </div>
+    </div>
+
+    <div class="pool-body pc-pool-body">
       <div class="top">
-        <div class="c-title"><span>Concentrated Liquidity</span></div>
-        <!-- <h3 class="title"></h3> -->
+        <div v-if="poolInfo" class="left">
+          <span>{{ fromCoin.symbol }} - {{ toCoin.symbol }}</span>
+          <div class="fee-tier">Fee tier {{ currentFeeTier }}%</div>
+        </div>
+        <div class="left" v-show="!fromCoin || !toCoin">Select Pool</div>
         <div class="right">
           <a class="clear-all" @click="clearAll">Clear All</a>
           <CoinTab
@@ -26,34 +40,32 @@
             :current="currentCoinTab"
             @onChange="changeDirection"
           ></CoinTab>
-          <RefreshIcon @refresh="refresh" :loading="liquidity.loading"></RefreshIcon>
-          <SetIcon></SetIcon>
+        </div>
+        <div v-if="poolInfo" class="h5-price-box">
+          <span>Current Price</span>
+          <div v-if="fromCoin && toCoin" class="price-text">
+            <div v-if="direction">
+              1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceView, toCoin.decimal) }}
+              {{ toCoin.symbol }}
+            </div>
+            <div v-else>
+              1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimal) }}
+              {{ toCoin.symbol }}
+            </div>
+          </div>
+          <Progress
+            type="circle"
+            :width="14"
+            :stroke-width="10"
+            :percent="(100 / autoRefreshTime) * countdown"
+            :show-info="false"
+            :class="liquidity.loading ? 'disabled' : ''"
+            @click="refresh"
+          />
         </div>
       </div>
       <div class="pool-content">
         <div class="left">
-          <div v-if="poolInfo" class="price-box">
-            <span>Current Price</span>
-            <div v-if="fromCoin && toCoin" class="right">
-              <div v-if="direction">
-                1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceView, toCoin.decimal) }}
-                {{ toCoin.symbol }}
-              </div>
-              <div v-else>
-                1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimal) }}
-                {{ toCoin.symbol }}
-              </div>
-              <Progress
-                type="circle"
-                :width="14"
-                :stroke-width="10"
-                :percent="(100 / autoRefreshTime) * countdown"
-                :show-info="false"
-                :class="liquidity.loading ? 'disabled' : ''"
-                @click="refresh"
-              />
-            </div>
-          </div>
           <div class="form-box">
             <CoinBlock
               v-model="fromCoinAmount"
@@ -92,12 +104,52 @@
               @onMax="maxBtnSelect('toCoin')"
             ></CoinBlock>
           </div>
-          <div class="fee-tier-box">
+          <!-- <div class="fee-tier-box">
             <FeeTier :currentFee="currentFeeTier"></FeeTier>
-          </div>
+          </div> -->
+          <!-- <div class="liquidity-value">
+            <div v-if="liquidityTotal && liquidityTotal !== '0'" class="left">Total</div>
+            <div v-if="liquidityTotal && liquidityTotal !== '0'" class="right">${{ liquidityTotal }}</div>
+          </div> -->
+          <Button v-if="!wallet.connected" class="add-liquidity-btn" @click="$accessor.wallet.openModal"
+            >Connect Wallet</Button
+          >
+          <Button
+            v-else
+            class="add-liquidity-btn"
+            :disabled="!poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance"
+            :loading="suppling"
+            @click="openAddLiquiditySecondConfirm"
+          >
+            <!-- {{ insufficientBalance ? 'Insufficient balance' : 'Add Liquidity' }} -->
+            <!-- {{ noEnterAmount ? 'Enter an amount' : insufficientBalance ? 'Insufficient balance' : 'Add Liquidity' }} -->
+            {{ addLiquidityBtnText }}
+          </Button>
         </div>
         <div class="right">
           <div class="set-price-range-chart-box">
+            <div v-if="poolInfo" class="price-box">
+              <span>Current Price</span>
+              <div v-if="fromCoin && toCoin" class="price-text">
+                <div v-if="direction">
+                  1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceView, toCoin.decimal) }}
+                  {{ toCoin.symbol }}
+                </div>
+                <div v-else>
+                  1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimal) }}
+                  {{ toCoin.symbol }}
+                </div>
+              </div>
+              <Progress
+                type="circle"
+                :width="14"
+                :stroke-width="10"
+                :percent="(100 / autoRefreshTime) * countdown"
+                :show-info="false"
+                :class="liquidity.loading ? 'disabled' : ''"
+                @click="refresh"
+              />
+            </div>
             <D3Chart
               v-if="poolInfo"
               :pool-info="poolInfo"
@@ -121,12 +173,160 @@
               :to-coin="toCoin"
               :direction="direction"
               :invalid-price-range="invalidPriceRange"
-              :default-max-price="defaultMaxPrice"
               :tick-space="poolInfo.tickSpace"
+              :default-min-price="defaultMinPrice"
+              :default-max-price="defaultMaxPrice"
               @onChangeMinPrice="priceRangeChangeMin"
               @onChangeMaxPrice="priceRangeChangeMax"
             ></SetPriceBlock>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pool-body h5-pool-body">
+      <div class="top">
+        <div v-if="poolInfo" class="left">
+          <span>{{ fromCoin.symbol }} - {{ toCoin.symbol }}</span>
+          <div class="fee-tier">Fee tier {{ currentFeeTier }}%</div>
+        </div>
+        <div class="left" v-show="!fromCoin || !toCoin">Select Pool</div>
+        <div class="right">
+          <a class="clear-all" @click="clearAll">Clear All</a>
+          <CoinTab
+            v-if="fromCoin && toCoin"
+            :list="coinTabList"
+            :current="currentCoinTab"
+            @onChange="changeDirection"
+          ></CoinTab>
+        </div>
+        <div v-if="poolInfo" class="h5-price-box">
+          <span>Current Price</span>
+          <div v-if="fromCoin && toCoin" class="price-text">
+            <div v-if="direction">
+              1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceView, toCoin.decimal) }}
+              {{ toCoin.symbol }}
+            </div>
+            <div v-else>
+              1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimal) }}
+              {{ toCoin.symbol }}
+            </div>
+          </div>
+          <Progress
+            type="circle"
+            :width="14"
+            :stroke-width="10"
+            :percent="(100 / autoRefreshTime) * countdown"
+            :show-info="false"
+            :class="liquidity.loading ? 'disabled' : ''"
+            @click="refresh"
+          />
+        </div>
+      </div>
+      <div class="pool-content">
+        <div class="right">
+          <div class="set-price-range-chart-box">
+            <div v-if="poolInfo" class="price-box">
+              <span>Current Price</span>
+              <div v-if="fromCoin && toCoin" class="price-text">
+                <div v-if="direction">
+                  1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceView, toCoin.decimal) }}
+                  {{ toCoin.symbol }}
+                </div>
+                <div v-else>
+                  1 {{ fromCoin.symbol }} ≈ {{ decimalFormat(poolInfo.currentPriceViewReverse, toCoin.decimal) }}
+                  {{ toCoin.symbol }}
+                </div>
+              </div>
+              <Progress
+                type="circle"
+                :width="14"
+                :stroke-width="10"
+                :percent="(100 / autoRefreshTime) * countdown"
+                :show-info="false"
+                :class="liquidity.loading ? 'disabled' : ''"
+                @click="refresh"
+              />
+            </div>
+            <H5D3Chart
+              v-if="poolInfo"
+              :pool-info="poolInfo"
+              :min-price="minPrice"
+              :max-price="maxPrice"
+              :direction="direction"
+              :tick-list="tickList"
+              :current-tick="currentTick"
+              :chart-loading="chartLoading"
+              @onChangeMinPrice="priceRangeChangeMin"
+              @onChangeMaxPrice="priceRangeChangeMax"
+            ></H5D3Chart>
+
+            <img v-else src="../assets/images/chart-nodata.png" />
+          </div>
+          <div v-if="poolInfo" class="set-price-block-box">
+            <SetPriceBlock
+              :min="minPrice"
+              :max="maxPrice"
+              :from-coin="fromCoin"
+              :to-coin="toCoin"
+              :direction="direction"
+              :invalid-price-range="invalidPriceRange"
+              :tick-space="poolInfo.tickSpace"
+              :default-min-price="defaultMinPrice"
+              :default-max-price="defaultMaxPrice"
+              @onChangeMinPrice="priceRangeChangeMin"
+              @onChangeMaxPrice="priceRangeChangeMax"
+            ></SetPriceBlock>
+          </div>
+        </div>
+        <div class="left">
+          <div class="deposit-title">Deposit</div>
+
+          <div class="form-box">
+            <CoinBlock
+              v-model="fromCoinAmount"
+              :coin-name="fromCoin ? fromCoin.symbol : null"
+              :balance="fromCoinBalance || null"
+              :coin-icon="fromCoin ? fromCoin.icon : ''"
+              :show-lock="showFromCoinLock"
+              @onInput="
+                (amount) => {
+                  fixedFromCoin = true
+                  fromCoinAmount = amount
+                }
+              "
+              @onSelect="openCoinSelect('fromCoin')"
+              @onMax="maxBtnSelect('fromCoin')"
+            ></CoinBlock>
+            <div class="add-icon">
+              <!-- <svg class="icon" aria-hidden="true" @click="changeCoinPosition">
+                <use xlink:href="#icon-a-icon-AddCustomMarket"></use>
+              </svg> -->
+              <a @click="changeCoinPosition"></a>
+            </div>
+            <CoinBlock
+              v-model="toCoinAmount"
+              :coin-name="toCoin ? toCoin.symbol : null"
+              :balance="toCoinBalance || null"
+              :coin-icon="toCoin ? toCoin.icon : ''"
+              :show-lock="showToCoinLock"
+              @onInput="
+                (amount) => {
+                  fixedFromCoin = false
+                  toCoinAmount = amount
+                }
+              "
+              @onSelect="openCoinSelect('toCoin')"
+              @onMax="maxBtnSelect('toCoin')"
+            ></CoinBlock>
+          </div>
+          <!-- <div class="fee-tier-box">
+            <FeeTier :currentFee="currentFeeTier"></FeeTier>
+          </div> -->
+          <!-- <div class="liquidity-value">
+            <div v-if="liquidityTotal && liquidityTotal !== '0'" class="left">Total</div>
+            <div v-if="liquidityTotal && liquidityTotal !== '0'" class="right">${{ liquidityTotal }}</div>
+          </div> -->
           <Button v-if="!wallet.connected" class="add-liquidity-btn" @click="$accessor.wallet.openModal"
             >Connect Wallet</Button
           >
@@ -352,6 +552,25 @@ export default Vue.extend({
         return true
       }
       return false
+    },
+    liquidityTotal() {
+      let result = ''
+      if (
+        this.liquidity.rates &&
+        this.fromCoin &&
+        Number(this.fromCoinAmount) &&
+        this.toCoin &&
+        Number(this.toCoinAmount) &&
+        Number(this.currentPriceView)
+      ) {
+        const f = new Decimal(this.fromCoinAmount)
+        const t = new Decimal(this.toCoinAmount)
+        const c = this.direction ? new Decimal(this.currentPriceView) : new Decimal(this.currentPriceViewReverse)
+        const r = this.liquidity.rates[this.toCoin.symbol.toUpperCase()] || 1
+
+        result = fixD(f.mul(c).plus(t).mul(r).toString(), 4) || ''
+      }
+      return result
     }
   },
   watch: {
@@ -1075,6 +1294,88 @@ export default Vue.extend({
   width: 100%;
   padding-bottom: 100px;
   // min-height: 100vh;
+  .back-box {
+    width: 996px;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    svg {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+      cursor: pointer;
+    }
+  }
+  .pool-top {
+    width: 996px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto;
+    margin-top: 16px;
+    > .left {
+      font-size: 20px;
+      font-weight: 800;
+    }
+    > .right {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .my-position-btn {
+        width: 148px;
+        height: 36px;
+        padding: 2px;
+        border-radius: 18px;
+        background: linear-gradient(90deg, rgba(183, 98, 255, 1), rgba(93, 193, 221, 1));
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        // justify-content: center;
+        a {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          // border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 16px;
+          color: #fff;
+          background: #1b1b26;
+          align-items: center;
+          justify-content: center;
+          // margin-right: 12px;
+          cursor: pointer;
+          i {
+            width: 28px;
+            height: 28px;
+            display: inline-block;
+            background: url('../assets/images/icon-position@2x.png') center center no-repeat;
+            background-size: auto 100%;
+            margin-right: 4px;
+          }
+          &:hover {
+            color: #fff;
+            background: none;
+            i {
+              background: url('../assets/images/icon-position-hover@2x.png') center center no-repeat;
+              background-size: auto 100%;
+            }
+            .icon {
+              fill: rgba(#fff, 1);
+            }
+          }
+          p {
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+          }
+          .icon {
+            width: 21px;
+            height: 21px;
+            fill: rgba(#fff, 0.5);
+          }
+        }
+      }
+    }
+  }
   .pool-body {
     width: 996px;
     // height: 545px;
@@ -1084,12 +1385,35 @@ export default Vue.extend({
     border: 1px solid #3f434e;
     margin: 0 auto;
     padding: 22px 20px;
+    margin-top: 16px;
+    .deposit-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 20px;
+    }
     > .top {
       display: flex;
       justify-content: space-between;
-      > .title {
-        font-size: 20px;
-        color: #fff;
+      > .left {
+        display: flex;
+        align-items: center;
+        > span {
+          font-size: 16px;
+          font-weight: 800;
+        }
+        .fee-tier {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 115px;
+          height: 28px;
+          border-radius: 8px;
+          border: 1px solid #2affa8;
+          font-size: 12px;
+          color: #2affa8;
+          margin-left: 12px;
+        }
       }
       > .right {
         display: flex;
@@ -1112,6 +1436,9 @@ export default Vue.extend({
         }
       }
     }
+    .h5-price-box {
+      display: none;
+    }
     .pool-content {
       display: flex;
       justify-content: space-between;
@@ -1119,42 +1446,14 @@ export default Vue.extend({
       > div {
         width: 460px;
       }
-      .price-box {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        .right {
-          font-weight: bold;
-          display: flex;
-          align-items: center;
-          .ant-progress {
-            margin-left: 4px;
-            margin-bottom: 3px;
-          }
-        }
-      }
+
       .form-box {
         margin-top: 12px;
         .add-icon {
-          // width: 48px;
-          // height: 48px;
-          // background: linear-gradient(214deg, #3e434e 0%, #373b42 100%);
-          // box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
-          // border-radius: 10px;
-          // border: 1px solid #3f434e;
-          // display: flex;
-          // align-items: center;
-          // justify-content: center;
-          // margin: 10px auto;
-          // svg {
-          //   width: 38px;
-          //   height: 38px;
-          //   fill: rgba(#fff, 1);
-          // }
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 11px 0px;
+          padding: 16px 0px;
           a {
             display: block;
             width: 48px;
@@ -1171,78 +1470,92 @@ export default Vue.extend({
           }
         }
       }
-      .fee-tier-box {
-        margin-top: 10px;
+      .liquidity-value {
+        width: 100%;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+        > .left {
+          color: rgba(255, 255, 255, 0.5);
+        }
       }
+      // .fee-tier-box {
+      //   margin-top: 10px;
+      // }
+
       .add-liquidity-btn {
         font-weight: bold;
         color: #fff;
-        font-size: 20px;
+        font-size: 18px;
         .gradient-btn-large();
-        margin-top: 16px;
+        margin-top: 44px;
       }
     }
+  }
+  .h5-pool-body {
+    display: none;
+  }
+  .pc-pool-body {
+    display: block;
   }
 
   .set-price-range-chart-box {
     width: 100%;
     display: flex;
     justify-content: center;
+    position: relative;
+    margin-top: 20px;
     > img {
       height: 200px;
     }
-  }
-  .link-block {
-    width: 996px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    // justify-content: space-between;
-    margin-bottom: 20px;
-    > a {
-      width: 150px;
-      height: 32px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      color: #fff;
+    .price-box {
+      position: absolute;
       display: flex;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      img {
-        width: 32px;
-        height: 32px;
+      left: 0px;
+      top: -14px;
+      > span {
+        font-weight: 800;
+        margin-right: 8px;
       }
-      &:hover {
+      .price-text {
+        font-size: 14px;
+        font-family: Arial-BoldMT, Arial;
+        font-weight: 600;
         color: #fff;
-        svg {
-          fill: #fff;
-        }
+        line-height: 14px;
+        background: linear-gradient(270deg, #10acff 0%, #c054ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-right: 8px;
       }
     }
-    .go-back {
-      display: flex;
-      align-items: center;
-      .icon {
-        width: 20px;
-        height: 20px;
-        fill: #fff;
-        margin-right: 4px;
-        &:hover {
-          fill: #07ebad;
-        }
-      }
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.5);
-    }
+  }
+  .set-price-block-box {
+    margin-top: 18px;
   }
 }
 @media screen and (max-width: 750px) {
   .pool-container {
+    .pool-top {
+      width: 100%;
+      display: block;
+      .right {
+        margin-top: 10px;
+        justify-content: flex-end;
+      }
+    }
     .link-block {
       width: 100%;
       margin-top: 20px;
+    }
+    .h5-pool-body {
+      display: block;
+    }
+    .pc-pool-body {
+      display: none;
     }
     .pool-body {
       width: 100%;
@@ -1252,6 +1565,7 @@ export default Vue.extend({
         display: block;
         .right {
           justify-content: flex-end;
+          margin-top: 10px;
         }
       }
       .pool-content {
@@ -1260,11 +1574,38 @@ export default Vue.extend({
           width: 100%;
         }
       }
+      .price-box {
+        display: none;
+      }
+      .h5-price-box {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+        > span {
+          font-weight: 800;
+        }
+        .price-text {
+          font-size: 14px;
+          font-family: Arial-BoldMT, Arial;
+          font-weight: 600;
+          color: #fff;
+          line-height: 14px;
+          background: linear-gradient(270deg, #10acff 0%, #c054ff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+      }
     }
     .set-price-range-chart-box {
+      padding-top: 40px;
       display: block;
       overflow: hidden;
       margin-top: 20px;
+      .price-box {
+        top: -5px;
+      }
     }
   }
 }

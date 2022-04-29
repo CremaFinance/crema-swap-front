@@ -12,7 +12,7 @@
             <img src="@/assets/images/Fire-lans.gif" alt="" />
             <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span>
           </div> -->
-          <!-- <SystemSetting></SystemSetting> -->
+          <SystemSetting></SystemSetting>
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
             <use xlink:href="#icon-a-icon_Menu1"></use>
           </svg>
@@ -35,17 +35,18 @@
             <img src="@/assets/images/icon-Swap@2x.png" alt="" />
             <span>Swap</span>
           </li>
-          <li class="have-sub-menu" @click="goUrl('deposit')">
+          <li class="have-sub-menu" @click="goUrl('pools')">
             <div
               :class="{
                 active:
                   $route.name === 'liquidity' ||
-                  $route.name === 'pool' ||
+                  $route.name === 'pools' ||
                   $route.name === 'index' ||
                   $route.path === '/position' ||
                   $route.name === 'increase-id' ||
                   $route.name === 'remove-id' ||
-                  $route.name === 'detail-id',
+                  $route.name === 'detail-id' ||
+                  $route.name === 'deposit',
                 title: true
               }"
               @click="liquiditySubMenuIsShow = !liquiditySubMenuIsShow"

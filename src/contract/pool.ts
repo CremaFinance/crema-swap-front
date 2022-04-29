@@ -6,7 +6,7 @@ import { web3Config } from '@/utils/web3'
 
 export function loadProvider(wallet: any): Provider {
   // const url = 'https://api.devnet.rpcpool.com/2ee3d7c0b48f6c361a06459b1d77'
-  const localRpc = window.localStorage.getItem('c-current-rpc')
+  const localRpc = window.localStorage.getItem('c-pre-current-rpc')
   let url: string
   if (localRpc) {
     url = localRpc

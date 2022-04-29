@@ -50,23 +50,24 @@ export default Vue.extend({
   },
   data() {
     return {
-      currentRpc: 'https://api.devnet.solana.com',
+      currentRpc: 'https://crema.rpcpool.com',
       rpcList: [
         {
-          label: 'Solana RPC',
-          value: 'https://api.devnet.solana.com'
+          label: 'Crema RPC',
+          value: 'https://crema.rpcpool.com'
         },
         {
-          label: 'Stage RPC',
-          value: 'https://stage.devnet.rpcpool.com/2ee3d7c0b48f6c361a06459b1d77'
+          label: 'Serum RPC',
+          value: 'https://solana-api.projectserum.com'
         }
       ],
       showSymstemSetting: false,
-      isloading: false
+      isloading: false,
+      oldRpc: ''
     }
   },
   mounted() {
-    const localRpc = localStorage.getItem('c-current-rpc')
+    const localRpc = localStorage.getItem('c-pre-current-rpc')
     if (localRpc) {
       this.currentRpc = localRpc
     }
@@ -76,14 +77,17 @@ export default Vue.extend({
       this.showSymstemSetting = !this.showSymstemSetting
     },
     closeSystemSetting() {
+      // console.log('this.oldRpc####', this.oldRpc)
+      this.currentRpc = localStorage.getItem('c-pre-current-rpc') || 'https://crema.rpcpool.com'
       this.showSymstemSetting = false
     },
     selectRpc(value) {
       // this.isloading = true
-      // localStorage.setItem('c-current-rpc', value)
+
       this.currentRpc = value
     },
     coinfirmChangeNetwork() {
+      localStorage.setItem('c-pre-current-rpc', this.currentRpc)
       this.isloading = true
       setTimeout(() => {
         window.location.reload()

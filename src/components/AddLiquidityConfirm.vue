@@ -467,7 +467,7 @@ export default Vue.extend({
         span {
           flex: 1;
           border-radius: 7px;
-          font-size: 14px;
+          font-size: 12px;
           color: rgba(255, 255, 255, 0.5);
           height: 100%;
           display: flex;
@@ -546,7 +546,7 @@ export default Vue.extend({
     div {
       font-weight: bold;
       font-size: 16px;
-      background: linear-gradient(to right, #59bdad, #6676f5, #9a89f9, #eba7ff);
+      background: linear-gradient(270deg, #10acff 0%, #c054ff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-left: 10px;
