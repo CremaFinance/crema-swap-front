@@ -611,6 +611,13 @@ export default Vue.extend({
     //     this.isLoading = false
     //   }
     // }
+    getSolBalance(amount, fee) {
+      if (amount < fee) {
+        return 0
+      } else {
+        return amount - fee
+      }
+    },
     async toIncrease() {
       this.isLoading = true
       const conn = this.$web3
@@ -642,8 +649,25 @@ export default Vue.extend({
       let amountB = this.toCoinAmount ? new Decimal(this.toCoinAmount) : null
       const slid = new Decimal(Number(this.$accessor.slippage) / 100)
 
-      let balanceA = new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimal))
-      let balanceB = new Decimal(this.toCoinBalance.fixed()).mul(Math.pow(10, this.toCoin.decimal))
+      let balanceA =
+        this.fromCoin?.symbol === 'SOL'
+          ? new Decimal(this.getSolBalance(Number(this.fromCoinBalance.fixed()), 0.01)).mul(
+              Math.pow(10, this.fromCoin.decimal)
+            )
+          : new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimal))
+      let balanceB =
+        this.toCoin?.symbol === 'SOL'
+          ? new Decimal(this.getSolBalance(Number(this.toCoinBalance.fixed()), 0.01)).mul(
+              Math.pow(10, this.toCoin.decimal)
+            )
+          : new Decimal(this.toCoinBalance.fixed()).mul(Math.pow(10, this.toCoin.decimal))
+
+      console.log(
+        'new Decimal(this.getSolBalance(Number(this.toCoinBalance), 0.01)).mul(Math.pow(10, this.toCoin.decimal))####',
+        new Decimal(this.getSolBalance(Number(this.toCoinBalance), 0.01))
+          .mul(Math.pow(10, this.toCoin.decimal))
+          .toString()
+      )
 
       console.log('increase###this.fromCoin####', this.fromCoin)
       console.log('increase###this.toCoin####', this.toCoin)

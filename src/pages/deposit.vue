@@ -1114,23 +1114,24 @@ export default Vue.extend({
       let balanceB: any
       let fromBalance: any = this.fromCoinBalance.fixed()
       let toBalance: any = this.toCoinBalance.fixed()
+
       if (this.direction) {
         balanceA =
           this.fromCoin?.symbol === 'SOL'
-            ? new Decimal(this.getSolBalance(Number(fromBalance), 0.005)).mul(Math.pow(10, this.fromCoin.decimal))
+            ? new Decimal(this.getSolBalance(Number(fromBalance), 0.01)).mul(Math.pow(10, this.fromCoin.decimal))
             : new Decimal(fromBalance).mul(Math.pow(10, this.fromCoin.decimal))
         balanceB =
           this.toCoin?.symbol === 'SOL'
-            ? new Decimal(this.getSolBalance(Number(toBalance), 0.005)).mul(Math.pow(10, this.toCoin.decimal))
+            ? new Decimal(this.getSolBalance(Number(toBalance), 0.01)).mul(Math.pow(10, this.toCoin.decimal))
             : new Decimal(toBalance).mul(Math.pow(10, this.toCoin.decimal))
       } else {
         balanceA =
           this.toCoin?.symbol === 'SOL'
-            ? new Decimal(this.getSolBalance(Number(toBalance), 0.005)).mul(Math.pow(10, this.toCoin.decimal))
+            ? new Decimal(this.getSolBalance(Number(toBalance), 0.01)).mul(Math.pow(10, this.toCoin.decimal))
             : new Decimal(toBalance).mul(Math.pow(10, this.toCoin.decimal))
         balanceB =
           this.fromCoin?.symbol === 'SOL'
-            ? new Decimal(this.getSolBalance(Number(fromBalance), 0.005)).mul(Math.pow(10, this.fromCoin.decimal))
+            ? new Decimal(this.getSolBalance(Number(fromBalance), 0.01)).mul(Math.pow(10, this.fromCoin.decimal))
             : new Decimal(fromBalance).mul(Math.pow(10, this.fromCoin.decimal))
       }
 
@@ -1175,15 +1176,36 @@ export default Vue.extend({
           this.fromCoinAmount && this.toCoinAmount ? 'and' : ''
         } ${this.toCoinAmount && this.toCoinAmount} ${this.toCoinAmount && this.toCoin?.symbol}`
       )
+
+      // let onlyA: boolean = false
+      // let onlyB: boolean = false
+      // if (this.direction) {
+      //   onlyA = this.showFromCoinLock
+      //   onlyB = this.showToCoinLock
+      // } else {
+      //   onlyA = this.showToCoinLock
+      //   onlyB = this.showFromCoinLock
+      // }
+
       this.$accessor.transaction.setShowWaiting(true)
       const deltaLiquity = fixD(this.deltaLiquity, 0)
       let txid = ''
+
       try {
         console.log('deposit####liquityResult.fixTokenType###', liquityResult.fixTokenType)
         console.log('deposit####tick_lower###', tick_lower)
         console.log('deposit####tick_upper###', tick_upper)
         console.log('deposit####liquityResult.maxAmountA###', liquityResult.maxAmountA.toString())
         console.log('deposit####liquityResult.maxAmountB###', liquityResult.maxAmountB.toString())
+        console.log('userTokenA####', userTokenA.toString())
+        console.log('userTokenB####', userTokenB.toString())
+
+        // const maxAmountA = onlyB ? new Decimal(0) : liquityResult.maxAmountA
+        // const maxAmountB = onlyA ? new Decimal(0) : liquityResult.maxAmountB
+
+        // console.log('deposit####maxAmountA###', maxAmountA.toString())
+        // console.log('deposit####maxAmountB###', maxAmountB.toString())
+
         const res = await swap.mintPositionFixToken(
           userTokenA,
           userTokenB,
