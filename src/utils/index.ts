@@ -243,6 +243,12 @@ export const getTokenBySymbol = (tokensObj: any, symbol: string) => {
   for (let key in tokensObj) {
     const item = tokensObj[key]
     if (item.symbol.toUpperCase() === symbol.toUpperCase()) {
+      if (item.symbol.toUpperCase() === 'SOL') {
+        return {
+          ...item,
+          token_mint: '11111111111111111111111111111111'
+        }
+      }
       return item
     }
   }
