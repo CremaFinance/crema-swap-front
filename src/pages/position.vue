@@ -1,21 +1,40 @@
 <template>
   <div class="positon-container">
+    <div class="back-btn">
+      <svg class="icon" aria-hidden="true" @click="gotoPoolList">
+        <use xlink:href="#icon-icon-return"></use>
+      </svg>
+      <div class="refresh-box h5-refresh-box" v-if="wallet.connected">
+        <RefreshIcon @refresh="refresh" :loading="liquidity.myPositionLoading"></RefreshIcon>
+      </div>
+    </div>
+
     <div class="position-title">
-      <span v-if="wallet.connected">Your Positions {{ list.length > 0 ? `( ${list.length} )` : '' }}</span>
-      <span v-else>Your Positions（0）</span>
+      <span v-if="wallet.connected"
+        >Your Positions
+        <span>{{ list.length > 0 ? `( ${list.length} )` : '' }}</span>
+      </span>
+      <span v-else
+        >Your Positions
+        <span>(0)</span>
+      </span>
       <div class="btn-list">
-        <div class="go-back" @click="gotoPoolList">
-          <svg class="icon" aria-hidden="true">
-            <use xlink:href="#icon-icon-return"></use>
-          </svg>
-        </div>
         <button>
           <div @click="gotoPool">
             <span>Add Liquidity</span>
           </div>
         </button>
+        <div class="refresh-box pc-refresh-box" v-if="wallet.connected">
+          <!-- <div class="refresh">
+            <svg class="icon" aria-hidden="true" @click="refresh">
+              <use xlink:href="#icon-icon-refresh"></use>
+            </svg>
+          </div> -->
+          <RefreshIcon @refresh="refresh" :loading="liquidity.myPositionLoading"></RefreshIcon>
+        </div>
       </div>
     </div>
+
     <div v-if="wallet.connected && list.length > 0" class="position-list">
       <PositionBlock v-for="(item, index) in list" :key="index" :p-item="item"></PositionBlock>
     </div>
@@ -83,7 +102,10 @@ export default Vue.extend({
       }
     },
     gotoPoolList() {
-      this.$router.push('/deposit')
+      this.$router.push('/pools')
+    },
+    refresh() {
+      this.$accessor.liquidity.getMyPositionsNew(this.wallet.tokenAccounts)
     }
   }
 })
@@ -92,38 +114,91 @@ export default Vue.extend({
 .positon-container {
   width: 800px;
   margin: 0 auto;
+  .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+      &:hover {
+        fill: #07ebad;
+      }
+    }
+    .h5-refresh-box {
+      display: none;
+    }
+  }
   .position-title {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: 10px;
     > span {
       font-size: 20px;
       color: #fff;
+      > span {
+        font-size: 14px;
+        font-weight: 800;
+        color: rgba(#fff, 0.5);
+      }
     }
     .btn-list {
       display: flex;
       align-items: center;
 
       button {
-        background: none;
+        width: 130px;
+        height: 36px;
+        border-radius: 18px;
+        padding: 2px;
+        border: none;
+        background: linear-gradient(90deg, rgba(183, 98, 255, 1), rgba(93, 193, 221, 1));
         > div {
-          width: 118px;
-          height: 22px;
-          background: linear-gradient(270deg, #5fe6d0 0%, #60b2f1 33%, #9380ff 68%, #e590ff 100%);
-          border-radius: 7px;
+          width: 100%;
+          height: 100%;
+          background: #1b1b26;
+          // background: linear-gradient(270deg, #5fe6d0 0%, #60b2f1 33%, #9380ff 68%, #e590ff 100%);
           font-size: 14px;
           color: #fff;
+          border-radius: 16px;
           font-weight: 600;
+          line-height: 34px;
           &:hover {
-            background: linear-gradient(214deg, #59bdad 0%, #6676f5 61%, #9a89f9 76%, #eba7ff 100%);
+            background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
           }
         }
       }
       .go-back {
         display: none;
       }
+      .refresh-box {
+        // width: 32px;
+        // height: 32px;
+        // border-radius: 15px;
+        // padding: 1px;
+        // margin-left: 12px;
+        // background: linear-gradient(137deg, rgba(35, 38, 43, 1), rgba(62, 67, 78, 1));
+        // .refresh {
+        //   width: 30px;
+        //   height: 30px;
+        //   background: linear-gradient(141deg, #383e49 0%, #1a1c1f 100%);
+        //   border-radius: 14px;
+        //   text-align: center;
+        //   .icon {
+        //     width: 16px;
+        //     height: 16px;
+        //     fill: #fff;
+        //     margin-top: 6px;
+        //   }
+        // }
+      }
     }
+  }
+  .h5-btn-list {
+    display: none;
   }
 
   .no-data {
@@ -150,12 +225,23 @@ export default Vue.extend({
   .positon-container {
     width: 100%;
     padding: 20px 16px 0;
+    .back-btn {
+      .h5-refresh-box {
+        display: block;
+      }
+    }
     .position-title {
-      display: block;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       .btn-list {
         // justify-content: flex-end;
         justify-content: space-between;
-        margin-top: 20px;
+        align-items: center;
+        margin-top: 0px;
+        .pc-refresh-box {
+          display: none;
+        }
         .go-back {
           display: flex;
           align-items: center;
@@ -173,6 +259,68 @@ export default Vue.extend({
         }
       }
     }
+    .h5-btn-list {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 12px;
+      button {
+        width: 130px;
+        height: 36px;
+        border-radius: 18px;
+        padding: 2px;
+        border: none;
+        background: linear-gradient(90deg, rgba(183, 98, 255, 1), rgba(93, 193, 221, 1));
+        > div {
+          width: 100%;
+          height: 100%;
+          background: #000;
+          // background: linear-gradient(270deg, #5fe6d0 0%, #60b2f1 33%, #9380ff 68%, #e590ff 100%);
+          font-size: 14px;
+          color: #fff;
+          border-radius: 16px;
+          font-weight: 600;
+          line-height: 34px;
+          &:hover {
+            background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
+          }
+        }
+      }
+    }
   }
 }
+</style>
+<style lang='less'>
+// .position-list {
+// .position-block:nth-child(6n + 1) {
+//   .deta-block-status-box {
+//     background: linear-gradient(180deg, #101118 0%, #0f1034 82%, #004f80 100%);
+//   }
+// }
+// .position-block:nth-child(6n + 2) {
+//   .deta-block-status-box {
+//     background: linear-gradient(180deg, #101118 0%, #07221f 82%, #00665f 100%);
+//   }
+// }
+// .position-block:nth-child(6n + 3) {
+//   .deta-block-status-box:nth-child(6n + 3) {
+//     background: linear-gradient(180deg, #101118 0%, #0f1116 82%, #00665f 100%);
+//   }
+// }
+// .position-block:nth-child(6n + 4) {
+//   .deta-block-status-box:nth-child(6n + 4) {
+//     background: linear-gradient(180deg, #101118 0%, #191529 79%, #3f339f 100%);
+//   }
+// }
+// .position-block:nth-child(6n + 5) {
+//   .deta-block-status-box {
+//     background: linear-gradient(180deg, #101118 0%, #201f0a 82%, #665900 100%);
+//   }
+// }
+// .position-block:nth-child(6n + 6) {
+//   .deta-block-status-box {
+//     background: linear-gradient(180deg, #101118 0%, #271529 79%, #540d3f 100%);
+//   }
+// }
+// }
 </style>

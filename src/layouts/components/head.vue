@@ -26,12 +26,13 @@
               <span>Swap</span>
             </nuxt-link>
             <nuxt-link
-              to="/deposit"
+              to="/pools"
               :class="
                 $route.path === '/position' ||
                 $route.name === 'increase-id' ||
                 $route.name === 'remove-id' ||
-                $route.name === 'detail-id'
+                $route.name === 'detail-id' ||
+                $route.name === 'deposit'
                   ? 'nuxt-link-exact-active nuxt-link-active'
                   : ''
               "
@@ -162,7 +163,7 @@ export default Vue.extend({
   }
   .logo {
     position: absolute;
-    left: 20px;
+    left: 0px;
     top: 50%;
     transform: translate(0%, -50%);
     // padding-right: 20px;

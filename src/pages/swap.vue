@@ -570,7 +570,7 @@ export default Vue.extend({
         background-repeat: no-repeat;
         background-size: 100% 100%;
         background-image: url('../assets/images/btn-change-new.png');
-        box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
+        // box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
 
         &:hover {
           background-image: url('../assets/images/brn-change-Hover-new.png');

@@ -15,6 +15,9 @@
             <div class="my-pisiton-logo"></div>
             <!-- <img src="../assets/images/icon-new-position@2x.png" alt="" /> -->
             <span>My Position</span>
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-icon-solid-right-copy"></use>
+            </svg>
           </Button>
         </div>
         <div class="total-val">
@@ -250,16 +253,16 @@ export default Vue.extend({
       justify-content: space-between;
       align-items: flex-end;
       .my-pisiton-box {
-        width: 132px;
+        width: 142px;
         height: 36px;
         background: linear-gradient(90deg, rgba(183, 98, 255, 1), rgba(93, 193, 221, 1));
         border-radius: 18px;
         // border: 1px solid;
         padding: 2px;
         .my-pisiton-btn {
-          width: 128px;
+          width: 138px;
           height: 32px;
-          background: #000;
+          background: #1b1b26;
           box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
           border-radius: 17px;
           display: flex;
@@ -278,6 +281,11 @@ export default Vue.extend({
             font-weight: normal;
             color: #fff;
           }
+          .icon {
+            width: 21px;
+            height: 21px;
+            fill: rgba(#fff, 0.5);
+          }
         }
         &:hover {
           background: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58));
@@ -286,8 +294,11 @@ export default Vue.extend({
             .my-pisiton-logo {
               width: 28px;
               height: 28px;
-              background: url(../assets/images/icon-position-hover.png);
+              background: url(../assets/images/icon-position-hover@2x.png);
               background-size: 100% 100%;
+            }
+            .icon {
+              fill: #fff;
             }
           }
         }

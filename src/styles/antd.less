@@ -203,15 +203,14 @@ button.ant-btn-background-ghost[disabled] {
 }
 
 .layout-container {
+
   .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-title,
-  .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph > li {
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph>li {
     // background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 37%, #f2f2f2 63%);
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.1) 25%,
-      rgba(255, 255, 255, 0.2) 37%,
-      rgba(255, 255, 255, 0.1) 63%
-    );
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.2) 37%,
+        rgba(255, 255, 255, 0.1) 63%);
     background-size: 400% 100%;
     // -webkit-animation: ant-skeleton-loading 1.4s ease infinite !important;
     animation: skeletonLoading 1.5s ease infinite;
@@ -237,6 +236,7 @@ button.ant-btn-background-ghost[disabled] {
 
 .ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
   background-color: rgba(255, 255, 255, 0.1) !important;
+
   &.rpc-option {
     background-color: #353840 !important;
   }
@@ -244,6 +244,7 @@ button.ant-btn-background-ghost[disabled] {
 
 .ant-select-dropdown-menu-item:hover:not(.ant-select-dropdown-menu-item-disabled) {
   background-color: rgba(255, 255, 255, 0.1) !important;
+
   &.rpc-option {
     background-color: #353840 !important;
   }
@@ -253,6 +254,7 @@ button.ant-btn-background-ghost[disabled] {
   &.rpc-option {
     position: relative;
     font-weight: 400 !important;
+
     &::after {
       content: '';
       width: 8px;
@@ -270,6 +272,7 @@ button.ant-btn-background-ghost[disabled] {
 .ant-select {
   color: #fff !important;
 }
+
 .ant-select-selection {
   background: none !important;
   border: 1px solid #3f434e !important;
@@ -295,6 +298,7 @@ button.ant-btn-background-ghost[disabled] {
   line-height: 0;
   margin-top: 5px;
 }
+
 .ant-select-open {
   .ant-select-arrow .ant-select-arrow-icon {
     transform: rotate(180deg);
@@ -309,6 +313,19 @@ button.ant-btn-background-ghost[disabled] {
     }
   }
 }
+
+// .ant-progress {
+//   .ant-progress-circle {
+//     path {
+//       &:first-child {
+//         stroke: #000 !important;
+//       }
+//       &:last-child {
+//         stroke: #fff !important;
+//       }
+//     }
+//   }
+// }
 
 @keyframes skeletonLoading {
   // 0% {
@@ -361,7 +378,7 @@ button.ant-btn-background-ghost[disabled] {
   height: 12px;
   border-radius: 5px;
 
-  & + li {
+  &+li {
     margin-left: 10px;
   }
 }
@@ -381,5 +398,17 @@ button.ant-btn-background-ghost[disabled] {
 
   &:hover {
     background: #76fff4 !important;
+  }
+}
+
+
+.customize-tooltip-tip {
+
+  // .ant-tooltip-content .ant-tooltip-arrow {
+  //   display: none !important;
+  // }
+
+  .active-tooltip {
+    font-size: 12px;
   }
 }

@@ -563,7 +563,7 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     right: 0px;
-    top: -14px;
+    top: -18px;
     div {
       width: 40px;
       height: 20px;
@@ -586,7 +586,7 @@ export default Vue.extend({
 @media screen and (max-width: 750px) {
   .chart {
     .zoom-button-box {
-      top: 0px;
+      top: -30px;
     }
   }
 }

@@ -173,15 +173,18 @@ export default Vue.extend({
       .balance-box {
         display: flex;
         justify-content: flex-end;
+        align-items: center;
         span {
           font-size: 14px;
+          line-height: 1;
           color: rgba(255, 255, 255, 0.5);
         }
         button {
           width: 48px;
           height: 24px;
-          background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 100%);
-          box-shadow: 0px 2px 9px 0px rgba(0, 0, 0, 0.59), -3px -3px 5px 0px rgba(255, 255, 255, 0.1);
+          // background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 100%);
+          background: linear-gradient(268deg, #82e6ff 0%, #7b98ff 38%, #c492ff 100%);
+          box-shadow: 0px 4px 6px 0px rgba(26, 28, 31, 0.1);
           border-radius: 7px;
           // border: 1px solid;
           // border-image: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58)) 1 1;

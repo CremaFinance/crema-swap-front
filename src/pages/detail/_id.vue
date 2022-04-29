@@ -667,6 +667,9 @@ export default Vue.extend({
         padding: 0 10px;
         justify-content: flex-end;
       }
+      .fee {
+        font-size: 14px !important;
+      }
     }
     .pool-info-box {
       padding-left: 0;

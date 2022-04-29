@@ -107,7 +107,6 @@ export const mutations = mutationTree(state, {
     state.poolsObj = res
   },
   setMyPositionObj(state, res) {
-    console.log(res, '==>myPositionObj##')
     state.myPositionObj = res
   },
   setStatisticsInfo(state, res) {
@@ -189,7 +188,6 @@ export const actions = actionTree(
       list.forEach((item: any) => {
         myPositionObj[item.name] = item
       })
-      console.log(myPositionObj, 'myPositionObj##')
       commit('setMyPositionObj', myPositionObj)
       commit('setMyPositionLoading', false)
     },
