@@ -12,7 +12,7 @@
             <img src="@/assets/images/Fire-lans.gif" alt="" />
             <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span>
           </div> -->
-          <SystemSetting></SystemSetting>
+          <!-- <SystemSetting></SystemSetting> -->
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
             <use xlink:href="#icon-a-icon_Menu1"></use>
           </svg>

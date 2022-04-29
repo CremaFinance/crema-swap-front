@@ -59,6 +59,10 @@ export default Vue.extend({
         {
           label: 'Serum RPC',
           value: 'https://solana-api.projectserum.com'
+        },
+        {
+          label: 'GenesysGo RPC',
+          value: 'https://ssc-dao.genesysgo.net'
         }
       ],
       showSymstemSetting: false,
