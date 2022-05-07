@@ -53,15 +53,15 @@ export default Vue.extend({
       currentRpc: 'https://crema.rpcpool.com',
       rpcList: [
         {
-          label: 'Crema RPC',
+          label: 'Crema',
           value: 'https://crema.rpcpool.com'
         },
         {
-          label: 'Serum RPC',
+          label: 'Serum',
           value: 'https://solana-api.projectserum.com'
         },
         {
-          label: 'GenesysGo RPC',
+          label: 'GenesysGo',
           value: 'https://ssc-dao.genesysgo.net'
         }
       ],
