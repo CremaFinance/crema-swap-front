@@ -76,7 +76,7 @@
         <span>Docs</span>
       </a> -->
           <Wallet />
-          <!-- <SystemSetting></SystemSetting> -->
+          <SystemSetting></SystemSetting>
           <Contactus></Contactus>
         </div>
       </div>

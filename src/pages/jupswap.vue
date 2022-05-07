@@ -143,17 +143,26 @@ import { inputRegex, escapeRegExp } from '@/utils/regex'
 import { decimalFormat, getUnixTs, checkNullObj } from '@/utils'
 import { TokenAmount, gt } from '@/utils/safe-math'
 import { Button } from 'ant-design-vue'
+import { web3Config } from '@/utils/web3'
 
 // const CUSDT = getTokenBySymbol('CUSDT')
 // const CUSDC = getTokenBySymbol('CUSDC')
 
 // const SOLANA_RPC_ENDPOINT = 'https://solana-api.projectserum.com'
 // const SOLANA_RPC_ENDPOINT = 'https://connect.runnode.com/?apikey=PMkQIG6CxY0ybWmaHRHJ'
-const SOLANA_RPC_ENDPOINT = 'https://crema.rpcpool.com'
+// const SOLANA_RPC_ENDPOINT = 'https://crema.rpcpool.com'
+
 // const SOLANA_RPC_ENDPOINT = 'https://mainnet.rpcpool.com'
 /* *******************
  ** Wallet/Keypair of Swapper
  * *******************/
+const localRpc = window.localStorage.getItem('c-pre-current-rpc')
+let SOLANA_RPC_ENDPOINT: string
+if (localRpc) {
+  SOLANA_RPC_ENDPOINT = localRpc
+} else {
+  SOLANA_RPC_ENDPOINT = web3Config.rpcs[0].url
+}
 
 export default Vue.extend({
   components: {
