@@ -85,7 +85,8 @@ export const actions = actionTree(
     async getStatisticsDataObj({ commit }) {
       const result: any = {}
       // const res: any = await this.$axios.get('https://dev-api-crema.bitank.com/farm/tvl')
-      const res: any = await this.$axios.get('https://api.crema.finance/farm/tvl')
+      // const res: any = await this.$axios.get('https://api.crema.finance/farm/tvl')
+      const res: any = await this.$axios.get('https://pre-api-crema.bitank.com/farm/tvl')
       console.log('getStatisticsDataObj####res####', res)
       if (res && res.wrappers) {
         res.wrappers.forEach((item) => {
@@ -100,7 +101,8 @@ export const actions = actionTree(
       // https://api.crema.finance/config?name=farming  生产
       // https://pre-api-crema.bitank.com/config?name=farming 预发布
       // const configRes = await this.$axios.get('https://dev-api-crema.bitank.com/config?name=farming')
-      const configRes = await this.$axios.get('https://api.crema.finance/config?name=farming')
+      // const configRes = await this.$axios.get('https://api.crema.finance/config?name=farming')
+      const configRes = await this.$axios.get('https://pre-api-crema.bitank.com/config?name=farming')
       console.log('getFarmingConfig###res####', configRes)
       console.log('getFarmingConfig####tokenObj###', tokenObj)
       const farmingConfig: any = []

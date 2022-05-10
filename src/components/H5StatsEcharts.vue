@@ -149,7 +149,8 @@ export default Vue.extend({
   methods: {
     getPhan(val, num, width, title, date) {
       this.$axios
-        .get(`https://api.crema.finance/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`)
+        // .get(`https://api.crema.finance/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`)
+        .get(`https://pre-api-crema.bitank.com/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`)
         .then((res) => {
           let list = res.data.list
           const result: any = {
@@ -171,7 +172,8 @@ export default Vue.extend({
     },
     getTvl(date, title, val, view, con) {
       this.$axios
-        .get(`https://api.crema.finance/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`)
+        // .get(`https://api.crema.finance/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`)
+        .get(`https://pre-api-crema.bitank.com/v1/histogram?date_type=${date}&typ=${title}&limit=${val}`)
         .then((res) => {
           let list = res.data.list
           const result: any = {
