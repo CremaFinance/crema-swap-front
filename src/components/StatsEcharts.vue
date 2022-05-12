@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="isShow == 'big'" class="test-container">
-      <div class="echarts-chart">
+      <!-- <div class="echarts-chart">
         <div class="chart-all">
           <div class="chart-title">
             <div class="chart-title-left">
@@ -14,7 +14,7 @@
             </div>
             <div class="chart-title-right">
               <div>
-                <!-- <div class="title-day" :class="echartsVal == 'D' ? 'title-active' : ''" @click="changeEcharts('D')">
+                <div class="title-day" :class="echartsVal == 'D' ? 'title-active' : ''" @click="changeEcharts('D')">
                   D
                 </div>
                 <div class="title-week" :class="echartsVal == 'W' ? 'title-active' : ''" @click="changeEcharts('W')">
@@ -22,13 +22,13 @@
                 </div>
                 <div class="title-mouth" :class="echartsVal == 'M' ? 'title-active' : ''" @click="changeEcharts('M')">
                   M
-                </div> -->
+                </div>
               </div>
-              <!-- <p>02 JUN , 2021</p> -->
+              <p>02 JUN , 2021</p>
               <p v-if="tvlTime.day">
-                <!-- {{ tvlTime.beforeDay }} {{ tvlTime.beforeMonth ? tvlTime.beforeMonth + '-' : '' }} -->
-                {{ tvlTime.day }} {{ tvlTime.month }} ,{{ tvlTime.year }}
-                <!-- {{ tvlTime.current ? tvlTime.current : '' }} -->
+                {{ tvlTime.beforeDay }} {{ tvlTime.beforeMonth ? tvlTime.beforeMonth + '-' : '' }} {{ tvlTime.day }}
+                {{ tvlTime.month }} ,{{ tvlTime.year }}
+                {{ tvlTime.current ? tvlTime.current : '' }}
               </p>
               <p v-if="tvlTime.current">
                 {{ tvlTime.current ? tvlTime.current : '' }}
@@ -51,7 +51,7 @@
             </p>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="echarts-chart chart-pillar">
         <div class="chart-all">
           <div class="chart-title">
@@ -89,7 +89,21 @@
           <div id="pillar" class="chart-test"></div>
         </div>
         <div class="chart-spec">
-          <div class="chart-spec-token">
+          <div class="chart-spec-locked">
+            <p>Total Value Locked</p>
+            <p>
+              $&nbsp;<Spin v-if="!TotalValue && !wdAll.TotalValue" size="small" /><span>{{
+                TotalValue ? TotalValue : wdAll.TotalValue
+              }}</span>
+            </p>
+          </div>
+          <div class="chart-spec-vol">
+            <p>Cumulative Volume</p>
+            <p>
+              $&nbsp;<Spin v-if="!wdAll.Vol" size="small" /><span>{{ wdAll.Vol }}</span>
+            </p>
+          </div>
+          <!-- <div class="chart-spec-token">
             <p>Total Tokens</p>
             <p>
               <Spin v-if="!wdAll.Token" size="small" /><span>{{ wdAll.Token }}</span>
@@ -100,7 +114,27 @@
             <p>
               <Spin v-if="!wdAll.Users" size="small" /><span>{{ wdAll.Users }}</span>
             </p>
-          </div>
+          </div> -->
+        </div>
+      </div>
+      <div class="data-block-list">
+        <div class="chart-spec-tra">
+          <p>Cumulative Transactions</p>
+          <p>
+            <Spin v-if="!wdAll.Tra" size="small" /><span>{{ wdAll.Tra }}</span>
+          </p>
+        </div>
+        <div class="chart-spec-user">
+          <p>Total Users</p>
+          <p>
+            <Spin v-if="!wdAll.Users" size="small" /><span>{{ wdAll.Users }}</span>
+          </p>
+        </div>
+        <div class="chart-spec-token">
+          <p>Total Tokens</p>
+          <p>
+            <Spin v-if="!wdAll.Token" size="small" /><span>{{ wdAll.Token }}</span>
+          </p>
         </div>
       </div>
     </div>
@@ -760,7 +794,7 @@ export default Vue.extend({
   padding: 20px;
   font-weight: bold;
   span {
-    font-size: 36px;
+    font-size: 28px;
   }
 }
 .chart-spec-vol {
@@ -778,5 +812,28 @@ export default Vue.extend({
 .chart-spec-user {
   background: url('@/assets/images/bg-Total-Users.png');
   background-size: 100% 100%;
+}
+.chart-spec-locked {
+  background: url('@/assets/images/bg-Total-Value-Locked.png');
+  background-size: 100% 100%;
+}
+.data-block-list {
+  display: flex;
+  align-items: center;
+  > div {
+    flex: 1;
+    margin-right: 20px;
+    height: 150px;
+    border-radius: 10px;
+    padding: 20px;
+    font-weight: bold;
+    span {
+      font-size: 28px;
+    }
+    &:last-child {
+      margin-right: 0px;
+      width: 320px;
+    }
+  }
 }
 </style>

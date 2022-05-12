@@ -839,12 +839,15 @@ export default Vue.extend({
   > .title {
     font-size: 20px;
     color: #fff;
-    padding: 28px 0px 12px;
+    padding: 40px 0px 12px;
     margin-bottom: 0px;
+    // padding-bottom: 0px;
     font-weight: 700;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
   }
   > .pools-val {
-    padding: 8px 0px 12px;
+    padding: 40px 0px 12px;
   }
   .title-overview {
     display: block;

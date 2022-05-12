@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="isShow == 'small'" class="h5-container">
-      <div class="echarts-chart">
+      <!-- <div class="echarts-chart">
         <div class="chart-all">
           <div class="chart-title">
             <div class="chart-title-left">
@@ -11,7 +11,7 @@
               </p>
             </div>
             <div class="chart-title-right">
-              <!-- <div>
+              <div>
                 <div class="title-day" :class="echartsVal == 'D' ? 'title-active' : ''" @click="changeEcharts('D')">
                   D
                 </div>
@@ -21,17 +21,17 @@
                 <div class="title-mouth" :class="echartsVal == 'M' ? 'title-active' : ''" @click="changeEcharts('M')">
                   M
                 </div>
-              </div> -->
-              <!-- <p>02 JUN , 2021</p> -->
+              </div>
+              <p>02 JUN , 2021</p>
               <p v-if="tvlTime.day">
                 {{ tvlTime.day }} {{ tvlTime.month }} , {{ tvlTime.year }}
-                <!-- {{ tvlTime.current ? ' - ' + tvlTime.current : '' }} -->
+                {{ tvlTime.current ? ' - ' + tvlTime.current : '' }}
               </p>
             </div>
           </div>
           <div id="mains" class="chart-test"></div>
         </div>
-      </div>
+      </div> -->
       <div class="echarts-chart chart-pillar">
         <div class="chart-all">
           <div class="chart-title">
@@ -65,6 +65,13 @@
         </div>
       </div>
       <div class="echarts-detail">
+        <div class="total-value-locked">
+          <p>Total Value Locked</p>
+          <p>
+            <a>$</a>&nbsp;<span>{{ TotalValue ? TotalValue : wdAll.TotalValue }}</span>
+          </p>
+          <img src="@/assets/images/h5-locked.png" alt="" />
+        </div>
         <div>
           <p>Cumulative Volume</p>
           <p>
@@ -577,6 +584,7 @@ export default Vue.extend({
   height: 320px;
   display: flex;
   justify-content: space-between;
+  margin-top: 0px !important;
 }
 .h5-container .echarts-chart {
   width: 100%;
@@ -603,7 +611,8 @@ export default Vue.extend({
 }
 .echarts-detail {
   width: 100%;
-  height: 210px;
+  height: auto;
+  // height: 210px;
   // height: 100px;
   display: flex;
   flex-wrap: wrap;
@@ -618,6 +627,15 @@ export default Vue.extend({
     font-family: 'HelveticaNeue-Bold', 'HelveticaNeue';
     font-size: 12px;
     position: relative;
+    margin-top: 20px;
+    // &:nth-of-type(1),
+    // &:nth-of-type(2) {
+    //   margin-top: 0px;
+    // }
+    &.total-value-locked {
+      margin-top: 0px;
+      width: 100%;
+    }
   }
   img {
     width: 80px;
@@ -626,11 +644,11 @@ export default Vue.extend({
     bottom: 0;
   }
   a {
-    font-size: 20px !important;
+    font-size: 18px !important;
     color: #fff;
   }
   span {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
   }
 }
