@@ -92,7 +92,7 @@
           <div class="chart-spec-locked">
             <p>Total Value Locked</p>
             <p>
-              <Spin v-if="!TotalValue && !wdAll.TotalValue" size="small" /><span>{{
+              $&nbsp;<Spin v-if="!TotalValue && !wdAll.TotalValue" size="small" /><span>{{
                 TotalValue ? TotalValue : wdAll.TotalValue
               }}</span>
             </p>
@@ -796,7 +796,7 @@ export default Vue.extend({
   padding: 20px;
   font-weight: bold;
   span {
-    font-size: 36px;
+    font-size: 28px;
   }
 }
 .chart-spec-vol {
@@ -830,7 +830,7 @@ export default Vue.extend({
     padding: 20px;
     font-weight: bold;
     span {
-      font-size: 36px;
+      font-size: 28px;
     }
     &:last-child {
       margin-right: 0px;

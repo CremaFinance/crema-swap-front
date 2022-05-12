@@ -65,7 +65,7 @@
         </div>
       </div>
       <div class="echarts-detail">
-        <div>
+        <div class="total-value-locked">
           <p>Total Value Locked</p>
           <p>
             <a>$</a>&nbsp;<span>{{ TotalValue ? TotalValue : wdAll.TotalValue }}</span>
@@ -586,6 +586,7 @@ export default Vue.extend({
   height: 320px;
   display: flex;
   justify-content: space-between;
+  margin-top: 0px !important;
 }
 .h5-container .echarts-chart {
   width: 100%;
@@ -629,6 +630,10 @@ export default Vue.extend({
     font-size: 12px;
     position: relative;
     margin-top: 20px;
+    // &:nth-of-type(1),
+    // &:nth-of-type(2) {
+    //   margin-top: 0px;
+    // }
     &.total-value-locked {
       margin-top: 0px;
       width: 100%;
