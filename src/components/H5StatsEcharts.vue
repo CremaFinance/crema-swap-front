@@ -629,9 +629,9 @@ export default Vue.extend({
     font-size: 12px;
     position: relative;
     margin-top: 20px;
-    &:nth-of-type(1),
-    &:nth-of-type(2) {
+    &.total-value-locked {
       margin-top: 0px;
+      width: 100%;
     }
   }
   img {
