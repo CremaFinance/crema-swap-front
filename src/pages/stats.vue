@@ -81,7 +81,7 @@
                 <use xlink:href="#icon-icon-Jump"></use>
               </svg>
             </p> -->
-            <i
+            <!--<i
               class="show-fee"
               @mouseenter="item.isShowFee = !item.isShowFee"
               @mouseleave="item.isShowFee = !item.isShowFee"
@@ -91,7 +91,7 @@
                   liquidity.coinPairConfigObj[item.swap_account].fee * 100 + '%') ||
                 '0.01%'
               }}</i
-            >
+            >-->
           </td>
           <td class="fee-bot">$ {{ addCommom(item.tvl_in_usd, 2) }}</td>
           <td>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</td>
@@ -167,7 +167,7 @@
             <span @mouseenter="item.isShowSwap = !item.isShowSwap" @mouseleave="item.isShowSwap = !item.isShowSwap">{{
               item.name
             }}</span>
-            <i
+            <!-- <i
               class="show-fee"
               @mouseenter="item.isShowFee = !item.isShowFee"
               @mouseleave="item.isShowFee = !item.isShowFee"
@@ -177,7 +177,7 @@
                   liquidity.coinPairConfigObj[item.swap_account].fee * 100 + '%') ||
                 '0.01%'
               }}</i
-            >
+            > -->
             <span v-if="item.isShowFee" class="Fee">Fee tier</span>
             <!-- <p v-if="item.isShowSwap">
               <a :href="`https://solscan.io/address/${item.swap_account}`" target="_blank">
