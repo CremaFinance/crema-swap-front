@@ -1112,8 +1112,8 @@ export default Vue.extend({
 
       let balanceA: any
       let balanceB: any
-      let fromBalance: any = this.fromCoinBalance.fixed()
-      let toBalance: any = this.toCoinBalance.fixed()
+      let fromBalance: any = (this.fromCoinBalance && this.fromCoinBalance.fixed()) || '0'
+      let toBalance: any = (this.toCoinBalance && this.toCoinBalance.fixed()) || '0'
 
       if (this.direction) {
         balanceA =
