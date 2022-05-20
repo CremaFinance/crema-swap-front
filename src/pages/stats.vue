@@ -603,7 +603,8 @@ export default Vue.extend({
     },
     getUct() {
       // this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
-      this.$axios.get(`https://pre-api-crema.bitank.com/v1/swap/count`).then((res) => {
+      // this.$axios.get(`https://pre-api-crema.bitank.com/v1/swap/count`).then((res) => {
+      this.$axios.get(`https://api.crema.finance/v1/swap/count/new`).then((res) => {
         let results = res.data
         const list = res.data.pools
         const token = res.data.tokens
