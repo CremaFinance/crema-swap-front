@@ -18,7 +18,8 @@ import { ACCOUNT_LAYOUT, MINT_LAYOUT } from '@/utils/layouts'
 import { TOKENS } from '@/utils/tokens'
 
 export const web3Config = {
-  strategy: 'speed',
+  // strategy: 'speed',
+  strategy: 'weight',
   rpcs: [
     // { url: 'https://free.rpcpool.com', weight: 10 },
     // { url: 'https://mainnet.rpcpool.com', weight: 50 }
