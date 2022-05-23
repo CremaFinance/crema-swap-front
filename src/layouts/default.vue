@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-container" :class="fairShow">
+  <div class="layout-container" :class="$route.path === '/ido' ? 'layout-fair' : ''">
     <div class="pc-header-container">
       <Head v-if="isPc"></Head>
     </div>
@@ -58,19 +58,18 @@ export default Vue.extend({
     'liquidity.coinPairConfigObj': {
       handler: 'coinPairConfigObjWatch',
       immediate: true
-    },
-    $route(to, from) {
-      if (to.path == '/fair') {
-        console.log('进去了####')
-        this.fairShow = 'layout-fair'
-      } else {
-        this.fairShow = ''
-        return false
-      }
     }
+    // $route(to, from) {
+    //   if (to.path == '/fair') {
+    //     console.log('进去了####')
+    //     this.fairShow = 'layout-fair'
+    //   } else {
+    //     this.fairShow = ''
+    //     return false
+    //   }
+    // }
   },
   created() {
-    console.log(this.$route)
     this.$accessor.liquidity.getRates()
     this.$accessor.liquidity.getPairConfigApi()
   },
@@ -80,20 +79,11 @@ export default Vue.extend({
     //   this.showNotice = true
     //   sessionStorage.setItem('crema_show_notice', '1')
     // }
-
+    console.log('screenWidth####这里没进来么')
+    this.watchScreen()
     window.onresize = () => {
-      const screenWidth = document.body.clientWidth
-      if (screenWidth < 750) {
-        this.isPc = false
-      } else {
-        this.isPc = true
-      }
+      this.watchScreen()
     }
-
-    // const test = await getprice('solana')
-    // console.log('test####', test)
-    // // socean-staked-sol
-    // // marinade-staked-sol-wormhole
   },
   destroyed() {
     window.onresize = null
@@ -102,6 +92,14 @@ export default Vue.extend({
     coinPairConfigObjWatch(newVal) {
       if (newVal) {
         this.$accessor.liquidity.getPoolList()
+      }
+    },
+    watchScreen() {
+      const screenWidth = document.body.clientWidth
+      if (screenWidth < 750) {
+        this.isPc = false
+      } else {
+        this.isPc = true
       }
     }
   }
@@ -121,7 +119,7 @@ export default Vue.extend({
 }
 .pc-header-container {
   display: block;
-  background: #22252b;
+  // background: #22252b;
   // padding: 0px 40px;
   z-index: 999;
   position: fixed;
@@ -136,7 +134,7 @@ export default Vue.extend({
   background: url('@/assets/images/img-fair-bg.png');
   background-size: 100% 100%;
   .pc-header-container {
-    background: none;
+    background: #22252b;
   }
 }
 .body-container {

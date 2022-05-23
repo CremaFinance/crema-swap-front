@@ -21,16 +21,22 @@
         <a class="farming-Btn" @click="comingsoon"></a>
       </div>
     </div>
-    <div v-if="isFarming == 'Farm'" class="farm-Banner">
+    <div v-if="isFarming == 'Farm'" class="active-banner">
       <div></div>
-      <div class="farm-Countdown">
-        <h3>Stake end in</h3>
+      <!-- <div class="farm-Countdown">
+        <h3>{{ timeText }}</h3>
         <div>
           <span>{{ day ? day : '--' }}</span> : <span>{{ hour ? hour : '--' }}</span> :
           <span>{{ min ? min : '--' }}</span> :
           <span>{{ sec ? sec : '--' }}</span>
         </div>
-      </div>
+        <div style="padding: 0 4px">
+          <p>Day</p>
+          <p>Hour</p>
+          <p>Min</p>
+          <p>Sec</p>
+        </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -63,11 +69,14 @@ export default Vue.extend({
   data() {
     return {
       stakeTitle: 'Stake',
+      timeNow: '2022-6-20 0:0:0',
+      timeText: 'Deposit end in',
       day: '',
       hour: '',
       min: '',
       sec: '',
-      caffeineMintAddress: 'CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw'
+      timer: null,
+      caffeineMintAddress: '32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'
       // caffeineAmount: 0
     }
   },
@@ -88,34 +97,39 @@ export default Vue.extend({
   },
   watch: {},
   mounted() {
-    window.setInterval(() => {
-      this.countDown('2022-4-30 0:0:0')
-    }, 1000)
+    // this.timer = setInterval(() => {
+    //   const nowTime = Math.round(new Date().valueOf() / 1000)
+    //   if (nowTime > 1655654400 && nowTime < 1655740800) {
+    //     this.timeNow = '2022-06-21 00:00:00'
+    //     this.timeText = 'Claim start in'
+    //   } else if (nowTime > 1655740800 && nowTime < 1656259200) {
+    //     this.timeNow = '2022-06-27 00:00:00'
+    //     this.timeText = 'Claim end in'
+    //   } else if (nowTime > 1656259200) {
+    //     clearInterval(this.timer)
+    //   }
+    //   this.countDown(this.timeNow)
+    // }, 1000)
   },
   methods: {
     importIcon,
     countDown(time) {
-      let nowTime = +new Date()
-      let inputTime = +new Date(time)
+      let nowTime = new Date().getTime()
+      let inputTime = new Date(time).getTime()
       let times: string | number = (inputTime - nowTime) / 1000
       let d: string | number = parseInt(String(times / 60 / 60 / 24))
-      d = Number(String(d).substr(1))
       d = d < 10 ? '0' + d : d
       let h: string | number = parseInt(String((times / 60 / 60) % 24))
-      h = Number(String(h).substr(1))
       h = h < 10 ? '0' + h : h
       let m: string | number = parseInt(String((times / 60) % 60))
-      m = Number(String(m).substr(1))
       m = m < 10 ? '0' + m : m
       let s: string | number = parseInt(String(times % 60))
-      s = Number(String(s).substr(1))
       s = s < 10 ? '0' + s : s
       // return d + '天' + h + '时' + m + '分' + s + '秒';
       this.day = d
       this.hour = h
       this.min = m
       this.sec = s
-      // console.log(d, h, m, s)
     },
     comingsoon() {
       this.$notify.success({
@@ -128,25 +142,28 @@ export default Vue.extend({
 </script>
 <style lang="less" scoped>
 .farming-Banner,
-.farm-Banner {
+.active-banner {
   width: 1000px;
   height: 180px;
   background: url('@/assets/images/farming-nav-pc.png');
   background-size: 100% 100%;
   display: flex;
 }
-.farm-Banner {
-  background: url('@/assets/images/farm-banner.png');
+.active-banner {
+  background: url('@/assets/images/farm-active-banners.png');
   background-size: 100% 100%;
   height: 120px;
   display: flex;
   justify-content: space-between;
   > div {
     width: 400px;
+    p {
+      font-size: 12px;
+    }
   }
 }
 .farm-Countdown {
-  padding: 30px 0;
+  padding: 20px 0;
   font-size: 16px;
 }
 .farm-Countdown > div {
@@ -206,9 +223,9 @@ img {
   background: url('@/assets/images/img-mintnft_btn.png');
   background-size: 100% 100%;
   cursor: pointer;
-  &:hover {
-    background: url('@/assets/images/img-mintnft-btn.png');
-    background-size: 100% 100%;
-  }
+  // &:hover {
+  //   background: url('@/assets/images/img-mintnft-btn.png');
+  //   background-size: 100% 100%;
+  // }
 }
 </style>

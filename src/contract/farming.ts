@@ -334,8 +334,18 @@ export async function calculateWrapAmount(conn: any, wallet: any, wrapper: Publi
 // activity
 export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
   const sdk = makeSDK(conn, wallet)
-  const info = await sdk.activity.fetchCremaKeys(user)
-  return info
+  const info = await sdk.activity.fetchCremaKeysV2(sdk.provider.connection, user)
+  const result: any = {}
+  if (info && info.keys && info.keys.length > 0) {
+    info.keys.forEach(item => {
+      if (result[item.degree]) {
+        result[item.degree].push(item)
+      } else {
+        result[item.degree] = [item]
+      }
+    })
+  }
+  return result
 }
 
 export async function getMasterPda() {

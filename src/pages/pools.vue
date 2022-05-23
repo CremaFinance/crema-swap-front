@@ -219,6 +219,7 @@ export default Vue.extend({
       }
     },
     getList() {
+      this.$accessor.liquidity.getPairConfigApi()
       this.$accessor.liquidity.getPoolsDefaultPriceRange()
       setInterval(() => {
         this.$accessor.liquidity.getPoolsDefaultPriceRange()
