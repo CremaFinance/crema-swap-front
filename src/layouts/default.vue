@@ -79,7 +79,7 @@ export default Vue.extend({
     //   this.showNotice = true
     //   sessionStorage.setItem('crema_show_notice', '1')
     // }
-    console.log('screenWidth####这里没进来么')
+    // console.log('screenWidth####这里没进来么')
     this.watchScreen()
     window.onresize = () => {
       this.watchScreen()
