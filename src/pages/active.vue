@@ -336,6 +336,11 @@ export default Vue.extend({
       .h5-banner {
         display: none;
       }
+      .pc-banner {
+        width: 1400px;
+        display: flex;
+        justify-content: center;
+      }
     }
     .h5-search-pool {
       display: none;
