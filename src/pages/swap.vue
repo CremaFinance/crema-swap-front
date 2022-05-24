@@ -343,7 +343,18 @@ export default Vue.extend({
           const source_amount = new Decimal(this.fromCoinAmount).mul(decimal)
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
+
+          const test1 = new Decimal(2000)
+          const test2 = new Decimal(20000)
+
           const amountOut = (res && res.amountOut.toNumber()) || 0
+
+          if (res.amountUsed.lt(source_amount)) {
+            this.insufficientLiquidity = true
+            this.toCoinAmount = '0'
+            this.loading = false
+            return
+          }
 
           if (amountOut) {
             this.insufficientLiquidity = false
@@ -363,6 +374,13 @@ export default Vue.extend({
             direct === 0 ? swap.preSwapB(new Decimal(source_amount)) : swap.preSwapA(new Decimal(source_amount))
 
           const amountOut = (res && res.amountOut.toNumber()) || 0
+
+          if (res.amountUsed.lt(source_amount)) {
+            this.insufficientLiquidity = true
+            this.fromCoinAmount = '0'
+            this.loading = false
+            return
+          }
 
           if (amountOut) {
             this.insufficientLiquidity = false
