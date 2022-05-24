@@ -109,6 +109,10 @@
                   <span>x {{ currentKeyItem['crm'] }}</span>
                 </li>
                 <li>
+                  <img src="@/assets/coins/icon-ush.png" />
+                  <span>x {{ currentKeyItem['icon-ush'] }}</span>
+                </li>
+                <li>
                   <img src="@/assets/coins/hubble.png" />
                   <span>x {{ currentKeyItem['hubble'] }}</span>
                 </li>

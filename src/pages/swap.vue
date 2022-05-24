@@ -463,7 +463,12 @@ export default Vue.extend({
 
       const swap = await loadSwapPair(poolInfo.tokenSwapKey, this.$wallet)
       const amount = new Decimal(this.fromCoinAmount)
-      const lamports = swap.tokenALamports(amount)
+      let lamports: any
+      if (!direct) {
+        lamports = swap.tokenALamports(amount)
+      } else {
+        lamports = swap.tokenBLamports(amount)
+      }
 
       // const outATA = await getATAAddress({
       //   mint: !direct ? swap.tokenSwapInfo.tokenAMint : swap.tokenSwapInfo.tokenBMint,
@@ -482,8 +487,7 @@ export default Vue.extend({
 
       try {
         // const tx = await swap.swap(outATA, inATA, direct, lamports, new Decimal(fixD(minIncome, 0)))
-        console.log('toswap##direct####', direct)
-        const tx = await swap.swapAtomic(direct, lamports, new Decimal(fixD(minIncome, 0)))
+        const tx = await swap.swapAtomic(direct, lamports, new Decimal(fixD(minIncome.toString(), 0)))
         // const receipt = await res.confirm()
         const opt: BroadcastOptions = {
           skipPreflight: true,

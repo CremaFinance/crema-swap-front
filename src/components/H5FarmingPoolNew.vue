@@ -187,7 +187,7 @@
               v-else
               class="action-btn none-btn"
               :loading="isUnStaking && currentPosition && currentPosition.nftMintAddress === pitem.nftMintAddress"
-              :class="pitem.isStaked ? '' : 'un-stake'"
+              :class="pitem.isStaked ? 'un-stake' : ''"
               :disabled="isDisabled"
               @click="toUnStake(item, pitem)"
             >
