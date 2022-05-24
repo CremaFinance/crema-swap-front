@@ -349,17 +349,13 @@ export default Vue.extend({
 
           const amountOut = (res && res.amountOut.toNumber()) || 0
 
-          if (res.amountUsed.lt(source_amount)) {
-            this.insufficientLiquidity = true
-            this.toCoinAmount = '0'
-            this.loading = false
-            return
-          }
-
           if (amountOut) {
             this.insufficientLiquidity = false
             const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimal)
             this.toCoinAmount = decimalFormat(String(toCoinAmount), this.toCoin?.decimal)
+            if (res.amountUsed.lt(source_amount)) {
+              this.insufficientLiquidity = true
+            }
           } else {
             this.insufficientLiquidity = true
             this.toCoinAmount = '0'
@@ -375,17 +371,13 @@ export default Vue.extend({
 
           const amountOut = (res && res.amountOut.toNumber()) || 0
 
-          if (res.amountUsed.lt(source_amount)) {
-            this.insufficientLiquidity = true
-            this.fromCoinAmount = '0'
-            this.loading = false
-            return
-          }
-
           if (amountOut) {
             this.insufficientLiquidity = false
             const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimal)
             this.fromCoinAmount = decimalFormat(String(fromCoinAmount), this.fromCoin?.decimal)
+            if (res.amountUsed.lt(source_amount)) {
+              this.insufficientLiquidity = true
+            }
           } else {
             this.insufficientLiquidity = true
             this.fromCoinAmount = '0'
