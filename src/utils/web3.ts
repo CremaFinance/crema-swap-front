@@ -32,7 +32,6 @@ export const web3Config = {
     // { url: 'https://raydium.rpcpool.com', weight: 50 },
     // { url: 'https://api.mainnet-beta.solana.com', weight: 10 }
     // { url: 'https://api.devnet.solana.com', weight: 50 }
-    // { url: 'https://connect.runnode.com/?apikey=PMkQIG6CxY0ybWmaHRHJ', weight: 50 }
   ]
 }
 
