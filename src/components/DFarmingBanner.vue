@@ -76,7 +76,7 @@ export default Vue.extend({
       min: '',
       sec: '',
       timer: null,
-      caffeineMintAddress: '32JXVurQacMxQF6qFxKkeAbysQcXsCakuYx3eyYRBoSR'
+      caffeineMintAddress: 'CAFTP2Yof8bJuwSScigqnZaLQKiBzECgJPxvEDzfivzw'
       // caffeineAmount: 0
     }
   },
