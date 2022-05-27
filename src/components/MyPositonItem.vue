@@ -251,7 +251,9 @@ export default Vue.extend({
         //   return a.tvl_in_usd - b.tvl_in_usd
         // })
         console.log(tepList, 'tepList##')
-        this.list = tepList
+        this.list = tepList.sort((a, b) => {
+          return b.tvl_in_usd - a.tvl_in_usd
+        })
       }
     },
     watchInputValue(value) {

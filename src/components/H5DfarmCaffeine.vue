@@ -610,7 +610,7 @@ export default Vue.extend({
       if (newValue) {
         // this.getKeys()
         this.$emit('refreshKeysData')
-        this.$accessor.farming.getEarnings()
+        this.$accessor.farming.getEarningsObj()
         // this.$accessor.farming.getCaffeineAmount()
       }
     },

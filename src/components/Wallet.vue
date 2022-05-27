@@ -128,6 +128,7 @@ import { SlopeWalletAdapter } from '@solana/wallet-adapter-slope'
 import { SafePalWalletAdapter } from '@solana/wallet-adapter-safepal'
 import { BloctoWalletAdapter } from '@solana/wallet-adapter-blocto'
 import { BitpieWalletAdapter } from '@solana/wallet-adapter-bitpie'
+// import { BitKeepWalletAdapter } from '@solana/wallet-adapter-bitkeep'
 import LocalStorage from '@/utils/local-storage'
 import { getUnixTs } from '@/utils'
 
@@ -146,7 +147,8 @@ interface WalletInfo {
   // firefox extension install url
   firefoxUrl?: string
   // isExtension: boolean
-  getAdapter: (providerUrl?: string) => WalletAdapter
+  // getAdapter: (providerUrl?: string) => WalletAdapter
+  getAdapter: (providerUrl?: string) => any
 }
 
 interface Wallets {
@@ -171,6 +173,13 @@ export default class Wallet extends Vue {
         return new PhantomWalletAdapter()
       }
     },
+    // BitKeep: {
+    //   website: 'https://bitkeep.com',
+    //   chromeUrl: 'https://chrome.google.com/webstore/detail/bitkeep-bitcoin-crypto-wa/jiidiaalihmmhddjgbnbgdfflelocpak',
+    //   getAdapter() {
+    //     return new BitKeepWalletAdapter()
+    //   }
+    // },
     Blocto: {
       website: 'https://blocto.portto.io',
       getAdapter() {
@@ -390,9 +399,12 @@ export default class Wallet extends Vue {
   }
 
   onConnect() {
+    console.log('onConnect进来了吗####')
     const { name, adapter } = this.connectingWallet
     this.isLoading = false
     this.$accessor.wallet.closeModal().then(() => {
+      console.log('onConnect###adapter####', adapter)
+      console.log('onConnect###adapter.publicKey###', adapter?.publicKey)
       if (adapter && adapter.publicKey) {
         // mock wallet
         // const address = new PublicKey('')
@@ -526,6 +538,20 @@ export default class Wallet extends Vue {
       // this.isLoading = true
       return
     }
+
+    // if (name === 'BitKeep') {
+    //   try {
+    //     console.log('bitkeep###connect start###')
+    //     await (window as any).bitkeep.solana.connect()
+    //     const publicKey = await (window as any).bitkeep.solana.getAccount()
+    //     console.log('bitkeep###publicKey####', publicKey)
+    //     const test = (window as any).bitkeep.solana.publicKey.toString() // Once the web application is connected to Bitkeep,
+    //     console.log('bitkeep###test###', test)
+    //   } catch (err) {
+    //     console.log('bitkeep connected error', err)
+    //   }
+    // }
+
     console.log('name123#####', name)
     this.currentWalletName = name
     const { providerUrl } = wallet

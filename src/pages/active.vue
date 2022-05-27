@@ -362,6 +362,8 @@ export default Vue.extend({
   .farming-container {
     width: 100%;
     padding: 40px 0px 0;
+    margin-top: 0px;
+    padding-top: 20px;
     background: none;
     .farming-container-center {
       width: 100%;
