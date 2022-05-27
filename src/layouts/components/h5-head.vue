@@ -9,8 +9,7 @@
         </div>
         <div class="right">
           <!-- <div class="fair-gi">
-            <img src="@/assets/images/Fire-lans.gif" alt="" />
-            <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span>
+            <nuxt-link to="/ido"><img src="@/assets/images/Text-NGU.gif" alt="" /></nuxt-link>
           </div> -->
           <SystemSetting></SystemSetting>
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
@@ -203,14 +202,16 @@ export default {
         cursor: pointer;
       }
       .fair-gi {
-        margin: 4px 18px 0 0;
-        font-size: 14px;
-        font-weight: bold;
-        background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        // white-space: nowrap;
+        // margin: 4px 18px 0 0;
+        margin-right: 20px;
+        // font-size: 14px;
+        // font-weight: bold;
+        // background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
+        // -webkit-background-clip: text;
+        // -webkit-text-fill-color: transparent;
         img {
-          width: 36px;
+          width: 120px;
         }
       }
     }

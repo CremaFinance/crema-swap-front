@@ -26,7 +26,8 @@ export default Vue.extend({
   justify-content: center;
   width: 100%;
   min-height: 36px;
-  background: rgba(#ff2a00, 0.1);
+  // background: rgba(#ff2a00, 0.1);
+  background: #37282a;
   padding: 0px 20px;
   span {
     color: rgba(255, 255, 255, 0.5);

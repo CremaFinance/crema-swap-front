@@ -294,8 +294,11 @@ export const actions = actionTree(
       console.log('getEarnings###rewardTokenInfo####', rewardTokenInfo)
       const rewardTokenDecimal = rewardTokenInfo.value.decimals
 
-      const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
-      commit('setEarnings', earning)
+      console.log('farming.ts###miner###', miner)
+      if (miner) {
+        const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
+        commit('setEarnings', earning)
+      }
     },
     async getEarningsObj({ state, commit }, haveLoading) {
       const conn = this.$web3
