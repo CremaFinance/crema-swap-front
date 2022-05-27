@@ -8,7 +8,7 @@ import {
   fetchCremaSwaps
 } from '@/contract/farming'
 import { PublicKey } from '@solana/web3.js'
-import { calculateTokenAmount, tick2Price } from 'test-crema-sdk'
+import { calculateTokenAmount, tick2Price, tick2UiPrice, lamportPrice2uiPrice } from 'test-crema-sdk'
 import Decimal from 'decimal.js'
 import { TOKENS } from '@/utils/tokens'
 import { decimalFormat, addCommom } from '@/utils'
@@ -161,6 +161,12 @@ export const actions = actionTree(
 
       const swap: any = await fetchCremaSwaps([new PublicKey(farmingInfo.swapKey)], conn)
 
+      const currentPrice = lamportPrice2uiPrice(
+        swap.currentSqrtPrice.pow(2),
+        tokenA.decimal,
+        tokenB.decimal
+      ).toNumber()
+
       console.log('getPositionObj###swap####', swap)
 
       if (wallet) {
@@ -175,6 +181,7 @@ export const actions = actionTree(
 
         const cpresult: any = []
         for (let j = 0; j < canStatePositions.length; j++) {
+          console.log('j###', j, 'canStatePositions[j].liquity###', canStatePositions[j].liquity.toString())
           const amount = await calculateTokenAmount(
             canStatePositions[j].lowerTick,
             canStatePositions[j].upperTick,
@@ -183,7 +190,11 @@ export const actions = actionTree(
             swap.currentSqrtPrice
           )
 
-          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimal)).mul(swap.currentPrice)
+          console.log('getPositionObj####amount.amountA####', amount.amountA.toString())
+          console.log('getPositionObj####amount.amountB####', amount.amountB.toString())
+          console.log('getPositionObj####currentPrice###', currentPrice.toString())
+
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimal)).mul(currentPrice)
           const amountB = amount.amountB.div(Math.pow(10, tokenB.decimal))
 
           console.log('getPositionObj####amountA###', amountA.toString())
@@ -214,13 +225,21 @@ export const actions = actionTree(
             nftAccountAddress: canStatePositions[j].nftAccount.toString(),
             liquityToString: canStatePositions[j].liquity.toString(),
             liquityUSD: addCommom(liquityUSD.toString(), 4),
+            // lowerPrice:
+            //   canStatePositions[j].lowerTick !== -443632
+            //     ? decimalFormat(tick2Price(canStatePositions[j].lowerTick).toString(), 6)
+            //     : '0',
+            // upperPrice:
+            //   canStatePositions[j].upperTick !== 443632
+            //     ? decimalFormat(tick2Price(canStatePositions[j].upperTick).toString(), 6)
+            //     : '∞',
             lowerPrice:
               canStatePositions[j].lowerTick !== -443632
-                ? decimalFormat(tick2Price(canStatePositions[j].lowerTick).toString(), 6)
+                ? decimalFormat(tick2UiPrice(canStatePositions[j].lowerTick, tokenA.decimal, tokenB.decimal).toString(), 6)
                 : '0',
             upperPrice:
               canStatePositions[j].upperTick !== 443632
-                ? decimalFormat(tick2Price(canStatePositions[j].upperTick).toString(), 6)
+                ? decimalFormat(tick2UiPrice(canStatePositions[j].upperTick, tokenA.decimal, tokenB.decimal).toString(), 6)
                 : '∞',
             isStaked: false,
             withinRange
@@ -243,7 +262,7 @@ export const actions = actionTree(
             swap.currentSqrtPrice
           )
 
-          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimal)).mul(swap.currentPrice)
+          const amountA = amount.amountA.div(Math.pow(10, tokenA.decimal)).mul(currentPrice)
           const amountB = amount.amountB.div(Math.pow(10, tokenB.decimal))
 
           // const liquityUSD = amountA.mul(RATES[tokenA.symbol]).plus(amountB.mul(RATES[tokenB.symbol]))
@@ -257,13 +276,21 @@ export const actions = actionTree(
             nftAccountAddress: item.nftVault.toString(),
             liquityToString: stakedPositons[k].liquity.toString(),
             liquityUSD: addCommom(liquityUSD.toString(), 4),
+            // lowerPrice:
+            //   stakedPositons[k].lowerTick !== -443632
+            //     ? decimalFormat(tick2Price(stakedPositons[k].lowerTick).toString(), 6)
+            //     : '0',
+            // upperPrice:
+            //   stakedPositons[k].upperTick !== 443632
+            //     ? decimalFormat(tick2Price(stakedPositons[k].upperTick).toString(), 6)
+            //     : '∞',
             lowerPrice:
               stakedPositons[k].lowerTick !== -443632
-                ? decimalFormat(tick2Price(stakedPositons[k].lowerTick).toString(), 6)
+                ? decimalFormat(tick2UiPrice(stakedPositons[k].lowerTick, tokenA.decimal, tokenB.decimal).toString(), 6)
                 : '0',
             upperPrice:
               stakedPositons[k].upperTick !== 443632
-                ? decimalFormat(tick2Price(stakedPositons[k].upperTick).toString(), 6)
+                ? decimalFormat(tick2UiPrice(stakedPositons[k].upperTick, tokenA.decimal, tokenB.decimal).toString(), 6)
                 : '∞',
             isStaked: true
           })

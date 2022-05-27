@@ -262,6 +262,9 @@ export const actions = actionTree(
         const fromCoinAmount = fixD(amountA.div(Math.pow(10, currentData.token_a.decimal)), currentData.token_a.decimal)
         const toCoinAmount = fixD(amountB.div(Math.pow(10, currentData.token_b.decimal)), currentData.token_b.decimal)
 
+        console.log('setCurrentPositon####fromCoinAmount####', fromCoinAmount.toString())
+        console.log('setCurrentPositon####toCoinAmount####', toCoinAmount.toString())
+
         // const current
         const currentPrice = currentData.currentPriceView
         const minPrice = Number(currentData.minPrice)
@@ -283,6 +286,8 @@ export const actions = actionTree(
 
         const tokenaFee = feeObj.amountA.div(Math.pow(10, currentData.token_a.decimal))
         const tokenbFee = feeObj.amountB.div(Math.pow(10, currentData.token_b.decimal))
+
+        console.log('setCurrentPositon####currentPrice####', currentPrice.toString())
 
         // amountUSD计算
         const fromCoinAmountBig = new BigNumber(fromCoinAmount)
