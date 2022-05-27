@@ -10,10 +10,11 @@ import * as fs from 'fs'
 import invariant from 'tiny-invariant'
 import * as toml from 'toml'
 import { QuarrySDK } from '@cremafinance/crema-farming'
-
 export async function currentTs(connection: Connection): Promise<BN> {
   const solt = await connection.getSlot()
   const ts = await connection.getBlockTime(solt)
   invariant(ts !== null, 'Get block time failed')
   return new BN(ts?.toString())
 }
+
+

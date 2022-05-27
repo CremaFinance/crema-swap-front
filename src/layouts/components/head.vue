@@ -2,15 +2,16 @@
   <div class="header-container">
     <NetworkWarnning v-if="$accessor.showNetWorkWarnning" @close="closeNetworkWarning"></NetworkWarnning>
     <div class="header-content-container">
-      <div class="header-content" style="background: none">
+      <div class="header-content">
         <a class="logo" href="https://www.crema.finance/" target="_blank">
           <img src="../../assets/images/logo@2x@2x.png" />
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </a>
         <!-- <div v-if="fairShow == 'header-fair'" class="fair-gi"> -->
         <!-- <div class="fair-gi">
-          <img src="@/assets/images/Fire-lans.gif" alt="" />
-          <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span>
+          <img src="@/assets/images/icon-left.png" alt="" />
+          <nuxt-link to="/ido"><img src="@/assets/images/Text-NGU.gif" alt="" /></nuxt-link>
+          <img src="@/assets/images/icon-right.png" alt="" />
         </div> -->
         <div class="left">
           <nav>
@@ -120,7 +121,7 @@ export default Vue.extend({
       deep: true
     },
     $route(to, from) {
-      if (to.path == '/fair') {
+      if (to.path == '/ido') {
         this.fairShow = 'header-fair'
       } else {
         this.fairShow = ''
@@ -144,6 +145,7 @@ export default Vue.extend({
 }
 .header-content-container {
   padding: 0px 40px;
+  background: #22252b;
 }
 .header-content {
   display: flex;
@@ -153,7 +155,7 @@ export default Vue.extend({
   width: 100%;
   // margin: 0px 40px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: #22252b;
+
   position: relative;
   // padding: 0px 40px;
   > .left {
@@ -179,27 +181,33 @@ export default Vue.extend({
   .fair-gi {
     position: absolute;
     left: 160px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    // display: flex;
+    // justify-content: space-between;
+    // align-items: center;
+    cursor: pointer;
+    > img {
+      width: 8px;
+      height: 8px !important;
+    }
     img {
-      width: 36px;
+      // width: 36px;
+      height: 79px;
     }
-    span {
-      font-size: 16px;
-      margin-top: 2px;
-      font-weight: bold;
-      background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      // font-family: 'DIN-Regular';
-      cursor: pointer;
-      &:hover {
-        background: linear-gradient(48deg, #df86fa 0%, #b8d3ff 40%, #83e9fd 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-    }
+    // span {
+    //   font-size: 16px;
+    //   margin-top: 2px;
+    //   font-weight: bold;
+    //   background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
+    //   -webkit-background-clip: text;
+    //   -webkit-text-fill-color: transparent;
+    //   // font-family: 'DIN-Regular';
+    //   cursor: pointer;
+    //   &:hover {
+    //     background: linear-gradient(48deg, #df86fa 0%, #b8d3ff 40%, #83e9fd 100%);
+    //     -webkit-background-clip: text;
+    //     -webkit-text-fill-color: transparent;
+    //   }
+    // }
   }
   nav {
     flex: 1;

@@ -24,10 +24,16 @@
                   </svg> -->
                     <div class="coin-box">
                       <div class="coin-before-box">
-                        <img class="coin-before" :src="importIcon(`/coins/${pItem.tokenA.toLowerCase()}.png`)" />
+                        <img
+                          class="coin-before"
+                          :src="pItem.tokenAicon || importIcon(`/coins/${pItem.tokenA.toLowerCase()}.png`)"
+                        />
                       </div>
                       <div class="coin-after-box">
-                        <img class="coin-after" :src="importIcon(`/coins/${pItem.tokenB.toLowerCase()}.png`)" />
+                        <img
+                          class="coin-after"
+                          :src="pItem.tokenBicon || importIcon(`/coins/${pItem.tokenB.toLowerCase()}.png`)"
+                        />
                       </div>
                     </div>
                     <div class="symbol-name">{{ pItem.tokenA }} - {{ pItem.tokenB }}</div>
@@ -128,7 +134,9 @@ export default Vue.extend({
       openIndex: null,
       list: [],
       myPosition: {},
-      statisticsInfo: {}
+      statisticsInfo: {},
+      tokensObj: {},
+      poolsDefaultPriceRangeObj: ''
     }
   },
   computed: {
@@ -144,8 +152,16 @@ export default Vue.extend({
     }
   },
   watch: {
+    'liquidity.coinPairConfigList': {
+      handler: 'watchCoinPairConfigList',
+      immediate: true
+    },
     'liquidity.myPositions': {
       handler: 'watchMyPositions',
+      immediate: true
+    },
+    'liquidity.tokensObj': {
+      handler: 'watchTokensObj',
       immediate: true
     },
     'wallet.connected'(newVal) {
@@ -161,8 +177,8 @@ export default Vue.extend({
       handler: 'watchMyPositionObj',
       immediate: true
     },
-    'liquidity.statisticsInfo': {
-      handler: 'watchStatisticsInfo',
+    'liquidity.poolsDefaultPriceRangeObj': {
+      handler: 'watchPoolsDefaultPriceRangeObj',
       immediate: true
     },
     selectCoin: {
@@ -176,6 +192,9 @@ export default Vue.extend({
   },
   methods: {
     importIcon,
+    watchTokensObj(info) {
+      console.log(info, 'info##')
+    },
     gotoPool(pItem) {
       if (this.wallet.connected) {
         this.$router.push(`/deposit?from=${pItem.tokenA}&to=${pItem.tokenB}`)
@@ -196,26 +215,33 @@ export default Vue.extend({
       this.$accessor.liquidity.setCurrentPositon(null)
       this.$router.push(`/detail/${item.nftTokenId}`)
     },
-    watchStatisticsInfo(info) {
+    watchPoolsDefaultPriceRangeObj(info) {
+      this.poolsDefaultPriceRangeObj = info
+      this.watchSelectCoin(this.selectCoin)
+    },
+    watchCoinPairConfigList(info) {
       this.statisticsInfo = info
       this.watchSelectCoin(this.selectCoin)
     },
     watchSelectCoin(coin) {
-      if (this.statisticsInfo && this.statisticsInfo.pools && this.statisticsInfo.pools.length > 0) {
-        let result = this.statisticsInfo.pools || []
-        console.log(result, 'result##')
+      if (this.statisticsInfo && this.statisticsInfo && this.statisticsInfo.length > 0) {
+        console.log(this.statisticsInfo, 'this.statisticsInfo##')
+        let result = this.statisticsInfo || []
         if (coin !== 'All') {
           result = result.filter((ele) => ele && ele.name.includes(coin))
         }
         let tepList: any = []
         result.forEach((ele) => {
+          const result = this.poolsDefaultPriceRangeObj[ele.swap_account]
           // const amount_usd = this.myPosition[ele.name] ? this.calculate(this.myPosition[ele.name]) : ''
           tepList.push({
-            tokenA: ele.name.split('-')[0],
-            tokenB: ele.name.split('-')[1],
+            tokenA: ele.token_a.symbol,
+            tokenAicon: ele.token_a.icon,
+            tokenB: ele.token_b.symbol,
+            tokenBicon: ele.token_b.icon,
             name: ele.name,
-            tvl_in_usd: fixD(ele.tvl_in_usd, 2),
-            vol_in_usd_24h: fixD(ele.vol_in_usd_24h, 2),
+            tvl_in_usd: fixD(result && result.tvl_in_usd, 2),
+            vol_in_usd_24h: fixD(result && result.vol_in_usd_24h, 2),
             ...this.myPosition[ele.name]
             // amount_usd,
           })

@@ -7,29 +7,29 @@
           <img :src="importIcon(`/images/${currentKeyItem.img}@2x.png`)" alt="" />
         </div>
       </div>
-      <h3 style="font-weight: bold; padding: 0 20px; margin-top: 20px">
-        Congratulations, you can mint a diamond key that can unlock rewards up to {{ currentKeyItem.maxpreReward }}.
-        {{ currentKeyItem.img }}
+      <h3 style="font-weight: bold; padding: 0 20px; margin-top: 20px; text-align: center">
+        Congratulations, you can mint a {{ currentKeyItem.key }}.
+        <!-- that can unlock rewards up to {{ currentKeyItem.maxpreReward }}. -->
       </h3>
       <div class="mint-NFT-Total">
         <div class="mint-NFT-Total-Top">
           <div>
-            <span>Total Consume</span>
+            <!-- <span>Total Consume</span> -->
+            <span>Spend</span>
           </div>
           <div>
             <span class="mint-NFT-Total-val" style="font-size: 24px">{{ currentKeyItem.minRequireAmount }}</span>
             <span>Caffeine</span>
           </div>
         </div>
-        <p></p>
-        <div class="mint-NFT-Total-Bot">
+        <!-- <p></p> -->
+        <!-- <div class="mint-NFT-Total-Bot">
           <div>Fee</div>
-          <!-- <div>Mint Fee</div> -->
           <div>
-            <span class="mint-NFT-Total-val">1,000</span>
+            <span class="mint-NFT-Total-val">0.01170976</span>
             <span>SOL</span>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="mint-NFT-btn-box">
         <Button class="mint-NFT-btn" :loading="isMinting" @click="$emit('toMint')"> Mint </Button>
@@ -104,11 +104,11 @@ export default Vue.extend({
     }
   }
   .mint-NFT-Total {
-    height: 100px;
+    height: 60px;
     background: rgba(#000, 0.2);
     border-radius: 10px;
     margin-top: 20px;
-    padding: 12px 20px 20px;
+    padding: 12px 20px;
     > div {
       display: flex;
       justify-content: space-between;

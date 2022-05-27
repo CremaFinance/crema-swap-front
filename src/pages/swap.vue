@@ -343,12 +343,19 @@ export default Vue.extend({
           const source_amount = new Decimal(this.fromCoinAmount).mul(decimal)
           const res: any =
             direct === 0 ? swap.preSwapA(new Decimal(source_amount)) : swap.preSwapB(new Decimal(source_amount))
+
+          const test1 = new Decimal(2000)
+          const test2 = new Decimal(20000)
+
           const amountOut = (res && res.amountOut.toNumber()) || 0
 
           if (amountOut) {
             this.insufficientLiquidity = false
             const toCoinAmount = Number(amountOut) / Math.pow(10, this.toCoin?.decimal)
             this.toCoinAmount = decimalFormat(String(toCoinAmount), this.toCoin?.decimal)
+            if (res.amountUsed.lt(source_amount)) {
+              this.insufficientLiquidity = true
+            }
           } else {
             this.insufficientLiquidity = true
             this.toCoinAmount = '0'
@@ -368,6 +375,9 @@ export default Vue.extend({
             this.insufficientLiquidity = false
             const fromCoinAmount = Number(amountOut) / Math.pow(10, this.fromCoin?.decimal)
             this.fromCoinAmount = decimalFormat(String(fromCoinAmount), this.fromCoin?.decimal)
+            if (res.amountUsed.lt(source_amount)) {
+              this.insufficientLiquidity = true
+            }
           } else {
             this.insufficientLiquidity = true
             this.fromCoinAmount = '0'
@@ -463,7 +473,12 @@ export default Vue.extend({
 
       const swap = await loadSwapPair(poolInfo.tokenSwapKey, this.$wallet)
       const amount = new Decimal(this.fromCoinAmount)
-      const lamports = swap.tokenALamports(amount)
+      let lamports: any
+      if (!direct) {
+        lamports = swap.tokenALamports(amount)
+      } else {
+        lamports = swap.tokenBLamports(amount)
+      }
 
       // const outATA = await getATAAddress({
       //   mint: !direct ? swap.tokenSwapInfo.tokenAMint : swap.tokenSwapInfo.tokenBMint,
@@ -482,8 +497,7 @@ export default Vue.extend({
 
       try {
         // const tx = await swap.swap(outATA, inATA, direct, lamports, new Decimal(fixD(minIncome, 0)))
-        console.log('toswap##direct####', direct)
-        const tx = await swap.swapAtomic(direct, lamports, new Decimal(fixD(minIncome, 0)))
+        const tx = await swap.swapAtomic(direct, lamports, new Decimal(fixD(minIncome.toString(), 0)))
         // const receipt = await res.confirm()
         const opt: BroadcastOptions = {
           skipPreflight: true,

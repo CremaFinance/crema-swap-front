@@ -7,12 +7,32 @@
         </div>
         <div></div>
         <div>
-          <img :src="importIcon(`/images/${canUpgradeHeighKeyItem.img}@2x.png`)" alt="" />
+          <!-- <img :src="importIcon(`/images/${canUpgradeHeighKeyItem.img}@2x.png`)" alt="" /> -->
+          <img :src="importIcon(`/images/${upgradeObject.img}@2x.png`)" alt="" />
         </div>
       </div>
-      <div class="mint-NFT-detail">
-        Congratulations, you can upgrade from Bronze Key to Silver Key that can unlock unlock rewards up to
-        {{ canUpgradeHeighKeyItem.minRequireAmount - currentKeyItem.minRequireAmount }}。
+      <h3 style="font-weight: bold; padding: 0 10px; margin-top: 30px">
+        Congratulations, you can upgrade from {{ currentKeyItem.key }} to {{ upgradeObject.key }}.
+      </h3>
+      <!-- <div class="mint-NFT-detail">
+        Congratulations, you can upgrade from Bronze Key to Silver Key.
+      </div> -->
+      <!-- that can unlock unlock rewards up to
+        {{ canUpgradeHeighKeyItem.minRequireAmount - currentKeyItem.minRequireAmount }} -->
+
+      <div class="mint-NFT-Total">
+        <div class="mint-NFT-Total-Top">
+          <div>
+            <!-- <span>Total Consume</span> -->
+            <span>Spend</span>
+          </div>
+          <div>
+            <span class="mint-NFT-Total-val" style="font-size: 24px">
+              {{ upgradeObject.minRequireAmount - currentKeyItem.minRequireAmount }}
+            </span>
+            <span>Caffeine</span>
+          </div>
+        </div>
       </div>
 
       <div class="mint-NFT-btn-box">
@@ -53,6 +73,12 @@ export default Vue.extend({
       }
     },
     canUpgradeHeighKeyItem: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    upgradeObject: {
       type: Object,
       default: () => {
         return {}
@@ -107,8 +133,25 @@ export default Vue.extend({
     height: 100px;
     padding: 20px;
     margin-top: 20px;
+    // background: rgba(#000, 0.2);
+    border-radius: 10px;
+  }
+  .mint-NFT-Total {
+    height: 60px;
     background: rgba(#000, 0.2);
     border-radius: 10px;
+    margin-top: 20px;
+    padding: 12px 20px;
+    .mint-NFT-Total-Top {
+      height: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      > div:nth-child(1) {
+        height: 36px;
+        padding-top: 11px;
+      }
+    }
   }
   .mint-NFT-btn-box {
     height: 48px;

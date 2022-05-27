@@ -34,7 +34,6 @@ export const mutations = mutationTree(state, {
   },
   setShowSubmitted(state, status: boolean) {
     state.showWaiting = false
-    console.log(status, 'status##')
     state.showSubmitted = status
   },
   setTransactionDesc(state, desc: string) {

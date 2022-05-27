@@ -913,6 +913,13 @@ export default Vue.extend({
   font-size: 14px;
   font-weight: 100;
 }
+button.ant-btn {
+  &:disabled {
+    &:hover {
+      color: rgba(255, 255, 255, 0.4) !important;
+    }
+  }
+}
 .btn-wind {
   width: 132px;
 }

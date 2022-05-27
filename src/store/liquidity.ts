@@ -35,7 +35,8 @@ export const state = () => ({
   statisticsInfo: {},
   poolListLoading: true,
   currentPositonLoading: false,
-  myPositionLoading: false
+  myPositionLoading: false,
+  coinPairConfigList: []
   // userPositionAccountObj: {} as any
 })
 
@@ -102,6 +103,8 @@ export const mutations = mutationTree(state, {
     console.log('tokensObj####', tokensObj)
     state.tokensObj = tokensObj
     state.coinPairConfigObj = coinPairConfigObj
+    state.coinPairConfigList = list
+    console.log(state.coinPairConfigList, 'state.coinPairConfigList##')
   },
   setPoolsObj(state, res) {
     state.poolsObj = res
@@ -235,8 +238,8 @@ export const actions = actionTree(
           break
         }
       }
-      commit('setCurrentPositonLoading', true)
 
+      commit('setCurrentPositonLoading', true)
       console.log('setCurrentPositon####currentData###', currentData)
 
       const swap: any = await loadSwapPair(currentData.tokenSwapKey, wallet)
@@ -295,7 +298,7 @@ export const actions = actionTree(
           try {
             const price = await getprice(currentData.token_b.symbol.toLowerCase())
             pcSymbolRate = price
-          } catch (err) {}
+          } catch (err) { }
         }
 
         if (currentData.token_b.symbol.toUpperCase() === 'CUSDC') {
@@ -312,9 +315,6 @@ export const actions = actionTree(
         let toPercent: any = toCoinAmountBig.toNumber()
           ? toCoinAmountBig.multipliedBy(pcSymbolRate).dividedBy(amountUSDBig).multipliedBy(100)
           : new BigNumber(0)
-
-        console.log('123###fromPercent###', fromPercent.toString())
-        console.log('123###toPercent###', toPercent.toString())
 
         fromPercent = Math.round(fromPercent.toNumber())
         toPercent = Math.round(toPercent.toNumber())
@@ -377,7 +377,7 @@ export const actions = actionTree(
           commit('setPoolListLoading', false)
         }
         pools.forEach((item: any) => {
-          result[item.name] = item
+          result[item.swap_account] = item
         })
         console.log('getPoolsDefaultPriceInterval###result#####', result)
         commit('setPoolsDefaultPriceRangeObj', result)
@@ -390,8 +390,9 @@ export const actions = actionTree(
       this.$axios.get(`https://api.crema.finance/config?name=swap-pairs`).then((res) => {
         console.log('getPairConfigApi###res####', res)
         if (res && res.data) {
+
           commit('setCoinPairConfig', [
-            ...res.data
+            ...res.data,
             // {
             //   fee: '0.0001',
             //   name: 'CNSOL-CNUSDC',
@@ -405,14 +406,16 @@ export const actions = actionTree(
             //     name: 'CNSOL test',
             //     symbol: 'CNSOL',
             //     swap_token_account: '',
-            //     token_mint: '8CZUSdQu5A6jE4oWMVYRZ29QVpYXigostjnYbWjXuCYs'
+            //     token_mint: '8CZUSdQu5A6jE4oWMVYRZ29QVpYXigostjnYbWjXuCYs',
+            //     icon: ''
             //   },
             //   token_b: {
             //     decimal: 6,
             //     name: 'CNUSDC test',
             //     symbol: 'CNUSDC',
             //     swap_token_account: '',
-            //     token_mint: 'BVwhuJSmKCTXVCP6y1Vyso46Z8tktD3LBBkBGtcESvji'
+            //     token_mint: 'BVwhuJSmKCTXVCP6y1Vyso46Z8tktD3LBBkBGtcESvji',
+            //     icon: ''
             //   }
             // },
             // {
@@ -428,14 +431,41 @@ export const actions = actionTree(
             //     name: 'TEST1 test',
             //     symbol: 'TEST1',
             //     swap_token_account: '',
-            //     token_mint: '5TCMBNQ6QV5a57c9vbCusv9BSK83rsPzTLoDFeyxaEWb'
+            //     token_mint: '5TCMBNQ6QV5a57c9vbCusv9BSK83rsPzTLoDFeyxaEWb',
+            //     icon: ''
             //   },
             //   token_b: {
             //     decimal: 9,
             //     name: 'TEST2 test',
             //     symbol: 'TEST2',
             //     swap_token_account: '',
-            //     token_mint: 'ETJ8GA6R9h3H6KEzbpRR1ZCT14ePQaNeDUWHGV5aMqNt'
+            //     token_mint: 'ETJ8GA6R9h3H6KEzbpRR1ZCT14ePQaNeDUWHGV5aMqNt',
+            //     icon: ''
+            //   }
+            // },
+            // {
+            //   fee: '0.0001',
+            //   name: 'cSOL-SOL',
+            //   price_interval: {
+            //     lower_price: '0.9',
+            //     upper_price: '1.1'
+            //   },
+            //   swap_account: 'VN7kVGTF8yNejs1Su1owEN3byo4HaBoZk9dnBnC9z4V',
+            //   token_a: {
+            //     decimal: 9,
+            //     name: 'cSOL',
+            //     symbol: 'cSOL',
+            //     swap_token_account: '',
+            //     token_mint: 'CSoLEzPj3EWGpZthSwKSHr8U9WQJrg93vCkURGkLEcQH',
+            //     icon: ''
+            //   },
+            //   token_b: {
+            //     decimal: 9,
+            //     name: 'SOL',
+            //     symbol: 'SOL',
+            //     swap_token_account: '',
+            //     token_mint: 'So11111111111111111111111111111111111111112',
+            //     icon: ''
             //   }
             // }
           ])

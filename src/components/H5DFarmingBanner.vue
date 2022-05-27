@@ -19,13 +19,14 @@
         <a class="farming-Btn" @click="comingsoon"></a>
       </div>
     </div>
-    <div v-if="isFarming == 'Farm'" class="farm-Banner">
-      <div class="farm-Banner-value">Stake start in</div>
+    <div v-if="isFarming == 'Farm'" class="active-banner">
+      <!-- <div class="active-banner-value">Stake start in {{ day }}</div> -->
+      <!-- <div class="active-banner-value">{{ timeText }}</div>
       <div class="farming-Banner-time">
         <span>{{ day ? day : '--' }}</span> : <span>{{ hour ? hour : '--' }}</span> :
         <span>{{ min ? min : '--' }}</span> :
         <span>{{ sec ? sec : '--' }}</span>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -58,15 +59,21 @@ export default Vue.extend({
   data() {
     return {
       stakeTitle: 'Stake',
+      timeNow: '2022-6-20 0:0:0',
+      timeText: 'Deposit end in',
       day: '',
       hour: '',
       min: '',
-      sec: ''
+      sec: '',
+      timer: null
     }
   },
   computed: {
     ...mapState(['wallet']),
     caffeineAmount() {
+      // 6.20-1655654400
+      // 当前 Math.round(new Date().valueOf() / 1000)
+
       if (this.wallet && this.wallet.tokenAccounts) {
         const account: any = this.wallet.tokenAccounts
         // console.log('account###', account)
@@ -81,15 +88,25 @@ export default Vue.extend({
   },
   watch: {},
   mounted() {
-    window.setInterval(() => {
-      this.countDown('2022-4-30 0:0:0')
-    }, 1000)
+    // this.timer = setInterval(() => {
+    //   const nowTime = Math.round(new Date().valueOf() / 1000)
+    //   if (nowTime > 1655654400 && nowTime < 1655740800) {
+    //     this.timeNow = '2022-06-21 00:00:00'
+    //     this.timeText = 'Claim start in'
+    //   } else if (nowTime > 1655740800 && nowTime < 1656259200) {
+    //     this.timeNow = '2022-06-27 00:00:00'
+    //     this.timeText = 'Claim end in'
+    //   } else if (nowTime > 1656259200) {
+    //     clearInterval(this.timer)
+    //   }
+    //   this.countDown(this.timeNow)
+    // }, 1000)
   },
   methods: {
     importIcon,
     countDown(time) {
-      let nowTime = +new Date()
-      let inputTime = +new Date(time)
+      let nowTime = new Date().getTime()
+      let inputTime = new Date(time).getTime()
       let times: string | number = (inputTime - nowTime) / 1000
       let d: string | number = parseInt(String(times / 60 / 60 / 24))
       d = d < 10 ? '0' + d : d
@@ -163,10 +180,11 @@ img {
   background: url('@/assets/images/img-mintnft_btn-h5.png');
   background-size: 100% 100%;
 }
-.farm-Banner {
+.active-banner {
   width: 100%;
-  height: 150px;
-  background: url('@/assets/images/farm-banner-h5.png');
+  // height: 150px;
+  height: 120px;
+  background: url('@/assets/images/farm-active-banners-h5.png');
   background-size: 100% 100%;
   padding: 70px 14px 0;
 }

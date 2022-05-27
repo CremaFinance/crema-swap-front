@@ -1,5 +1,5 @@
 <template>
-  <div class="fair-container">
+  <div class="fair-container" v-if="!loading">
     <div class="fair-container-center">
       <div class="fair-coin">
         <div class="fair-coin-one"></div>
@@ -7,20 +7,96 @@
         <div class="fair-coin-three"></div>
         <div class="fair-coin-four"></div>
       </div>
-      <FairLeft />
+      <FairLeft
+        :pool-usdcall="poolUsdcall"
+        :poolAccountInfo="poolAccountInfo"
+        :pool-water="poolWater"
+        :tokenPrice="tokenPrice"
+        @getPoolAcount="getPoolAcount"
+      />
     </div>
   </div>
+  <div v-else><Spin size="large" /></div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { Input } from 'ant-design-vue'
+import { Input, Spin } from 'ant-design-vue'
+import {
+  programGen,
+  getPoolAccount,
+  // initializePool,
+  exchangeUsdcForRedeemable,
+  WithdrawRedeemableTokens
+} from '@/contract/fair'
+import { mapState } from 'vuex'
+import IdoIdl from '@/idl/ido_pool.json'
+import * as anchor from '@project-serum/anchor'
+import { Connection, PublicKey, Keypair } from '@solana/web3.js'
+// import { decimalFormat } from '@/utils'
+import { checkNullObj, decimalFormat, fixD } from '@/utils'
+import BigNumber from 'bignumber.js'
+import { toNumber } from 'lodash'
+// const SOLANA_RPC_ENDPOINT = 'https://solana-api.projectserum.com'
+import * as serum from '@project-serum/common'
+import { getATAAddress } from '@saberhq/token-utils'
+import { publicKey } from '@project-serum/borsh'
+import { POOL_ACCOUNT, USDC_DECIMAL, MELON_DECIMAL, REDEEM_MINT, POOL_MELON_NUM } from '@/utils/fair'
 export default Vue.extend({
+  components: {
+    Spin
+  },
   data() {
     return {
-      poolStatus: ''
+      poolUsdcall: null,
+      poolWater: '',
+      poolAccountInfo: {},
+      tokenPrice: null,
+      loading: true,
+      poolRedeemToken: null
     }
   },
-  methods: {}
+  computed: {
+    ...mapState(['wallet'])
+  },
+  mounted() {
+    this.getPoolAcount()
+    const _this = this
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        _this.getPoolAcount()
+      }
+    })
+  },
+  methods: {
+    // 池子信息
+    async getPoolAcount() {
+      const wallet = (this as any).$wallet
+      const connection = this.$web3
+      const program = await programGen(wallet, connection, IdoIdl)
+      //池子信息
+      const poolAccountInfo = await getPoolAccount(program, POOL_ACCOUNT)
+      this.poolAccountInfo = poolAccountInfo
+      console.log(poolAccountInfo, 'poolAccountInfo##')
+      const poolUsdcs = await serum.getTokenAccount(program.provider, poolAccountInfo.poolUsdc)
+      const toPoolUsdcs: any = poolUsdcs.amount.toNumber() / Math.pow(10, USDC_DECIMAL)
+      this.poolUsdcall = toPoolUsdcs
+      console.log(toPoolUsdcs, 'toPoolUsdcs##')
+
+      // const poolWatermelon: any = await serum.getTokenAccount(program.provider, poolAccountInfo.poolWatermelon)
+      // const toWatermelon: any = poolWatermelon.amount.toNumber() / Math.pow(10, MELON_DECIMAL)
+      this.poolWater = POOL_MELON_NUM
+      if (POOL_MELON_NUM > 0) {
+        this.tokenPrice = new BigNumber(toPoolUsdcs).dividedBy(new BigNumber(POOL_MELON_NUM)).toNumber()
+      } else {
+        this.tokenPrice = null
+      }
+
+      console.log(poolUsdcs.amount.toNumber() / Math.pow(10, USDC_DECIMAL), 'pool池子usdc总量')
+      console.log(POOL_MELON_NUM, 'pool池子奖励总量')
+      console.log(this.tokenPrice, 'this.tokenPrice##')
+      this.loading = false
+    }
+  }
 })
 </script>
 <style lang="less" scoped>
@@ -63,6 +139,7 @@ export default Vue.extend({
   overflow: hidden;
   margin-top: -20px;
   padding-top: 80px;
+  position: relative;
   .fair-container-center {
     width: 1100px;
     height: 700px;
@@ -74,11 +151,11 @@ export default Vue.extend({
 .fair-coin {
   position: relative;
   position: absolute;
-  right: 0;
+  right: -100px;
   top: 0;
   width: 660px;
   height: 600px;
-  background: url('@/assets/images/img-bgs-fairs.png');
+  background: url('@/assets/images/img-bgs-fairs.png') right center;
   background-size: 100% 100%;
   animation: iconK 6s linear infinite;
 }
@@ -135,7 +212,7 @@ export default Vue.extend({
     background: none;
     .fair-container-center {
       width: 100%;
-      height: auto;
+      height: 1000px;
       padding: 0;
     }
   }
@@ -144,6 +221,18 @@ export default Vue.extend({
     width: 100%;
     height: 316px;
     top: 400px;
+    background: url('@/assets/images/fair-h5-bg.png');
+    background-size: 100% 100%;
+    .fair-coin-one,
+    .fair-coin-two {
+      display: none;
+    }
   }
+}
+.ant-spin-spinning {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>
