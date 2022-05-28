@@ -17,8 +17,8 @@
           <span>{{ wallet.connected ? caffeineAmount : 0 }}</span>
         </div>
 
-        <!-- <nuxt-link to="/active" class="farming-Btn"></nuxt-link> -->
-        <a class="farming-Btn" @click="comingsoon"></a>
+        <nuxt-link to="/active" class="farming-Btn"></nuxt-link>
+        <!-- <a class="farming-Btn" @click="comingsoon"></a> -->
       </div>
     </div>
     <div v-if="isFarming == 'Farm'" class="active-banner">
