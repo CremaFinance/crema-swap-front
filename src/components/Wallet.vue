@@ -128,7 +128,7 @@ import { SlopeWalletAdapter } from '@solana/wallet-adapter-slope'
 import { SafePalWalletAdapter } from '@solana/wallet-adapter-safepal'
 import { BloctoWalletAdapter } from '@solana/wallet-adapter-blocto'
 import { BitpieWalletAdapter } from '@solana/wallet-adapter-bitpie'
-// import { BitKeepWalletAdapter } from '@solana/wallet-adapter-bitkeep'
+import { BitKeepWalletAdapter } from '@solana/wallet-adapter-bitkeep'
 import LocalStorage from '@/utils/local-storage'
 import { getUnixTs } from '@/utils'
 
@@ -173,13 +173,13 @@ export default class Wallet extends Vue {
         return new PhantomWalletAdapter()
       }
     },
-    // BitKeep: {
-    //   website: 'https://bitkeep.com',
-    //   chromeUrl: 'https://chrome.google.com/webstore/detail/bitkeep-bitcoin-crypto-wa/jiidiaalihmmhddjgbnbgdfflelocpak',
-    //   getAdapter() {
-    //     return new BitKeepWalletAdapter()
-    //   }
-    // },
+    BitKeep: {
+      website: 'https://bitkeep.com',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/bitkeep-bitcoin-crypto-wa/jiidiaalihmmhddjgbnbgdfflelocpak',
+      getAdapter() {
+        return new BitKeepWalletAdapter()
+      }
+    },
     Blocto: {
       website: 'https://blocto.portto.io',
       getAdapter() {
