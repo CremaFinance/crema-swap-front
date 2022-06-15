@@ -173,13 +173,6 @@ export default class Wallet extends Vue {
         return new PhantomWalletAdapter()
       }
     },
-    BitKeep: {
-      website: 'https://bitkeep.com',
-      chromeUrl: 'https://chrome.google.com/webstore/detail/bitkeep-bitcoin-crypto-wa/jiidiaalihmmhddjgbnbgdfflelocpak',
-      getAdapter() {
-        return new BitKeepWalletAdapter()
-      }
-    },
     Blocto: {
       website: 'https://blocto.portto.io',
       getAdapter() {
@@ -191,6 +184,13 @@ export default class Wallet extends Vue {
       chromeUrl: 'https://chrome.google.com/webstore/detail/slope-finance-wallet/pocmplpaccanhmnllbbkpgfliimjljgo',
       getAdapter() {
         return new SlopeWalletAdapter()
+      }
+    },
+    BitKeep: {
+      website: 'https://bitkeep.com',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/bitkeep-bitcoin-crypto-wa/jiidiaalihmmhddjgbnbgdfflelocpak',
+      getAdapter() {
+        return new BitKeepWalletAdapter()
       }
     },
     'Solflare Extension': {
