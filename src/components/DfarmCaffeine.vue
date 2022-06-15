@@ -528,7 +528,7 @@ export default Vue.extend({
 
         // 3、当前存在的咖啡因数量可以铸造当前选中的等级时展示
         if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
-          return `You are eligible to mint a new ${this.currentKeyItem.key} key. `
+          return `You are eligible to mint a new ${this.currentKeyItem.key}. `
         }
 
         // 4、该等级下存在NFT 时，不可升级时
@@ -557,7 +557,7 @@ export default Vue.extend({
           this.caffeineAmount >= this.currentKeyItem.minRequireAmount &&
           this.currentKeyItem.id === 5
         ) {
-          return `You are eligible to mint a new ${this.currentKeyItem.key} key. `
+          return `You are eligible to mint a new ${this.currentKeyItem.key}. `
         }
 
         // 当是最后一个等级，且咖啡因不够mint时
