@@ -310,7 +310,7 @@ export default Vue.extend({
   padding-top: 20px;
   width: 100%;
   .farming-container-center {
-    width: 1600px;
+    // width: 1600px;
     margin: auto;
     display: flex;
     flex-wrap: wrap;

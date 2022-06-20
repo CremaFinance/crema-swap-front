@@ -159,7 +159,8 @@
                 >
                   Connect a wallet
                 </Button>
-                <Button
+                <!-- Open when online 0620 -->
+                <!-- <Button
                   v-if="
                     wallet.connected &&
                     farmingIsEnd &&
@@ -172,7 +173,7 @@
                   style="width: 280px"
                 >
                   Open Treasure Box
-                </Button>
+                </Button> -->
               </div>
             </div>
           </div>
