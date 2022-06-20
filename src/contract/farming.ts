@@ -27,8 +27,10 @@ import type { AccountInfo } from '@solana/spl-token'
 import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
 import invariant from 'tiny-invariant'
 import { currentTs } from './utils'
+import { fixD } from '@/utils'
 import { Token, TokenAmount } from '@saberhq/token-utils'
 import * as base58 from 'bs58'
+import Decimal from 'decimal.js'
 
 export function makeSDK(conn: any, wallet: any) {
   const anchorProvider = new AnchorProvider(conn, wallet, {
@@ -335,17 +337,74 @@ export async function calculateWrapAmount(conn: any, wallet: any, wrapper: Publi
 export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
   const sdk = makeSDK(conn, wallet)
   const info = await sdk.activity.fetchCremaKeysV2(sdk.provider.connection, user)
+  console.log('fetchCremakeys###info###', info)
   const result: any = {}
-  if (info && info.keys && info.keys.length > 0) {
+  if (info && info.keys && info.keys.length > 0 && info.meta) {
+    const decimals = info.meta.decimals
+    const names = info.meta.names
+    const crmMint = 'CrMKwgPf5qFmvamgvZ7sdUiK4vYrwaHi9WK5qabJvddS'
+
     info.keys.forEach(item => {
+      const claimAmounts = item.claimAmounts
+      const isSecondPartyClaimed = item.isSecondPartyClaimed
+      const newObj: any = {}
+
+      newObj[crmMint] = {
+        amount: fixD(new Decimal(item.crmClaimedAmount).div(Math.pow(10, 6)).toString(), 0),
+        amountOrigin: item.crmClaimedAmount,
+        isSecondPartyClaimed: isSecondPartyClaimed.get(crmMint),
+        name: 'crm'
+      }
+
+      claimAmounts.forEach((value, key) => {
+        const decimal = decimals.get(key)
+        const amountStr = new Decimal(value).div(Math.pow(10, decimal)).toString()
+        const amount = fixD(amountStr, 0)
+        newObj[key] = {
+          amount,
+          amountOrigin: value,
+          isSecondPartyClaimed: isSecondPartyClaimed.get(key),
+          name: names.get(key)
+        }
+      })
+
+
+
+      const newItem = {
+        ...item,
+        // claim
+        newClaimAmounts: newObj
+      }
+
       if (result[item.degree]) {
-        result[item.degree].push(item)
+        result[item.degree].push(newItem)
       } else {
-        result[item.degree] = [item]
+        result[item.degree] = [newItem]
       }
     })
+
   }
   return result
+}
+
+export async function fetchTransferInfoMap(conn: any, wallet: any) {
+  const sdk = makeSDK(conn, wallet)
+  const info = await sdk.activity.fetchTransferInfoMap()
+  console.log('fetchTransferInfoMap####info###', info)
+  const result: any = {}
+  if (info && info.names) {
+    const names = info.names
+    const decimals = info.decimals
+
+    names.forEach((value, key) => {
+      result[key] = {
+        name: value,
+        decimal: decimals.get(key) || 6
+      }
+    })
+    return result
+  }
+  return {}
 }
 
 export async function getMasterPda() {

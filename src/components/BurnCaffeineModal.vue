@@ -15,10 +15,15 @@
         <div class="right">
           <div class="max-box">
             <img src="@/assets/images/icon-caffeine.png" />
-            <span>1234.1234</span>
-            <button>MAX</button>
+            <span>{{ caffeineAmount }}</span>
+            <button @click="burnMax">MAX</button>
           </div>
-          <input v-model="amount" class="amount-input" type="text" />
+          <input
+            v-model="amount"
+            oninput="value=this.value.replace(/[^\d-]*(\d*(?:\.\d{0,10})?).*$/g,'$1')"
+            class="amount-input"
+            type="text"
+          />
         </div>
       </div>
       <div class="arrow-block">
@@ -30,7 +35,7 @@
           <div class="amount">{{ crmAmount }}</div>
         </div>
       </div>
-      <Button class="burn-btn-block">Burn</Button>
+      <Button class="burn-btn-block" :loading="isBurnLoading" @click="claimCaffeine">Burn</Button>
     </div>
   </Modal>
 </template>
@@ -45,6 +50,20 @@ export default Vue.extend({
     Modal,
     Button
   },
+  props: {
+    isBurnLoading: {
+      type: Boolean,
+      default: false
+    },
+    caffeineAmount: {
+      type: String,
+      default: '0'
+    },
+    caffeineToCrmRate: {
+      type: Number,
+      default: 2
+    }
+  },
   data() {
     return {
       amount: '0'
@@ -52,12 +71,17 @@ export default Vue.extend({
   },
   computed: {
     crmAmount() {
-      return 1 * Number(this.amount)
+      return this.caffeineToCrmRate * Number(this.amount)
     }
   },
   methods: {
     claimCaffeine() {
       console.log('claim caffeine')
+      this.$emit('toBurn', this.amount)
+      this.$emit('onClose')
+    },
+    burnMax() {
+      this.amount = this.caffeineAmount
     }
   }
 })
@@ -147,6 +171,15 @@ export default Vue.extend({
     width: 100%;
     height: 56px;
     margin-top: 40px;
+  }
+}
+@media screen and (max-width: 750px) {
+  .burn-caffeine-content {
+    .block {
+      .left {
+        font-size: 12px;
+      }
+    }
   }
 }
 </style>

@@ -19,10 +19,10 @@
         <p>
           {{
             poolStatus == 'isStart'
-              ? 'Deposit end in'
+              ? 'Deposit ends in'
               : poolStatus == 'isNotStart'
-              ? 'Deposit start in'
-              : 'Claim start in'
+              ? 'Deposit starts in'
+              : 'Claim starts in'
           }}
         </p>
         <div class="fair-count-down">
@@ -31,7 +31,7 @@
         </div>
         <div class="fair-date">
           <span>Day</span>
-          <span>Hours</span>
+          <span>Hour</span>
           <span>Min</span>
           <span>Sec</span>
         </div>
@@ -59,34 +59,33 @@
     <div class="fair-hint-pc">
       <div class="hint-dim" v-if="poolStatus == 'isEnd' || poolStatus == 'isStart' || poolStatus == 'isEndDeposit'">
         <template v-if="poolStatus == 'isEnd' && userWatermelonBalance > 0 && wallet.connected">
-          <p style="width: auto; margin: 0">Claimable tokens</p>
-          <div>
-            <img src="@/assets/images/icon_coins.png" alt="" />
+          <h3 style="width: auto; margin: 0">You have claimed your CRM.</h3>
+          <div style="margin-bottom: -3px">
+            <img src="@/assets/coins/crm.png" alt="" />
             <div class="text-wrap">{{ thousands(fomatFloat(userWatermelonBalance, 6)) }}</div>
             <!-- <span>CRM</span> -->
           </div>
+          <h3 style="margin-bottom: 10px">Thanks for your contribution.</h3>
         </template>
         <template v-if="poolStatus == 'isEnd' && currentToken > 0">
           <p style="width: auto; margin: 0">Claim your CRM</p>
-
           <div>
-            <img src="@/assets/images/icon_coins.png" alt="" />
+            <img src="@/assets/coins/crm.png" alt="" />
             <div class="text-wrap">{{ thousands(fomatFloat(tokenNum, 6)) }}</div>
             <!-- <span>CRM</span> -->
           </div>
 
           <Button class="action-btn" :disabled="tokenNum == 0" @click="claim"> Claim </Button>
         </template>
-        <h3
-          style="margin: 0"
-          v-if="wallet.connected && poolStatus == 'isEnd' && tokenNum == 0 && userWatermelonBalance == 0"
-        >
-          You did not contribute to the token sale
-        </h3>
+        <template v-if="wallet.connected && poolStatus == 'isEnd' && tokenNum == 0 && userWatermelonBalance == 0">
+          <img src="@/assets/coins/crm.png" alt="" />
+          <h3 style="margin: 10px 0 0 0">You did not contribute to the token sale</h3>
+        </template>
+
         <template v-if="poolStatus == 'isStart' || poolStatus == 'isEndDeposit'">
           <div class="journey-fair">
             <img src="@/assets/images/fair-sjzan.png" alt="" />
-            <span>The journey starts hear</span>
+            <span>The journey starts here</span>
           </div>
           <p class="fair-title-s">When you're ready, deposit your USDC</p>
           <div class="Half-Max-fair">
@@ -124,6 +123,12 @@
               @focus="changeS"
             />
           </div>
+          <div class="deposit-tips" v-if="wallet.connected && fairvalue && fairvalue < 10">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-error"></use>
+            </svg>
+            <span>Minimum deposit 10 USDC</span>
+          </div>
           <!-- @click="change('Deposit')" -->
           <Button
             v-if="wallet.connected"
@@ -132,7 +137,8 @@
               depositLoading ||
               currentBidn <= 0 ||
               fairvalue > currentBidn ||
-              poolStatus == 'isEndDeposit'
+              poolStatus == 'isEndDeposit' ||
+              fairvalue < 10
             "
             class="action-btn"
             :loading="depositLoading"
@@ -317,7 +323,6 @@ export default Vue.extend({
   methods: {
     fixD,
     updateUserAccount() {
-      console.log('et##')
       this.getUserAccount()
       this.$emit('getPoolAcount')
     },
@@ -957,7 +962,20 @@ svg {
     width: 32px;
     height: 32px;
   }
-  margin-bottom: 32px !important;
+  margin-bottom: 22px !important;
+}
+.deposit-tips {
+  display: flex;
+  align-items: center;
+  .icon {
+    width: 14px;
+    height: 14px;
+    fill: #fb0;
+  }
+  span {
+    font-size: 12px !important;
+  }
+  color: #fb0;
 }
 .ant-modal {
   background: #000 !important;

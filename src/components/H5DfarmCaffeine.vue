@@ -3,14 +3,15 @@
     <div class="caffeine-banner">
       <div>
         <span>My Caffeine</span>
-        <span>{{ addCommom(caffeineAmount, 4) }}</span>
-        <Tooltip v-if="false" overlay-class-name="burn-btn-tooltip" placement="top">
-          <!-- <button class="burn-btn" @click="openBurnModal">Burn</button> -->
+        <!-- <span>{{ addCommom(caffeineAmount, 4) }}</span> -->
+        <span>{{ caffeineAmount }}</span>
+        <Tooltip overlay-class-name="burn-btn-tooltip" placement="top">
+          <button class="burn-btn" @click="openBurnModal">Burn</button>
           <template slot="title">
-            <div class="burn-tips">
+            <!-- <div class="burn-tips">
               <img src="@/assets/images/icon-Burn@2x.png" />
               <span>Burn remaining Caffeine to get CRM</span>
-            </div>
+            </div> -->
           </template>
         </Tooltip>
       </div>
@@ -75,18 +76,7 @@
         {{ currentKeyItem.mint && currentKeyItem.mint.substr(currentKeyItem.mint.length - 4, 4) }}
       </a>
     </div>
-    <!-- <p>Congratulations, you can upgrade NFT from Bronze Key to Silver Key</p> -->
-    <p>{{ tipText || isClaimedText }}</p>
-    <!-- <div class="pmgressbar-hint" :class="isdir">
-      <p v-if="isdir === 'Golden'">Gold</p>
-      <p v-else>{{ isdir }}</p>
-      <span>{{ addCommom(caffeineAmount, 0) }} / {{ addCommom(currentKeyItem.minRequireAmount, 0) }}</span>
-    </div>
-    <div class="pmgressbar-detail">
-      <div>
-        <div v-for="(item, index) in changeHintData" :key="index"></div>
-      </div>
-    </div> -->
+    <!-- <p>{{ tipText || isClaimedText }}</p> -->
     <div class="tips-stats" v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed">
       <div class="caync">
         <div>
@@ -115,28 +105,60 @@
         <span>{{ addCommom(caffeineAmount, 0) }} </span> / {{ addCommom(currentKeyItem.minRequireAmount, 0) }}
       </div>
     </div>
+    <h3 v-if="currentKeyItem.isCrmClaimed && canClaim" class="congratulations">Congratulations</h3>
+    <p v-if="wallet.connected" class="tips-text">{{ tipText || isClaimedText }}</p>
+    <ul v-if="currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
+      <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
+        <img :src="importIcon(`/coins/${item.name}.png`)" />
+        <span>x {{ item.amount }}</span>
+        <Button v-if="!item.isSecondPartyClaimed" :loading="claimIsLoadingObj[key]" @click="toClaimMint(item, key)">
+          Claim >
+        </Button>
+        <button v-else disabled>Claimed</button>
+      </li>
+    </ul>
     <div class="pmgressbar-btn">
+      <!-- && !farmingIsEnd  -->
       <Button
-        v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed"
+        v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
         class="action-btn"
         :disabled="!canMint"
         @click="changeMint"
       >
         Mint
       </Button>
+      <!-- !farmingIsEnd && -->
       <Button
         v-if="
           wallet.connected &&
-          !farmingIsEnd &&
           currentKeyItem.id !== 5 &&
           currentKeyItem.mint &&
           !currentKeyItem.is_crm_claimed &&
-          canUpgrade
+          canUpgrade &&
+          !currentKeyItem.isCrmClaimed
         "
         class="action-btn"
         @click="changeUpgrade"
       >
         Upgrade
+      </Button>
+      <Button
+        v-if="!wallet.connected"
+        class="action-btn"
+        @click="$accessor.wallet.openModal"
+        style="width: 150px; margin: -14px 0 0 68px"
+      >
+        Connect a wallet
+      </Button>
+      <Button
+        v-if="
+          wallet.connected && farmingIsEnd && currentKeyAmount > 0 && !isClaimedText && !currentKeyItem.isCrmClaimed
+        "
+        class="action-btn"
+        @click="changeClaim"
+        style="width: 100%"
+      >
+        Open Treasure Box
       </Button>
     </div>
     <DMintNFTPopout
@@ -145,6 +167,15 @@
       :isMinting="isMinting"
       @onClose="() => (showMint = false)"
       @toMint="toMint"
+    />
+    <ClaimRewards
+      v-if="showClaim"
+      :isClaiming="isClaiming"
+      :currentKeyItem="currentKeyItem"
+      :openRewardTimestamp="openRewardTimestamp"
+      :type="claimRewardsType"
+      @onClose="() => (showClaim = false)"
+      @toOpen="toOpen"
     />
     <DUpgradeNFTPopout
       v-if="showUpgrade"
@@ -155,890 +186,22 @@
       @onClose="() => (showUpgrade = false)"
       @toUpgrade="toUpgrade"
     />
-    <BurnCaffeineModal v-if="showBurnModal" @onClose="closeBurnModal"></BurnCaffeineModal>
+    <BurnCaffeineModal
+      v-if="showBurnModal"
+      :isBurnLoading="isBurnLoading"
+      :caffeineAmount="caffeineAmount"
+      :caffeineToCrmRate="caffeineToCrmRate"
+      @onClose="closeBurnModal"
+      @toBurn="toBurn"
+    ></BurnCaffeineModal>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
-import importIcon from '@/utils/import-icon'
-import {
-  QuarrySDK,
-  MinerWrapper,
-  PositionWrapper,
-  findActivityMetadataAddress,
-  QUARRY_CODERS
-} from '@cremafinance/crema-farming'
-import invariant from 'tiny-invariant'
-import { makeSDK, fetchCremakeys, getMasterPda, fetchActivitymaster, quarryInfo } from '@/contract/farming'
-import {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  PublicKey,
-  AccountInfo as BaseAccountInfo,
-  Signer,
-  TokenAccountsFilter,
-  Context,
-  SignatureResult
-} from '@solana/web3.js'
-import { addCommom, checkNullObj, fixD } from '@/utils'
-import { BroadcastOptions } from '@saberhq/solana-contrib'
-import { Tooltip, Progress } from 'ant-design-vue'
+import mixin from '@/mixin/active'
 
-// import { Button } from 'ant-design-vue'
-// Vue.use(Button)
 export default Vue.extend({
-  components: {
-    // Button
-    Tooltip,
-    Progress
-  },
-  props: {
-    isStaked: {
-      type: String,
-      default: 'All'
-    },
-    searchKey: {
-      type: String,
-      default: ''
-    },
-    earningsAmount: {
-      type: Number,
-      default: 0
-    },
-    caffeineAmount: {
-      type: String,
-      default: '0'
-    },
-    keysObj: {
-      type: Object,
-      default: () => {
-        return null as any
-      }
-    },
-    countObj: {
-      type: Object,
-      default: () => {
-        return {} as any
-      }
-    },
-    keysList: {
-      type: Array,
-      default: () => {
-        return [] as any
-      }
-    }
-  },
-  data() {
-    return {
-      showMint: false,
-      showClaim: false,
-      showUpgrade: false,
-      stakeTitle: 'Stake',
-      showStake: false,
-      isShowTableTr: -1,
-      changeNFT: false,
-      isNotLink: false,
-      isClaim: false,
-      changeBtn: 'Card-Bronze',
-      farmCard: 'Card-Bronze',
-      nftPrice: '300',
-      keyBaseData: {
-        1: {
-          id: 1,
-          icon: 'Card-Bronze',
-          img: 'Brass_Key',
-          name: 'option-Bronze',
-          key: 'Bronze Key',
-          num: '',
-          minRequireAmount: 2000,
-          upgradeMinAmount: 3000,
-          maxpreReward: 1200,
-          rewardX: '2X'
-        },
-        2: {
-          id: 2,
-          icon: 'Card-Silver',
-          img: 'Silver_Key',
-          name: 'option-Silver',
-          key: 'Silver Key',
-          num: '',
-          minRequireAmount: 5000,
-          upgradeMinAmount: 5000,
-          maxpreReward: 4500,
-          rewardX: '3X'
-        },
-        3: {
-          id: 3,
-          icon: 'Card-Golden',
-          img: 'Golden_Key',
-          name: 'option-Golden',
-          key: 'Golden Key',
-          num: '',
-          minRequireAmount: 10000,
-          upgradeMinAmount: 10000,
-          maxpreReward: 12000,
-          rewardX: '4X'
-        },
-        4: {
-          id: 4,
-          icon: 'Card-Platinum',
-          img: 'Platinum_Key',
-          name: 'option-Platinum',
-          key: 'Platinum Key',
-          num: '',
-          minRequireAmount: 20000,
-          upgradeMinAmount: 15000,
-          maxpreReward: 30000,
-          rewardX: '5X'
-        },
-        5: {
-          id: 5,
-          icon: 'Card-Diamond',
-          img: 'Diamond_Key',
-          name: 'option-Diamond',
-          key: 'Diamond Key',
-          num: '',
-          minRequireAmount: 35000,
-          maxpreReward: 63000,
-          rewardX: '6X'
-        }
-      },
-      keyData: [
-        {
-          id: 1,
-          icon: 'Card-Bronze',
-          img: 'Brass_Key',
-          name: 'option-Bronze',
-          key: 'Bronze Key',
-          num: '',
-          minRequireAmount: 2000,
-          upgradeMinAmount: 3000,
-          maxpreReward: 200,
-          rewardX: '2X'
-        },
-        {
-          id: 2,
-          icon: 'Card-Silver',
-          img: 'Silver_Key',
-          name: 'option-Silver',
-          key: 'Silver Key',
-          num: '',
-          minRequireAmount: 5000,
-          upgradeMinAmount: 5000,
-          maxpreReward: 500,
-          rewardX: '3X'
-        },
-        {
-          id: 3,
-          icon: 'Card-Golden',
-          img: 'Golden_Key',
-          name: 'option-Golden',
-          key: 'Golden Key',
-          num: '',
-          minRequireAmount: 10000,
-          upgradeMinAmount: 10000,
-          maxpreReward: 1000,
-          rewardX: '4X'
-        },
-        {
-          id: 4,
-          icon: 'Card-Platinum',
-          img: 'Platinum_Key',
-          name: 'option-Platinum',
-          key: 'Platinum Key',
-          num: '',
-          minRequireAmount: 20000,
-          upgradeMinAmount: 15000,
-          maxpreReward: 2000,
-          rewardX: '5X'
-        },
-        {
-          id: 5,
-          icon: 'Card-Diamond',
-          img: 'Diamond_Key',
-          name: 'option-Diamond',
-          key: 'Diamond Key',
-          num: '',
-          minRequireAmount: 35000,
-          maxpreReward: 3000,
-          rewardX: '6X'
-        }
-      ],
-      changeHintData: [
-        { val: 'Bronze' },
-        { val: 'Silver' },
-        { val: 'Golden' },
-        { val: 'Platinum' },
-        { val: 'Diamond' }
-      ],
-      isEewardRangeTab: -1,
-      isdir: 'Brass',
-      isMinting: false,
-      isDisabled: false,
-      isUpgrading: false,
-      isClaiming: false,
-      currentKeyItem: {} as any,
-      openRewardTimestamp: 0,
-      farmingEndTimestamp: 0,
-      currentCardIndex: 0,
-      showBurnModal: false,
-      upgradeObject: {
-        id: 2,
-        icon: 'Card-Silver',
-        img: 'Silver_Key',
-        name: 'option-Silver',
-        key: 'Silver Key',
-        num: '',
-        minRequireAmount: 5000,
-        upgradeMinAmount: 5000,
-        maxpreReward: 500,
-        rewardX: '3X'
-      }
-    }
-  },
-  computed: {
-    ...mapState(['wallet', 'transaction', 'url', 'farming']),
-
-    currentKeyAmount() {
-      if (this.keysObj && this.currentKeyItem && this.keysObj[this.currentKeyItem.id]) {
-        return this.keysObj[this.currentKeyItem.id].length
-      }
-      return 0
-    },
-    tipText() {
-      // 1、未连接钱包，数据占位--
-      if (!this.wallet && !this.wallet.connected) {
-        return 'Please connect a wallet. '
-      }
-      if (!this.farmingIsEnd) {
-        // 2、当前不存在NFT
-        if (this.currentKeyAmount < 1 && this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
-          return `You need  ${Math.ceil(this.currentKeyItem.minRequireAmount - this.caffeineAmount)} 
-            more Caffeine to mint a new ${this.currentKeyItem.key}. `
-        }
-
-        // 3、当前存在的咖啡因数量可以铸造当前选中的等级时展示
-        if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
-          return `You are eligible to mint a new ${this.currentKeyItem.key}. `
-        }
-
-        // 4、该等级下存在NFT 时，不可升级时
-        if (
-          this.currentKeyItem.id !== 5 &&
-          this.currentKeyAmount > 0 &&
-          this.caffeineAmount < this.currentKeyItem.upgradeMinAmount
-        ) {
-          return `You need ${fixD(
-            this.currentKeyItem.upgradeMinAmount - this.caffeineAmount,
-            0
-          )} more Caffeine to upgrade this key. `
-        }
-
-        // 5、该等级下存在NFT 时，可升级时
-        if (
-          this.currentKeyItem.id !== 5 &&
-          this.currentKeyAmount > 0 &&
-          this.caffeineAmount >= this.currentKeyItem.upgradeMinAmount
-        ) {
-          return `You are eligible to upgrade this key to a ${this.keyData[this.canUpgradeHeighKeyId - 1].key}.`
-        }
-
-        // 当是最后一个等级时，且咖啡因够mint时
-        if (
-          this.currentKeyAmount > 0 &&
-          this.caffeineAmount >= this.currentKeyItem.minRequireAmount &&
-          this.currentKeyItem.id === 5
-        ) {
-          return `You are eligible to mint a new ${this.currentKeyItem.key}. `
-        }
-
-        // 当是最后一个等级，且咖啡因不够mint时
-        if (
-          this.currentKeyAmount > 0 &&
-          this.caffeineAmount < this.currentKeyItem.minRequireAmount &&
-          this.currentKeyItem.id === 5
-        ) {
-          return `You need  ${Math.ceil(this.currentKeyItem.minRequireAmount - this.caffeineAmount)} 
-            more Caffeine to mint a new ${this.currentKeyItem.key}. `
-        }
-      } else {
-        // 6、抽奖开启，当前等级下不存在NFT：
-        if (this.currentKeyAmount < 1) {
-          return `Sorry, you don't have ${this.currentKeyItem.key}.`
-        }
-
-        console.log('tipText####currentKeyItem#####', this.currentKeyItem)
-        // 7、质押结束后，当前等级下有NFT，等待开启奖励：
-        if (this.currentKeyAmount > 0 && !this.canClaim && !this.currentKeyItem.is_crm_claimed) {
-          return `You can use your ${this.currentKeyItem.key} to unlock the treasury box soon.`
-        } else if (this.currentKeyAmount > 0 && this.canClaim && !this.currentKeyItem.is_crm_claimed) {
-          // 8、质押结束后，当前等级下有NFT，到达可开启时间：
-          return 'This key is ready to open the treasure box. Claim your rewards now! '
-        }
-      }
-
-      return ''
-    },
-    canMintKeyName() {
-      if (this.caffeineAmount >= 35000) {
-        return 'Diamond Key'
-      } else if (this.caffeineAmount >= 20000) {
-        return 'Platinum Key'
-      } else if (this.caffeineAmount >= 10000) {
-        return 'Golden Key'
-      } else if (this.caffeineAmount >= 5000) {
-        return 'Silver Key'
-      } else if (this.caffeineAmount >= 2000) {
-        return 'Bronze Key'
-      }
-      return ''
-    },
-    canMint() {
-      if (Number(this.caffeineAmount) >= this.currentKeyItem.minRequireAmount) {
-        return true
-      }
-      return false
-    },
-    canUpgrade() {
-      if (this.currentKeyItem.upgradeMinAmount && Number(this.caffeineAmount) >= this.currentKeyItem.upgradeMinAmount) {
-        return true
-      }
-      return false
-    },
-    canUpgradeHeighKeyId() {
-      if (this.currentKeyItem.id === 5) return ''
-      let i = 4
-      while (i > 0) {
-        if (Number(this.caffeineAmount) >= this.keyData[i].minRequireAmount - this.currentKeyItem.minRequireAmount) {
-          return this.keyData[i].id
-        }
-        i--
-      }
-      return ''
-    },
-    isClaimedText() {
-      if (this.currentKeyItem.is_crm_claimed) {
-        return 'Congratulations, this event the NFT got the rewards'
-      }
-      return ''
-    },
-    farmingIsEnd() {
-      if (this.farmingEndTimestamp) {
-        const now = parseInt(String(new Date().getTime() / 1000))
-        if (this.farmingEndTimestamp <= now) {
-          return true
-        }
-      }
-      return false
-    },
-    canClaim() {
-      if (this.openRewardTimestamp) {
-        const now = parseInt(String(new Date().getTime() / 1000))
-        if (this.openRewardTimestamp <= now) {
-          return true
-        }
-      }
-      return false
-    }
-  },
-  watch: {
-    changeBtn(newValue, oldValue) {
-      if (newValue == 'Card-Bronze') {
-        this.isClaim = false
-        this.isNotLink = false
-        this.nftPrice = '300'
-        this.isdir = 'Brass'
-        this.upgradeObject = this.keyData[1]
-      } else if (newValue == 'Card-Silver') {
-        this.isClaim = false
-        this.isNotLink = false
-        this.nftPrice = '700'
-        this.isdir = 'Silver'
-        this.upgradeObject = this.keyData[2]
-      } else if (newValue == 'Card-Golden') {
-        this.isClaim = false
-        this.isNotLink = false
-        this.nftPrice = '1,300'
-        this.isdir = 'Golden'
-        this.upgradeObject = this.keyData[3]
-      } else if (newValue == 'Card-Platinum') {
-        this.isClaim = false
-        this.isNotLink = false
-        this.nftPrice = '2,100'
-        this.isdir = 'Platinum'
-        this.upgradeObject = this.keyData[4]
-      } else if (newValue == 'Card-Diamond') {
-        this.isClaim = false
-        this.isNotLink = false
-        this.nftPrice = '3,100'
-        this.isdir = 'Diamond'
-      }
-    },
-    'wallet.connected': {
-      handler: 'walletWatch',
-      immediate: true
-    },
-    keysObj: {
-      handler: 'keysObjWatch',
-      immediate: true
-    },
-    keysList: {
-      handler: 'keysListWatch',
-      immediate: true
-    }
-  },
-  mounted() {
-    this.getCanClaimDate()
-    this.getFarmingDate()
-  },
-  methods: {
-    addCommom,
-    importIcon,
-    // changeHint(value: string) {
-    //   this.hint = value
-    //   this.isShowHint = !this.isShowHint
-    // },
-    closeBurnModal() {
-      this.showBurnModal = false
-    },
-    openBurnModal() {
-      this.showBurnModal = true
-    },
-    walletWatch(newValue) {
-      if (newValue) {
-        // this.getKeys()
-        this.$emit('refreshKeysData')
-        this.$accessor.farming.getEarningsObj()
-        // this.$accessor.farming.getCaffeineAmount()
-      }
-    },
-    keysListWatch(newVal) {
-      console.log('keysListWatch####newVal###', newVal)
-      if (!checkNullObj(this.currentKeyItem)) {
-        const item = newVal.filter(
-          (item) => item.mint === this.currentKeyItem.mint && item.id === this.currentKeyItem.id
-        )[0]
-        let result: any
-        console.log('this.currentKeyItem#####', this.currentKeyItem)
-        if (!item) {
-          result = newVal.filter((item) => item.id === this.currentKeyItem.id)[0]
-        } else {
-          result = item
-        }
-        this.currentKeyItem = result
-        console.log('这里item####', item)
-        console.log('这里result####', result)
-      }
-    },
-    keysObjWatch(newVal) {
-      console.log('keysObjWatch####newVal###', newVal)
-      if (newVal !== null && !checkNullObj(newVal) && newVal[1] && newVal[1][0] && checkNullObj(this.currentKeyItem)) {
-        this.currentKeyItem = {
-          ...newVal[1][0],
-          ...this.keyBaseData[1]
-        }
-      } else if (newVal !== null && checkNullObj(newVal) && checkNullObj(this.currentKeyItem)) {
-        this.currentKeyItem = this.keysList[0]
-      }
-    },
-    changeMint() {
-      this.showMint = true
-    },
-    changeClaim() {
-      this.showClaim = true
-    },
-    changeUpgrade() {
-      this.showUpgrade = true
-    },
-    changeIcon(item: any) {
-      this.changeBtn = item.icon
-      this.farmCard = item.icon
-      for (let i = 0; i < this.keysList.length; i++) {
-        if (item.mint && item.mint === this.keysList[i].mint) {
-          this.currentKeyItem = this.keysList[i]
-          this.currentCardIndex = i
-          break
-        }
-        if (!item.mint && item.id === this.keysList[i].id) {
-          this.currentKeyItem = this.keysList[i]
-          this.currentCardIndex = i
-          break
-        }
-      }
-    },
-    changeImg(key) {
-      let index
-      if (key === 'left') {
-        index = this.currentCardIndex - 1
-      } else {
-        index = this.currentCardIndex + 1
-      }
-      if (index < 0) {
-        index = this.keysList.length - 1
-      } else if (index > this.keysList.length - 1) {
-        index = 0
-      }
-      this.currentCardIndex = index
-      this.currentKeyItem = this.keysList[index]
-      this.changeBtn = this.keysList[index].icon
-    },
-    async getCanClaimDate() {
-      try {
-        const res = await getMasterPda()
-        let MasterPda
-        if (res && res[0]) {
-          MasterPda = res[0].toString()
-        }
-        const wallet = (this as any).$wallet
-        const conn = this.$web3
-        const activeInfo = await fetchActivitymaster(conn, wallet, new PublicKey(MasterPda))
-        if (activeInfo && activeInfo.openRewardTimestamp) {
-          this.openRewardTimestamp = activeInfo.openRewardTimestamp.toNumber()
-          console.log('activeInfo.openRewardTimestamp.toNumber()###', activeInfo.openRewardTimestamp.toNumber())
-          // 为了测试设置为4月30日
-          // this.openRewardTimestamp = 1648569600
-          // this.openRewardTimestamp = 1651248000
-        }
-      } catch (err) {
-        console.log('getCanClaimDate###err###', err)
-      }
-    },
-    async getFarmingDate() {
-      const wallet = (this as any).$wallet
-      const conn = this.$web3
-      const rewarderKey = new PublicKey('Aqz8Zvot5BZht6vuwRHpLmP4M126WaECRmc3cVDWnRtm')
-      const positionWrapperWrapMint = new PublicKey('GAQbaSD7aFDhkijfAjh2tebxJpm1iJRhWwtrbdNYGTBh')
-      try {
-        const res: any = await quarryInfo(conn, wallet, rewarderKey, positionWrapperWrapMint)
-        if (res && res.famineTs) {
-          this.farmingEndTimestamp = Number(res.famineTs.toString()) // 目前后端设置的质押活动结束时间是永久 即9223372036854775807
-          console.log('Number(res.famineTs.toString())####', Number(res.famineTs.toString()))
-          // 为了测试，暂设置为4月25
-          // this.farmingEndTimestamp = 1650816000
-        }
-      } catch (err) {
-        console.log('getFarmingDate###err###', err)
-      }
-    },
-    async toMint() {
-      this.showMint = false
-      this.isMinting = true
-      this.isDisabled = true
-      const wallet = (this as any).$wallet
-      const conn = this.$web3
-      const degree = this.currentKeyItem.id
-
-      const sdk: any = makeSDK(conn, wallet)
-      const authoritySdk = sdk.provider.walletKey
-
-      invariant(wallet.publicKey.toString() == authoritySdk.toString(), 'user is the same to sdk')
-
-      this.$accessor.transaction.setTransactionDesc('Mint NFT')
-      this.$accessor.transaction.setShowWaiting(true)
-
-      let txid = ''
-      try {
-        const res = await sdk.activity.mintCremaKey({
-          user: wallet.publicKey,
-          degree
-        })
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-
-        const receipt = await res.tx.send(opt)
-        this.$accessor.transaction.setShowWaiting(false)
-
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
-          const description = `Mint NFT`
-          this.$accessor.transaction.setShowSubmitted(true)
-          const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Mint',
-            successCallback: () => {
-              _this.isMinting = false
-              _this.isDisabled = false
-              // _this.getKeys()
-              _this.$emit('refreshKeysData')
-            },
-            errorCallback: () => {
-              _this.isMinting = false
-              _this.isDisabled = false
-            }
-          })
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-
-          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-          //   _this.isMinting = false
-          //   _this.isDisabled = false
-          //   if (!signatureResult.err) {
-          //     // _this.$accessor.farming.getFarmingList()
-          //     // 监听到成功后刷新
-          //     _this.getKeys()
-          //   }
-          // })
-        }
-      } catch (err) {
-        console.log('toMint ERROR#####', err)
-        this.$accessor.transaction.setShowWaiting(false)
-        this.isMinting = false
-        this.isDisabled = false
-      }
-    },
-    async toUpgrade() {
-      const mint = this.keysObj[this.currentKeyItem.id][0].mint
-      if (!mint) return
-      // const mint = ''
-      this.showUpgrade = false
-      this.isUpgrading = true
-      this.isDisabled = true
-      const wallet = (this as any).$wallet
-      const conn = this.$web3
-
-      const sdk: any = makeSDK(conn, wallet)
-      const authoritySdk = sdk.provider.walletKey
-      invariant(wallet.publicKey.toBase58() == authoritySdk.toBase58(), 'user is the same to sdk')
-
-      this.$accessor.transaction.setTransactionDesc('Upgrade NFT')
-      this.$accessor.transaction.setShowWaiting(true)
-      let txid = ''
-      try {
-        const tx = await sdk.activity.upgrade({
-          user: wallet.publicKey,
-          mint: new PublicKey(mint)
-        })
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-
-        const receipt = await tx.send(opt)
-        this.$accessor.transaction.setShowWaiting(false)
-
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
-          const description = 'Upgrade NFT'
-          this.$accessor.transaction.setShowSubmitted(true)
-          const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Upgrade',
-            successCallback: () => {
-              _this.isUpgrading = false
-              _this.isDisabled = false
-              _this.$emit('refreshKeysData')
-            },
-            errorCallback: () => {
-              _this.isUpgrading = false
-              _this.isDisabled = false
-            }
-          })
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-
-          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-          //   _this.isUpgrading = false
-          //   _this.isDisabled = false
-          //   if (!signatureResult.err) {
-          //     // _this.$accessor.farming.getFarmingList()
-          //     // 监听到成功后刷新
-          //     _this.getKeys()
-          //   }
-          // })
-        }
-      } catch (err) {
-        this.$accessor.transaction.setShowWaiting(false)
-        this.isUpgrading = false
-        this.isDisabled = false
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'Upgrade',
-          message: 'Transaction failed',
-          description: ''
-        })
-      }
-    },
-    async toClaim() {
-      const mint = this.keysObj[this.currentKeyItem.id][0].mint
-      this.isClaiming = true
-      this.isDisabled = true
-      const wallet = (this as any).$wallet
-      const conn = this.$web3
-
-      const sdk: any = makeSDK(conn, wallet)
-      const authoritySdk = sdk.provider.walletKey
-      invariant(wallet.publicKey.toBase58() == authoritySdk.toBase58(), 'user is the same to sdk')
-
-      this.$accessor.transaction.setTransactionDesc('Claim NFT')
-      this.$accessor.transaction.setShowWaiting(true)
-
-      let txid = ''
-      try {
-        // const tx = await sdk.activity.claim({
-        //   user: wallet.publicKey,
-        //   mint: new PublicKey(mint)
-        // })
-        // const opt: BroadcastOptions = {
-        //   skipPreflight: true,
-        //   preflightCommitment: 'confirmed',
-        //   maxRetries: 30,
-        //   printLogs: true
-        // }
-        // // const receipt = await tx.confirm()
-        // const receipt: any = await tx.send(opt)
-        // this.$accessor.transaction.setShowWaiting(false)
-        // if (receipt && receipt.signature) {
-        //   txid = receipt.signature
-        //   const description = 'Claim NFT'
-        //   const _this = this
-        //   this.$accessor.transaction.setShowSubmitted(true)
-        //   this.$accessor.transaction.sub({
-        //     txid,
-        //     description,
-        //     type: 'Claim',
-        //     successCallback: () => {
-        //       _this.isClaiming = false
-        //       _this.isDisabled = false
-        //       _this.$accessor.wallet.getTokenAccounts()
-        //     },
-        //     errorCallback: () => {
-        //       _this.isClaiming = false
-        //       _this.isDisabled = false
-        //     }
-        //   })
-        //   const whatWait = await receipt.wait({
-        //     commitment: 'confirmed',
-        //     useWebsocket: true,
-        //     retries: 30
-        //   })
-        // }
-        const txs = await sdk.activity.claim({
-          user: wallet.publicKey,
-          mint: new PublicKey(mint)
-        })
-
-        if (txs.ataCreate.instructions.length > 0) {
-          const res = await txs.ataCreate.confirm()
-          console.log('claim##ataCreate##signature##', res.signature.toString())
-          console.log('claim##ataCreate##computeUnits##', res.computeUnits)
-          // printObjectJSON({
-          //   name: 'ataCreate',
-          //   signature: res.signature.toString(),
-          //   computeUnits: res.computeUnits
-          // })
-        }
-        const [activityMedatata, _] = await findActivityMetadataAddress(new PublicKey(mint))
-        const info = await sdk.activity.fetchMetadata(activityMedatata)
-        if (info === null) {
-          console.log('activityMedatata %s not found fot this nft', activityMedatata.toBase58())
-          return
-        }
-
-        if (!info.isCrmClaimed) {
-          const crmClaim = await txs.crmClaim.confirm()
-          const event = QUARRY_CODERS.Activity.parseProgramLogEvents(crmClaim.response.meta?.logMessages ?? [])[0]
-          invariant(event?.name === 'ClaimRewardEvent', 'ClaimRewardEvent not found')
-          // printObjectJSON({
-          //   name: 'crmClaim',
-          //   signature: crmClaim.signature.toString(),
-          //   computeUnits: crmClaim.computeUnits,
-          //   mint: mint.toBase58(),
-          //   user: user.toBase58()
-          // })
-          console.log('claim##crmClaim###signature###', crmClaim.signature.toString())
-          console.log('claim##crmClaim###computeUnits###', crmClaim.computeUnits)
-
-          console.log('claim##crmClaim###mint###', mint)
-          console.log('claim##crmClaim###user###', wallet.publicKey.toString())
-        }
-
-        if (!info.isSecondPartyClaimed) {
-          const receipt = await txs.secondPartyClaim.confirm()
-          const event2 = QUARRY_CODERS.Activity.parseProgramLogEvents(receipt.response.meta?.logMessages ?? [])[0]
-          // invariant(event2?.name === 'ClaimSecondPartyEvent', 'ClaimSecondPartyEvent not found')
-          // printObjectJSON({
-          //   name: 'secondPartyClaim',
-          //   signature: receipt.signature.toString(),
-          //   computeUnits: receipt.computeUnits,
-          //   mint: mint.toBase58(),
-          //   user: user.toBase58()
-          // })
-          console.log('cliam###secondPartyClaim##signature###', receipt.signature.toString())
-          console.log('cliam###secondPartyClaim##computeUnits###', receipt.computeUnits)
-          if (receipt && receipt.signature && receipt.signature.toString()) {
-            txid = receipt.signature.toString()
-            const description = 'Claim NFT'
-            const _this = this
-            this.$accessor.transaction.setShowSubmitted(true)
-            this.$accessor.transaction.sub({
-              txid,
-              description,
-              type: 'Claim',
-              successCallback: () => {
-                _this.isClaiming = false
-                _this.isDisabled = false
-                _this.$accessor.wallet.getTokenAccounts()
-                _this.$emit('refreshKeysData')
-              },
-              errorCallback: () => {
-                _this.isClaiming = false
-                _this.isDisabled = false
-              }
-            })
-            const whatWait = await receipt.wait({
-              commitment: 'confirmed',
-              useWebsocket: true,
-              retries: 30
-            })
-          }
-        }
-      } catch (err) {
-        console.log('toclaim###err###', err)
-        this.$accessor.transaction.setShowWaiting(false)
-        this.isClaiming = false
-        this.isDisabled = false
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'Claim',
-          message: 'Transaction failed',
-          description: ''
-        })
-      }
-    },
-    gotoFarming() {
-      this.$router.push('/farming')
-    },
-    delcommafy(num) {
-      if (num != undefined) {
-        num = num.toString()
-        num = num.replace(/[ ]/g, '') //去除空格
-        num = num.replace(/,/gi, '')
-        return Number(num)
-      }
-    }
-  }
+  mixins: [mixin]
 })
 </script>
 <style lang="less" scoped>
@@ -1050,6 +213,69 @@ export default Vue.extend({
   margin-bottom: 40px;
   > p {
     margin: 40px 0 20px;
+  }
+  .congratulations {
+    width: 100%;
+    font-size: 18px;
+    font-family: Krungthep;
+    // line-height: 20px;
+    background: linear-gradient(233deg, #89cfff 0%, #e0b9ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    height: 26px;
+    // margin-bottom: 12px;
+    margin-top: 20px;
+  }
+  .tips-text {
+    width: 100%;
+    margin: 10px 0 0;
+  }
+  .nft-rewards {
+    width: 100%;
+    height: 100px;
+    background: #000;
+  }
+  .reward-coin-list {
+    width: 280px;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    margin: 10px auto 0;
+    border-radius: 8px;
+    // display: flex;
+    // flex-wrap: wrap;
+    li {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      margin-top: 8px;
+      &:first-child {
+        margin-top: 0px;
+      }
+      img {
+        width: 24px;
+        height: 24px;
+      }
+      span {
+        display: block;
+        flex: 1;
+        margin-left: 8px;
+        height: 18px;
+        font-size: 14px;
+        font-family: Arial-BoldMT, Arial;
+        font-weight: normal;
+        color: #fff;
+        line-height: 18px;
+        background: linear-gradient(233deg, #4bb5ff 0%, #ce90ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      button {
+        background: none;
+        border: none;
+        width: auto;
+        padding: 0px;
+      }
+    }
   }
 }
 .caffeine-banner {
@@ -1069,7 +295,7 @@ export default Vue.extend({
   box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
   border-radius: 6px;
   border: 1px solid rgba(232, 228, 255, 0.5) !important;
-  margin-left: 20px;
+  // margin-left: 20px;
   font-size: 12px;
   &:hover {
     background: linear-gradient(268deg, #5fe6d0 0%, #596eff 39%, #533cd7 74%, #ad4ff6 100%);
@@ -1434,18 +660,21 @@ export default Vue.extend({
 }
 .pmgressbar-btn {
   width: 100%;
-  height: 40px;
+  // height: 40px;
   margin-top: 24px;
   display: flex;
-  justify-content: space-around;
+  // justify-content: space-around;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 .action-btn {
   // width: 130px;
   .gradient-btn-large();
-  width: 130px;
+  width: 150px;
   height: 40px;
   font-size: 14px;
   font-weight: 100;
+  margin-bottom: 12px;
   // div {
   //   line-height: 38px;
   // }

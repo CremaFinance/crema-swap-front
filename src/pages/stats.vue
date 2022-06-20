@@ -537,7 +537,7 @@ export default Vue.extend({
       }, 60000)
     },
     poolSource(val) {
-      this.changeAbout(760)
+      this.changeAbout(600)
       // this.sortList('pools')
       let data = this.pools
       if (val == 'add') {
@@ -640,8 +640,11 @@ export default Vue.extend({
         }
         let tra = this.thousands(Math.round(results.tx_num * 100) / 100 + 0.1)
         let user = this.thousands(Math.round(results.user_num * 100) / 100 + 0.1)
+        let vols = this.thousands(Math.round(results.vol_in_usd * 100) / 100)
         this.wdAll = {
-          Vol: this.getNum(results.vol_in_usd),
+          // Vol: this.getNum(results.vol_in_usd),
+          Vol: vols.substr(0, vols.length - 3),
+          VolTyni: vols.substr(0, vols.length),
           // Tra : this.getNum(results.tx_num),
           Tra: tra.substr(0, tra.length - 2),
           Token: results.token_num,
@@ -675,34 +678,29 @@ export default Vue.extend({
     sortList(vol) {
       // console.log(this.pools);
       // console.log(this.tokens);
+      this.poolsPage.page = 1
       if (vol == 'pools') {
+        let val
         if (this.drop) {
-          let val = this.pools.sort(this.changeArr('tvl'))
-          this.pools = val
-          this.poolsvas = val.slice(0, 10)
-          this.drop = !this.drop
+          val = this.pools.sort(this.changeArr('tvl'))
         } else {
-          let val = this.pools.sort(this.changeArrs('tvl'))
-          this.pools = val
-          this.poolsvas = val.slice(0, 10)
-          this.drop = !this.drop
+          val = this.pools.sort(this.changeArrs('tvl'))
         }
+        this.pools = val
+        this.poolsvas = val.slice(0, 10)
+        this.drop = !this.drop
       } else if (vol == 'tokens') {
+        let val
         if (this.litre) {
-          let val = this.tokens.sort(this.changeArr('tvl'))
-          this.tokens = val
-          let start = 10 * (this.tokenPage.page + 1) - 10
-          let end = 10 * (this.tokenPage.page + 1)
-          this.tokenvas = val.slice(start, end)
-          this.litre = !this.litre
+          val = this.tokens.sort(this.changeArr('tvl'))
         } else {
-          let val = this.tokens.sort(this.changeArrs('tvl'))
-          this.tokens = val
-          let start = 10 * (this.tokenPage.page + 1) - 10
-          let end = 10 * (this.tokenPage.page + 1)
-          this.tokenvas = val.slice(start, end)
-          this.litre = !this.litre
+          val = this.tokens.sort(this.changeArrs('tvl'))
         }
+        this.tokens = val
+        let start = 10 * (this.tokenPage.page + 1) - 10
+        let end = 10 * (this.tokenPage.page + 1)
+        this.tokenvas = val.slice(start, end)
+        this.litre = !this.litre
       } else {
         let val = this.tokens.sort(this.changeArrs('vol_in_usd_24h'))
         this.tokenvas = val.slice(0, 10)

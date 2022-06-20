@@ -187,6 +187,7 @@ export default Vue.extend({
     }
     .h5-wallet {
       display: block;
+      bottom: 20px;
       padding: 60px 0 20px 0px;
       width: 198px;
       margin: auto;

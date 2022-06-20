@@ -136,16 +136,19 @@ export default Vue.extend({
   }
 }
 .fair-container {
-  overflow: hidden;
-  margin-top: -20px;
-  padding-top: 80px;
+  // overflow: hidden;
   position: relative;
+  // height: 900px;
   .fair-container-center {
     width: 1100px;
     height: 700px;
     padding: 0 80px;
-    margin: auto;
-    position: relative;
+    position: absolute;
+    left: 50%;
+    top: 50vh;
+    transform: translate(-50%, -50vh);
+    // margin: auto;
+    // position: relative;
   }
 }
 .fair-coin {
@@ -210,6 +213,7 @@ export default Vue.extend({
     margin-top: 20px;
     padding: 0px 0px 0;
     background: none;
+    height: 900px;
     .fair-container-center {
       width: 100%;
       height: 1000px;
