@@ -63,6 +63,10 @@ export default Vue.extend({
         {
           label: 'GenesysGo',
           value: 'https://ssc-dao.genesysgo.net'
+        },
+        {
+          label: 'Triton',
+          value: 'https://crema-crema-b941.mainnet.rpcpool.com'
         }
       ],
       showSymstemSetting: false,
