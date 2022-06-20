@@ -89,18 +89,18 @@
           <div id="pillar" class="chart-test"></div>
         </div>
         <div class="chart-spec">
+          <div class="chart-spec-vol">
+            <p>Cumulative Volume</p>
+            <p>
+              $&nbsp;<Spin v-if="!wdAll.Vol" size="small" /><span>{{ wdAll.Vol }}</span>
+            </p>
+          </div>
           <div class="chart-spec-locked">
             <p>Total Value Locked</p>
             <p>
               $&nbsp;<Spin v-if="!TotalValue && !wdAll.TotalValue" size="small" /><span>{{
                 TotalValue ? TotalValue : wdAll.TotalValue
               }}</span>
-            </p>
-          </div>
-          <div class="chart-spec-vol">
-            <p>Cumulative Volume</p>
-            <p>
-              $&nbsp;<Spin v-if="!wdAll.Vol" size="small" /><span>{{ wdAll.Vol }}</span>
             </p>
           </div>
           <!-- <div class="chart-spec-token">

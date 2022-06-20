@@ -29,7 +29,7 @@ function enquireScreen(call: Function) {
 export const state = () => ({
   isMobile: false,
   slippage: '1',
-  showNetWorkWarnning: true
+  showNetWorkWarnning: false
 })
 
 export type RootState = ReturnType<typeof state>
@@ -57,7 +57,7 @@ export const actions = actionTree(
     },
 
     copy(_vuexContext, text: string) {
-      ;(this as any)._vm
+      ; (this as any)._vm
         .$copyText(text)
         .then(() => {
           this.$notify.success({

@@ -638,8 +638,11 @@ export default Vue.extend({
         }
         let tra = this.thousands(Math.round(results.tx_num * 100) / 100 + 0.1)
         let user = this.thousands(Math.round(results.user_num * 100) / 100 + 0.1)
+        let vols = this.thousands(Math.round(results.vol_in_usd * 100) / 100)
         this.wdAll = {
-          Vol: this.getNum(results.vol_in_usd),
+          // Vol: this.getNum(results.vol_in_usd),
+          Vol: vols.substr(0, vols.length - 3),
+          VolTyni: vols.substr(0, vols.length),
           // Tra : this.getNum(results.tx_num),
           Tra: tra.substr(0, tra.length - 2),
           Token: results.token_num,

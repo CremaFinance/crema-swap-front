@@ -66,18 +66,18 @@
       </div>
       <div class="echarts-detail">
         <div class="total-value-locked">
+          <p>Cumulative Volume</p>
+          <p>
+            <a>$</a>&nbsp;<span>{{ wdAll.VolTyni }}</span>
+          </p>
+          <img src="@/assets/images/h5-vol.png" alt="" />
+        </div>
+        <div>
           <p>Total Value Locked</p>
           <p>
             <a>$</a>&nbsp;<span>{{ TotalValue ? TotalValue : wdAll.TotalValue }}</span>
           </p>
           <img src="@/assets/images/h5-locked.png" alt="" />
-        </div>
-        <div>
-          <p>Cumulative Volume</p>
-          <p>
-            <a>$</a>&nbsp;<span>{{ wdAll.Vol }}</span>
-          </p>
-          <img src="@/assets/images/h5-vol.png" alt="" />
         </div>
         <div>
           <p>Cumulative Transactions</p>
@@ -87,18 +87,18 @@
           <img src="@/assets/images/h5-tra.png" alt="" />
         </div>
         <div>
-          <p>Total Tokens</p>
-          <p>
-            <span>{{ wdAll.Token }}</span>
-          </p>
-          <img src="@/assets/images/h5-token.png" alt="" />
-        </div>
-        <div>
           <p>Total Users</p>
           <p>
             <span>{{ wdAll.Users }}</span>
           </p>
           <img src="@/assets/images/h5-user.png" alt="" />
+        </div>
+        <div>
+          <p>Total Tokens</p>
+          <p>
+            <span>{{ wdAll.Token }}</span>
+          </p>
+          <img src="@/assets/images/h5-token.png" alt="" />
         </div>
       </div>
     </div>
