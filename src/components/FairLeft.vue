@@ -75,9 +75,9 @@
             <!-- <span>CRM</span> -->
           </div>
 
-          <Button class="action-btn" :disabled="tokenNum == 0" @click="claim"> Claim </Button>
+          <Button class="action-btn" :disabled="currentToken == 0" @click="claim"> Claim </Button>
         </template>
-        <template v-if="wallet.connected && poolStatus == 'isEnd' && tokenNum == 0 && userWatermelonBalance == 0">
+        <template v-if="wallet.connected && poolStatus == 'isEnd' && currentToken == 0 && userWatermelonBalance == 0">
           <img src="@/assets/coins/crm.png" alt="" />
           <h3 style="margin: 10px 0 0 0">You did not contribute to the token sale</h3>
         </template>
@@ -643,21 +643,25 @@ export default Vue.extend({
 <style lang="less" scoped>
 @import '../styles/base.less';
 .fair-detail-all {
-  width: 100%;
+  // width: 1100px;
   height: 100%;
   // background: #000;
-  display: flex;
-  justify-content: space-between;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  // display: flex;
+  // margin: 0 auto;
+  // justify-content: space-between;
+  // position: absolute;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -50%);
 }
 .fair-detail-pc {
   width: 520px;
-  position: relative;
-  z-index: 100;
-  padding: 128px 0 0;
+  // position: relative;
+  // z-index: 100;
+  // padding: 50px 0 0;
+  position: absolute;
+  left: 0;
+  top: 80px;
   .fair-title {
     display: flex;
     align-items: center;
@@ -743,10 +747,13 @@ export default Vue.extend({
 }
 .fair-hint-pc {
   width: 400px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  align-content: center;
+  position: absolute;
+  right: 0;
+  top: 140px;
+  // display: flex;
+  // flex-wrap: wrap;
+  // align-items: center;
+  // align-content: center;
   padding-top: 0px;
   .hint-dim {
     width: 400px;
@@ -999,6 +1006,7 @@ input {
     width: 100%;
     padding: 20px 0 0 0;
     margin-bottom: 20px;
+    position: unset;
     .fair-title {
       justify-content: center;
       flex-wrap: wrap;
@@ -1035,6 +1043,7 @@ input {
     width: 100%;
     height: 440px;
     display: block;
+    position: unset;
     .hint-dim {
       width: 100%;
       > div {
