@@ -114,6 +114,9 @@ import { getprice } from '@/utils/stake'
 import { Spin } from 'ant-design-vue'
 import { lamportPrice2uiPrice, tick2Price, calculateTokenAmount, tick2UiPrice } from 'test-crema-sdk'
 export default Vue.extend({
+  components: {
+    Spin
+  },
   mixins: [mixin],
   props: {
     selectCoin: {
@@ -124,9 +127,6 @@ export default Vue.extend({
       type: String,
       default: ''
     }
-  },
-  components: {
-    Spin
   },
   data() {
     return {

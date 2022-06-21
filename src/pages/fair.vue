@@ -1,5 +1,5 @@
 <template>
-  <div class="fair-container" v-if="!loading">
+  <div v-if="!loading" class="fair-container">
     <div class="fair-container-center">
       <div class="fair-coin">
         <div class="fair-coin-one"></div>
@@ -9,9 +9,9 @@
       </div>
       <FairLeft
         :pool-usdcall="poolUsdcall"
-        :poolAccountInfo="poolAccountInfo"
+        :pool-account-info="poolAccountInfo"
         :pool-water="poolWater"
-        :tokenPrice="tokenPrice"
+        :token-price="tokenPrice"
         @getPoolAcount="getPoolAcount"
       />
     </div>
@@ -80,6 +80,7 @@ export default Vue.extend({
       const poolUsdcs = await serum.getTokenAccount(program.provider, poolAccountInfo.poolUsdc)
       const toPoolUsdcs: any = poolUsdcs.amount.toNumber() / Math.pow(10, USDC_DECIMAL)
       this.poolUsdcall = toPoolUsdcs
+      // this.poolUsdcall = 2211
       console.log(toPoolUsdcs, 'toPoolUsdcs##')
 
       // const poolWatermelon: any = await serum.getTokenAccount(program.provider, poolAccountInfo.poolWatermelon)
@@ -87,6 +88,7 @@ export default Vue.extend({
       this.poolWater = POOL_MELON_NUM
       if (POOL_MELON_NUM > 0) {
         this.tokenPrice = new BigNumber(toPoolUsdcs).dividedBy(new BigNumber(POOL_MELON_NUM)).toNumber()
+        // this.tokenPrice = new BigNumber(2211).dividedBy(new BigNumber(POOL_MELON_NUM)).toNumber()
       } else {
         this.tokenPrice = null
       }

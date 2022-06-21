@@ -23,20 +23,20 @@
         class="pc-farming-pool"
         :earnings-amount="earningsAmount"
         :caffeine-amount="caffeineAmount"
-        :nameObj="nameObj"
-        :keysObj="processedKeysObj.newObj"
-        :countObj="processedKeysObj.countObj"
-        :keysList="keysList"
+        :name-obj="nameObj"
+        :keys-obj="processedKeysObj.newObj"
+        :count-obj="processedKeysObj.countObj"
+        :keys-list="keysList"
         @refreshKeysData="refreshKeysData"
       />
       <H5DfarmCaffeine
         class="h5-farming-pool"
         :earnings-amount="earningsAmount"
         :caffeine-amount="caffeineAmount"
-        :nameObj="nameObj"
-        :keysObj="processedKeysObj.newObj"
-        :countObj="processedKeysObj.countObj"
-        :keysList="keysList"
+        :name-obj="nameObj"
+        :keys-obj="processedKeysObj.newObj"
+        :count-obj="processedKeysObj.countObj"
+        :keys-list="keysList"
         @refreshKeysData="refreshKeysData"
       />
     </div>

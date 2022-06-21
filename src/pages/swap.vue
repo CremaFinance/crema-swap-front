@@ -82,8 +82,8 @@
         :from-coin-amount="fromCoinAmount"
         :to-coin-amount="toCoinAmount"
         :pool-info="poolInfo"
-        :currentPriceViewReverse="currentPriceViewReverse"
-        :currentPriceView="currentPriceView"
+        :current-price-view-reverse="currentPriceViewReverse"
+        :current-price-view="currentPriceView"
         :fixed-from-coin="fixedFromCoin"
         @refresh="refresh"
       ></SwapInfo>

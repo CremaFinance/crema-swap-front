@@ -137,8 +137,8 @@
           </div> -->
         </div>
         <div
-          :class="isOpenArr[index] ? 'change-farming farming-pool' : 'farming-pool'"
           v-if="!changeNFT && wallet.connected"
+          :class="isOpenArr[index] ? 'change-farming farming-pool' : 'farming-pool'"
         >
           <div>
             <!-- <svg class="stern-icon set-dot" aria-hidden="true">
@@ -152,7 +152,7 @@
           </div>
           <div>
             <div class="fee-pool">
-              <div class="fee-pool-demo" v-for="(item, index) in farmingLists" :key="index">
+              <div v-for="(item, index) in farmingLists" :key="index" class="fee-pool-demo">
                 <div>
                   <span>{{ item.Earned }}</span>
                   <div>{{ item.Num }}</div>
@@ -190,10 +190,10 @@
             <!-- <p>No positions</p> -->
           </div>
           <div
-            v-else
-            class="content-Bot-All"
             v-for="(pitem, pindex) in farming.positionsObj[item.positionWrapper]"
+            v-else
             :key="pindex"
+            class="content-Bot-All"
           >
             <div>
               <div class="td-title">NFT</div>
@@ -326,7 +326,7 @@
             </div> -->
           </div>
         </div>
-        <div :class="isOpenArr[index] ? 'change-farming farming-pool' : 'farming-pool'" v-if="false">
+        <div v-if="false" :class="isOpenArr[index] ? 'change-farming farming-pool' : 'farming-pool'">
           <div>
             <!-- <svg class="stern-icon set-dot" aria-hidden="true">
               <use xlink:href="#icon-icon-Get-NFT"></use>
@@ -339,7 +339,7 @@
           </div>
           <div>
             <div class="fee-pool">
-              <div class="fee-pool-demo" v-for="(item, index) in farmingLists" :key="index">
+              <div v-for="(item, index) in farmingLists" :key="index" class="fee-pool-demo">
                 <div>
                   <span>{{ item.Earned }}</span>
                   <div>{{ item.Num }}</div>
@@ -371,7 +371,7 @@
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
-import { Button } from 'ant-design-vue'
+import { Button , Tooltip, Spin } from 'ant-design-vue'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { BroadcastOptions, SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
@@ -391,7 +391,6 @@ import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
 import invariant from 'tiny-invariant'
 import { makeSDK, getTokenAccountsByOwnerAndMint, calculateWrapAmount } from '@/contract/farming'
 import { Token, TokenAmount } from '@saberhq/token-utils'
-import { Tooltip, Spin } from 'ant-design-vue'
 import { fixD, addCommom } from '@/utils'
 
 Vue.use(Button)

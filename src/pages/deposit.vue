@@ -31,7 +31,7 @@
           <span>{{ fromCoin.symbol }} - {{ toCoin.symbol }}</span>
           <div class="fee-tier">Fee tier {{ currentFeeTier }}%</div>
         </div>
-        <div class="left" v-show="!fromCoin || !toCoin">Select Pool</div>
+        <div v-show="!fromCoin || !toCoin" class="left">Select Pool</div>
         <div class="right">
           <a class="clear-all" @click="clearAll">Clear All</a>
           <CoinTab
@@ -190,7 +190,7 @@
           <span>{{ fromCoin.symbol }} - {{ toCoin.symbol }}</span>
           <div class="fee-tier">Fee tier {{ currentFeeTier }}%</div>
         </div>
-        <div class="left" v-show="!fromCoin || !toCoin">Select Pool</div>
+        <div v-show="!fromCoin || !toCoin" class="left">Select Pool</div>
         <div class="right">
           <a class="clear-all" @click="clearAll">Clear All</a>
           <CoinTab

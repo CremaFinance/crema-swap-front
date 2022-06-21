@@ -77,7 +77,7 @@
       </a>
     </div>
     <!-- <p>{{ tipText || isClaimedText }}</p> -->
-    <div class="tips-stats" v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed">
+    <div v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed" class="tips-stats">
       <div class="caync">
         <div>
           <!-- <img :src="`/_nuxt/src/assets/images/icon-${isdir}-Key-bright.png`" alt="" /> -->
@@ -93,7 +93,7 @@
         "
         :success="{ percent: 30 }"
         type="dashboard"
-        trailColor="#527983"
+        trail-color="#527983"
         :stroke-color="{
           '0%': '#00EC86',
           '50%': '#3489C1',
@@ -134,9 +134,9 @@
           currentKeyItem.id !== 5 &&
           currentKeyItem.mint &&
           !currentKeyItem.is_crm_claimed &&
-          canUpgrade &&
           !currentKeyItem.isCrmClaimed
         "
+        :disabled="!canUpgrade"
         class="action-btn"
         @click="changeUpgrade"
       >
@@ -145,8 +145,8 @@
       <Button
         v-if="!wallet.connected"
         class="action-btn"
-        @click="$accessor.wallet.openModal"
         style="width: 150px; margin: -14px 0 0 68px"
+        @click="$accessor.wallet.openModal"
       >
         Connect a wallet
       </Button>
@@ -156,42 +156,42 @@
           wallet.connected && farmingIsEnd && currentKeyAmount > 0 && !isClaimedText && !currentKeyItem.isCrmClaimed
         "
         class="action-btn"
-        @click="changeClaim"
         style="width: 100%"
+        @click="changeClaim"
       >
         Open Treasure Box
       </Button> -->
     </div>
     <DMintNFTPopout
       v-if="showMint"
-      :currentKeyItem="currentKeyItem"
-      :isMinting="isMinting"
+      :current-key-item="currentKeyItem"
+      :is-minting="isMinting"
       @onClose="() => (showMint = false)"
       @toMint="toMint"
     />
     <ClaimRewards
       v-if="showClaim"
-      :isClaiming="isClaiming"
-      :currentKeyItem="currentKeyItem"
-      :openRewardTimestamp="openRewardTimestamp"
+      :is-claiming="isClaiming"
+      :current-key-item="currentKeyItem"
+      :open-reward-timestamp="openRewardTimestamp"
       :type="claimRewardsType"
       @onClose="() => (showClaim = false)"
       @toOpen="toOpen"
     />
     <DUpgradeNFTPopout
       v-if="showUpgrade"
-      :currentKeyItem="currentKeyItem"
-      :isUpgrading="isUpgrading"
-      :canUpgradeHeighKeyItem="keyData[canUpgradeHeighKeyId - 1]"
-      :upgradeObject="upgradeObject"
+      :current-key-item="currentKeyItem"
+      :is-upgrading="isUpgrading"
+      :can-upgrade-heigh-key-item="keyData[canUpgradeHeighKeyId - 1]"
+      :upgrade-object="upgradeObject"
       @onClose="() => (showUpgrade = false)"
       @toUpgrade="toUpgrade"
     />
     <BurnCaffeineModal
       v-if="showBurnModal"
-      :isBurnLoading="isBurnLoading"
-      :caffeineAmount="caffeineAmount"
-      :caffeineToCrmRate="caffeineToCrmRate"
+      :is-burn-loading="isBurnLoading"
+      :caffeine-amount="caffeineAmount"
+      :caffeine-to-crm-rate="caffeineToCrmRate"
       @onClose="closeBurnModal"
       @toBurn="toBurn"
     ></BurnCaffeineModal>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="farm-pool-table-NFT" ref="caffeine">
+    <div ref="caffeine" class="farm-pool-table-NFT">
       <div class="farm-caffeine">
         <div></div>
         <div class="farm-caffeine-title">
@@ -34,7 +34,7 @@
                 <!-- <Tooltip
                   overlay-class-name="burn-btn-tooltip"
                   placement="top"
-                  :getPopupContainer="() => $refs.caffeine"
+                  :get-popup-container="() => $refs.caffeine"
                 >
                   <button class="burn-btn ant-tooltip-open" @click="openBurnModal">Burn</button>
                   <template slot="title">
@@ -83,7 +83,7 @@
                   "
                   :success="{ percent: 30 }"
                   type="dashboard"
-                  trailColor="#527983"
+                  trail-color="#527983"
                   :stroke-color="{
                     '0%': '#00EC86',
                     '50%': '#3489C1',
@@ -115,7 +115,7 @@
                   >
                     Claim >
                   </Button>
-                  <button class="caffeine-claimed" v-else disabled>Claimed</button>
+                  <button v-else class="caffeine-claimed" disabled>Claimed</button>
                 </li>
               </ul>
             </div>
@@ -123,39 +123,76 @@
             <div class="farm-NFT-detail-Mint-pmgressbar">
               <div class="pmgressbar-btn">
                 <!-- v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed" -->
-                <Button
-                  v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
-                  class="action-btn"
-                  :disabled="!canMint"
-                  @click="changeMint"
+                <Tooltip
+                  overlay-class-name="burn-btn-tooltip"
+                  placement="top"
+                  :get-popup-container="() => $refs.caffeine"
                 >
-                  Mint
-                </Button>
+                  <div>
+                    <Button
+                      v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
+                      class="action-btn"
+                      :disabled="!canMint"
+                      @click="changeMint"
+                    >
+                      Mint
+                    </Button>
+                  </div>
+                  <template v-if="!canMint" slot="title">
+                    <div>
+                      <span>You don't have enough Caffeine.</span>
+                    </div>
+                  </template>
+                </Tooltip>
                 <!-- wallet.connected &&
                     !farmingIsEnd &&
                     currentKeyItem.id !== 5 &&
                     currentKeyItem.mint &&
                     !currentKeyItem.is_crm_claimed &&
                     canUpgrade -->
-                <Button
-                  v-if="
-                    wallet.connected &&
-                    currentKeyItem.id !== 5 &&
-                    currentKeyItem.mint &&
-                    !currentKeyItem.is_crm_claimed &&
-                    canUpgrade &&
-                    !currentKeyItem.isCrmClaimed
-                  "
-                  class="action-btn"
-                  @click="changeUpgrade"
+                <Tooltip
+                  overlay-class-name="burn-btn-tooltip"
+                  placement="top"
+                  :get-popup-container="() => $refs.caffeine"
                 >
-                  Upgrade
-                </Button>
+                  <div>
+                    <!-- <Button
+                      v-if="
+                        wallet.connected &&
+                        currentKeyItem.id !== 5 &&
+                        currentKeyItem.mint &&
+                        !currentKeyItem.is_crm_claimed &&
+                        !currentKeyItem.isCrmClaimed
+                      "
+                      :disabled="!canUpgrade"
+                      class="action-btn"
+                      @click="changeUpgrade"
+                    > -->
+                    <Button
+                      v-if="
+                        wallet.connected &&
+                        !currentKeyItem.is_crm_claimed &&
+                        currentKeyItem.id !== 5 &&
+                        !currentKeyItem.isCrmClaimed
+                      "
+                      :disabled="!canUpgrade"
+                      class="action-btn"
+                      @click="changeUpgrade"
+                    >
+                      Upgrade
+                    </Button>
+                  </div>
+                  <template v-if="!canUpgrade" slot="title">
+                    <div>
+                      <span>You don't have enough Caffeine.</span>
+                    </div>
+                  </template>
+                </Tooltip>
                 <Button
                   v-if="!wallet.connected"
                   class="action-btn"
-                  @click="$accessor.wallet.openModal"
                   style="width: 150px; margin: -14px 0 0 68px"
+                  @click="$accessor.wallet.openModal"
                 >
                   Connect a wallet
                 </Button>
@@ -169,8 +206,8 @@
                     !currentKeyItem.isCrmClaimed
                   "
                   class="action-btn"
-                  @click="changeClaim"
                   style="width: 280px"
+                  @click="changeClaim"
                 >
                   Open Treasure Box
                 </Button> -->
@@ -208,34 +245,34 @@
       </div>
       <DMintNFTPopout
         v-if="showMint"
-        :currentKeyItem="currentKeyItem"
-        :isMinting="isMinting"
+        :current-key-item="currentKeyItem"
+        :is-minting="isMinting"
         @onClose="() => (showMint = false)"
         @toMint="toMint"
       />
       <ClaimRewards
         v-if="showClaim"
-        :isClaiming="isClaiming"
-        :currentKeyItem="currentKeyItem"
-        :openRewardTimestamp="openRewardTimestamp"
+        :is-claiming="isClaiming"
+        :current-key-item="currentKeyItem"
+        :open-reward-timestamp="openRewardTimestamp"
         :type="claimRewardsType"
         @onClose="() => (showClaim = false)"
         @toOpen="toOpen"
       />
       <DUpgradeNFTPopout
         v-if="showUpgrade"
-        :currentKeyItem="currentKeyItem"
-        :isUpgrading="isUpgrading"
-        :canUpgradeHeighKeyItem="keyData[canUpgradeHeighKeyId - 1]"
-        :upgradeObject="upgradeObject"
+        :current-key-item="currentKeyItem"
+        :is-upgrading="isUpgrading"
+        :can-upgrade-heigh-key-item="keyData[canUpgradeHeighKeyId - 1]"
+        :upgrade-object="upgradeObject"
         @onClose="() => (showUpgrade = false)"
         @toUpgrade="toUpgrade"
       />
       <BurnCaffeineModal
         v-if="showBurnModal"
-        :isBurnLoading="isBurnLoading"
-        :caffeineAmount="caffeineAmount"
-        :caffeineToCrmRate="caffeineToCrmRate"
+        :is-burn-loading="isBurnLoading"
+        :caffeine-amount="caffeineAmount"
+        :caffeine-to-crm-rate="caffeineToCrmRate"
         @onClose="closeBurnModal"
         @toBurn="toBurn"
       ></BurnCaffeineModal>

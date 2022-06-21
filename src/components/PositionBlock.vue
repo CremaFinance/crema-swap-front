@@ -47,7 +47,7 @@
     </div>
     <div class="pc-right right">
       <!-- <StatusBlock :current-status="getCurrentStatus(pItem)" /> -->
-      <NewStatusBlock :current-status="getCurrentStatus(pItem)" :pItem="pItem" @click.stop="" />
+      <NewStatusBlock :current-status="getCurrentStatus(pItem)" :p-item="pItem" @click.stop="" />
     </div>
   </div>
 </template>

@@ -58,28 +58,28 @@
     </div>
     <div class="fair-hint-pc">
       <div class="hint-dim" v-if="poolStatus == 'isEnd' || poolStatus == 'isStart' || poolStatus == 'isEndDeposit'">
-        <template v-if="poolStatus == 'isEnd' && userWatermelonBalance > 0 && wallet.connected">
+        <!-- <template v-if="poolStatus == 'isEnd' && userWatermelonBalance > 0 && wallet.connected">
           <h3 style="width: auto; margin: 0">You have claimed your CRM.</h3>
           <div style="margin-bottom: -3px">
             <img src="@/assets/coins/crm.png" alt="" />
             <div class="text-wrap">{{ thousands(fomatFloat(userWatermelonBalance, 6)) }}</div>
-            <!-- <span>CRM</span> -->
           </div>
           <h3 style="margin-bottom: 10px">Thanks for your contribution.</h3>
-        </template>
-        <template v-if="poolStatus == 'isEnd' && currentToken > 0">
+        </template> -->
+        <template v-if="poolStatus == 'isEnd' && currentToken > 0 && wallet.connected">
           <p style="width: auto; margin: 0">Claim your CRM</p>
           <div>
             <img src="@/assets/coins/crm.png" alt="" />
             <div class="text-wrap">{{ thousands(fomatFloat(tokenNum, 6)) }}</div>
-            <!-- <span>CRM</span> -->
           </div>
 
           <Button class="action-btn" :disabled="currentToken == 0" @click="claim"> Claim </Button>
         </template>
-        <template v-if="wallet.connected && poolStatus == 'isEnd' && currentToken == 0 && userWatermelonBalance == 0">
-          <img src="@/assets/coins/crm.png" alt="" />
-          <h3 style="margin: 10px 0 0 0">You did not contribute to the token sale</h3>
+        <template v-if="wallet.connected && poolStatus == 'isEnd' && currentToken == 0">
+          <div>
+            <img src="@/assets/coins/crm.png" alt="" />
+          </div>
+          <h3 style="margin: 10px 0 0 0">Thanks for your contribution.</h3>
         </template>
 
         <template v-if="poolStatus == 'isStart' || poolStatus == 'isEndDeposit'">

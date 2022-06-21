@@ -39,7 +39,7 @@
               <use xlink:href="#icon-a-icon_Shutdownbeifen"></use>
             </svg>
           </div>
-          <RefreshIcon @refresh="toRefresh" :loading="farming.loading"></RefreshIcon>
+          <RefreshIcon :loading="farming.loading" @refresh="toRefresh"></RefreshIcon>
         </div>
         <div class="search-symbol search-h5">
           <svg v-if="!value" class="icon" aria-hidden="true">
@@ -67,7 +67,7 @@
               {{ item.label }}
             </Option>
           </Select>
-          <RefreshIcon @refresh="toRefresh" :loading="farming.loading"></RefreshIcon>
+          <RefreshIcon :loading="farming.loading" @refresh="toRefresh"></RefreshIcon>
         </div>
       </div>
 
@@ -82,14 +82,14 @@
         <!-- 池子列表 -->
         <FarmingPoolNc
           class="pc-farming-pool"
-          :tvlData="tvlData"
+          :tvl-data="tvlData"
           :is-staked="poolStatus"
           :search-key="searchKey"
           @refreshData="toRefresh"
         ></FarmingPoolNc>
         <H5FarmingPoolNc
           class="h5-farming-pool"
-          :tvlData="tvlData"
+          :tvl-data="tvlData"
           :is-staked="poolStatus"
           :search-key="searchKey"
           @refreshData="toRefresh"

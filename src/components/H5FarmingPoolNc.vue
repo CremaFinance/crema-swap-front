@@ -121,7 +121,7 @@
             </div>
           </div>
         </div>
-        <div class="h5-farming-pool" v-if="!changeNFT && wallet.connected">
+        <div v-if="!changeNFT && wallet.connected" class="h5-farming-pool">
           <div class="h5-farming-top">
             <div>
               <img src="@/assets/images/farming-icon-nft.png" alt="" />
@@ -139,7 +139,7 @@
               </div>
             </div>
           </div>
-          <div class="fee-pool-demo" v-for="(item, index) in farmingLists" :key="index">
+          <div v-for="(item, index) in farmingLists" :key="index" class="fee-pool-demo">
             <div>
               <span>{{ item.Earned }}</span>
               <div>{{ item.Num }}</div>
@@ -173,8 +173,8 @@
             <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
           </div>
           <div
-            v-else
             v-for="(pitem, pindex) in farming.positionsObj[item.positionWrapper]"
+            v-else
             :key="pindex"
             class="stake-box trade-info"
           >
@@ -267,7 +267,7 @@
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
-import { Button } from 'ant-design-vue'
+import { Button , Tooltip, Spin } from 'ant-design-vue'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { BroadcastOptions, SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
@@ -287,7 +287,6 @@ import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
 import invariant from 'tiny-invariant'
 import { makeSDK, getTokenAccountsByOwnerAndMint, calculateWrapAmount } from '@/contract/farming'
 import { Token, TokenAmount } from '@saberhq/token-utils'
-import { Tooltip, Spin } from 'ant-design-vue'
 import { fixD, addCommom } from '@/utils'
 
 Vue.use(Button)

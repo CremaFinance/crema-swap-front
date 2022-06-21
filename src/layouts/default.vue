@@ -133,6 +133,7 @@ export default Vue.extend({
   z-index: 5;
   background: url('@/assets/images/img-fair-bg.png');
   background-size: 100% 100%;
+  overflow-x: hidden;
   .pc-header-container {
     background: #22252b;
   }
