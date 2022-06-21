@@ -50,10 +50,14 @@ export default Vue.extend({
   },
   data() {
     return {
-      currentRpc: 'https://crema.rpcpool.com',
+      currentRpc: 'https://crema-crema-b941.mainnet.rpcpool.com',
       rpcList: [
         {
-          label: 'Crema',
+          label: 'Triton A',
+          value: 'https://crema-crema-b941.mainnet.rpcpool.com'
+        },
+        {
+          label: 'Triton B',
           value: 'https://crema.rpcpool.com'
         },
         {
@@ -63,10 +67,6 @@ export default Vue.extend({
         {
           label: 'GenesysGo',
           value: 'https://ssc-dao.genesysgo.net'
-        },
-        {
-          label: 'Triton',
-          value: 'https://crema-crema-b941.mainnet.rpcpool.com'
         }
       ],
       showSymstemSetting: false,
@@ -86,7 +86,7 @@ export default Vue.extend({
     },
     closeSystemSetting() {
       // console.log('this.oldRpc####', this.oldRpc)
-      this.currentRpc = localStorage.getItem('c-pre-current-rpc') || 'https://crema.rpcpool.com'
+      this.currentRpc = localStorage.getItem('c-pre-current-rpc') || 'https://crema-crema-b941.mainnet.rpcpool.com/'
       this.showSymstemSetting = false
     },
     selectRpc(value) {
