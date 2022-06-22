@@ -46,7 +46,7 @@
         v-if="(poolStatus == 'isStart' || poolStatus == 'isEndDeposit' || poolStatus == 'isEnd') && poolUsdcall > 0"
         :style="poolStatus == 'isEnd' ? { marginTop: '89px' } : ''"
       >
-        <p>Total USDC Depoit</p>
+        <p>Total USDC Deposit</p>
         <div v-if="poolUsdcall || poolUsdcall == 0">{{ thousands(fixD(poolUsdcall, 4)) }}</div>
         <div v-else><Spin /></div>
       </div>
@@ -56,7 +56,7 @@
         <div v-else><Spin /></div>
       </div>
     </div>
-    <div class="fair-hint-pc">
+    <div class="fair-hint-pc" :class="poolStatus == 'isEnd' ? 'fair-hint-bottom' : ''">
       <div class="hint-dim" v-if="poolStatus == 'isEnd' || poolStatus == 'isStart' || poolStatus == 'isEndDeposit'">
         <!-- <template v-if="poolStatus == 'isEnd' && userWatermelonBalance > 0 && wallet.connected">
           <h3 style="width: auto; margin: 0">You have claimed your CRM.</h3>
@@ -883,6 +883,9 @@ export default Vue.extend({
       background: rgba(255, 255, 255, 0.05);
     }
   }
+}
+.fair-hint-bottom {
+  top: 210px;
 }
 .fair-modal {
   position: absolute;
