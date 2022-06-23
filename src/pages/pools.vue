@@ -91,7 +91,7 @@
     <!-- </div> -->
     <!-- </div> -->
     <!-- </div> -->
-    <MyPositonItem :selectCoin="selectCoin" :inputValue="value"></MyPositonItem>
+    <MyPositonItem :select-coin="selectCoin" :input-value="value"></MyPositonItem>
     <!-- <div class="positon-container-share-left"></div>
     <div class="positon-container-share-right"></div> -->
     <!-- 列表形式 -->

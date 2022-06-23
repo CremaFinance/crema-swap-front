@@ -1,5 +1,5 @@
 <template>
-  <div class="fair-container" v-if="!loading">
+  <div v-if="!loading" class="fair-container">
     <div class="fair-container-center">
       <div class="fair-coin">
         <div class="fair-coin-one"></div>
@@ -9,9 +9,9 @@
       </div>
       <FairLeft
         :pool-usdcall="poolUsdcall"
-        :poolAccountInfo="poolAccountInfo"
+        :pool-account-info="poolAccountInfo"
         :pool-water="poolWater"
-        :tokenPrice="tokenPrice"
+        :token-price="tokenPrice"
         @getPoolAcount="getPoolAcount"
       />
     </div>
@@ -52,7 +52,8 @@ export default Vue.extend({
       poolAccountInfo: {},
       tokenPrice: null,
       loading: true,
-      poolRedeemToken: null
+      poolRedeemToken: null,
+      timer: null
     }
   },
   computed: {
@@ -60,12 +61,21 @@ export default Vue.extend({
   },
   mounted() {
     this.getPoolAcount()
+    if (this.timer) {
+      clearInterval(this.timer)
+    } else {
+      this.timer = setInterval(() => this.getPoolAcount(), 10000)
+    }
     const _this = this
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
         _this.getPoolAcount()
       }
     })
+  },
+  beforeDestroy() {
+    clearInterval(this.timer)
+    this.timer = null
   },
   methods: {
     // 池子信息
@@ -79,14 +89,16 @@ export default Vue.extend({
       console.log(poolAccountInfo, 'poolAccountInfo##')
       const poolUsdcs = await serum.getTokenAccount(program.provider, poolAccountInfo.poolUsdc)
       const toPoolUsdcs: any = poolUsdcs.amount.toNumber() / Math.pow(10, USDC_DECIMAL)
-      this.poolUsdcall = toPoolUsdcs
+      // this.poolUsdcall = toPoolUsdcs
+      this.poolUsdcall = 151
       console.log(toPoolUsdcs, 'toPoolUsdcs##')
 
       // const poolWatermelon: any = await serum.getTokenAccount(program.provider, poolAccountInfo.poolWatermelon)
       // const toWatermelon: any = poolWatermelon.amount.toNumber() / Math.pow(10, MELON_DECIMAL)
       this.poolWater = POOL_MELON_NUM
       if (POOL_MELON_NUM > 0) {
-        this.tokenPrice = new BigNumber(toPoolUsdcs).dividedBy(new BigNumber(POOL_MELON_NUM)).toNumber()
+        // this.tokenPrice = new BigNumber(toPoolUsdcs).dividedBy(new BigNumber(POOL_MELON_NUM)).toNumber()
+        this.tokenPrice = new BigNumber(151).dividedBy(new BigNumber(POOL_MELON_NUM)).toNumber()
       } else {
         this.tokenPrice = null
       }
@@ -136,16 +148,19 @@ export default Vue.extend({
   }
 }
 .fair-container {
-  overflow: hidden;
-  margin-top: -20px;
-  padding-top: 80px;
+  // overflow: hidden;
   position: relative;
+  // height: 900px;
   .fair-container-center {
     width: 1100px;
     height: 700px;
     padding: 0 80px;
-    margin: auto;
-    position: relative;
+    position: absolute;
+    left: 50%;
+    top: 50vh;
+    transform: translate(-50%, -50vh);
+    // margin: auto;
+    // position: relative;
   }
 }
 .fair-coin {
@@ -210,6 +225,7 @@ export default Vue.extend({
     margin-top: 20px;
     padding: 0px 0px 0;
     background: none;
+    height: 900px;
     .fair-container-center {
       width: 100%;
       height: 1000px;
@@ -221,6 +237,7 @@ export default Vue.extend({
     width: 100%;
     height: 316px;
     top: 400px;
+    right: 0px;
     background: url('@/assets/images/fair-h5-bg.png');
     background-size: 100% 100%;
     .fair-coin-one,

@@ -136,7 +136,7 @@
                 </div>
               </template>
             </Tooltip>
-            <div class="the-more-icon-box" v-if="!changeNFT && wallet && wallet.connected">
+            <div v-if="!changeNFT && wallet && wallet.connected" class="the-more-icon-box">
               <svg class="stern-icon" aria-hidden="true" @click="toogleData(index, item)">
                 <use :xlink:href="isOpenArr[index] ? '#icon-icon-Pack-up' : '#icon-icon-Pack-on'"></use>
               </svg>
@@ -158,10 +158,10 @@
             <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
           </div>
           <div
-            v-else
-            class="content-Bot-All"
             v-for="(pitem, pindex) in farming.positionsObj[item.positionWrapper]"
+            v-else
             :key="pindex"
+            class="content-Bot-All"
           >
             <div>
               <div class="td-title">NFT</div>
@@ -214,7 +214,7 @@
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
-import { Button } from 'ant-design-vue'
+import { Button , Tooltip, Spin } from 'ant-design-vue'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { BroadcastOptions, SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
@@ -234,7 +234,6 @@ import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
 import invariant from 'tiny-invariant'
 import { makeSDK, getTokenAccountsByOwnerAndMint, calculateWrapAmount } from '@/contract/farming'
 import { Token, TokenAmount } from '@saberhq/token-utils'
-import { Tooltip, Spin } from 'ant-design-vue'
 import { fixD, addCommom } from '@/utils'
 
 Vue.use(Button)

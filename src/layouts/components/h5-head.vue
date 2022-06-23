@@ -8,9 +8,9 @@
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </div>
         <div class="right">
-          <!-- <div class="fair-gi">
+          <div class="fair-gi">
             <nuxt-link to="/ido"><img src="@/assets/images/Text-NGU.gif" alt="" /></nuxt-link>
-          </div> -->
+          </div>
           <SystemSetting></SystemSetting>
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
             <use xlink:href="#icon-a-icon_Menu1"></use>

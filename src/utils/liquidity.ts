@@ -202,6 +202,9 @@ export async function addLiquidityNew(
   console.log('addLiquidityNew###coinAmount####', coinAmount)
   console.log('addLiquidityNew###pcAmount####', pcAmount)
 
+  console.log('addLiquidityNew###coinBalance####', coinAmount)
+  console.log('addLiquidityNew###pcBalance####', pcBalance)
+
   let wrappedCoinSolAccount
   if (poolInfo.coin.mintAddress === NATIVE_SOL.mintAddress) {
     wrappedCoinSolAccount = await createTokenAccountIfNotExist(
