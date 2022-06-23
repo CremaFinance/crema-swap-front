@@ -273,7 +273,7 @@ export default Vue.extend({
     },
     getReardCoinINfo() {},
     async getKeys() {
-      console.log('getKeys###进到getKeys了####')
+      console.log('active###getKeys了####')
       const wallet = (this as any).$wallet
       const conn = this.$web3
       // const namesObj = await fetchTransferInfoMap(conn, wallet)
