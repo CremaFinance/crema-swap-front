@@ -8,7 +8,7 @@
         <!-- <svg class="icon" aria-hidden="true" @click="toRefresh">
             <use xlink:href="#icon-icon-refresh"></use>
           </svg> -->
-        <RefreshIcon @refresh="toRefresh" :loading="farming.loading"></RefreshIcon>
+        <RefreshIcon :loading="farming.loading" @refresh="toRefresh"></RefreshIcon>
         <!-- </div> -->
       </div>
       <!-- banner -->
@@ -23,14 +23,14 @@
         <!-- 池子列表 -->
         <FarmingPoolNew
           class="pc-farming-pool"
-          :tvlData="tvlData"
+          :tvl-data="tvlData"
           :is-staked="poolStatus"
           :search-key="searchKey"
           @refreshData="toRefresh"
         ></FarmingPoolNew>
         <H5FarmingPoolNew
           class="h5-farming-pool"
-          :tvlData="tvlData"
+          :tvl-data="tvlData"
           :is-staked="poolStatus"
           :search-key="searchKey"
           @refreshData="toRefresh"

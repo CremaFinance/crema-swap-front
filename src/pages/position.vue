@@ -4,8 +4,8 @@
       <svg class="icon" aria-hidden="true" @click="gotoPoolList">
         <use xlink:href="#icon-icon-return"></use>
       </svg>
-      <div class="refresh-box h5-refresh-box" v-if="wallet.connected">
-        <RefreshIcon @refresh="refresh" :loading="liquidity.myPositionLoading"></RefreshIcon>
+      <div v-if="wallet.connected" class="refresh-box h5-refresh-box">
+        <RefreshIcon :loading="liquidity.myPositionLoading" @refresh="refresh"></RefreshIcon>
       </div>
     </div>
 
@@ -24,13 +24,13 @@
             <span>Add Liquidity</span>
           </div>
         </button>
-        <div class="refresh-box pc-refresh-box" v-if="wallet.connected">
+        <div v-if="wallet.connected" class="refresh-box pc-refresh-box">
           <!-- <div class="refresh">
             <svg class="icon" aria-hidden="true" @click="refresh">
               <use xlink:href="#icon-icon-refresh"></use>
             </svg>
           </div> -->
-          <RefreshIcon @refresh="refresh" :loading="liquidity.myPositionLoading"></RefreshIcon>
+          <RefreshIcon :loading="liquidity.myPositionLoading" @refresh="refresh"></RefreshIcon>
         </div>
       </div>
     </div>

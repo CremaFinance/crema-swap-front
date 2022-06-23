@@ -19,10 +19,10 @@
         <p>
           {{
             poolStatus == 'isStart'
-              ? 'Deposit end in'
+              ? 'Deposit ends in'
               : poolStatus == 'isNotStart'
-              ? 'Deposit start in'
-              : 'Claim start in'
+              ? 'Deposit starts in'
+              : 'Claim starts in'
           }}
         </p>
         <div class="fair-count-down">
@@ -31,7 +31,7 @@
         </div>
         <div class="fair-date">
           <span>Day</span>
-          <span>Hours</span>
+          <span>Hour</span>
           <span>Min</span>
           <span>Sec</span>
         </div>
@@ -46,7 +46,7 @@
         v-if="(poolStatus == 'isStart' || poolStatus == 'isEndDeposit' || poolStatus == 'isEnd') && poolUsdcall > 0"
         :style="poolStatus == 'isEnd' ? { marginTop: '89px' } : ''"
       >
-        <p>Total USDC Depoit</p>
+        <p>Total USDC Deposit</p>
         <div v-if="poolUsdcall || poolUsdcall == 0">{{ thousands(fixD(poolUsdcall, 4)) }}</div>
         <div v-else><Spin /></div>
       </div>
@@ -56,37 +56,36 @@
         <div v-else><Spin /></div>
       </div>
     </div>
-    <div class="fair-hint-pc">
+    <div class="fair-hint-pc" :class="poolStatus == 'isEnd' ? 'fair-hint-bottom' : ''">
       <div class="hint-dim" v-if="poolStatus == 'isEnd' || poolStatus == 'isStart' || poolStatus == 'isEndDeposit'">
-        <template v-if="poolStatus == 'isEnd' && userWatermelonBalance > 0 && wallet.connected">
-          <p style="width: auto; margin: 0">Claimable tokens</p>
-          <div>
-            <img src="@/assets/images/icon_coins.png" alt="" />
+        <!-- <template v-if="poolStatus == 'isEnd' && userWatermelonBalance > 0 && wallet.connected">
+          <h3 style="width: auto; margin: 0">You have claimed your CRM.</h3>
+          <div style="margin-bottom: -3px">
+            <img src="@/assets/coins/crm.png" alt="" />
             <div class="text-wrap">{{ thousands(fomatFloat(userWatermelonBalance, 6)) }}</div>
-            <!-- <span>CRM</span> -->
           </div>
-        </template>
-        <template v-if="poolStatus == 'isEnd' && currentToken > 0">
+          <h3 style="margin-bottom: 10px">Thanks for your contribution.</h3>
+        </template> -->
+        <template v-if="poolStatus == 'isEnd' && currentToken > 0 && wallet.connected">
           <p style="width: auto; margin: 0">Claim your CRM</p>
-
           <div>
-            <img src="@/assets/images/icon_coins.png" alt="" />
+            <img src="@/assets/coins/crm.png" alt="" />
             <div class="text-wrap">{{ thousands(fomatFloat(tokenNum, 6)) }}</div>
-            <!-- <span>CRM</span> -->
           </div>
 
-          <Button class="action-btn" :disabled="tokenNum == 0" @click="claim"> Claim </Button>
+          <Button class="action-btn" :disabled="currentToken == 0" @click="claim"> Claim </Button>
         </template>
-        <h3
-          style="margin: 0"
-          v-if="wallet.connected && poolStatus == 'isEnd' && tokenNum == 0 && userWatermelonBalance == 0"
-        >
-          You did not contribute to the token sale
-        </h3>
+        <template v-if="wallet.connected && poolStatus == 'isEnd' && currentToken == 0">
+          <div>
+            <img src="@/assets/coins/crm.png" alt="" />
+          </div>
+          <h3 style="margin: 10px 0 0 0">Thanks for your contribution.</h3>
+        </template>
+
         <template v-if="poolStatus == 'isStart' || poolStatus == 'isEndDeposit'">
           <div class="journey-fair">
             <img src="@/assets/images/fair-sjzan.png" alt="" />
-            <span>The journey starts hear</span>
+            <span>The journey starts here</span>
           </div>
           <p class="fair-title-s">When you're ready, deposit your USDC</p>
           <div class="Half-Max-fair">
@@ -124,6 +123,12 @@
               @focus="changeS"
             />
           </div>
+          <div class="deposit-tips" v-if="wallet.connected && fairvalue && fairvalue < 10">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-error"></use>
+            </svg>
+            <span>Minimum deposit 10 USDC</span>
+          </div>
           <!-- @click="change('Deposit')" -->
           <Button
             v-if="wallet.connected"
@@ -132,7 +137,8 @@
               depositLoading ||
               currentBidn <= 0 ||
               fairvalue > currentBidn ||
-              poolStatus == 'isEndDeposit'
+              poolStatus == 'isEndDeposit' ||
+              fairvalue < 10
             "
             class="action-btn"
             :loading="depositLoading"
@@ -317,7 +323,6 @@ export default Vue.extend({
   methods: {
     fixD,
     updateUserAccount() {
-      console.log('et##')
       this.getUserAccount()
       this.$emit('getPoolAcount')
     },
@@ -638,21 +643,25 @@ export default Vue.extend({
 <style lang="less" scoped>
 @import '../styles/base.less';
 .fair-detail-all {
-  width: 100%;
+  // width: 1100px;
   height: 100%;
   // background: #000;
-  display: flex;
-  justify-content: space-between;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  // display: flex;
+  // margin: 0 auto;
+  // justify-content: space-between;
+  // position: absolute;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -50%);
 }
 .fair-detail-pc {
   width: 520px;
-  position: relative;
-  z-index: 100;
-  padding: 128px 0 0;
+  // position: relative;
+  // z-index: 100;
+  // padding: 50px 0 0;
+  position: absolute;
+  left: 0;
+  top: 80px;
   .fair-title {
     display: flex;
     align-items: center;
@@ -738,10 +747,13 @@ export default Vue.extend({
 }
 .fair-hint-pc {
   width: 400px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  align-content: center;
+  position: absolute;
+  right: 0;
+  top: 140px;
+  // display: flex;
+  // flex-wrap: wrap;
+  // align-items: center;
+  // align-content: center;
   padding-top: 0px;
   .hint-dim {
     width: 400px;
@@ -872,6 +884,9 @@ export default Vue.extend({
     }
   }
 }
+.fair-hint-bottom {
+  top: 210px;
+}
 .fair-modal {
   position: absolute;
 }
@@ -957,7 +972,20 @@ svg {
     width: 32px;
     height: 32px;
   }
-  margin-bottom: 32px !important;
+  margin-bottom: 22px !important;
+}
+.deposit-tips {
+  display: flex;
+  align-items: center;
+  .icon {
+    width: 14px;
+    height: 14px;
+    fill: #fb0;
+  }
+  span {
+    font-size: 12px !important;
+  }
+  color: #fb0;
 }
 .ant-modal {
   background: #000 !important;
@@ -981,6 +1009,7 @@ input {
     width: 100%;
     padding: 20px 0 0 0;
     margin-bottom: 20px;
+    position: unset;
     .fair-title {
       justify-content: center;
       flex-wrap: wrap;
@@ -1017,6 +1046,7 @@ input {
     width: 100%;
     height: 440px;
     display: block;
+    position: unset;
     .hint-dim {
       width: 100%;
       > div {

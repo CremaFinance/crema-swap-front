@@ -29,10 +29,10 @@ export const web3Config = {
     // { url: 'https://stage.mainnet.rpcpool.com/2ee3d7c0b48f6c361a06459b1d77', weight: 50 }
     // { url: 'https://api.rpcpool.com', weight: 10 },
     // { url: 'https://solana-api.projectserum.com', weight: 50 }
+    // { url: 'https://ssc-dao.genesysgo.net', weight: 50 }
     // { url: 'https://raydium.rpcpool.com', weight: 50 },
     // { url: 'https://api.mainnet-beta.solana.com', weight: 10 }
     // { url: 'https://api.devnet.solana.com', weight: 50 }
-    // { url: 'https://connect.runnode.com/?apikey=PMkQIG6CxY0ybWmaHRHJ', weight: 50 }
   ]
 }
 

@@ -19,7 +19,7 @@
           :from-coin="fromCoin"
           :to-coin="toCoin"
           :dirction="dirction"
-          :tickSpace="tickSpace"
+          :tick-space="tickSpace"
         ></SetPriceItem>
         <SetPriceItem
           v-model="maxPrice"
@@ -28,7 +28,7 @@
           :from-coin="fromCoin"
           :to-coin="toCoin"
           :dirction="dirction"
-          :tickSpace="tickSpace"
+          :tick-space="tickSpace"
         ></SetPriceItem>
       </div>
 

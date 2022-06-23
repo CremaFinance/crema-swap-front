@@ -79,7 +79,7 @@ export default Vue.extend({
     //   this.showNotice = true
     //   sessionStorage.setItem('crema_show_notice', '1')
     // }
-    console.log('screenWidth####这里没进来么')
+    // console.log('screenWidth####这里没进来么')
     this.watchScreen()
     window.onresize = () => {
       this.watchScreen()
@@ -133,6 +133,7 @@ export default Vue.extend({
   z-index: 5;
   background: url('@/assets/images/img-fair-bg.png');
   background-size: 100% 100%;
+  overflow-x: hidden;
   .pc-header-container {
     background: #22252b;
   }
@@ -187,6 +188,7 @@ export default Vue.extend({
     }
     .h5-wallet {
       display: block;
+      bottom: 20px;
       padding: 60px 0 20px 0px;
       width: 198px;
       margin: auto;

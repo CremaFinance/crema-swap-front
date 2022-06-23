@@ -81,7 +81,7 @@
                 <use xlink:href="#icon-icon-Jump"></use>
               </svg>
             </p> -->
-            <!-- <i
+            <!--<i
               class="show-fee"
               @mouseenter="item.isShowFee = !item.isShowFee"
               @mouseleave="item.isShowFee = !item.isShowFee"
@@ -91,7 +91,7 @@
                   liquidity.coinPairConfigObj[item.swap_account].fee * 100 + '%') ||
                 '0.01%'
               }}</i
-            > -->
+            >-->
           </td>
           <td class="fee-bot">$ {{ addCommom(item.tvl_in_usd, 2) }}</td>
           <td>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</td>
@@ -537,7 +537,7 @@ export default Vue.extend({
       }, 60000)
     },
     poolSource(val) {
-      this.changeAbout(760)
+      this.changeAbout(600)
       // this.sortList('pools')
       let data = this.pools
       if (val == 'add') {
@@ -602,7 +602,9 @@ export default Vue.extend({
       })
     },
     getUct() {
-      this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
+      // this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
+      // this.$axios.get(`https://pre-api-crema.bitank.com/v1/swap/count`).then((res) => {
+      this.$axios.get(`https://api.crema.finance/v1/swap/count/new`).then((res) => {
         let results = res.data
         const list = res.data.pools
         const token = res.data.tokens
@@ -676,34 +678,29 @@ export default Vue.extend({
     sortList(vol) {
       // console.log(this.pools);
       // console.log(this.tokens);
+      this.poolsPage.page = 1
       if (vol == 'pools') {
+        let val
         if (this.drop) {
-          let val = this.pools.sort(this.changeArr('tvl'))
-          this.pools = val
-          this.poolsvas = val.slice(0, 10)
-          this.drop = !this.drop
+          val = this.pools.sort(this.changeArr('tvl'))
         } else {
-          let val = this.pools.sort(this.changeArrs('tvl'))
-          this.pools = val
-          this.poolsvas = val.slice(0, 10)
-          this.drop = !this.drop
+          val = this.pools.sort(this.changeArrs('tvl'))
         }
+        this.pools = val
+        this.poolsvas = val.slice(0, 10)
+        this.drop = !this.drop
       } else if (vol == 'tokens') {
+        let val
         if (this.litre) {
-          let val = this.tokens.sort(this.changeArr('tvl'))
-          this.tokens = val
-          let start = 10 * (this.tokenPage.page + 1) - 10
-          let end = 10 * (this.tokenPage.page + 1)
-          this.tokenvas = val.slice(start, end)
-          this.litre = !this.litre
+          val = this.tokens.sort(this.changeArr('tvl'))
         } else {
-          let val = this.tokens.sort(this.changeArrs('tvl'))
-          this.tokens = val
-          let start = 10 * (this.tokenPage.page + 1) - 10
-          let end = 10 * (this.tokenPage.page + 1)
-          this.tokenvas = val.slice(start, end)
-          this.litre = !this.litre
+          val = this.tokens.sort(this.changeArrs('tvl'))
         }
+        this.tokens = val
+        let start = 10 * (this.tokenPage.page + 1) - 10
+        let end = 10 * (this.tokenPage.page + 1)
+        this.tokenvas = val.slice(start, end)
+        this.litre = !this.litre
       } else {
         let val = this.tokens.sort(this.changeArrs('vol_in_usd_24h'))
         this.tokenvas = val.slice(0, 10)

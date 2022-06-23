@@ -27,7 +27,7 @@
           : ''
       }}
     </div>
-    <div class="address" v-if="pItem.nftTokenMint">
+    <div v-if="pItem.nftTokenMint" class="address">
       <a :href="`https://solscan.io/account/${pItem.nftTokenAccount}`" target="_blank">
         {{ pItem.nftTokenMint.substr(0, 4) }}
         ...

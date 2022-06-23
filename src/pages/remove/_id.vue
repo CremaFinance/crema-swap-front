@@ -179,6 +179,7 @@ export default Vue.extend({
       // }
     },
     watchCurrentPositon(currentPositon: any) {
+      console.log('remove##watchCurrentPositon###currentPositon###', currentPositon)
       const id = this.$route.params.id
 
       if (currentPositon && currentPositon.nftTokenMint === id) {

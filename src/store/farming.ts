@@ -101,6 +101,7 @@ export const actions = actionTree(
       // https://pre-api-crema.bitank.com/config?name=farming 预发布
       // const configRes = await this.$axios.get('https://dev-api-crema.bitank.com/config?name=farming')
       const configRes = await this.$axios.get('https://api.crema.finance/config?name=farming')
+      // const configRes = await this.$axios.get('https://pre-api-crema.bitank.com/config?name=farming')
       console.log('getFarmingConfig###res####', configRes)
       console.log('getFarmingConfig####tokenObj###', tokenObj)
       const farmingConfig: any = []
@@ -306,27 +307,27 @@ export const actions = actionTree(
         commit('setPositionsLoadingObj', { key: farmingInfo.positionWrapper, value: false })
       }
     },
-    async getEarnings({ commit }) {
-      const conn = this.$web3
-      const wallet = (this as any)._vm.$wallet
+    // async getEarnings({ commit }) {
+    //   const conn = this.$web3
+    //   const wallet = (this as any)._vm.$wallet
 
-      const miner: any = await minerInfo(
-        conn,
-        wallet,
-        new PublicKey(LPFARMS[0].rewarderKey),
-        new PublicKey(LPFARMS[0].positionWrapperWrapMint)
-      )
+    //   const miner: any = await minerInfo(
+    //     conn,
+    //     wallet,
+    //     new PublicKey(LPFARMS[0].rewarderKey),
+    //     new PublicKey(LPFARMS[0].positionWrapperWrapMint)
+    //   )
 
-      const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(LPFARMS[0].rewardTokenMint))
-      console.log('getEarnings###rewardTokenInfo####', rewardTokenInfo)
-      const rewardTokenDecimal = rewardTokenInfo.value.decimals
+    //   const rewardTokenInfo = await conn.getTokenSupply(new PublicKey(LPFARMS[0].rewardTokenMint))
+    //   console.log('getEarnings###rewardTokenInfo####', rewardTokenInfo)
+    //   const rewardTokenDecimal = rewardTokenInfo.value.decimals
 
-      console.log('farming.ts###miner###', miner)
-      if (miner) {
-        const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
-        commit('setEarnings', earning)
-      }
-    },
+    //   console.log('farming.ts###miner###', miner)
+    //   if (miner) {
+    //     const earning = new Decimal(miner.PendingReward).div(Math.pow(10, rewardTokenDecimal)).toString()
+    //     commit('setEarnings', earning)
+    //   }
+    // },
     async getEarningsObj({ state, commit }, haveLoading) {
       const conn = this.$web3
       const wallet = (this as any)._vm.$wallet

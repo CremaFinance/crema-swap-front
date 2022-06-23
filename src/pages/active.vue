@@ -23,18 +23,20 @@
         class="pc-farming-pool"
         :earnings-amount="earningsAmount"
         :caffeine-amount="caffeineAmount"
-        :keysObj="processedKeysObj.newObj"
-        :countObj="processedKeysObj.countObj"
-        :keysList="keysList"
+        :name-obj="nameObj"
+        :keys-obj="processedKeysObj.newObj"
+        :count-obj="processedKeysObj.countObj"
+        :keys-list="keysList"
         @refreshKeysData="refreshKeysData"
       />
       <H5DfarmCaffeine
         class="h5-farming-pool"
         :earnings-amount="earningsAmount"
         :caffeine-amount="caffeineAmount"
-        :keysObj="processedKeysObj.newObj"
-        :countObj="processedKeysObj.countObj"
-        :keysList="keysList"
+        :name-obj="nameObj"
+        :keys-obj="processedKeysObj.newObj"
+        :count-obj="processedKeysObj.countObj"
+        :keys-list="keysList"
         @refreshKeysData="refreshKeysData"
       />
     </div>
@@ -46,7 +48,14 @@ import { mapState } from 'vuex'
 // import { Input } from 'ant-design-vue'
 import { checkNullObj } from '@/utils'
 import { TokenAmount, gt } from '@/utils/safe-math'
-import { makeSDK, fetchCremakeys, getMasterPda, fetchActivitymaster, quarryInfo } from '@/contract/farming'
+import {
+  makeSDK,
+  fetchCremakeys,
+  getMasterPda,
+  fetchActivitymaster,
+  quarryInfo,
+  fetchTransferInfoMap
+} from '@/contract/farming'
 
 export default Vue.extend({
   data() {
@@ -121,7 +130,8 @@ export default Vue.extend({
       keysList: [] as any,
       loadings: false,
       refreshLoading: false,
-      refreshTimer: null
+      refreshTimer: null,
+      nameObj: {} as any
       // : {} as any
     }
   },
@@ -261,9 +271,14 @@ export default Vue.extend({
       this.getKeys()
       // this.getClaimedHistory()
     },
+    getReardCoinINfo() {},
     async getKeys() {
+      console.log('active###getKeys了####')
       const wallet = (this as any).$wallet
       const conn = this.$web3
+      // const namesObj = await fetchTransferInfoMap(conn, wallet)
+      // this.nameObj = namesObj
+      // console.log('namesObj####', namesObj)
       const keys = await fetchCremakeys(conn, wallet, wallet.publicKey)
       console.log('getKeys###keys####', keys)
       this.keysObj = keys
@@ -296,7 +311,7 @@ export default Vue.extend({
   padding-top: 20px;
   width: 100%;
   .farming-container-center {
-    // width: 1400px;
+    // width: 1600px;
     margin: auto;
     display: flex;
     flex-wrap: wrap;
@@ -338,7 +353,7 @@ export default Vue.extend({
         display: none;
       }
       .pc-banner {
-        width: 1400px;
+        width: 1600px;
         display: flex;
         justify-content: center;
       }
