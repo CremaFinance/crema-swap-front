@@ -590,8 +590,8 @@ export default Vue.extend({
     async getFarmingDate() {
       const wallet = (this as any).$wallet
       const conn = this.$web3
-      const rewarderKey = new PublicKey('Aqz8Zvot5BZht6vuwRHpLmP4M126WaECRmc3cVDWnRtm')
-      const positionWrapperWrapMint = new PublicKey('GAQbaSD7aFDhkijfAjh2tebxJpm1iJRhWwtrbdNYGTBh')
+      const rewarderKey = new PublicKey('9VdAkPH9WTiAEEr1fdSd5ycbK8Z3JsdyDuzxCk6vpJod')
+      const positionWrapperWrapMint = new PublicKey('9aExwsPhX6i1NMdWgPG6odh8VxTfib2Fw2hLd1Tui9V4')
       try {
         const res: any = await quarryInfo(conn, wallet, rewarderKey, positionWrapperWrapMint)
         if (res && res.famineTs) {
