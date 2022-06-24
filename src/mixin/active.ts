@@ -265,36 +265,39 @@ export default Vue.extend({
       }
       if (!this.farmingIsEnd) {
         // 2、当前不存在NFT
-        if (this.currentKeyAmount < 1 && this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
+        // if (this.currentKeyAmount < 1 && this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
+        if (this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
+          // if (this.caffeineAmount < this.currentKeyItem.minRequireAmount) {
           return `You need  
           ${Math.ceil(this.currentKeyItem.minRequireAmount - this.caffeineAmount)}
            more Caffeine to mint a new ${this.currentKeyItem.key}. `
         }
 
         // 3、当前存在的咖啡因数量可以铸造当前选中的等级时展示
-        if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
+        // if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
+        if (this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
           return `You are eligible to mint a new ${this.currentKeyItem.key} key. `
         }
 
         // 4、该等级下存在NFT 时，不可升级时
-        if (
-          this.currentKeyItem.id !== 5 &&
-          this.currentKeyAmount > 0 &&
-          this.caffeineAmount < this.currentKeyItem.upgradeMinAmount
-        ) {
-          return `You need 
-          ${Math.ceil(this.currentKeyItem.upgradeMinAmount - this.caffeineAmount)}
-           more Caffeine to upgrade this key. `
-        }
+        // if (
+        //   this.currentKeyItem.id !== 5 &&
+        //   this.currentKeyAmount > 0 &&
+        //   this.caffeineAmount < this.currentKeyItem.upgradeMinAmount
+        // ) {
+        //   return `You need 
+        //   ${Math.ceil(this.currentKeyItem.upgradeMinAmount - this.caffeineAmount)}
+        //    more Caffeine to upgrade this key. `
+        // }
 
         // 5、该等级下存在NFT 时，可升级时
-        if (
-          this.currentKeyItem.id !== 5 &&
-          this.currentKeyAmount > 0 &&
-          this.caffeineAmount >= this.currentKeyItem.upgradeMinAmount
-        ) {
-          return `You are eligible to upgrade this key to a ${this.keyData[this.canUpgradeHeighKeyId - 1].key}.`
-        }
+        // if (
+        //   this.currentKeyItem.id !== 5 &&
+        //   this.currentKeyAmount > 0 &&
+        //   this.caffeineAmount >= this.currentKeyItem.upgradeMinAmount
+        // ) {
+        //   return `You are eligible to upgrade this key to a ${this.keyData[this.canUpgradeHeighKeyId - 1].key}.`
+        // }
 
         // 当是最后一个等级时，且咖啡因够mint时
         if (
@@ -568,9 +571,8 @@ export default Vue.extend({
         if (activeInfo && activeInfo.openRewardTimestamp) {
           this.openRewardTimestamp = activeInfo.openRewardTimestamp.toNumber()
           console.log('activeInfo.openRewardTimestamp.toNumber()###', activeInfo.openRewardTimestamp.toNumber())
-          // 为了测试设置为4月30日
-          // this.openRewardTimestamp = 1648569600
-          // this.openRewardTimestamp = 1651248000
+          // 为了测试设置为6月30日
+          // this.openRewardTimestamp = 1656518400
         }
         if (activeInfo && activeInfo.crmExchangeRate) {
           const crmToUstRate = activeInfo.crmExchangeRate.toNumber() / Math.pow(10, activeInfo.crmPriceDecimal)
@@ -594,8 +596,8 @@ export default Vue.extend({
         if (res && res.famineTs) {
           this.farmingEndTimestamp = Number(res.famineTs.toString()) // 目前后端设置的质押活动结束时间是永久 即9223372036854775807
           console.log('Number(res.famineTs.toString())####', Number(res.famineTs.toString()))
-          // 为了测试，暂设置为5月30 14:13
-          // this.farmingEndTimestamp = 1653898400
+          // 为了测试，暂设置为6月30 00:00
+          // this.farmingEndTimestamp = 1656518400
         }
       } catch (err) {
         console.log('getFarmingDate###err###', err)
