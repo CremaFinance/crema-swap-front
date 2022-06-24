@@ -95,7 +95,6 @@
                   <span>{{ addCommom(caffeineAmount, 0) }} </span> / {{ addCommom(currentKeyItem.minRequireAmount, 0) }}
                 </div>
               </div>
-
               <img
                 v-if="!wallet.connected"
                 :class="!wallet.connected ? 'NotLink-img' : ''"
@@ -103,7 +102,32 @@
                 alt=""
               />
               <h3 v-if="currentKeyItem.isCrmClaimed && canClaim" class="congratulations">Congratulations</h3>
-              <p v-if="wallet.connected" class="tips-text">{{ tipText || isClaimedText }}</p>
+              <p
+                v-if="
+                  wallet.connected &&
+                  currentKeyItem.id !== 5 &&
+                  currentKeyAmount > 0 &&
+                  caffeineAmount < currentKeyItem.upgradeMinAmount &&
+                  upgradeMouseover
+                "
+                class="tips-text"
+              >
+                You need {{ Math.ceil(currentKeyItem.upgradeMinAmount - caffeineAmount) }} more Caffeine to upgrade this
+                key.
+              </p>
+              <p
+                v-else-if="
+                  wallet.connected &&
+                  currentKeyItem.id !== 5 &&
+                  currentKeyAmount > 0 &&
+                  caffeineAmount >= currentKeyItem.upgradeMinAmount &&
+                  upgradeMouseover
+                "
+                class="tips-text"
+              >
+                You are eligible to upgrade this key to a {{ keyData[canUpgradeHeighKeyId - 1].key }}
+              </p>
+              <p v-else-if="wallet.connected" class="tips-text">{{ tipText || isClaimedText }}</p>
               <ul v-if="currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
                 <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
                   <img :src="importIcon(`/coins/${item.name}.png`)" />
@@ -130,14 +154,7 @@
                   :get-popup-container="() => $refs.caffeine"
                 >
                   <div>
-                    <Button
-                      v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
-                      class="action-btn"
-                      :disabled="!canMint"
-                      @click="changeMint"
-                    >
-                      Mint
-                    </Button>
+                    <Button class="action-btn" :disabled="!canMint" @click="changeMint"> Mint </Button>
                   </div>
                   <template v-if="!canMint" slot="title">
                     <div>
@@ -152,12 +169,7 @@
                     !currentKeyItem.is_crm_claimed &&
                     canUpgrade -->
                 <Tooltip
-                  v-if="
-                    wallet.connected &&
-                    !currentKeyItem.is_crm_claimed &&
-                    currentKeyItem.id !== 5 &&
-                    !currentKeyItem.isCrmClaimed
-                  "
+                  v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
                   overlay-class-name="burn-btn-tooltip"
                   placement="top"
                   :get-popup-container="() => $refs.caffeine"
@@ -175,23 +187,35 @@
                       class="action-btn"
                       @click="changeUpgrade"
                     > -->
-                    <Button
-                      v-if="
-                        wallet.connected &&
-                        !currentKeyItem.is_crm_claimed &&
-                        currentKeyItem.id !== 5 &&
-                        !currentKeyItem.isCrmClaimed
-                      "
-                      :disabled="!canUpgrade"
-                      class="action-btn"
-                      @click="changeUpgrade"
-                    >
-                      Upgrade
-                    </Button>
+                    <Button :disabled="!canUpgrade" class="action-btn" @click="changeUpgrade"> Upgrade </Button>
                   </div>
                   <template v-if="!canUpgrade" slot="title">
                     <div>
-                      <span>You don't have enough Caffeine.</span>
+                      <span v-if="currentKeyItem.id === 5">Already at the highest level.</span>
+                      <span v-else-if="currentKeyAmount < 1">You need to mint a key first.</span>
+                      <span
+                        v-else-if="
+                          currentKeyItem.id !== 5 &&
+                          currentKeyAmount > 0 &&
+                          caffeineAmount < currentKeyItem.upgradeMinAmount
+                        "
+                        >You need {{ Math.ceil(currentKeyItem.upgradeMinAmount - caffeineAmount) }} more Caffeine to
+                        upgrade this key.</span
+                      >
+                      <span
+                        v-else-if="
+                          currentKeyItem.id !== 5 &&
+                          currentKeyAmount > 0 &&
+                          caffeineAmount >= currentKeyItem.upgradeMinAmount
+                        "
+                        >You are eligible to upgrade this key to a {{ keyData[canUpgradeHeighKeyId - 1].key }}</span
+                      >
+                      <span v-else>You don't have enough Caffeine.</span>
+                    </div>
+                  </template>
+                  <template v-else slot="title">
+                    <div>
+                      <span>You are eligible to upgrade this key.</span>
                     </div>
                   </template>
                 </Tooltip>
@@ -213,7 +237,7 @@
                     !currentKeyItem.isCrmClaimed
                   "
                   class="action-btn"
-                  style="width: 280px"
+                  style="width: 270px"
                   @click="changeClaim"
                 >
                   Open Treasure Box
@@ -799,7 +823,7 @@ export default Vue.extend({
   width: 100%;
   margin-top: 24px;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
 }
 .action-btn {
   // .farm-btn-small();

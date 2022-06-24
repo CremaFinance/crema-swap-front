@@ -77,7 +77,7 @@
       </a>
     </div>
     <!-- <p>{{ tipText || isClaimedText }}</p> -->
-    <div v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed" class="tips-stats">
+    <div v-if="wallet.connected && !currentKeyItem.is_crm_claimed" class="tips-stats">
       <div class="caync">
         <div>
           <!-- <img :src="`/_nuxt/src/assets/images/icon-${isdir}-Key-bright.png`" alt="" /> -->
@@ -129,13 +129,7 @@
       </Button>
       <!-- !farmingIsEnd && -->
       <Button
-        v-if="
-          wallet.connected &&
-          currentKeyItem.id !== 5 &&
-          currentKeyItem.mint &&
-          !currentKeyItem.is_crm_claimed &&
-          !currentKeyItem.isCrmClaimed
-        "
+        v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
         :disabled="!canUpgrade"
         class="action-btn"
         @click="changeUpgrade"
