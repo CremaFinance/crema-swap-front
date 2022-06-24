@@ -10,7 +10,7 @@
         <!-- <div v-if="fairShow == 'header-fair'" class="fair-gi"> -->
         <div class="fair-gi">
           <img src="@/assets/images/icon-left.png" alt="" />
-          <nuxt-link to="/ido"><img src="@/assets/images/Text-NGU.gif" alt="" /></nuxt-link>
+          <a href="https://ido.crema.finance/" target="_blank"><img src="@/assets/images/Text-NGU.gif" alt="" /></a>
           <img src="@/assets/images/icon-right.png" alt="" />
         </div>
         <div class="left">
