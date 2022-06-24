@@ -246,7 +246,8 @@ export default Vue.extend({
       },
       claimIsLoadingObj: {} as any,
       claimRewardsType: 'open',
-      isBurnLoading: false
+      isBurnLoading: false,
+      upgradeMouseover: false
     }
   },
   computed: {
@@ -276,7 +277,7 @@ export default Vue.extend({
         // 3、当前存在的咖啡因数量可以铸造当前选中的等级时展示
         // if (this.currentKeyAmount < 1 && this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
         if (this.caffeineAmount >= this.currentKeyItem.minRequireAmount) {
-          return `You are eligible to mint a new ${this.currentKeyItem.key} key. `
+          return `You are eligible to mint a new ${this.currentKeyItem.key}. `
         }
 
         // 4、该等级下存在NFT 时，不可升级时
@@ -357,7 +358,7 @@ export default Vue.extend({
       return false
     },
     canUpgrade() {
-      if (this.currentKeyItem.upgradeMinAmount && Number(this.caffeineAmount) >= this.currentKeyItem.upgradeMinAmount) {
+      if (this.currentKeyAmount > 0 && this.currentKeyItem.upgradeMinAmount && Number(this.caffeineAmount) >= this.currentKeyItem.upgradeMinAmount) {
         return true
       }
       return false
