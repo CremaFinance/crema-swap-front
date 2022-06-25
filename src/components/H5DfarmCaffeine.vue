@@ -69,7 +69,7 @@
         v-if="wallet.connected && currentKeyItem && currentKeyItem.mint"
         class="img-text"
         target="_blank"
-        :href="`https://solscan.io/token/${currentKeyItem.mint}?cluster=devnet`"
+        :href="`https://solscan.io/token/${currentKeyItem.mint}`"
       >
         {{ currentKeyItem.mint && currentKeyItem.mint.substr(0, 4) }}
         ...

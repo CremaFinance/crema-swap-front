@@ -9,7 +9,7 @@
         </div>
         <div class="right">
           <!-- <div class="fair-gi">
-            <nuxt-link to="/ido"><img src="@/assets/images/Text-NGU.gif" alt="" /></nuxt-link>
+            <a href="https://ido.crema.finance/" target="_blank"><img src="@/assets/images/Text-NGU.gif" alt="" /></a>
           </div> -->
           <SystemSetting></SystemSetting>
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
