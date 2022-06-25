@@ -265,7 +265,7 @@
               class="img-text"
               style="margin-top: 6px"
               target="_blank"
-              :href="`https://solscan.io/token/${currentKeyItem.mint}?cluster=devnet`"
+              :href="`https://solscan.io/token/${currentKeyItem.mint}`"
             >
               {{ currentKeyItem.mint && currentKeyItem.mint.substr(0, 4) }}
               ...
