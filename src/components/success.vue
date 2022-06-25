@@ -4,7 +4,7 @@
       <img src="@/assets/images/img-Swap-Submitted@2x.png" alt="" />
       <p class="waiting-title">Transaction Submitted</p>
       <p class="waiting-text">
-        <a :href="`https://solscan.io/tx/${transaction.currentTransactionTxid}?cluster=devnet`" target="_blank">
+        <a :href="`https://solscan.io/tx/${transaction.currentTransactionTxid}`" target="_blank">
           <span>View on Explorer</span>
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-icon-Jump"></use>
