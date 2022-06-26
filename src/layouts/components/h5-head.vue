@@ -8,9 +8,9 @@
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </div>
         <div class="right">
-          <!-- <div class="fair-gi">
+          <div class="fair-gi">
             <a href="https://ido.crema.finance/" target="_blank"><img src="@/assets/images/Text-NGU.gif" alt="" /></a>
-          </div> -->
+          </div>
           <SystemSetting></SystemSetting>
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
             <use xlink:href="#icon-a-icon_Menu1"></use>
