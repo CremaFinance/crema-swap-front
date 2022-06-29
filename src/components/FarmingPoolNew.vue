@@ -214,7 +214,7 @@
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
-import { Button , Tooltip, Spin } from 'ant-design-vue'
+import { Button, Tooltip, Spin } from 'ant-design-vue'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { BroadcastOptions, SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
@@ -393,6 +393,9 @@ export default Vue.extend({
 
       let txid = ''
 
+      console.log('toStake###wrapperInfo####', wrapperInfo)
+      console.log('toStake###nftMint####', nftMint.toString())
+      console.log('toStake###rewarderKey####', rewarderKey.toString())
       try {
         const res = await sdk.positionWrapper.mintAndStake({
           wrapper: wrapperInfo,
