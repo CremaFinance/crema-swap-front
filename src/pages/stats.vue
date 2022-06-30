@@ -218,8 +218,8 @@
                   </li>
                   <li>
                     <h3>Farm</h3>
-                    <p v-if="farming.statisticsDataObj && farming.statisticsDataObj[item.swap_account]">
-                      {{ fixD(Number(farming.statisticsDataObj[item.swap_account].apr) * 100, 2) }}%
+                    <p v-if="farmingv2AprObj && farmingv2AprObj[item.swap_account]">
+                      {{ farmingv2AprObj[item.swap_account].aprView }}
                     </p>
                     <p v-else>N/A</p>
                   </li>
@@ -533,10 +533,22 @@ export default Vue.extend({
       return importIcon(`/coins/${name.toLowerCase()}.png`)
     },
     getTotalApr(item: any) {
-      if (this.farming.statisticsDataObj && this.farming.statisticsDataObj[item.swap_account]) {
-        const farmApr = Number(this.farming.statisticsDataObj[item.swap_account].apr) * 100
+      // if (this.farming.statisticsDataObj && this.farming.statisticsDataObj[item.swap_account]) {
+      //   const farmApr = Number(this.farming.statisticsDataObj[item.swap_account].apr) * 100
+      //   const currentApr = Number(item.apr.split('%')[0])
+      //   return `${fixD(String(farmApr + currentApr), 2)}%`
+      // } else {
+      //   return item.apr
+      // }
+      if (this.farmingv2AprObj && this.farmingv2AprObj[item.swap_account]) {
+        const farmApr = Number(this.farmingv2AprObj[item.swap_account].apr)
         const currentApr = Number(item.apr.split('%')[0])
-        return `${fixD(String(farmApr + currentApr), 2)}%`
+        const total = farmApr + currentApr
+        if (total > 10000) {
+          return 'Infinity'
+        } else {
+          return `${fixD(String(total), 2)}%`
+        }
       } else {
         return item.apr
       }
