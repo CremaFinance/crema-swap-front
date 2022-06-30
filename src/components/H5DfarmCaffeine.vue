@@ -5,7 +5,11 @@
         <span>My Caffeine</span>
         <!-- <span>{{ addCommom(caffeineAmount, 4) }}</span> -->
         <span>{{ caffeineAmount }}</span>
-        <!-- <Tooltip overlay-class-name="burn-btn-tooltip" placement="top">
+        <Tooltip
+          v-if="wallet.connected && Number(caffeineAmount) > 0"
+          overlay-class-name="burn-btn-tooltip"
+          placement="top"
+        >
           <button class="burn-btn" @click="openBurnModal">Burn</button>
           <template slot="title">
             <div class="burn-tips">
@@ -13,7 +17,7 @@
               <span>Burn remaining Caffeine to get CRM</span>
             </div>
           </template>
-        </Tooltip> -->
+        </Tooltip>
       </div>
       <!-- <div>
         <span>Total Earned</span>
@@ -140,7 +144,7 @@
         Connect a wallet
       </Button>
       <!-- Open when online 0620 -->
-      <!-- <Button
+      <Button
         v-if="
           wallet.connected && farmingIsEnd && currentKeyAmount > 0 && !isClaimedText && !currentKeyItem.isCrmClaimed
         "
@@ -149,7 +153,7 @@
         @click="changeClaim"
       >
         Open Treasure Box
-      </Button> -->
+      </Button>
     </div>
     <DMintNFTPopout
       v-if="showMint"
