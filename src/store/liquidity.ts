@@ -338,7 +338,7 @@ export const actions = actionTree(
         const tokenfeeA = tokenaFee.mul(currentPrice)
         const tokenfeeB = tokenbFee.plus(tokenfeeA)
         const feeUSDBig = tokenfeeB.mul(pcSymbolRate)
-        const feeUSD = decimalFormat(feeUSDBig.toString(), 4)
+        const feeUSD = feeUSDBig.toNumber() > 0 ? decimalFormat(feeUSDBig.toString(), 4) : '0'
         console.log('feeUSDBig.toString()####', feeUSDBig.toString())
         console.log('feeUSD###', feeUSD)
 

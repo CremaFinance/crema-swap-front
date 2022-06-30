@@ -344,6 +344,8 @@ export default Vue.extend({
 
       try {
         console.log('toUnstake###rewarderKey###', rewarderKey.toString())
+        console.log('toUnstake###wrapper###', wrapper.toString())
+        console.log('toUnstake###nftMint###', nftMint.toString())
         const tx = await sdk.positionWrapper.unstakeAndBurn({
           wrapper: wrapperInfo,
           nftMint,
