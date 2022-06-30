@@ -242,7 +242,7 @@
 import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
-import { Button , Tooltip, Spin } from 'ant-design-vue'
+import { Button, Tooltip, Spin } from 'ant-design-vue'
 import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
 import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { BroadcastOptions, SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
@@ -365,11 +365,11 @@ export default Vue.extend({
       if (item) {
         console.log('gotoLp###item####', item)
         let tokenA = item.tokenA.symbol
-        if (item.tokenA.symbol === 'WSOL') {
+        if (item.tokenA.symbol.toUpperCase() === 'WSOL') {
           tokenA = 'SOL'
         }
         let tokenB = item.tokenB.symbol
-        if (item.tokenB.symbol === 'WSOL') {
+        if (item.tokenB.symbol.toUpperCase() === 'WSOL') {
           tokenB = 'SOL'
         }
         this.$router.push(`/deposit?from=${tokenA}&to=${tokenB}`)

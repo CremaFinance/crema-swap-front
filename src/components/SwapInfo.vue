@@ -137,7 +137,10 @@ export default Vue.extend({
       }
     },
     setDefaultExchangeRate(poolInfo: any) {
-      if (this.fromCoin?.symbol === poolInfo.token_a.symbol && this.toCoin?.symbol === poolInfo.token_b.symbol) {
+      if (
+        this.fromCoin?.symbol.toLowerCase() === poolInfo.token_a.symbol.toLowerCase() &&
+        this.toCoin?.symbol.toLowerCase() === poolInfo.token_b.symbol.toLowerCase()
+      ) {
         this.defaultRates = this.currentPriceView || poolInfo.currentPriceView
       } else {
         this.defaultRates = this.currentPriceViewReverse || poolInfo.currentPriceViewReverse

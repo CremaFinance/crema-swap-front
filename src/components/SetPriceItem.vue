@@ -134,7 +134,7 @@ export default Vue.extend({
         const tick = getNearestTickByPrice(new Decimal(this.pValue), this.tickSpace)
         console.log('onBlur###tick####', tick)
         const price = tick2Price(tick)
-        console.log('onBlur###price####', price)
+        console.log('onBlur###price####', price.toString())
         this.oValue = price // 存储没有处理精度的数据，以避免增加消耗精度导致增减每次数据展示不一致
         const value = String(decimalFormat(String(price), 6))
         this.pValue = value

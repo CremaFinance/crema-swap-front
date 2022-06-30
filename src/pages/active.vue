@@ -3,7 +3,7 @@
     <div class="farming-container-center">
       <!-- title开始 -->
       <div class="farming-title">
-        <div @click="gotoMyPosition">
+        <div @click="gotoFarming">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-icon-return"></use>
           </svg>
@@ -244,8 +244,8 @@ export default Vue.extend({
       console.log('this.keysList####', list)
       this.keysList = list
     },
-    gotoMyPosition() {
-      this.$router.push('/farming')
+    gotoFarming() {
+      this.$router.push('/farming?type=Ended')
     },
     walletWatch(newVal) {
       if (newVal) {

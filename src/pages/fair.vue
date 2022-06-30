@@ -82,7 +82,7 @@ export default Vue.extend({
     async getPoolAcount() {
       const wallet = (this as any).$wallet
       const connection = this.$web3
-      const program = await programGen(wallet, connection, IdoIdl)
+      const program: any = await programGen(wallet, connection, IdoIdl)
       //池子信息
       const poolAccountInfo = await getPoolAccount(program, POOL_ACCOUNT)
       this.poolAccountInfo = poolAccountInfo

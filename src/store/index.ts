@@ -7,6 +7,7 @@ import * as swap from './swap'
 import * as liquidity from './liquidity'
 import * as farm from './farm'
 import * as farming from './farming'
+import * as farmingv2 from './farmingv2'
 import * as transaction from './transaction'
 
 import { getAccessorType, mutationTree, actionTree } from 'typed-vuex'
@@ -101,6 +102,7 @@ export const accessorType = getAccessorType({
     liquidity,
     farm,
     farming,
+    farmingv2,
     transaction
   }
 })

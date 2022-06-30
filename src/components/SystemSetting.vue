@@ -75,7 +75,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const localRpc = localStorage.getItem('c-pro-current-rpc')
+    const localRpc = localStorage.getItem('pro-current-rpc')
     if (localRpc) {
       this.currentRpc = localRpc
     }
@@ -86,7 +86,7 @@ export default Vue.extend({
     },
     closeSystemSetting() {
       // console.log('this.oldRpc####', this.oldRpc)
-      this.currentRpc = localStorage.getItem('c-pro-current-rpc') || 'https://crema-crema-b941.mainnet.rpcpool.com'
+      this.currentRpc = localStorage.getItem('pro-current-rpc') || 'https://crema-crema-b941.mainnet.rpcpool.com'
       this.showSymstemSetting = false
     },
     selectRpc(value) {
@@ -95,7 +95,7 @@ export default Vue.extend({
       this.currentRpc = value
     },
     coinfirmChangeNetwork() {
-      localStorage.setItem('c-pro-current-rpc', this.currentRpc)
+      localStorage.setItem('pro-current-rpc', this.currentRpc)
       this.isloading = true
       setTimeout(() => {
         window.location.reload()

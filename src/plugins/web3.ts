@@ -58,7 +58,7 @@ export function getWeightEndpoint(endpoints: Rpc[]) {
 
 const web3Plugin: Plugin = async (ctx, inject) => {
   console.log('web3Plugin####ctx###', ctx)
-  console.log('web3Plugin####window###', window.localStorage.getItem('c-pro-current-rpc'))
+  console.log('web3Plugin####window###', window.localStorage.getItem('pro-current-rpc'))
   const { $api } = ctx
 
   // let config
@@ -76,7 +76,7 @@ const web3Plugin: Plugin = async (ctx, inject) => {
   const { rpcs, strategy } = config
 
   let currentRpc: any
-  const localRpc = window.localStorage.getItem('c-pro-current-rpc')
+  const localRpc = window.localStorage.getItem('pro-current-rpc')
   if (localRpc) {
     currentRpc = [{ url: localRpc, weight: 50 }]
   } else {

@@ -156,7 +156,7 @@ import { web3Config } from '@/utils/web3'
 /* *******************
  ** Wallet/Keypair of Swapper
  * *******************/
-const localRpc = window.localStorage.getItem('c-pro-current-rpc')
+const localRpc = window.localStorage.getItem('pro-current-rpc')
 let SOLANA_RPC_ENDPOINT: string
 if (localRpc) {
   SOLANA_RPC_ENDPOINT = localRpc

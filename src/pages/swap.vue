@@ -159,8 +159,10 @@ export default Vue.extend({
       if (this.liquidity.poolsObj) {
         const info: any = Object.values(this.liquidity.poolsObj).find((p: any) => {
           return (
-            (p.token_a.symbol === this.fromCoin?.symbol && p.token_b.symbol === this.toCoin?.symbol) ||
-            (p.token_b.symbol === this.fromCoin?.symbol && p.token_a.symbol === this.toCoin?.symbol)
+            (p.token_a.symbol.toLowerCase() === this.fromCoin?.symbol.toLowerCase() &&
+              p.token_b.symbol.toLowerCase() === this.toCoin?.symbol.toLowerCase()) ||
+            (p.token_b.symbol.toLowerCase() === this.fromCoin?.symbol.toLowerCase() &&
+              p.token_a.symbol.toLowerCase() === this.toCoin?.symbol.toLowerCase())
           )
         })
 
@@ -400,12 +402,12 @@ export default Vue.extend({
     },
     onCoinSelect(token: any) {
       if (this.currentCoinKey === 'fromCoin') {
-        if (token.symbol === this.toCoin?.symbol) {
+        if (token.symbol.toLowerCase() === this.toCoin?.symbol.toLowerCase()) {
           this.toCoin = null
         }
         this.fromCoin = token
       } else {
-        if (token.symbol === this.fromCoin?.symbol) {
+        if (token.symbol.toLowerCase() === this.fromCoin?.symbol.toLowerCase()) {
           this.fromCoin = null
         }
         this.toCoin = token

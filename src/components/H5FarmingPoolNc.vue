@@ -1,20 +1,12 @@
 <template>
   <div class="farming-pool-card-list">
     <div v-for="(item, index) in dataList" :key="index" class="farming-pool-card-box">
-      <div
-        v-if="isStaked === 'All' || isStaked === item.isStaked"
-        class="farming-pool-card"
-        :class="isOpenArr[index] ? 'is-open' : ''"
-      >
+      <div class="farming-pool-card" :class="isOpenArr[index] ? 'is-open' : ''">
         <div class="symbol-info">
           <div class="symbol-left">
-            <img
-              class="coin-before"
-              :src="item.tokenA.icon || importIcon(`/coins/${item.tokenA.symbol.toLowerCase()}.png`)"
-              alt=""
-            /><img
+            <img class="coin-before" :src="getIcon(item.swap_key, 'a')" alt="" /><img
               class="coin-after"
-              :src="item.tokenB.icon || importIcon(`/coins/${item.tokenB.symbol.toLowerCase()}.png`)"
+              :src="getIcon(item.swap_key, 'b')"
               alt=""
             />
             <div class="symbol-text">
@@ -91,27 +83,31 @@
               </Tooltip>
             </div>
             <div class="trade-info-text">
-              {{ (tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].aprView) || '--' }}
+              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].aprView) || '--' }}
             </div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Liquidity</div>
             <div class="trade-info-text">
-              {{ (tvlDataObjNew[item.positionWrapper] && tvlDataObjNew[item.positionWrapper].tvlView) || '--' }}
+              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].tvlView) || '--' }}
             </div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Reward Range</div>
             <div class="trade-info-text">
-              {{ item.minPrice }} -
-              {{ item.maxPrice }}
+              <!-- {{ getRewardRange(item.swap_key) }} -->
+              {{ (rewardRange[item.mpKey] && rewardRange[item.mpKey].rewardRange) || '--' }}
             </div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Reward</div>
             <div class="trade-info-text" style="margin-top: 8px">
-              <img src="../assets/coins/cusdt.png" alt="" />
-              <img src="../assets/coins/cusdc.png" alt="" />
+              <img
+                v-for="qitem in item.quarries"
+                :key="qitem.quarry"
+                :src="importIcon(`/coins/${rewardTokenObj[qitem.reward_token_mint].name.toLowerCase()}.png`)"
+                alt=""
+              />
               <!-- {{
                 (farming.earningObj &&
                   farming.earningObj[item.positionWrapperWrapMint] &&
@@ -139,12 +135,21 @@
               </div>
             </div>
           </div>
-          <div v-for="(item, index) in farmingLists" :key="index" class="fee-pool-demo">
-            <div>
-              <span>{{ item.Earned }}</span>
-              <div>{{ item.Num }}</div>
+          <div v-for="qitem in item.quarries" :key="qitem.quarry" class="harvest-btn-box">
+            <div class="harvest-btn">
+              <div>
+                <span>{{ rewardTokenObj[qitem.reward_token_mint].name }} Earned</span>
+                <div v-if="farmingv2.rewardsLoading"><Spin size="small" /></div>
+                <div v-else>{{ getRewardNumber(item, qitem, farmingv2.rewardsObj) }}</div>
+              </div>
+              <button
+                :disabled="getRewardNumber(item, qitem, farmingv2.rewardsObj) === '0' || isDisabled"
+                :loading="isClaiming"
+                @click="toClaim(item, qitem)"
+              >
+                Harvest
+              </button>
             </div>
-            <span>{{ item.Value }}</span>
           </div>
         </div>
         <!-- <div class="get-lp">
@@ -164,16 +169,18 @@
             Harvest all
           </Button>
         </div> -->
-        <div class="stake-and-unstake" :class="isOpenArr[index] ? '' : 'is-close'">
+        <div v-if="wallet.connected" class="stake-and-unstake" :class="isOpenArr[index] ? '' : 'is-close'">
           <div
-            v-if="!farming.positionsObj[item.positionWrapper] || farming.positionsObj[item.positionWrapper].length < 1"
+            v-if="
+              !farmingv2.positionsObj[item.positionWrapper] || farmingv2.positionsObj[item.positionWrapper].length < 1
+            "
             class="no-positions"
           >
             <p>No positions</p>
-            <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button>
+            <!-- <Button class="action-btn" @click="gotoLp(item)">Add Liquidity</Button> -->
           </div>
           <div
-            v-for="(pitem, pindex) in farming.positionsObj[item.positionWrapper]"
+            v-for="(pitem, pindex) in farmingv2.positionsObj[item.positionWrapper]"
             v-else
             :key="pindex"
             class="stake-box trade-info"
@@ -198,29 +205,35 @@
               <div class="trade-info-title">Price Range</div>
               <div class="trade-info-text">{{ pitem.lowerPrice }} - {{ pitem.upperPrice }}</div>
             </div>
-            <Button
-              v-if="!pitem.isStaked"
-              class="action-btn"
-              :disabled="!pitem.withinRange || isDisabled"
-              :loading="isStaking && currentPosition && currentPosition.nftMintAddress === pitem.nftMintAddress"
-              @click="toStake(item, pitem)"
-            >
-              <!-- <div>Stake</div> -->
-              Stake
-            </Button>
-            <Button
-              v-else
-              class="action-btn none-btn"
-              :loading="isUnStaking && currentPosition && currentPosition.nftMintAddress === pitem.nftMintAddress"
-              :class="pitem.isStaked ? 'un-stake' : ''"
-              :disabled="isDisabled"
-              @click="toUnStake(item, pitem)"
-            >
-              <!-- <div>Unstake</div> -->
-              Unstake
-            </Button>
+            <div v-if="!pitem.isStaked" class="trade-info-item">
+              <div class="action-btn-box stake-btn-box" :class="!pitem.withinRange || isDisabled ? 'disabled' : ''">
+                <Button
+                  class="action-btn"
+                  :disabled="!pitem.withinRange || isDisabled"
+                  :loading="isStaking && currentPosition && currentPosition.nftMintAddress === pitem.nftMintAddress"
+                  @click="toStake(item, pitem)"
+                >
+                  <!-- <div>Stake</div> -->
+                  Stake
+                </Button>
+              </div>
+            </div>
+            <div v-else class="trade-info-item">
+              <div class="action-btn-box unstake-btn-box">
+                <Button
+                  class="action-btn none-btn"
+                  :loading="isUnStaking && currentPosition && currentPosition.nftMintAddress === pitem.nftMintAddress"
+                  :class="pitem.isStaked ? 'un-stake' : ''"
+                  :disabled="isDisabled"
+                  @click="toUnStake(item, pitem)"
+                >
+                  <!-- <div>Unstake</div> -->
+                  Unstake
+                </Button>
+              </div>
+            </div>
           </div>
-          <div v-if="farming.positionsLoadingObj[item.positionWrapper]" class="position-loading"><Spin /></div>
+          <div v-if="farmingv2.positionsLoadingObj[item.positionWrapper]" class="position-loading"><Spin /></div>
           <!-- <div class="stake-box trade-info unstake-box">
             <div class="trade-info-item">
               <div class="trade-info-title">NFT ID</div>
@@ -240,6 +253,17 @@
           </div> -->
         </div>
       </div>
+    </div>
+    <CaffeineFarmingListH5
+      v-if="currentType === 'Ended'"
+      :stake-success="stakeSuccess"
+      :stake-failed="stakeFailed"
+      :is-new-staking="isStaking"
+      @newStake="toStake"
+    ></CaffeineFarmingListH5>
+    <div v-if="dataList.length < 1 && currentType !== 'Ended'" class="no-data">
+      <img src="../assets/images/icon_NoDate@2x.png" />
+      <p>No Data</p>
     </div>
     <!-- <div v-if="isShowHidebox" class="farming-pool-card-hide-box">
       <div class="symbol-info">
@@ -265,474 +289,13 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import importIcon from '@/utils/import-icon'
-import { mapState } from 'vuex'
-import { Button , Tooltip, Spin } from 'ant-design-vue'
-import { QuarrySDK, MinerWrapper, PositionWrapper } from '@cremafinance/crema-farming'
-import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
-import { BroadcastOptions, SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
-import {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  PublicKey,
-  AccountInfo as BaseAccountInfo,
-  Signer,
-  TokenAccountsFilter,
-  Context,
-  SignatureResult
-} from '@solana/web3.js'
-import type { AccountInfo } from '@solana/spl-token'
-import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
-import invariant from 'tiny-invariant'
-import { makeSDK, getTokenAccountsByOwnerAndMint, calculateWrapAmount } from '@/contract/farming'
-import { Token, TokenAmount } from '@saberhq/token-utils'
-import { fixD, addCommom } from '@/utils'
-
-Vue.use(Button)
+import mixin from '@/mixin/farmingv2'
+import CaffeineFarmingListH5 from '@/components/CaffeineFarmingListH5.vue'
 export default Vue.extend({
   components: {
-    Button,
-    Tooltip,
-    Spin
+    CaffeineFarmingListH5
   },
-  props: {
-    isStaked: {
-      type: String,
-      default: 'All'
-    },
-    searchKey: {
-      type: String,
-      default: ''
-    },
-    tvlData: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    }
-  },
-  data() {
-    return {
-      stakeTitle: 'Stake',
-      showStake: false,
-      isShowTableTr: -1,
-      changeNFT: false,
-      dataNFT: true,
-      farmingLists: [
-        {
-          Earned: 'Earned (CRM)',
-          Num: '1.1236',
-          Value: 'Harvest'
-        },
-        {
-          Earned: 'Earned (ABCD)',
-          Num: '111,111,1.1234',
-          Value: 'Harvest'
-        }
-      ],
-      tableData: [
-        {
-          NFTID: '2',
-          Liquidity: '$ 856.89',
-          PriceRange: '1 - 1.002',
-          isStaked: 'Stake'
-        },
-        {
-          NFTID: '1',
-          Liquidity: '$ 1,395.27',
-          PriceRange: '1 - 1.002',
-          isStaked: 'Unstake'
-        }
-      ],
-      nftData: [],
-      isEewardRangeTab: -1,
-      dataList: [],
-      isStaking: false,
-      isUnStaking: false,
-      isClaiming: false,
-      isDisabled: false,
-      currentPosition: null as any,
-      currentPool: null as any,
-      tvlDataObjNew: {} as any,
-      isOpenArr: {
-        // 0: false,
-        // 1: false,
-        // 2: false,
-        // 3: false,
-        // 4: false,
-        // 5: false
-      } as any
-    }
-  },
-  computed: {
-    ...mapState(['wallet', 'transaction', 'url', 'farming', 'liquidity'])
-  },
-  watch: {
-    'farming.farmingList': {
-      handler: 'watchFarmingList',
-      immediate: true
-    },
-    tableData: {
-      handler(newValue, oldValue) {
-        if (!newValue[0]) {
-          this.changeNFT = true
-        } else {
-          this.changeNFT = false
-        }
-      },
-      deep: true
-    },
-    tvlData: {
-      handler: 'tvlDataWatch',
-      immediate: true
-    },
-    'farming.positionsObj'(newVal) {
-      console.log('positionsObj####newVal###', newVal)
-    }
-  },
-  methods: {
-    importIcon,
-    tvlDataWatch(newVal) {
-      if (newVal) {
-        this.tvlDataObjNew = newVal
-      }
-    },
-    gotoLp(item: any) {
-      if (item) {
-        console.log('gotoLp###item####', item)
-        let tokenA = item.tokenA.symbol
-        if (item.tokenA.symbol === 'WSOL') {
-          tokenA = 'SOL'
-        }
-        let tokenB = item.tokenB.symbol
-        if (item.tokenB.symbol === 'WSOL') {
-          tokenB = 'SOL'
-        }
-        this.$router.push(`/deposit?from=${tokenA}&to=${tokenB}`)
-      }
-    },
-    processNftAddress(address: string) {
-      if (address) {
-        const result = `${address.substr(0, 4)}...${address.substr(address.length - 4, 4)}`
-        return result
-      }
-      return ''
-    },
-    watchFarmingList(list: any) {
-      this.dataList = list
-    },
-    toogleData(index: number, item: any) {
-      const obj = JSON.parse(JSON.stringify(this.isOpenArr))
-      this.isOpenArr = {
-        ...obj,
-        [index]: !obj[index]
-      }
-      if (!obj[index]) {
-        this.$accessor.farming.getPositionObj({ tvlData: this.tvlData, farmingInfo: item, rates: this.liquidity.rates })
-      }
-    },
-    async toStake(poolInfo: any, positionInfo: any) {
-      this.currentPosition = positionInfo
-      this.isStaking = true
-      this.isDisabled = true
-      const wrapper = new PublicKey(poolInfo.positionWrapper)
-      const nftMint = positionInfo.nftTokenId
-      const rewarderKey = new PublicKey(poolInfo.rewarderKey)
-
-      const wallet = (this as any).$wallet
-      const conn = this.$web3
-      const sdk = makeSDK(conn, wallet)
-
-      const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
-      invariant(wrapperInfo !== null, 'wrapper not found')
-
-      const userSwapPosition = await PositionWrapper.fetchSwapPositionsByOwner(wrapperInfo.swapKey, nftMint, conn)
-      invariant(userSwapPosition !== null, "Can't find the swap position you own")
-
-      this.$accessor.transaction.setTransactionDesc(`Stake ${poolInfo.name} NFT`)
-      this.$accessor.transaction.setShowWaiting(true)
-
-      let txid = ''
-
-      try {
-        const res = await sdk.positionWrapper.mintAndStake({
-          wrapper: wrapperInfo,
-          nftMint,
-          rewarderKey
-        })
-
-        // const receipt: any = await res.tx.confirm()
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-
-        const receipt: any = await res.tx.send(opt)
-        this.$accessor.transaction.setShowWaiting(false)
-        console.log('whattest####', receipt)
-
-        // const receipt = await (
-        //   await res.tx.send(opt)
-        // ).wait({
-        //   commitment: 'confirmed',
-        //   useWebsocket: true,
-        //   retries: 30
-        // })
-
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
-          const description = `Stake ${poolInfo.name} NFT`
-          this.$accessor.transaction.setShowSubmitted(true)
-          const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Stake',
-            successCallback: () => {
-              _this.isStaking = false
-              _this.isDisabled = false
-              _this.$emit('refreshData')
-              _this.$accessor.farming.getPositionObj({
-                tvlData: _this.tvlData,
-                farmingInfo: poolInfo,
-                rates: _this.liquidity.rates
-              })
-            },
-            errorCallback: () => {
-              _this.isStaking = false
-              _this.isDisabled = false
-            }
-          })
-        }
-        const whatWait = await receipt.wait({
-          commitment: 'confirmed',
-          useWebsocket: true,
-          retries: 30
-        })
-
-        console.log('whatWait####', whatWait)
-      } catch (err) {
-        console.log('stake##err###', err)
-        this.$accessor.transaction.setShowWaiting(false)
-        this.$accessor.transaction.setShowSubmitted(false)
-        this.isStaking = false
-        this.isDisabled = false
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'StakeErr',
-          message: 'Transaction failed',
-          description: ''
-        })
-      }
-    },
-    async toUnStake(poolInfo: any, positionInfo: any) {
-      this.currentPosition = positionInfo
-      this.isUnStaking = true
-      this.isDisabled = true
-      const wrapper = new PublicKey(poolInfo.positionWrapper)
-      const nftMint = new PublicKey(positionInfo.nftMintAddress)
-      const rewarderKey = new PublicKey(poolInfo.rewarderKey)
-      const isClaim = false
-
-      const wallet = (this as any).$wallet
-      const conn = this.$web3
-      const sdk = makeSDK(conn, wallet)
-
-      // Get nft account
-      // const tokenAccounts = await getTokenAccountsByOwnerAndMint(
-      //   sdk.provider.connection,
-      //   sdk.provider.wallet.publicKey,
-      //   nftMint
-      // )
-      // if (tokenAccounts.length <= 0) {
-      //   console.log('The nft token account not foundkj')
-      // }
-      // invariant(tokenAccounts[0] !== undefined, 'The nft token accuont is undefined')
-
-      this.$accessor.transaction.setTransactionDesc(`Unstake ${poolInfo.name} NFT`)
-      this.$accessor.transaction.setShowWaiting(true)
-
-      // Get wrapper info
-      const wrapperInfo = await PositionWrapper.fetchPositionWrapper(wrapper, conn)
-      invariant(wrapperInfo !== null, 'wrapper not found')
-
-      let txid = ''
-
-      try {
-        const tx = await sdk.positionWrapper.unstakeAndBurn({
-          wrapper: wrapperInfo,
-          nftMint,
-          // nftAccount: tokenAccounts[0].address,
-          rewarderKey,
-          isClaim
-        })
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-        // const receipt = await tx.confirm()
-        const receipt: any = await tx.send(opt)
-        console.log('whattest####', receipt)
-
-        this.$accessor.transaction.setShowWaiting(false)
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
-          const description = `Unstake ${poolInfo.name} NFT`
-          this.$accessor.transaction.setShowSubmitted(true)
-          const _this = this
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Unstake',
-            successCallback: () => {
-              _this.isUnStaking = false
-              _this.isDisabled = false
-              _this.$emit('refreshData')
-              _this.$accessor.farming.getPositionObj({
-                tvlData: _this.tvlData,
-                farmingInfo: poolInfo,
-                rates: _this.liquidity.rates
-              })
-            },
-            errorCallback: () => {
-              _this.isUnStaking = false
-              _this.isDisabled = false
-            }
-          })
-        }
-
-        const whatWait = await receipt.wait({
-          commitment: 'confirmed',
-          useWebsocket: true,
-          retries: 30
-        })
-
-        console.log('whatWait####', whatWait)
-      } catch (err) {
-        this.$accessor.transaction.setShowWaiting(false)
-        this.$accessor.transaction.setShowSubmitted(false)
-        this.isUnStaking = false
-        this.isDisabled = false
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'UnStakeErr',
-          message: 'Transaction failed',
-          description: ''
-        })
-      }
-    },
-    async minerWrapper(rewarderKey: PublicKey, mint: PublicKey): Promise<MinerWrapper> {
-      const wallet = (this as any).$wallet
-      const conn = this.$web3
-      const sdk = makeSDK(conn, wallet)
-      const rewarder = await sdk.mine.loadRewarderWrapper(rewarderKey)
-      const token = await Token.load(sdk.provider.connection, mint)
-      invariant(token !== null)
-      const quarry = await rewarder.getQuarry(token)
-      return await quarry.getMinerActions(wallet.publicKey)
-    },
-    async toClaim(poolInfo: any) {
-      this.currentPool = poolInfo
-      this.isClaiming = true
-      this.isDisabled = true
-      const conn = this.$web3
-      const rewarderKey = new PublicKey(poolInfo.rewarderKey)
-      const mint = new PublicKey(poolInfo.positionWrapperWrapMint)
-
-      this.$accessor.transaction.setTransactionDesc('Harvest all rewards')
-      this.$accessor.transaction.setShowWaiting(true)
-
-      let txid = ''
-      try {
-        const miner = await this.minerWrapper(rewarderKey, mint)
-        const tx = await miner.claim()
-
-        // const receipt = await tx.confirm()
-
-        const opt: BroadcastOptions = {
-          skipPreflight: true,
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-          maxRetries: 30,
-          printLogs: true
-        }
-        // const receipt = await tx.confirm()
-        const receipt: any = await tx.send(opt)
-        console.log('whattest####', receipt)
-        this.$accessor.transaction.setShowWaiting(false)
-
-        if (receipt && receipt.signature) {
-          txid = receipt.signature
-          const description = `Harvest all rewards`
-          const _this = this
-          this.$accessor.transaction.setShowSubmitted(true)
-          this.$accessor.transaction.sub({
-            txid,
-            description,
-            type: 'Harvest',
-            successCallback: () => {
-              _this.isClaiming = false
-              _this.isDisabled = false
-              _this.$emit('refreshData')
-              _this.$accessor.farming.getPositionObj({
-                tvlData: _this.tvlData,
-                farmingInfo: poolInfo,
-                rates: _this.liquidity.rates
-              })
-            },
-            errorCallback: () => {
-              _this.isClaiming = false
-              _this.isDisabled = false
-            }
-          })
-
-          const whatWait = await receipt.wait({
-            commitment: 'confirmed',
-            useWebsocket: true,
-            retries: 30
-          })
-
-          console.log('whatWait####', whatWait)
-
-          // const _this = this
-          // conn.onSignature(txid, function (signatureResult: SignatureResult, context: Context) {
-          //   _this.isClaiming = false
-          //   _this.isDisabled = false
-          //   if (!signatureResult.err) {
-          //     // _this.$accessor.farming.getFarmingList()
-          //     // _this.$accessor.farming.getEarningsObj()
-          //     _this.$emit('refreshData')
-          //     _this.$accessor.farming.getPositionObj({
-          //       tvlData: _this.tvlData,
-          //       farmingInfo: poolInfo,
-          //       rates: _this.liquidity.rates
-          //     })
-          //   }
-          // })
-        }
-      } catch (err) {
-        this.$accessor.transaction.setShowWaiting(false)
-        this.$accessor.transaction.setShowSubmitted(false)
-        this.isClaiming = false
-        this.isDisabled = false
-        this.$notify.close(txid + 'loading')
-        this.$notify.error({
-          key: 'HarvestErr',
-          message: 'Transaction failed',
-          description: ''
-        })
-      }
-    }
-  }
+  mixins: [mixin]
 })
 </script>
 
@@ -773,6 +336,22 @@ export default Vue.extend({
   // margin-top: 27px;
   position: relative;
   padding-bottom: 50px;
+  .no-data {
+    width: 100%;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    img {
+      width: 80px;
+      height: 80px;
+    }
+    p {
+      color: rgba(255, 255, 255, 0.8);
+      padding-top: 10px;
+    }
+  }
 }
 .farming-pool-card-list > img {
   width: 80px;
@@ -781,7 +360,7 @@ export default Vue.extend({
   left: -12px;
 }
 .farming-pool-card-box {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   background: linear-gradient(270deg, #3e434e 0%, #292d33 100%);
   border-radius: 20px;
   border: 1px solid #3f434e;
@@ -872,34 +451,50 @@ export default Vue.extend({
         }
       }
     }
-    .fee-pool-demo {
-      width: 220px;
+    .harvest-btn-box {
       margin: 20px auto 0;
+      width: 220px;
       height: 44px;
       border-radius: 10px;
-      border: 1px solid #ac85ff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      // color: #30343c;
-      padding: 2px 16px;
-      > span {
-        margin-left: 16px;
-        font-weight: bold;
-        background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      span {
-        font-size: 12px;
-        color: #b5b8c2;
-        line-height: 22px;
-      }
+      // border: 1px solid #ac85ff;
 
-      > div {
-        font-size: 14px;
-        line-height: 20px;
+      background: linear-gradient(90deg, rgba(172, 133, 255, 1), rgba(93, 181, 226, 1));
+      padding: 2px;
+      .harvest-btn {
+        width: 100%;
+        height: 100%;
+        padding: 2px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #2f3446;
+        border-radius: 10px;
+        > button {
+          margin-left: 16px;
+          font-weight: bold;
+          background: linear-gradient(48deg, #d032ff 0%, #8ab6ff 40%, #4ce1ff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          &:disabled {
+            cursor: not-allowed;
+            background: none;
+            color: #7a7a7a;
+            // -webkit-background-clip:
+            -webkit-text-fill-color: #7a7a7a;
+          }
+        }
+        span {
+          font-size: 12px;
+          color: #b5b8c2;
+          line-height: 20px;
+        }
+
+        > div {
+          font-size: 12px;
+          line-height: 20px;
+        }
       }
+      // color: #30343c;
     }
   }
   .get-lp {
@@ -926,14 +521,34 @@ export default Vue.extend({
       font-weight: normal;
     }
   }
+  .action-btn-box {
+    width: 93px;
+    height: 32px;
+    padding: 2px;
+    background: linear-gradient(90deg, rgba(183, 98, 255, 1), rgba(93, 193, 221, 1));
+    border-radius: 8px;
+    margin-top: 10px;
+    &.disabled {
+      background: none;
+    }
+    &.stake-btn-box {
+      padding: 0px;
+    }
+    &.unstake-btn-box {
+      .action-btn {
+        border: none;
+      }
+    }
+  }
   .action-btn {
     .gradient-btn-large();
     width: 100%;
     line-height: 1;
-    height: 40px;
+    height: 100%;
     padding: 1px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: normal;
+    // border: none;
   }
   .un-stake {
     box-sizing: border-box;
@@ -963,7 +578,7 @@ export default Vue.extend({
     // background: #282c33;
     border-radius: 10px;
     .stake-box {
-      padding: 0 16px 40px;
+      padding: 20px;
       border-bottom: 1px solid rgba(#fff, 0.1);
       &:last-child {
         border-bottom: none;
@@ -1098,7 +713,7 @@ export default Vue.extend({
 }
 
 .no-positions {
-  height: 200px !important;
+  height: 100px !important;
   width: 100%;
   display: flex;
   flex-direction: column;

@@ -338,7 +338,7 @@ export const actions = actionTree(
         const tokenfeeA = tokenaFee.mul(currentPrice)
         const tokenfeeB = tokenbFee.plus(tokenfeeA)
         const feeUSDBig = tokenfeeB.mul(pcSymbolRate)
-        const feeUSD = decimalFormat(feeUSDBig.toString(), 4)
+        const feeUSD = feeUSDBig.toNumber() > 0 ? decimalFormat(feeUSDBig.toString(), 4) : '0'
         console.log('feeUSDBig.toString()####', feeUSDBig.toString())
         console.log('feeUSD###', feeUSD)
 
@@ -492,11 +492,16 @@ export const actions = actionTree(
 
         const citem: any = coinPairConfigObj[item.tokenSwapKey.toString()]
         if (citem) {
+
           const currentPriceView = lamportPrice2uiPrice(
             item.currentSqrtPrice.pow(2),
             citem.token_a.decimal,
             citem.token_b.decimal
           ).toNumber()
+          if (item.tokenSwapKey.toString() === 'CjCoqsummKzipiJTmPRPUYfm8yz1gSHptZfhhAZsPVsR') {
+            console.log('getPoolList####curentSqrtPrice####', item.currentSqrtPrice.toString())
+            console.log('getPoolList####currentPriceView####', currentPriceView, '###item###', item, '##citem###', citem)
+          }
           const currentPriceViewReverse = String(1 / Number(currentPriceView))
           result[item.tokenSwapKey.toString()] = {
             ...citem,

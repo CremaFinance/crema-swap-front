@@ -32,6 +32,7 @@
                 <span>{{ caffeineAmount }}</span>
                 <!-- Open when online 0620 -->
                 <!-- <Tooltip
+                  v-if="wallet.connected && farmingIsEnd && Number(caffeineAmount) > 0"
                   overlay-class-name="burn-btn-tooltip"
                   placement="top"
                   :get-popup-container="() => $refs.caffeine"
@@ -61,7 +62,8 @@
         <div class="farm-NFT-detail-Mint">
           <div class="farm-NFT-detail-Mint-Left" :class="farmingIsEnd ? 'farm-NFT-isClaim' : ''">
             <div class="tips-text-box">
-              <div v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed" class="tips-stats">
+              <!-- <div v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.isCrmClaimed" class="tips-stats"> -->
+              <div v-if="wallet.connected && !currentKeyItem.isCrmClaimed" class="tips-stats">
                 <div
                   v-if="
                     delcommafy(addCommom(caffeineAmount, 0)) > delcommafy(addCommom(currentKeyItem.minRequireAmount, 0))
@@ -131,7 +133,7 @@
               <ul v-if="currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
                 <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
                   <img :src="importIcon(`/coins/${item.name}.png`)" />
-                  <span>x {{ item.amount }}</span>
+                  <span>x {{ item.amount }} {{ item.name.toUpperCase() }}</span>
                   <Button
                     v-if="!item.isSecondPartyClaimed"
                     :loading="claimIsLoadingObj[key]"
@@ -146,79 +148,67 @@
 
             <div class="farm-NFT-detail-Mint-pmgressbar">
               <div class="pmgressbar-btn">
-                <!-- v-if="wallet.connected && !farmingIsEnd && !currentKeyItem.is_crm_claimed" -->
-                <Tooltip
-                  v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
-                  overlay-class-name="burn-btn-tooltip"
-                  placement="top"
-                  :get-popup-container="() => $refs.caffeine"
-                >
-                  <div>
-                    <Button class="action-btn" :disabled="!canMint" @click="changeMint"> Mint </Button>
-                  </div>
-                  <template v-if="!canMint" slot="title">
-                    <div>
-                      <span>You don't have enough Caffeine.</span>
+                <div class="mint-and-upgrade-box">
+                  <Tooltip
+                    v-if="wallet.connected"
+                    overlay-class-name="burn-btn-tooltip"
+                    placement="top"
+                    :get-popup-container="() => $refs.caffeine"
+                  >
+                    <div class="tooltip-btn-box">
+                      <Button class="action-btn" :disabled="!canMint" @click="changeMint"> Mint </Button>
                     </div>
-                  </template>
-                </Tooltip>
-                <!-- wallet.connected &&
-                    !farmingIsEnd &&
-                    currentKeyItem.id !== 5 &&
-                    currentKeyItem.mint &&
-                    !currentKeyItem.is_crm_claimed &&
-                    canUpgrade -->
-                <Tooltip
-                  v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
-                  overlay-class-name="burn-btn-tooltip"
-                  placement="top"
-                  :get-popup-container="() => $refs.caffeine"
-                >
-                  <div>
-                    <!-- <Button
-                      v-if="
-                        wallet.connected &&
-                        currentKeyItem.id !== 5 &&
-                        currentKeyItem.mint &&
-                        !currentKeyItem.is_crm_claimed &&
-                        !currentKeyItem.isCrmClaimed
-                      "
-                      :disabled="!canUpgrade"
-                      class="action-btn"
-                      @click="changeUpgrade"
-                    > -->
-                    <Button :disabled="!canUpgrade" class="action-btn" @click="changeUpgrade"> Upgrade </Button>
-                  </div>
-                  <template v-if="!canUpgrade" slot="title">
-                    <div>
-                      <span v-if="currentKeyItem.id === 5">Already at the highest level.</span>
-                      <span v-else-if="currentKeyAmount < 1">You need to mint a key first.</span>
-                      <span
-                        v-else-if="
-                          currentKeyItem.id !== 5 &&
-                          currentKeyAmount > 0 &&
-                          caffeineAmount < currentKeyItem.upgradeMinAmount
-                        "
-                        >You need {{ Math.ceil(currentKeyItem.upgradeMinAmount - caffeineAmount) }} more Caffeine to
-                        upgrade this key.</span
-                      >
-                      <span
-                        v-else-if="
-                          currentKeyItem.id !== 5 &&
-                          currentKeyAmount > 0 &&
-                          caffeineAmount >= currentKeyItem.upgradeMinAmount
-                        "
-                        >You are eligible to upgrade this key to a {{ keyData[canUpgradeHeighKeyId - 1].key }}</span
-                      >
-                      <span v-else>You don't have enough Caffeine.</span>
+                    <template v-if="!canMint" slot="title">
+                      <div>
+                        <span>You don't have enough Caffeine.</span>
+                      </div>
+                    </template>
+                  </Tooltip>
+                  <div
+                    v-if="wallet.connected && !currentKeyItem.isCrmClaimed && currentKeyItem.id !== 5"
+                    class="button-spacing"
+                  ></div>
+                  <Tooltip
+                    v-if="wallet.connected && !currentKeyItem.isCrmClaimed && currentKeyItem.id !== 5"
+                    overlay-class-name="burn-btn-tooltip"
+                    placement="top"
+                    :get-popup-container="() => $refs.caffeine"
+                  >
+                    <div class="tooltip-btn-box">
+                      <Button :disabled="!canUpgrade" class="action-btn" @click="changeUpgrade"> Upgrade </Button>
                     </div>
-                  </template>
-                  <template v-else slot="title">
-                    <div>
-                      <span>You are eligible to upgrade this key.</span>
-                    </div>
-                  </template>
-                </Tooltip>
+                    <template v-if="!canUpgrade" slot="title">
+                      <div>
+                        <span v-if="currentKeyItem.id === 5">Already at the highest level.</span>
+                        <span v-else-if="currentKeyAmount < 1">You need to mint a key first.</span>
+                        <span
+                          v-else-if="
+                            currentKeyItem.id !== 5 &&
+                            currentKeyAmount > 0 &&
+                            caffeineAmount < currentKeyItem.upgradeMinAmount
+                          "
+                          >You need {{ Math.ceil(currentKeyItem.upgradeMinAmount - caffeineAmount) }} more Caffeine to
+                          upgrade this key.</span
+                        >
+                        <span
+                          v-else-if="
+                            currentKeyItem.id !== 5 &&
+                            currentKeyAmount > 0 &&
+                            caffeineAmount >= currentKeyItem.upgradeMinAmount
+                          "
+                          >You are eligible to upgrade this key to a {{ keyData[canUpgradeHeighKeyId - 1].key }}</span
+                        >
+                        <span v-else>You don't have enough Caffeine.</span>
+                      </div>
+                    </template>
+                    <template v-else slot="title">
+                      <div>
+                        <span>You are eligible to upgrade this key.</span>
+                      </div>
+                    </template>
+                  </Tooltip>
+                </div>
+
                 <Button
                   v-if="!wallet.connected"
                   class="action-btn"
@@ -237,7 +227,7 @@
                     !currentKeyItem.isCrmClaimed
                   "
                   class="action-btn"
-                  style="width: 270px"
+                  style="width: 100%"
                   @click="changeClaim"
                 >
                   Open Treasure Box
@@ -630,6 +620,7 @@ export default Vue.extend({
         align-items: center;
         width: 100%;
         margin-top: 8px;
+        height: 32px;
         &:first-child {
           margin-top: 0px;
         }
@@ -823,7 +814,25 @@ export default Vue.extend({
   width: 100%;
   margin-top: 24px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+
+  .mint-and-upgrade-box {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .tooltip-btn-box {
+      flex: 1;
+      button {
+        width: 100%;
+      }
+    }
+    .button-spacing {
+      height: 10px;
+      width: 20px;
+    }
+  }
 }
 .action-btn {
   // .farm-btn-small();

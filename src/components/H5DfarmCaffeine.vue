@@ -5,7 +5,11 @@
         <span>My Caffeine</span>
         <!-- <span>{{ addCommom(caffeineAmount, 4) }}</span> -->
         <span>{{ caffeineAmount }}</span>
-        <!-- <Tooltip overlay-class-name="burn-btn-tooltip" placement="top">
+        <!-- <Tooltip
+          v-if="wallet.connected && farmingIsEnd && Number(caffeineAmount) > 0"
+          overlay-class-name="burn-btn-tooltip"
+          placement="top"
+        >
           <button class="burn-btn" @click="openBurnModal">Burn</button>
           <template slot="title">
             <div class="burn-tips">
@@ -77,7 +81,7 @@
       </a>
     </div>
     <!-- <p>{{ tipText || isClaimedText }}</p> -->
-    <div v-if="wallet.connected && !currentKeyItem.is_crm_claimed" class="tips-stats">
+    <div v-if="wallet.connected && !currentKeyItem.isCrmClaimed" class="tips-stats">
       <div class="caync">
         <div>
           <!-- <img :src="`/_nuxt/src/assets/images/icon-${isdir}-Key-bright.png`" alt="" /> -->
@@ -105,12 +109,12 @@
         <span>{{ addCommom(caffeineAmount, 0) }} </span> / {{ addCommom(currentKeyItem.minRequireAmount, 0) }}
       </div>
     </div>
-    <h3 v-if="currentKeyItem.isCrmClaimed && canClaim" class="congratulations">Congratulations</h3>
+    <h3 v-if="wallet.connected && currentKeyItem.isCrmClaimed && canClaim" class="congratulations">Congratulations</h3>
     <p v-if="wallet.connected" class="tips-text">{{ tipText || isClaimedText }}</p>
-    <ul v-if="currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
+    <ul v-if="wallet.connected && currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
       <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
         <img :src="importIcon(`/coins/${item.name}.png`)" />
-        <span>x {{ item.amount }}</span>
+        <span>x {{ item.amount }} {{ item.name.toUpperCase() }}</span>
         <Button v-if="!item.isSecondPartyClaimed" :loading="claimIsLoadingObj[key]" @click="toClaimMint(item, key)">
           Claim >
         </Button>
@@ -119,33 +123,28 @@
     </ul>
     <div class="pmgressbar-btn">
       <!-- && !farmingIsEnd  -->
-      <Button
-        v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
-        class="action-btn"
-        :disabled="!canMint"
-        @click="changeMint"
-      >
-        Mint
-      </Button>
-      <!-- !farmingIsEnd && -->
-      <Button
-        v-if="wallet.connected && !currentKeyItem.is_crm_claimed"
-        :disabled="!canUpgrade"
-        class="action-btn"
-        @click="changeUpgrade"
-      >
-        Upgrade
-      </Button>
-      <Button
-        v-if="!wallet.connected"
-        class="action-btn"
-        style="width: 150px; margin: -14px 0 0 68px"
-        @click="$accessor.wallet.openModal"
-      >
+      <div class="mint-and-upgrade-box">
+        <Button v-if="wallet.connected" class="action-btn" :disabled="!canMint" @click="changeMint"> Mint </Button>
+        <!-- !farmingIsEnd && -->
+        <div
+          v-if="wallet.connected && !currentKeyItem.isCrmClaimed && currentKeyItem.id !== 5"
+          class="button-spacing"
+        ></div>
+        <Button
+          v-if="wallet.connected && !currentKeyItem.isCrmClaimed && currentKeyItem.id !== 5"
+          :disabled="!canUpgrade"
+          class="action-btn"
+          @click="changeUpgrade"
+        >
+          Upgrade
+        </Button>
+      </div>
+
+      <Button v-if="!wallet.connected" class="action-btn" @click="$accessor.wallet.openModal">
         Connect a wallet
       </Button>
       <!-- Open when online 0620 -->
-      <!-- <Button
+      <Button
         v-if="
           wallet.connected && farmingIsEnd && currentKeyAmount > 0 && !isClaimedText && !currentKeyItem.isCrmClaimed
         "
@@ -154,7 +153,7 @@
         @click="changeClaim"
       >
         Open Treasure Box
-      </Button> -->
+      </Button>
     </div>
     <DMintNFTPopout
       v-if="showMint"
@@ -231,9 +230,10 @@ export default Vue.extend({
     background: #000;
   }
   .reward-coin-list {
-    width: 280px;
+    // width: 280px;
+    width: 100%;
     background: rgba(0, 0, 0, 0.1);
-    padding: 10px 20px;
+    padding: 10px 0px;
     margin: 10px auto 0;
     border-radius: 8px;
     // display: flex;
@@ -305,22 +305,29 @@ export default Vue.extend({
   padding: 0 20px;
 }
 .caffeine-banner-farming {
-  position: absolute;
-  // position: relative;
+  // position: absolute;
+  position: relative;
   width: 100%;
-  height: 340px;
-  display: flex;
-  justify-content: center;
-  top: 176px;
+  margin-top: 20px;
+  // height: 340px;
+  // display: flex;
+  text-align: center;
+  // justify-content: center;
+  // top: 176px;
   // img {
   //   width: 340px;
   // }
+  > img {
+    width: 100%;
+    height: auto;
+  }
   > a {
     display: block;
     width: 100%;
     position: absolute;
     text-align: center;
-    top: 216px;
+    top: 60%;
+    // margin-top: 20px;
     color: #fff;
   }
 }
@@ -332,7 +339,7 @@ export default Vue.extend({
   height: 140px;
   display: flex;
   justify-content: space-between;
-  margin-top: 312px;
+  // margin-top: 312px;
   .option-Golden {
     margin-top: 46px;
   }
@@ -463,6 +470,7 @@ export default Vue.extend({
 .farm-caffeine-key {
   width: 100%;
   height: 330px;
+  margin-top: 20px;
   // background: #000;
   display: flex;
   // align-items: center;
@@ -659,8 +667,21 @@ export default Vue.extend({
   margin-top: 24px;
   display: flex;
   // justify-content: space-around;
-  justify-content: space-between;
+  // justify-content: space-between;
+  justify-content: center;
   flex-wrap: wrap;
+  .mint-and-upgrade-box {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    button {
+      flex: 1;
+    }
+    .button-spacing {
+      height: 10px;
+      width: 20px;
+    }
+  }
 }
 .action-btn {
   // width: 130px;
