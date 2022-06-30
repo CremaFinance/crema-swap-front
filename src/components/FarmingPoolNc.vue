@@ -49,7 +49,8 @@
           <div style="width: 240px">
             <div class="td-title">Reward Range</div>
             <div class="td-text">
-              {{ getRewardRange(item.swap_key) }}
+              <!-- {{ getRewardRange(item.swap_key) }} -->
+              {{ (rewardRange[item.mpKey] && rewardRange[item.mpKey].rewardRange) || '--' }}
             </div>
           </div>
 
@@ -154,12 +155,14 @@
                   <div v-if="farmingv2.rewardsLoading"><Spin size="small" /></div>
                   <div v-else>{{ getRewardNumber(item, qitem, farmingv2.rewardsObj) }}</div>
                 </div>
-                <!-- <button
+                <button
                   :disabled="getRewardNumber(item, qitem, farmingv2.rewardsObj) === '0' || isDisabled"
                   :loading="isClaiming"
                   @click="toClaim(item, qitem)"
-                > -->
-                <button :disabled="isDisabled" :loading="isClaiming" @click="toClaim(item, qitem)">Harvest</button>
+                >
+                  <!-- <button :disabled="isDisabled" :loading="isClaiming" @click="toClaim(item, qitem)"> -->
+                  Harvest
+                </button>
               </div>
 
               <!-- <div class="fee-pool-demo">

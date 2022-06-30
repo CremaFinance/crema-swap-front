@@ -95,7 +95,8 @@
           <div class="trade-info-item">
             <div class="trade-info-title">Reward Range</div>
             <div class="trade-info-text">
-              {{ getRewardRange(item.swap_key) }}
+              <!-- {{ getRewardRange(item.swap_key) }} -->
+              {{ (rewardRange[item.mpKey] && rewardRange[item.mpKey].rewardRange) || '--' }}
             </div>
           </div>
           <div class="trade-info-item">

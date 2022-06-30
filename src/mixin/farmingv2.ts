@@ -145,6 +145,28 @@ export default Vue.extend({
 
 
       },
+      rewardRange: {
+        'DM3hoNvAHSZxqAT1q8NYZJfC5NU3PY3V96nqQwSVYiTb': {
+          name: 'USDT-USDC',
+          rewardRange: '0.999 - 1.0005'
+        },
+        'DqoE4gtukSEzFDdZ4ymeay1tBS6h8Z7BYCSmFWHyuDgP': {
+          name: 'mSOL-SOL',
+          rewardRange: '1.04 - 1.08'
+        },
+        '8x5Rjz61rh4N5CdFHGQQNGK2vAND9Lt8SXCBshye8kU4': {
+          name: 'stSOL-SOL',
+          rewardRange: '1.03 - 1.07'
+        },
+        'Fg8NYsi6zv7Yhtww7mQqQ8wwpAGQDUxMTccKtxp1PicM': {
+          name: 'USDH-USDC',
+          rewardRange: '0.998 - 1.008'
+        },
+        '8a5StzsVKvf9Lwv7CPN82Bcbnaws8gUiGp5LzVSV2QRY': {
+          name: 'USH-USDC',
+          rewardRange: '0.99 - 1.05'
+        }
+      },
       stakeSuccess: false,
       stakeFailed: false
     }
