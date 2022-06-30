@@ -31,8 +31,8 @@
                 <!-- <span>{{ addCommom(caffeineAmount, 4) }}</span> -->
                 <span>{{ caffeineAmount }}</span>
                 <!-- Open when online 0620 -->
-                <!-- <Tooltip
-                  v-if="wallet.connected && farmingIsEnd && Number(caffeineAmount) > 0"
+                <Tooltip
+                  v-if="wallet.connected && Number(caffeineAmount) > 0"
                   overlay-class-name="burn-btn-tooltip"
                   placement="top"
                   :get-popup-container="() => $refs.caffeine"
@@ -44,7 +44,7 @@
                       <span>Burn remaining Caffeine to get CRM</span>
                     </div>
                   </template>
-                </Tooltip> -->
+                </Tooltip>
               </div>
             </div>
             <!-- <div>
@@ -132,7 +132,7 @@
               <p v-else-if="wallet.connected" class="tips-text">{{ tipText || isClaimedText }}</p>
               <ul v-if="currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
                 <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
-                  <img :src="importIcon(`/coins/${item.name}.png`)" />
+                  <img :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
                   <span>x {{ item.amount }} {{ item.name.toUpperCase() }}</span>
                   <Button
                     v-if="!item.isSecondPartyClaimed"
@@ -218,7 +218,7 @@
                   Connect a wallet
                 </Button>
                 <!-- Open when online 0620 -->
-                <!-- <Button
+                <Button
                   v-if="
                     wallet.connected &&
                     farmingIsEnd &&
@@ -231,7 +231,7 @@
                   @click="changeClaim"
                 >
                   Open Treasure Box
-                </Button> -->
+                </Button>
               </div>
             </div>
           </div>

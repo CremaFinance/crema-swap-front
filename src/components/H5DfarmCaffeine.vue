@@ -5,8 +5,8 @@
         <span>My Caffeine</span>
         <!-- <span>{{ addCommom(caffeineAmount, 4) }}</span> -->
         <span>{{ caffeineAmount }}</span>
-        <!-- <Tooltip
-          v-if="wallet.connected && farmingIsEnd && Number(caffeineAmount) > 0"
+        <Tooltip
+          v-if="wallet.connected && Number(caffeineAmount) > 0"
           overlay-class-name="burn-btn-tooltip"
           placement="top"
         >
@@ -17,7 +17,7 @@
               <span>Burn remaining Caffeine to get CRM</span>
             </div>
           </template>
-        </Tooltip> -->
+        </Tooltip>
       </div>
       <!-- <div>
         <span>Total Earned</span>
@@ -113,7 +113,7 @@
     <p v-if="wallet.connected" class="tips-text">{{ tipText || isClaimedText }}</p>
     <ul v-if="wallet.connected && currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
       <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
-        <img :src="importIcon(`/coins/${item.name}.png`)" />
+        <img :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
         <span>x {{ item.amount }} {{ item.name.toUpperCase() }}</span>
         <Button v-if="!item.isSecondPartyClaimed" :loading="claimIsLoadingObj[key]" @click="toClaimMint(item, key)">
           Claim >
