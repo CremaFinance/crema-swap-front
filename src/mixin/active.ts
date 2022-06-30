@@ -987,7 +987,7 @@ export default Vue.extend({
     },
 
     gotoFarming() {
-      this.$router.push('/farmings?type=Ended')
+      this.$router.push('/farming?type=Ended')
     },
     delcommafy(num) {
       if (num != undefined) {

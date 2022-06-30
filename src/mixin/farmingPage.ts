@@ -80,7 +80,7 @@ export default Vue.extend({
       if (newVal && !checkNullObj(newVal)) this.$accessor.farming.getFarmingConfig(newVal)
     },
     getFarmTvl() {
-      this.$axios.get(`https://dev-api-crema.bitank.com/farm/tvl`).then((res) => {
+      this.$axios.get(`https://pre-api-crema.bitank.com/farm/tvl`).then((res) => {
         // this.$axios.get(`/farm/tvl`).then((res) => {
         console.log('farmingTest####getFarmTvl###res#####', res)
         const result: any = {}

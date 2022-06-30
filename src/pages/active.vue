@@ -245,7 +245,7 @@ export default Vue.extend({
       this.keysList = list
     },
     gotoFarming() {
-      this.$router.push('/farmings?type=Ended')
+      this.$router.push('/farming?type=Ended')
     },
     walletWatch(newVal) {
       if (newVal) {

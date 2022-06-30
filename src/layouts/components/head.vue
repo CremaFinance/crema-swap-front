@@ -46,7 +46,7 @@
               <img src="../../assets/images/icon-Farming@2x.png" />
               <span>Farming</span>
             </nuxt-link> -->
-            <nuxt-link to="/farmings">
+            <nuxt-link to="/farming">
               <img src="../../assets/images/icon-Farming@2x.png" />
               <span>Farming</span>
             </nuxt-link>
