@@ -119,7 +119,7 @@ export default Vue.extend({
     ...mapState(['wallet', 'farmingv2']),
     newPoolApr() {
       if (this.farmingv2.aprAndTvlObj && this.newPoolInfo && this.newPoolInfo.mpKey) {
-        return this.farmingv2.aprAndTvlObj[this.newPoolInfo.mpKey]?.apr + '%'
+        return this.farmingv2.aprAndTvlObj[this.newPoolInfo.mpKey]?.aprView + '%'
       }
       return 0
     }

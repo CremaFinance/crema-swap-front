@@ -357,21 +357,21 @@ export const actions = actionTree(
       try {
         const res: any = await this.$axios.get('https://api.crema.finance/indexer/farming-apr')
         const aprAndTvl = res && res.data || [
-          {
-            "apr": "0",
-            "merge_pool": "BuAw6F7RBPQjMRj6v1APoBUfFNYBNrbCcqMQb92uo8ma",
-            "tvl": "0"
-          },
-          {
-            "apr": "0",
-            "merge_pool": "F3b7tshxgcEqUpQNXRyNeERcGoFohERDJj3idbJp8SFF",
-            "tvl": "0"
-          },
-          {
-            "apr": "0",
-            "merge_pool": "HUxnFnqFYStWhKL2NH57HC6jXqoCyA4CptuQAE3HnHWq",
-            "tvl": "0"
-          },
+          // {
+          //   "apr": "0",
+          //   "merge_pool": "BuAw6F7RBPQjMRj6v1APoBUfFNYBNrbCcqMQb92uo8ma",
+          //   "tvl": "0"
+          // },
+          // {
+          //   "apr": "0",
+          //   "merge_pool": "F3b7tshxgcEqUpQNXRyNeERcGoFohERDJj3idbJp8SFF",
+          //   "tvl": "0"
+          // },
+          // {
+          //   "apr": "0",
+          //   "merge_pool": "HUxnFnqFYStWhKL2NH57HC6jXqoCyA4CptuQAE3HnHWq",
+          //   "tvl": "0"
+          // },
         ]
 
         const result: any = {}
