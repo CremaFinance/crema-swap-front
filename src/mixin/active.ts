@@ -327,11 +327,13 @@ export default Vue.extend({
 
         console.log('tipText####currentKeyItem#####', this.currentKeyItem)
         // 7、质押结束后，当前等级下有NFT，等待开启奖励：
-        if (this.currentKeyAmount > 0 && !this.canClaim && !this.currentKeyItem.is_crm_claimed) {
+        if (this.currentKeyAmount > 0 && !this.canClaim && !this.currentKeyItem.isCrmClaimed) {
           return `You can use your ${this.currentKeyItem.key} to unlock the treasury box soon.`
-        } else if (this.currentKeyAmount > 0 && this.canClaim && !this.currentKeyItem.is_crm_claimed) {
+        } else if (this.currentKeyAmount > 0 && this.canClaim && !this.currentKeyItem.isCrmClaimed) {
           // 8、质押结束后，当前等级下有NFT，到达可开启时间：
           return 'This key is ready to open the treasure box. Claim your rewards now! '
+        } else if (this.currentKeyItem.isCrmClaimed) {
+          return 'Here are your token rewards.'
         }
       }
 
@@ -358,7 +360,7 @@ export default Vue.extend({
       return false
     },
     canUpgrade() {
-      if (this.currentKeyAmount > 0 && this.currentKeyItem.upgradeMinAmount && Number(this.caffeineAmount) >= this.currentKeyItem.upgradeMinAmount) {
+      if (this.currentKeyAmount > 0 && this.currentKeyItem.upgradeMinAmount && Number(this.caffeineAmount) >= this.currentKeyItem.upgradeMinAmount && !this.currentKeyItem.isCrmClaimed) {
         return true
       }
       return false
@@ -884,7 +886,7 @@ export default Vue.extend({
         const receipt: any = await txs.send(opt)
         if (receipt && receipt.signature && receipt.signature.toString()) {
           txid = receipt.signature.toString()
-          const description = `Claim ${item.name} Rewards. `
+          const description = `Claim ${item.name.toUpperCase()} Rewards. `
           const _this = this
           this.$accessor.transaction.setShowSubmitted(true)
           this.$accessor.transaction.sub({
@@ -924,7 +926,7 @@ export default Vue.extend({
       const conn = this.$web3
       const sdk: any = makeSDK(conn, wallet)
 
-      this.$accessor.transaction.setTransactionDesc(`Burn CRM. `)
+      this.$accessor.transaction.setTransactionDesc(`Burn Caffeine. `)
       this.$accessor.transaction.setShowWaiting(true)
 
       let txid = ''
@@ -947,7 +949,7 @@ export default Vue.extend({
         const receipt: any = await txs.send(opt)
         if (receipt && receipt.signature && receipt.signature.toString()) {
           txid = receipt.signature.toString()
-          const description = 'Burn CRM.'
+          const description = 'Burn Caffeine.'
           const _this = this
           this.$accessor.transaction.setShowSubmitted(true)
           this.$accessor.transaction.sub({
@@ -973,12 +975,19 @@ export default Vue.extend({
       } catch (error: any) {
         console.log('toBurn Error###', error)
         this.isBurnLoading = false
+        this.$accessor.transaction.setShowWaiting(false)
+        this.$notify.close(txid + 'loading')
+        this.$notify.error({
+          key: 'Claim',
+          message: 'Transaction failed',
+          description: ''
+        })
       }
 
     },
 
     gotoFarming() {
-      this.$router.push('/farming')
+      this.$router.push('/farmings?type=Ended')
     },
     delcommafy(num) {
       if (num != undefined) {

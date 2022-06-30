@@ -1,5 +1,5 @@
 import * as anchor from '@project-serum/anchor'
-import { Program } from '@project-serum/anchor'
+import { Program, AnchorProvider } from '@project-serum/anchor'
 import { PublicKey, Keypair, Transaction, Connection, Commitment, TransactionSignature } from '@solana/web3.js'
 import { POOL_ACCOUNT, poolAccount, MELON_MINT } from '@/utils/fair'
 import { getATAAddress, getOrCreateATA } from '@saberhq/token-utils'
@@ -9,7 +9,8 @@ const TokenInstructions = require('@project-serum/serum').TokenInstructions
 
 const TOKEN_PROGRAM_ID = new anchor.web3.PublicKey(TokenInstructions.TOKEN_PROGRAM_ID.toString())
 export const programGen = (wallet: any, connection: Connection, idl: any) => {
-  const provider = new anchor.Provider(connection, wallet, anchor.Provider.defaultOptions())
+  console.log('这里的anchor里面有什么####', anchor)
+  const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions())
   const programID = new PublicKey('CiDoyZEpx3V5fDt2hhZrD43idfgDJUhDHxToqC6upm1V')
   const program = new Program(idl as anchor.Idl, programID, provider)
   return program
@@ -48,7 +49,8 @@ export async function sendTransaction(
 }
 
 export async function exchangeUsdcForRedeemable(
-  program: Program,
+  // program: Program,
+  program: any,
   poolAccountInfo,
   amount,
   userUsdc,
@@ -93,7 +95,8 @@ export async function exchangeUsdcForRedeemable(
   const tx = await sendTransaction(program.provider.connection, program.provider.wallet, depositTransaction)
   return tx
 }
-export async function WithdrawRedeemableTokens(program: Program, poolAccountInfo, amount, userUsdc, userRedeemable) {
+// export async function WithdrawRedeemableTokens(program: Program, poolAccountInfo, amount, userUsdc, userRedeemable) {
+export async function WithdrawRedeemableTokens(program: any, poolAccountInfo, amount, userUsdc, userRedeemable) {
   const [_poolSigner, nonce] = await anchor.web3.PublicKey.findProgramAddress(
     [poolAccountInfo.watermelonMint.toBuffer()],
     program.programId
@@ -120,7 +123,8 @@ export async function WithdrawRedeemableTokens(program: Program, poolAccountInfo
   return tx
 }
 
-export async function exchangeRedeemableForWatermelon(program: Program, poolAccountInfo: any, firstWithdrawal, provider) {
+// export async function exchangeRedeemableForWatermelon(program: Program, poolAccountInfo: any, firstWithdrawal, provider) {
+export async function exchangeRedeemableForWatermelon(program: any, poolAccountInfo: any, firstWithdrawal, provider) {
   const [_poolSigner, nonce] = await anchor.web3.PublicKey.findProgramAddress(
     [poolAccountInfo.watermelonMint.toBuffer()],
     program.programId

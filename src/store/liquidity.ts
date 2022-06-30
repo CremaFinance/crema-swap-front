@@ -495,11 +495,16 @@ export const actions = actionTree(
 
         const citem: any = coinPairConfigObj[item.tokenSwapKey.toString()]
         if (citem) {
+
           const currentPriceView = lamportPrice2uiPrice(
             item.currentSqrtPrice.pow(2),
             citem.token_a.decimal,
             citem.token_b.decimal
           ).toNumber()
+          if (item.tokenSwapKey.toString() === 'CjCoqsummKzipiJTmPRPUYfm8yz1gSHptZfhhAZsPVsR') {
+            console.log('getPoolList####curentSqrtPrice####', item.currentSqrtPrice.toString())
+            console.log('getPoolList####currentPriceView####', currentPriceView, '###item###', item, '##citem###', citem)
+          }
           const currentPriceViewReverse = String(1 / Number(currentPriceView))
           result[item.tokenSwapKey.toString()] = {
             ...citem,

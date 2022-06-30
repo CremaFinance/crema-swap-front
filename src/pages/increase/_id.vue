@@ -341,13 +341,15 @@ export default Vue.extend({
       if (this.fixedFromCoin) {
         coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimal, false).wei.toNumber()
         direction =
-          this.fromCoin?.symbol === this.poolInfo.token_a.symbol && this.toCoin?.symbol === this.poolInfo.token_b.symbol
+          this.fromCoin?.symbol.toLowerCase() === this.poolInfo.token_a.symbol.toLowerCase() &&
+          this.toCoin?.symbol.toLowerCase() === this.poolInfo.token_b.symbol.toLowerCase()
             ? 0
             : 1
       } else {
         coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimal, false).wei.toNumber()
         direction =
-          this.toCoin?.symbol === this.poolInfo.token_a.symbol && this.toCoin?.symbol === this.poolInfo.token_b.symbol
+          this.toCoin?.symbol.toLowerCase() === this.poolInfo.token_a.symbol.toLowerCase() &&
+          this.toCoin?.symbol.toLowerCase() === this.poolInfo.token_b.symbol.toLowerCase()
             ? 0
             : 1
       }
@@ -650,13 +652,13 @@ export default Vue.extend({
       const slid = new Decimal(Number(this.$accessor.slippage) / 100)
 
       let balanceA =
-        this.fromCoin?.symbol === 'SOL'
+        this.fromCoin?.symbol.toUpperCase() === 'SOL'
           ? new Decimal(this.getSolBalance(Number(this.fromCoinBalance.fixed()), 0.01)).mul(
               Math.pow(10, this.fromCoin.decimal)
             )
           : new Decimal(this.fromCoinBalance.fixed()).mul(Math.pow(10, this.fromCoin.decimal))
       let balanceB =
-        this.toCoin?.symbol === 'SOL'
+        this.toCoin?.symbol.toUpperCase() === 'SOL'
           ? new Decimal(this.getSolBalance(Number(this.toCoinBalance.fixed()), 0.01)).mul(
               Math.pow(10, this.toCoin.decimal)
             )
@@ -747,8 +749,8 @@ export default Vue.extend({
           userTokenA,
           userTokenB,
           liquityResult.fixTokenType,
-          liquityResult.maxAmountA,
-          liquityResult.maxAmountB,
+          new Decimal(fixD(liquityResult.maxAmountA.toString(), 0)),
+          new Decimal(fixD(liquityResult.maxAmountB.toString(), 0)),
           new PublicKey(currentData.nftTokenAccount)
         )
 

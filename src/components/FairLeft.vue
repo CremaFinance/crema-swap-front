@@ -439,7 +439,7 @@ export default Vue.extend({
       this.userWatermelonBalance = 0
       const wallet = (this as any).$wallet
       const connection = this.$web3
-      const program = await programGen(wallet, connection, IdoIdl)
+      const program: any = await programGen(wallet, connection, IdoIdl)
       try {
         // 用户钱包
         const userWallet = await getATAAddress({

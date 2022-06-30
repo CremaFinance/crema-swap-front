@@ -35,12 +35,17 @@
         <!-- <span>Open mystery box to get up to {{ currentKeyItem.rewardX }} bonus</span> -->
         <span>Open treasure box to see your lucky rewards</span>
       </div>
-      <ul v-if="type === 'claim' && currentKeyItem.newClaimAmounts" class="reward-coin-list">
-        <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
-          <img :src="importIcon(`/coins/${item.name}.png`)" />
-          <span>x {{ item.amount }}</span>
-        </li>
-      </ul>
+      <div v-if="type === 'claim' && currentKeyItem.newClaimAmounts" class="reward-coin-list-box">
+        <ul class="reward-coin-list">
+          <!-- <ul v-if="type !== 'claim' && currentKeyItem.newClaimAmounts" class="reward-coin-list"> -->
+          <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
+            <img :src="importIcon(`/coins/${item.name}.png`)" />
+            <span>x {{ item.amount }}</span>
+            <span>{{ item.name.toUpperCase() }}</span>
+          </li>
+        </ul>
+      </div>
+
       <div v-if="type === 'open'" class="mint-NFT-btn-box">
         <Button v-if="showLock" disabled>Open Treasure Box</Button>
         <Button v-if="showUnset" class="mint-NFT-btn" :class="showLock ? 'btn-close' : ''" @click="$emit('toOpen')">
@@ -105,6 +110,10 @@ export default Vue.extend({
     openRewardTimestamp: {
       handler: 'openRewardTimestampWatch',
       immediate: true
+    },
+    currentKeyItem: {
+      handler: 'currentKeyItemWatch',
+      immediate: true
     }
   },
   mounted() {},
@@ -114,6 +123,9 @@ export default Vue.extend({
   },
   methods: {
     importIcon,
+    currentKeyItemWatch(newValue) {
+      console.log('ClaimRewards###currentKeyItemWatch###newValue###', newValue)
+    },
     openRewardTimestampWatch(newVal) {
       const now = parseInt(String(new Date().getTime() / 1000))
       if (newVal && newVal > now) {
@@ -156,13 +168,13 @@ export default Vue.extend({
   padding-bottom: 40px;
   .mint-NFT-key {
     width: 100%;
-    // height: 270px;
+    height: 270px;
     display: flex;
     justify-content: center;
     position: relative;
     > img {
       width: 270px;
-      height: 270px;
+      // height: 270px;
     }
   }
   .mint-NFT-num {
@@ -189,6 +201,7 @@ export default Vue.extend({
     align-items: center;
     span {
       padding-left: 14px;
+      flex: 1;
     }
   }
   .count-down {
@@ -247,17 +260,22 @@ export default Vue.extend({
     }
   }
 
+  .reward-coin-list-box {
+    display: flex;
+    justify-content: center;
+  }
   .reward-coin-list {
     // width: 280px;
     // background: rgba(0, 0, 0, 0.1);
     // padding: 10px 20px;
     // margin-top: 10px;
     // border-radius: 8px;
-    display: flex;
-    flex-wrap: wrap;
+    // display: flex;
+    // flex-wrap: wrap;
+    display: inline-block;
     margin-top: 0 auto;
-    padding: 0px 40px;
-    justify-content: space-between;
+    // padding: 0px 40px;
+    // justify-content: space-between;
     li {
       display: flex;
       align-items: center;
@@ -266,9 +284,9 @@ export default Vue.extend({
       // &:first-child {
       //   margin-top: 0px;
       // }
-      &:nth-of-type(2n) {
-        justify-content: flex-end;
-      }
+      // &:nth-of-type(2n) {
+      //   justify-content: flex-end;
+      // }
       img {
         width: 36px;
         height: 36px;
@@ -276,7 +294,7 @@ export default Vue.extend({
       span {
         display: block;
         // flex: 1;
-        width: 80px;
+        // width: 80px;
         margin-left: 8px;
         height: 18px;
         font-size: 18px;

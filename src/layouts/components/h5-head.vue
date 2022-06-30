@@ -10,6 +10,8 @@
         <div class="right">
           <div class="fair-gi">
             <a href="https://ido.crema.finance/" target="_blank"><img src="@/assets/images/Text-NGU.gif" alt="" /></a>
+            <!-- <img src="@/assets/images/Fire-lans.gif" alt="" /> -->
+            <!-- <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span> -->
           </div>
           <SystemSetting></SystemSetting>
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
@@ -59,8 +61,14 @@
                 <use xlink:href="#icondown"></use>
               </svg>
             </div>
-          </li>
+            <!-- </li>
           <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
+            <img src="@/assets/images/icon-Farming@2x.png" alt="" />
+            <span>Farming</span>
+          </li> -->
+          </li>
+
+          <li :class="{ active: $route.name === 'farmings' }" @click="goUrl('farmings')">
             <img src="@/assets/images/icon-Farming@2x.png" alt="" />
             <span>Farming</span>
           </li>

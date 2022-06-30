@@ -469,10 +469,14 @@ export default Vue.extend({
     },
     poolInfo() {
       if (this.liquidity.poolsObj) {
+        console.log('deposit###poolInfo###this.fromCoin?.symbol###', this.fromCoin?.symbol)
+        console.log('deposit###poolInfo###this.toCoin?.symbol###', this.toCoin?.symbol)
         const info: any = Object.values(this.liquidity.poolsObj).find((p: any) => {
           return (
-            (p.token_a.symbol === this.fromCoin?.symbol && p.token_b.symbol === this.toCoin?.symbol) ||
-            (p.token_b.symbol === this.fromCoin?.symbol && p.token_a.symbol === this.toCoin?.symbol)
+            (p.token_a.symbol.toUpperCase() === this.fromCoin?.symbol?.toUpperCase() &&
+              p.token_b.symbol.toUpperCase() === this.toCoin?.symbol?.toUpperCase()) ||
+            (p.token_b.symbol.toUpperCase() === this.fromCoin?.symbol?.toUpperCase() &&
+              p.token_a.symbol.toUpperCase() === this.toCoin?.symbol?.toUpperCase())
           )
         })
         if (info && !checkNullObj(info)) {
@@ -706,7 +710,10 @@ export default Vue.extend({
           let direction = true
 
           // 设置默认方向
-          if (value.token_a.symbol === this.fromCoin?.symbol && value.token_b.symbol === this.toCoin?.symbol) {
+          if (
+            value.token_a.symbol.toLowerCase() === this.fromCoin?.symbol.toLowerCase() &&
+            value.token_b.symbol.toLowerCase() === this.toCoin?.symbol.toLowerCase()
+          ) {
             direction = true
           } else {
             direction = false
@@ -723,6 +730,7 @@ export default Vue.extend({
 
             this.minPrice = tick2Price(minTick).toString()
             this.maxPrice = tick2Price(maxTick).toString()
+
             this.defaultMinPrice = tick2Price(minTick).toString()
             this.defaultMaxPrice = tick2Price(maxTick).toString()
           } else {
@@ -855,6 +863,7 @@ export default Vue.extend({
       console.log('changeCoinPosition####updateAmount#####')
       // 处理过的current price , 与前端价格区间比较时用
       const currentPriceP = this.direction ? this.poolInfo.currentPriceView : this.poolInfo.currentPriceViewReverse
+      console.log('updateAmounts####currentPriceP####', currentPriceP)
       let currentPriceTick = 0
       const min = this.minPrice
       const max = this.maxPrice
@@ -865,12 +874,14 @@ export default Vue.extend({
       let direction: any
       if (this.fixedFromCoin) {
         direction =
-          this.fromCoin?.symbol === this.poolInfo.token_a.symbol && this.toCoin?.symbol === this.poolInfo.token_b.symbol
+          this.fromCoin?.symbol.toLowerCase() === this.poolInfo.token_a.symbol.toLowerCase() &&
+          this.toCoin?.symbol.toLowerCase() === this.poolInfo.token_b.symbol.toLowerCase()
             ? 0
             : 1
       } else {
         direction =
-          this.toCoin?.symbol === this.poolInfo.token_a.symbol && this.fromCoin?.symbol === this.poolInfo.token_b.symbol
+          this.toCoin?.symbol.toLowerCase() === this.poolInfo.token_a.symbol.toLowerCase() &&
+          this.fromCoin?.symbol.toLowerCase() === this.poolInfo.token_b.symbol.toLowerCase()
             ? 0
             : 1
       }
@@ -991,14 +1002,20 @@ export default Vue.extend({
     },
     onCoinSelect(token: any) {
       if (this.currentCoinKey === 'fromCoin') {
-        if (token.symbol === this.toCoin?.symbol || !this.checkIsHaveCoinPair(token.symbol, this.toCoin?.symbol)) {
+        if (
+          token.symbol.toLowerCase() === this.toCoin?.symbol.toLowerCase() ||
+          !this.checkIsHaveCoinPair(token.symbol, this.toCoin?.symbol)
+        ) {
           this.toCoin = null
         }
         this.fromCoin = token
       } else {
         console.log('onCoinSelect####token.symbol#####', token.symbol)
         console.log('onCoinSelect####this.fromCoin?.symbol3####', this.fromCoin?.symbol)
-        if (token.symbol === this.fromCoin?.symbol || !this.checkIsHaveCoinPair(token.symbol, this.fromCoin?.symbol)) {
+        if (
+          token.symbol.toLowerCase() === this.fromCoin?.symbol.toLowerCase() ||
+          !this.checkIsHaveCoinPair(token.symbol, this.fromCoin?.symbol)
+        ) {
           this.fromCoin = null
         }
         this.toCoin = token
@@ -1077,10 +1094,16 @@ export default Vue.extend({
       let direction: any
       if (this.fixedFromCoin) {
         direction =
-          this.fromCoin?.symbol === poolInfo.token_a.symbol && this.toCoin?.symbol === poolInfo.token_b.symbol ? 0 : 1
+          this.fromCoin?.symbol.toLowerCase() === poolInfo.token_a.symbol.toLowerCase() &&
+          this.toCoin?.symbol.toLowerCase() === poolInfo.token_b.symbol.toLowerCase()
+            ? 0
+            : 1
       } else {
         direction =
-          this.toCoin?.symbol === poolInfo.token_a.symbol && this.fromCoin?.symbol === poolInfo.token_b.symbol ? 0 : 1
+          this.toCoin?.symbol.toLowerCase() === poolInfo.token_a.symbol.toLowerCase() &&
+          this.fromCoin?.symbol.toLowerCase() === poolInfo.token_b.symbol.toLowerCase()
+            ? 0
+            : 1
       }
 
       const swap = await loadSwapPair(poolInfo.tokenSwapKey, wallet)
@@ -1117,20 +1140,20 @@ export default Vue.extend({
 
       if (this.direction) {
         balanceA =
-          this.fromCoin?.symbol === 'SOL'
+          this.fromCoin?.symbol.toUpperCase() === 'SOL'
             ? new Decimal(this.getSolBalance(Number(fromBalance), 0.01)).mul(Math.pow(10, this.fromCoin.decimal))
             : new Decimal(fromBalance).mul(Math.pow(10, this.fromCoin.decimal))
         balanceB =
-          this.toCoin?.symbol === 'SOL'
+          this.toCoin?.symbol.toUpperCase() === 'SOL'
             ? new Decimal(this.getSolBalance(Number(toBalance), 0.01)).mul(Math.pow(10, this.toCoin.decimal))
             : new Decimal(toBalance).mul(Math.pow(10, this.toCoin.decimal))
       } else {
         balanceA =
-          this.toCoin?.symbol === 'SOL'
+          this.toCoin?.symbol.toUpperCase() === 'SOL'
             ? new Decimal(this.getSolBalance(Number(toBalance), 0.01)).mul(Math.pow(10, this.toCoin.decimal))
             : new Decimal(toBalance).mul(Math.pow(10, this.toCoin.decimal))
         balanceB =
-          this.fromCoin?.symbol === 'SOL'
+          this.fromCoin?.symbol.toUpperCase() === 'SOL'
             ? new Decimal(this.getSolBalance(Number(fromBalance), 0.01)).mul(Math.pow(10, this.fromCoin.decimal))
             : new Decimal(fromBalance).mul(Math.pow(10, this.fromCoin.decimal))
       }
@@ -1212,8 +1235,8 @@ export default Vue.extend({
           liquityResult.fixTokenType,
           tick_lower,
           tick_upper,
-          liquityResult.maxAmountA,
-          liquityResult.maxAmountB
+          new Decimal(fixD(liquityResult.maxAmountA.toString(), 0)),
+          new Decimal(fixD(liquityResult.maxAmountB.toString(), 0))
         )
 
         const opt: BroadcastOptions = {
@@ -1561,6 +1584,18 @@ export default Vue.extend({
 }
 @media screen and (max-width: 750px) {
   .pool-container {
+    .back-box {
+      width: 100%;
+      // display: flex;
+      // align-items: center;
+      // margin: 0 auto;
+      // svg {
+      //   width: 20px;
+      //   height: 20px;
+      //   fill: #fff;
+      //   cursor: pointer;
+      // }
+    }
     .pool-top {
       width: 100%;
       display: block;

@@ -149,7 +149,7 @@ export default Vue.extend({
         }
 
         // if (!tokenInfo.showDefault) continue
-        if (tokenInfo.symbol === 'SOL') continue
+        if (tokenInfo.symbol.toUpperCase() === 'SOL') continue
 
         // tokenInfo.symbol = symbol
 

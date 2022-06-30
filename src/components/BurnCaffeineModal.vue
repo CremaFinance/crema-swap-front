@@ -23,6 +23,7 @@
             oninput="value=this.value.replace(/[^\d-]*(\d*(?:\.\d{0,10})?).*$/g,'$1')"
             class="amount-input"
             type="text"
+            placeholder="0"
           />
         </div>
       </div>
@@ -35,13 +36,17 @@
           <div class="amount">{{ crmAmount }}</div>
         </div>
       </div>
-      <Button class="burn-btn-block" :loading="isBurnLoading" @click="claimCaffeine">Burn</Button>
+      <Button v-if="insufficientBalance" class="burn-btn-block" disabled>Insufficient balance</Button>
+      <Button v-else class="burn-btn-block" :loading="isBurnLoading" :disabled="!Number(amount)" @click="claimCaffeine"
+        >Burn</Button
+      >
     </div>
   </Modal>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { Modal, Select, Button } from 'ant-design-vue'
+import { decimalFormat } from '@/utils'
 
 Vue.use(Modal)
 
@@ -66,12 +71,18 @@ export default Vue.extend({
   },
   data() {
     return {
-      amount: '0'
+      amount: ''
     }
   },
   computed: {
     crmAmount() {
-      return this.caffeineToCrmRate * Number(this.amount)
+      return decimalFormat(String(this.caffeineToCrmRate * Number(this.amount)), 6)
+    },
+    insufficientBalance() {
+      if (Number(this.amount) > Number(this.caffeineAmount)) {
+        return true
+      }
+      return false
     }
   },
   methods: {
@@ -92,7 +103,7 @@ export default Vue.extend({
   .block {
     display: flex;
     width: 100%;
-    height: 100px;
+    height: 80px;
     background: #23262b;
     box-shadow: 0px 0px 2px 0px #535966, inset 0px 2px 3px 1px #1a1c1f;
     border-radius: 20px;
@@ -100,7 +111,7 @@ export default Vue.extend({
     justify-content: space-between;
     padding: 10px 20px;
     .left {
-      font-size: 20px;
+      font-size: 16px;
       font-family: Arial-BoldMT, Arial;
       font-weight: normal;
       color: rgba(255, 255, 255, 0.5);
@@ -131,17 +142,21 @@ export default Vue.extend({
         }
       }
       .amount-input {
-        font-size: 30px;
+        font-size: 24px;
         color: #fff;
         background: none;
         border: none;
         text-align: right;
         width: 100%;
+        &::placeholder {
+          color: rgba(#fff, 0.5);
+        }
       }
       .amount {
-        font-size: 30px;
-        color: #fff;
+        font-size: 24px;
+        color: rgba(255, 255, 255, 0.5);
         text-align: right;
+        cursor: not-allowed;
       }
     }
   }

@@ -48,7 +48,7 @@ export interface TokenInfo {
  * @returns {TokenInfo | null} tokenInfo
  */
 export function getTokenBySymbol(symbol: string): TokenInfo | null {
-  if (symbol === 'SOL') {
+  if (symbol.toUpperCase() === 'SOL') {
     return cloneDeep(NATIVE_SOL)
   }
 

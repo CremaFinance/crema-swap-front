@@ -365,11 +365,11 @@ export default Vue.extend({
       if (item) {
         console.log('gotoLp###item####', item)
         let tokenA = item.tokenA.symbol
-        if (item.tokenA.symbol === 'WSOL') {
+        if (item.tokenA.symbol.toUpperCase() === 'WSOL') {
           tokenA = 'SOL'
         }
         let tokenB = item.tokenB.symbol
-        if (item.tokenB.symbol === 'WSOL') {
+        if (item.tokenB.symbol.toUpperCase() === 'WSOL') {
           tokenB = 'SOL'
         }
         this.$router.push(`/deposit?from=${tokenA}&to=${tokenB}`)

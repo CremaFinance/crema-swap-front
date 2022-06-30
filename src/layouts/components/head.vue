@@ -10,6 +10,7 @@
         <!-- <div v-if="fairShow == 'header-fair'" class="fair-gi"> -->
         <div class="fair-gi">
           <img src="@/assets/images/icon-left.png" alt="" />
+          <!-- <img src="@/assets/images/Fire-lans.gif" alt="" /> -->
           <a href="https://ido.crema.finance/" target="_blank"><img src="@/assets/images/Text-NGU.gif" alt="" /></a>
           <img src="@/assets/images/icon-right.png" alt="" />
         </div>
@@ -41,7 +42,11 @@
               <img src="../../assets/images/icon-Pools@2x.png" />
               <span>Pools</span>
             </nuxt-link>
-            <nuxt-link to="/farming">
+            <!-- <nuxt-link to="/farming">
+              <img src="../../assets/images/icon-Farming@2x.png" />
+              <span>Farming</span>
+            </nuxt-link> -->
+            <nuxt-link to="/farmings">
               <img src="../../assets/images/icon-Farming@2x.png" />
               <span>Farming</span>
             </nuxt-link>

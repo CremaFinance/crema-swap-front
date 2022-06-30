@@ -21,13 +21,13 @@ import {
   POSITIONS_ACCOUNT_SIZE as SWAP_POSITION_ACCOUNT_SIZE,
   parsePositionsAccount
 } from '@cremafinance/crema-farming'
-import { Provider as AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
+import { AnchorProvider, setProvider, Wallet as AnchorWallet } from '@project-serum/anchor'
 import { SignerWallet, SolanaProvider } from '@saberhq/solana-contrib'
 import type { AccountInfo } from '@solana/spl-token'
 import { AccountLayout, TOKEN_PROGRAM_ID, u64 } from '@solana/spl-token'
 import invariant from 'tiny-invariant'
 import { currentTs } from './utils'
-import { fixD } from '@/utils'
+import { fixD, decimalFormat } from '@/utils'
 import { Token, TokenAmount } from '@saberhq/token-utils'
 import * as base58 from 'bs58'
 import Decimal from 'decimal.js'
@@ -171,53 +171,162 @@ export async function minerInfo(conn: any, wallet: any, rewarderKey: PublicKey, 
   }
 }
 
-interface MinerInfo extends MinerData {
-  MinerKey: PublicKey
-  PendingReward: u64
-  BlockTime: u64
-  tokenMintKey: PublicKey
-}
+// interface MinerInfo extends MinerData {
+//   MinerKey: PublicKey
+//   PendingReward: u64
+//   BlockTime: u64
+//   tokenMintKey: PublicKey
+// }
 interface QuarryInfo extends QuarryData {
   address: PublicKey
 }
 
-async function fetchQuarries(connection: Connection): Promise<Array<QuarryInfo>> {
+// async function fetchQuarries(connection: Connection): Promise<Array<QuarryInfo>> {
+//   const filters: Array<GetProgramAccountsFilter> = [
+//     {
+//       memcmp: {
+//         offset: 0,
+//         bytes: base58.encode(QUARRY_CODERS.Mine.accounts.quarry.discriminator)
+//       }
+//     }
+//   ]
+//   const accounts = await connection.getProgramAccounts(QUARRY_ADDRESSES.Mine, {
+//     filters
+//   })
+//   const quarries: QuarryInfo[] = []
+//   accounts.forEach((accountInfo) => {
+//     const info = QUARRY_CODERS.Mine.coder.accounts.decode<QuarryData>('Quarry', accountInfo.account.data)
+//     console.log('这里的accountInfo#####', accountInfo)
+//     console.log('accountInfo.account.data#####', info)
+//     quarries.push({
+//       address: accountInfo.pubkey,
+//       ...info
+//     })
+//   })
+//   return quarries
+// }
+
+// interface NewPayroll {
+//   payroll: Payroll
+//   tokenMintKey: PublicKey
+// }
+
+export async function fetchMiners(conn, wallet, authority: PublicKey | null) {
+  const sdk = makeSDK(conn, wallet);
+  const miners = await getMiners(sdk, authority);
+  // printTable(miners);
+  return miners
+}
+
+// export async function fetchMiners(authority: PublicKey | null, conn) {
+//   // const sdk = makeSDK()
+//   const quarries = await fetchQuarries(conn)
+//   const payrolls: Map<string, NewPayroll> = new Map()
+//   quarries.forEach((quarry) => {
+//     console.log('fetchMiners###quarry####', quarry)
+//     console.log('fetchMiners###quarry####quarry.tokenMintKey.toString()###', quarry.tokenMintKey.toString())
+//     payrolls.set(quarry.address.toBase58(), {
+//       payroll: new Payroll(
+//         quarry.famineTs,
+//         quarry.lastUpdateTs,
+//         quarry.annualRewardsRate,
+//         quarry.rewardsPerTokenStored,
+//         quarry.totalTokensDeposited
+//       ),
+//       tokenMintKey: quarry.tokenMintKey
+//     })
+//   })
+//   const ts = await currentTs(conn)
+
+//   const filters: Array<GetProgramAccountsFilter> = [
+//     {
+//       memcmp: {
+//         offset: 0,
+//         bytes: base58.encode(QUARRY_CODERS.Mine.accounts.miner.discriminator)
+//       }
+//     }
+//   ]
+//   if (authority !== null) {
+//     filters.push({
+//       memcmp: {
+//         offset: 40,
+//         bytes: authority?.toBase58()
+//       }
+//     })
+//   }
+//   const accounts = await conn.getProgramAccounts(QUARRY_ADDRESSES.Mine, {
+//     filters
+//   })
+
+//   const miners: MinerInfo[] = []
+
+//   accounts.forEach((accountInfo) => {
+//     const info = QUARRY_CODERS.Mine.coder.accounts.decode<MinerData>('Miner', accountInfo.account.data)
+//     const payroll = payrolls.get(info.quarryKey.toBase58())
+//     invariant(payroll !== undefined, `The ${info.quarryKey.toBase58()} payroll not found`)
+//     miners.push({
+//       MinerKey: accountInfo.pubkey,
+//       tokenMintKey: payroll.tokenMintKey,
+//       PendingReward: payroll.payroll.calculateRewardsEarned(
+//         ts,
+//         info.balance,
+//         info.rewardsPerTokenPaid,
+//         info.rewardsEarned
+//       ),
+//       BlockTime: ts,
+//       ...info
+//     })
+//   })
+//   // printTable(miners)
+//   return miners
+// }
+
+interface MinerInfo extends MinerData {
+  MinerKey: PublicKey;
+  PendingReward: u64;
+  BlockTime: u64;
+  tokenMintKey: PublicKey;
+}
+
+export async function getQuarries(
+  connection: Connection
+): Promise<Array<QuarryInfo>> {
   const filters: Array<GetProgramAccountsFilter> = [
     {
       memcmp: {
         offset: 0,
-        bytes: base58.encode(QUARRY_CODERS.Mine.accounts.quarry.discriminator)
-      }
-    }
-  ]
+        bytes: base58.encode(QUARRY_CODERS.Mine.accounts.quarry.discriminator),
+      },
+    },
+  ];
   const accounts = await connection.getProgramAccounts(QUARRY_ADDRESSES.Mine, {
-    filters
-  })
-  const quarries: QuarryInfo[] = []
+    filters,
+  });
+  const quarries: QuarryInfo[] = [];
   accounts.forEach((accountInfo) => {
-    const info = QUARRY_CODERS.Mine.coder.accounts.decode<QuarryData>('Quarry', accountInfo.account.data)
-    console.log('这里的accountInfo#####', accountInfo)
-    console.log('accountInfo.account.data#####', info)
+    const info = QUARRY_CODERS.Mine.coder.accounts.decode<QuarryData>(
+      "Quarry",
+      accountInfo.account.data
+    );
     quarries.push({
       address: accountInfo.pubkey,
-      ...info
-    })
-  })
-  return quarries
+      ...info,
+    });
+  });
+  return quarries;
 }
 
 interface NewPayroll {
   payroll: Payroll
   tokenMintKey: PublicKey
 }
-
-export async function fetchMiners(authority: PublicKey | null, conn) {
-  // const sdk = makeSDK()
-  const quarries = await fetchQuarries(conn)
-  const payrolls: Map<string, NewPayroll> = new Map()
+export async function getMiners(
+  sdk: QuarrySDK,
+  authority: PublicKey | null
+): Promise<Array<MinerInfo>> {
+  const quarries = await getQuarries(sdk.provider.connection);
+  const payrolls: Map<string, NewPayroll> = new Map();
   quarries.forEach((quarry) => {
-    console.log('fetchMiners###quarry####', quarry)
-    console.log('fetchMiners###quarry####quarry.tokenMintKey.toString()###', quarry.tokenMintKey.toString())
     payrolls.set(quarry.address.toBase58(), {
       payroll: new Payroll(
         quarry.famineTs,
@@ -228,35 +337,44 @@ export async function fetchMiners(authority: PublicKey | null, conn) {
       ),
       tokenMintKey: quarry.tokenMintKey
     })
-  })
-  const ts = await currentTs(conn)
+  });
+  const ts = await currentTs(sdk.provider.connection);
 
   const filters: Array<GetProgramAccountsFilter> = [
     {
       memcmp: {
         offset: 0,
-        bytes: base58.encode(QUARRY_CODERS.Mine.accounts.miner.discriminator)
-      }
-    }
-  ]
+        bytes: base58.encode(QUARRY_CODERS.Mine.accounts.miner.discriminator),
+      },
+    },
+  ];
   if (authority !== null) {
     filters.push({
       memcmp: {
         offset: 40,
-        bytes: authority?.toBase58()
-      }
-    })
+        bytes: authority?.toBase58(),
+      },
+    });
   }
-  const accounts = await conn.getProgramAccounts(QUARRY_ADDRESSES.Mine, {
-    filters
-  })
+  const accounts = await sdk.provider.connection.getProgramAccounts(
+    QUARRY_ADDRESSES.Mine,
+    {
+      filters,
+    }
+  );
 
-  const miners: MinerInfo[] = []
+  const miners: MinerInfo[] = [];
 
   accounts.forEach((accountInfo) => {
-    const info = QUARRY_CODERS.Mine.coder.accounts.decode<MinerData>('Miner', accountInfo.account.data)
-    const payroll = payrolls.get(info.quarryKey.toBase58())
-    invariant(payroll !== undefined, `The ${info.quarryKey.toBase58()} payroll not found`)
+    const info = QUARRY_CODERS.Mine.coder.accounts.decode<MinerData>(
+      "Miner",
+      accountInfo.account.data
+    );
+    const payroll = payrolls.get(info.quarry.toBase58());
+    invariant(
+      payroll !== undefined,
+      `The ${info.quarry.toBase58()} payroll not found`
+    );
     miners.push({
       MinerKey: accountInfo.pubkey,
       tokenMintKey: payroll.tokenMintKey,
@@ -267,11 +385,11 @@ export async function fetchMiners(authority: PublicKey | null, conn) {
         info.rewardsEarned
       ),
       BlockTime: ts,
-      ...info
-    })
-  })
-  // printTable(miners)
-  return miners
+      ...info,
+    });
+  });
+
+  return miners;
 }
 
 export async function fetchCremaSwaps(swapList: PublicKey[], conn) {
@@ -349,8 +467,9 @@ export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
       const isSecondPartyClaimed = item.isSecondPartyClaimed
       const newObj: any = {}
 
+      console.log('开启宝箱crm不展示问题测试###', item.mint, 'item####', item, '###item.crmClaimedAmount###', item.crmClaimedAmount)
       newObj[crmMint] = {
-        amount: fixD(new Decimal(item.crmClaimedAmount).div(Math.pow(10, 6)).toString(), 0),
+        amount: decimalFormat(new Decimal(item.crmClaimedAmount).div(Math.pow(10, 6)).toString(), 6),
         amountOrigin: item.crmClaimedAmount,
         isSecondPartyClaimed: isSecondPartyClaimed.get(crmMint),
         name: 'crm'
@@ -359,7 +478,7 @@ export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
       claimAmounts.forEach((value, key) => {
         const decimal = decimals.get(key)
         const amountStr = new Decimal(value).div(Math.pow(10, decimal)).toString()
-        const amount = fixD(amountStr, 0)
+        const amount = decimalFormat(amountStr, 6)
         newObj[key] = {
           amount,
           amountOrigin: value,

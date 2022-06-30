@@ -1,21 +1,21 @@
 <template>
   <div class="farming-container">
     <div class="banners-all">
-      <img class="banners-pc" src="../assets/images/farming-imge-banner.png" style="width: 100%" alt="" />
-      <img class="banners-h5" src="../assets/images/farming-imge-banner-h5.png" style="width: 100%" alt="" />
+      <img class="banners-pc" src="../assets/images/farming-imge-banner.png" alt="" />
+      <img class="banners-h5" src="../assets/images/farming-imge-banner-h5.png" alt="" />
       <nuxt-link to="/active" class="farming-jump"></nuxt-link>
     </div>
     <div class="farming-container-center">
       <!-- title开始 -->
       <div class="farming-title">
-        <div class="coin-tab">
+        <div class="type-tab">
           <span
-            v-for="item in coinList"
-            :key="item"
-            :class="item == selectCoin ? 'active' : ''"
-            @click="changeDirect(true, item)"
+            v-for="item in typeList"
+            :key="item.value"
+            :class="item.value == currentType ? 'active' : ''"
+            @click="selectType(item.value)"
           >
-            {{ item }}
+            {{ item.label }}
           </span>
         </div>
         <div class="serach-pool">
@@ -32,20 +32,22 @@
               oninput="this.value=this.value.replace(/[^a-zA-Z]/g,'')"
               @input="handleInput"
             />
-            <svg v-if="!value" class="icon" aria-hidden="true">
+            <!-- <svg v-if="!value" class="icon" aria-hidden="true"> -->
+            <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-a-bianzu30"></use>
             </svg>
-            <svg v-else class="icon out-icon" aria-hidden="true" @click="value = ''">
+            <svg v-if="value" class="icon out-icon" aria-hidden="true" @click="value = ''">
               <use xlink:href="#icon-a-icon_Shutdownbeifen"></use>
             </svg>
           </div>
           <RefreshIcon :loading="farming.loading" @refresh="toRefresh"></RefreshIcon>
         </div>
         <div class="search-symbol search-h5">
-          <svg v-if="!value" class="icon" aria-hidden="true">
+          <!-- <svg v-if="!value" class="icon" aria-hidden="true"> -->
+          <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-a-bianzu30"></use>
           </svg>
-          <svg v-else class="icon h5-out-icon" aria-hidden="true" @click="value = ''">
+          <svg v-if="value" class="icon h5-out-icon" aria-hidden="true" @click="value = ''">
             <use xlink:href="#icon-a-icon_Shutdownbeifen"></use>
           </svg>
           <input
@@ -62,8 +64,8 @@
           />
         </div>
         <div class="pool-select">
-          <Select ref="select" v-model="currentRpc" class="rpc-select" @change="selectRpc">
-            <Option v-for="item in rpcList" :key="item.label" :value="item.value" class="rpc-option">
+          <Select ref="select" v-model="currentType" class="rpc-select" @change="selectType">
+            <Option v-for="item in typeList" :key="item.label" :value="item.value" class="rpc-option">
               {{ item.label }}
             </Option>
           </Select>
@@ -83,15 +85,15 @@
         <FarmingPoolNc
           class="pc-farming-pool"
           :tvl-data="tvlData"
-          :is-staked="poolStatus"
-          :search-key="searchKey"
+          :search-key="value"
+          :current-type="currentType"
           @refreshData="toRefresh"
         ></FarmingPoolNc>
         <H5FarmingPoolNc
           class="h5-farming-pool"
           :tvl-data="tvlData"
-          :is-staked="poolStatus"
-          :search-key="searchKey"
+          :search-key="value"
+          :current-type="currentType"
           @refreshData="toRefresh"
         ></H5FarmingPoolNc>
       </div>
@@ -114,38 +116,28 @@ export default Vue.extend({
   },
   data() {
     return {
-      poolStatus: 'All',
+      poolStatus: 'Live',
       searchKey: '',
       showFarm: 'Farming',
       tvlData: null,
       timer: null,
       earningTimer: null,
       value: '',
-      coinList: ['All', 'Double', 'Ended', 'My Staked'],
-      selectCoin: 'All',
-      currentRpc: 'one',
-      rpcList: [
+      currentType: 'Live',
+      typeList: [
         {
-          label: 'All',
-          value: 'one'
-        },
-        {
-          label: 'Double',
-          value: 'two'
+          label: 'Live',
+          value: 'Live'
         },
         {
           label: 'Ended',
-          value: 'three'
-        },
-        {
-          label: 'My Staked',
-          value: 'four'
+          value: 'Ended'
         }
       ]
     }
   },
   computed: {
-    ...mapState(['farming', 'wallet', 'liquidity']),
+    ...mapState(['farming', 'wallet', 'liquidity', 'farmingv2']),
     farmingConfigData() {
       return {
         walletConnected: this.wallet.connected,
@@ -153,35 +145,44 @@ export default Vue.extend({
         farmingConfigObj: this.farming.farmingConfigObj,
         tvlData: this.tvlData
       }
+    },
+    walletConnectedAndFarmingListReady() {
+      if (this.wallet.connected && this.farmingv2.farmingList && this.farmingv2.farmingList.length > 0) {
+        return true
+      }
+      return false
     }
   },
   watch: {
-    // 'wallet.connected': {
-    //   handler: 'walletWatch',
+    farmingConfigData(newVal, oldVal) {
+      // if (newVal.rates && newVal.farmingConfigObj && newVal.tvlData && this.farming.farmingList.length < 1) {
+      //   this.$accessor.farming.getFarmingList({
+      //     rates: newVal.rates,
+      //     farmingConfig: newVal.farmingConfigObj,
+      //     haveLoading: true,
+      //     tvlData: newVal.tvlData
+      //   })
+      // }
+      // if (
+      //   newVal.rates &&
+      //   newVal.farmingConfigObj &&
+      //   newVal.tvlData &&
+      //   newVal.walletConnected &&
+      //   checkNullObj(this.farming.earningObj)
+      // ) {
+      //   this.$accessor.farming.getEarningsObj(true)
+      // }
+    },
+    // 'liquidity.tokensObj': {
+    //   handler: 'tokensObjWatch',
     //   immediate: true
     // },
-    farmingConfigData(newVal, oldVal) {
-      console.log('123getFarmingList###farmingConfigData####newVal###', newVal)
-      if (newVal.rates && newVal.farmingConfigObj && newVal.tvlData && this.farming.farmingList.length < 1) {
-        this.$accessor.farming.getFarmingList({
-          rates: newVal.rates,
-          farmingConfig: newVal.farmingConfigObj,
-          haveLoading: true,
-          tvlData: newVal.tvlData
-        })
-      }
-      if (
-        newVal.rates &&
-        newVal.farmingConfigObj &&
-        newVal.tvlData &&
-        newVal.walletConnected &&
-        checkNullObj(this.farming.earningObj)
-      ) {
-        this.$accessor.farming.getEarningsObj(true)
-      }
+    walletConnectedAndFarmingListReady: {
+      handler: 'walletConnectedAndFarmingListReadyWatch',
+      immediate: true
     },
-    'liquidity.tokensObj': {
-      handler: 'tokensObjWatch',
+    $route: {
+      handler: 'routeWatch',
       immediate: true
     }
   },
@@ -189,48 +190,51 @@ export default Vue.extend({
     this.getFarmTvl()
   },
   mounted() {
+    this.$accessor.farmingv2.getFarmingList()
+    this.$accessor.farmingv2.getAprAndTvl()
+    this.$accessor.farmingv2.getWrappers()
+
     const _this = this
     this.timer = setInterval(function () {
-      console.log('123getFarmingList###进到轮循了')
       _this.toRefresh(true)
     }, 20000)
   },
   destroyed() {
     clearInterval(this.timer)
     this.timer = null
-
-    // clearInterval(this.earningTimer)
-    // this.earningTimer = null
   },
   methods: {
-    selectRpc(value) {
-      // this.isloading = true
-
-      this.currentRpc = value
+    routeWatch(newVal) {
+      console.log('routeWatch####newVal####', newVal)
+      if (newVal && newVal.query && newVal.query.type) {
+        this.currentType = newVal.query.type
+      }
     },
-    changeDirect(value: boolean, name: String) {
-      this.direct = value
-      this.selectCoin = name
+    walletConnectedAndFarmingListReadyWatch(newVal) {
+      if (newVal) {
+        this.$accessor.farmingv2.getRewardsObj({ farmingList: this.farmingv2.farmingList, haveLoading: true })
+      }
+    },
+    selectType(value) {
+      console.log('selectType###value###', value, 'this.$route####', this.$route)
+      this.currentType = value
+      if (this.$route.query.type) {
+        this.$route.query.type = value
+      }
     },
     handleInput(e: any) {
       this.value = e.target.value
     },
-    tokensObjWatch(newVal) {
-      if (newVal && !checkNullObj(newVal)) this.$accessor.farming.getFarmingConfig(newVal)
-    },
+    // tokensObjWatch(newVal) {
+    //   if (newVal && !checkNullObj(newVal)) this.$accessor.farming.getFarmingConfig(newVal)
+    // },
     getFarmTvl() {
       this.$axios.get(`https://dev-api-crema.bitank.com/farm/tvl`).then((res) => {
-        // this.$axios.get(`/farm/tvl`).then((res) => {
-        console.log('farmingTest####getFarmTvl###res#####', res)
         const result: any = {}
-        // const farmingConfg = this.farming.farmingConfg
         if (res && res.wrappers) {
           res.wrappers.forEach((item) => {
             const apr = item.apr * 100
             const tvl = item.tvl
-            // console.log('farmingConfgsdfsdf####', farmingConfg)
-            // const farmingConfigItem = farmingConfg.filter((fitem) => fitem.positionWrapper === item.address)
-            // console.log('farmingConfigItem####', farmingConfigItem)
             result[item.address] = {
               ...item,
               aprView: apr > 10000 ? Infinity : `${fixD(apr, 2)}%`,
@@ -244,32 +248,13 @@ export default Vue.extend({
         this.tvlData = result
       })
     },
-    // walletWatch(newVal) {
-    //   const _this = this
-    //   if (newVal) {
-    //     _this.refreshEarningsObj()
-    //     this.earningTimer = setInterval(function () {
-    //       _this.refreshEarningsObj()
-    //     }, 20000)
-    //   } else {
-    //     clearInterval(this.earningTimer)
-    //     this.earningTimer = null
-    //   }
-    // },
     refreshEarningsObj() {
       this.$accessor.farming.getEarningsObj()
     },
-    toRefresh(unLoaidng) {
-      this.$accessor.farming.getFarmingList({
-        rates: this.farmingConfigData.rates,
-        farmingConfig: this.farmingConfigData.farmingConfigObj,
-        haveLoading: !unLoaidng,
-        tvlData: this.tvlData
-      })
-      this.getFarmTvl()
+    toRefresh(unLoading) {
+      this.$accessor.farmingv2.getFarmingList()
       if (this.wallet.connected) {
-        this.$accessor.farming.getEarningsObj(!unLoaidng)
-        this.$accessor.wallet.getTokenAccounts()
+        this.$accessor.farmingv2.getRewardsObj({ farmingList: this.farmingv2.farmingList, haveLoading: !unLoading })
       }
     }
   }
@@ -279,27 +264,38 @@ export default Vue.extend({
 .farming-container {
   .banners-all {
     position: relative;
-    width: 100%;
+    width: auto;
     margin-top: -20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    // img {
+
+    // }
+
     .banners-pc {
       display: block;
+      height: 180px;
     }
     .banners-h5 {
       display: none;
     }
     .farming-jump {
       position: absolute;
-      bottom: -6px;
-      right: 20%;
+      bottom: 0px;
+      left: 50%;
+      margin-left: 370px;
       // width: 120px;
       // height: 140px;
-      width: 7%;
-      height: 87%;
-      background: url('../assets/images/img-Caffeine-Farming-Mint.png');
+      width: 123px;
+      height: 138px;
+      background: url('../assets/images/img-Caffeine-Farming-Mint.png') center bottom no-repeat;
       background-size: 100% auto;
       cursor: pointer;
       &:hover {
-        background: url('../assets/images/img-Caffeine-Farming-Mint-hover.png');
+        background: url('../assets/images/img-Caffeine-Farming-Mint-hover.png') center bottom no-repeat;
         background-size: 100% auto;
       }
     }
@@ -316,8 +312,8 @@ export default Vue.extend({
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      margin-top: 28px;
-      padding-bottom: 20px;
+      margin-top: 40px;
+      // padding-bottom: 20px;
       > div {
         display: flex;
         align-items: center;
@@ -361,15 +357,16 @@ export default Vue.extend({
           left: 210px;
         }
       }
-      .coin-tab {
+      .type-tab {
         // margin-left: 20px;
-        min-width: 380px;
+        // min-width: 380px;
         height: 36px;
         background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
         border-radius: 8px;
         display: flex;
         align-items: center;
         span {
+          width: 88px;
           flex: 1;
           border-radius: 7px;
           font-size: 14px;
@@ -527,6 +524,20 @@ export default Vue.extend({
     }
   }
 }
+
+@media screen and (min-width: 1920px) {
+  .farming-container {
+    .banners-all {
+      .banners-pc {
+        width: 100%;
+        height: auto;
+      }
+      .farming-jump {
+        margin-left: 20%;
+      }
+    }
+  }
+}
 @media screen and (max-width: 1366px) {
   .farming-container {
     .banners-all {
@@ -552,13 +563,16 @@ export default Vue.extend({
         display: block;
         border-radius: 20px;
         margin-top: 20px;
+        height: 180px;
       }
       .farming-jump {
         bottom: 0;
-        width: 90px;
-        height: 100px;
-        left: 10%;
-        right: 0;
+        width: 98px;
+        // height: 117px;
+        // height: auto;
+        left: 50%;
+        margin-left: -142px;
+        // right: 0;
       }
     }
     width: 100%;
@@ -567,7 +581,7 @@ export default Vue.extend({
       width: 100%;
       .farming-title {
         padding: 0;
-        .coin-tab,
+        .type-tab,
         .serach-pool {
           display: none;
         }
@@ -579,7 +593,8 @@ export default Vue.extend({
             left: 8px;
           }
           .h5-out-icon {
-            left: 300px;
+            left: auto;
+            right: 10px;
           }
           input {
             width: 100%;

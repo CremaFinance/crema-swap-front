@@ -239,13 +239,15 @@ export default Vue.extend({
       if (this.fixedFromCoin) {
         coinAmount = new TokenAmount(this.fromCoinAmount, this.fromCoin?.decimal, false).wei.toNumber()
         direction =
-          this.fromCoin?.symbol === this.currentData.coin.symbol && this.toCoin?.symbol === this.currentData.pc.symbol
+          this.fromCoin?.symbol.toLowerCase() === this.currentData.coin.symbol.toLowerCase() &&
+          this.toCoin?.symbol.toLowerCase() === this.currentData.pc.symbol.toLowerCase()
             ? 0
             : 1
       } else {
         coinAmount = new TokenAmount(this.toCoinAmount, this.toCoin?.decimal, false).wei.toNumber()
         direction =
-          this.toCoin?.symbol === this.currentData.coin.symbol && this.toCoin?.symbol === this.currentData.pc.symbol
+          this.toCoin?.symbol.toLowerCase() === this.currentData.coin.symbol.toLowerCase() &&
+          this.toCoin?.symbol.toLowerCase() === this.currentData.pc.symbol.toLowerCase()
             ? 0
             : 1
       }

@@ -132,8 +132,11 @@ export const actions = actionTree(
       const result: any = []
       for (let key in farmingConfig) {
         const { tokenA, tokenB } = farmingConfig[key]
+        const item = farmingConfig[key]
+        const now = parseInt(String(new Date().getTime() / 1000))
         result.push({
-          ...farmingConfig[key],
+          ...item,
+          isEnded: Number(now) > Number(item.famineTs),
           positions: [],
           minPrice:
             (farmingConfig[key] && farmingConfig[key].effectivePrice && farmingConfig[key].effectivePrice[0]) || 0,
@@ -302,9 +305,17 @@ export const actions = actionTree(
           return b.withinRange - a.withinRange
         })
 
+        const newCanStakePositions: any = []
+        cpresult.forEach(item => {
+          const ep = sdresult.filter(eitem => eitem.nftMintAddress === item.nftMintAddress)
+          if (!ep || ep.length < 1) {
+            newCanStakePositions.push(item)
+          }
+        })
+
         console.log('positionsObj####setPositionsObj###', sdresult, cpresult)
 
-        commit('setPositionsObj', { positions: [...sdresult, ...cpresult], farmingInfo })
+        commit('setPositionsObj', { positions: [...sdresult, ...newCanStakePositions], farmingInfo })
         commit('setPositionsLoadingObj', { key: farmingInfo.positionWrapper, value: false })
       }
     },
@@ -338,13 +349,17 @@ export const actions = actionTree(
         commit('setEarningLoading', true)
       }
 
-      const minerList: any = (await fetchMiners(wallet.publicKey, conn)) || []
-      minerList.forEach((item) => {
+      const minerList: any = (await fetchMiners(conn, wallet, wallet.publicKey)) || []
+      console.log('getEarningsObj###minerList####', minerList)
+      minerList.forEach((item, index) => {
+        console.log('getEarningsObj###index###', index, '###item.MinerKey####', item.MinerKey.toString())
+        console.log('getEarningsObj###index###', index, '###item.tokenVaultKey####', item.tokenVaultKey.toString())
+        console.log('getEarningsObj###index###', index, '###item.tokenMintKey####', item.tokenMintKey.toString())
         if (item.PendingReward && item.PendingReward.toNumber()) {
           const earning = new Decimal(item.PendingReward.toString()).div(Math.pow(10, 6)).toString()
           result[item.tokenMintKey.toString()] = {
             value: earning,
-            view: addCommom(earning, 6)
+            view: Number(earning) < 0 ? '0' : addCommom(earning, 6)
           }
         } else {
           result[item.tokenMintKey.toString()] = {
@@ -353,6 +368,8 @@ export const actions = actionTree(
           }
         }
       })
+
+      console.log('getEarningsObj###result####', result)
       commit('setEarningObj', result)
       if (haveLoading) {
         commit('setEarningLoading', false)

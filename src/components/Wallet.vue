@@ -784,9 +784,11 @@ export default class Wallet extends Vue {
     justify-content: center;
     padding: 0px 12px;
     background: linear-gradient(270deg, #3e434e 0%, #282a2f 100%);
+    // background: linear-gradient(270deg, #14161b 0%, #0b0c0e 100%);
     box-shadow: 0px 4px 12px 0px rgba(26, 28, 31, 0.5);
     border-radius: 10px;
     border: 1px solid #3f434e;
+    // border: 1px solid #272b33;
     .wallet-icon {
       width: 25px;
       height: 25px;
@@ -1021,6 +1023,13 @@ export default class Wallet extends Vue {
   }
   /deep/.ant-modal {
     width: auto !important;
+  }
+  .connect-btn {
+    background: rgba(0, 0, 0, 0.8);
+    .wallet-icon-and-name {
+      background: linear-gradient(270deg, #14161b 0%, #0b0c0e 100%);
+      border: 1px solid #272b33;
+    }
   }
 }
 </style>
