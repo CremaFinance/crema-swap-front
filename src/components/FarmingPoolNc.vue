@@ -37,13 +37,13 @@
               </Tooltip>
             </div>
             <div class="td-text">
-              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].apr) || '--' }}
+              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].aprView) || '--' }}
             </div>
           </div>
           <div style="width: 200px">
             <div class="td-title">Liquidity</div>
             <div class="td-text">
-              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].tvl) || '--' }}
+              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].tvlView) || '--' }}
             </div>
           </div>
           <div style="width: 240px">

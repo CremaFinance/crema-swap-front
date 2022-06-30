@@ -83,13 +83,13 @@
               </Tooltip>
             </div>
             <div class="trade-info-text">
-              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].apr) || '--' }}
+              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].aprView) || '--' }}
             </div>
           </div>
           <div class="trade-info-item">
             <div class="trade-info-title">Liquidity</div>
             <div class="trade-info-text">
-              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].tvl) || '--' }}
+              {{ (aprAndTvlObj[item.mpKey] && aprAndTvlObj[item.mpKey].tvlView) || '--' }}
             </div>
           </div>
           <div class="trade-info-item">

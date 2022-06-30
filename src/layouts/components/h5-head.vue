@@ -68,7 +68,7 @@
           </li> -->
           </li>
 
-          <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farmings')">
+          <li :class="{ active: $route.name === 'farming' }" @click="goUrl('farming')">
             <img src="@/assets/images/icon-Farming@2x.png" alt="" />
             <span>Farming</span>
           </li>

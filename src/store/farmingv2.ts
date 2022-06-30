@@ -3,7 +3,7 @@ import { getQuarries, fetchMiners, fetchWrappers, fetchCremaSwaps, fetchStakedPo
 import { tick2UiPrice, lamportPrice2uiPrice, calculateTokenAmount } from 'test-crema-sdk'
 import { PublicKey } from '@solana/web3.js'
 import Decimal from 'decimal.js'
-import { decimalFormat, addCommom } from '@/utils'
+import { decimalFormat, addCommom, fixD } from '@/utils'
 
 export const state = () => ({
   quarryObj: {} as any,
@@ -53,12 +53,12 @@ export const mutations = mutationTree(state, {
     }
     // state.positionsObj = value
   },
-  setAprAndTvlObj(state, list) {
-    const result: any = {}
-    list.forEach(item => {
-      result[item.merge_pool] = item
-    })
-    state.aprAndTvlObj = result
+  setAprAndTvlObj(state, value) {
+    // const result: any = {}
+    // list.forEach(item => {
+    //   result[item.merge_pool] = item
+    // })
+    state.aprAndTvlObj = value
   }
 })
 
@@ -353,46 +353,38 @@ export const actions = actionTree(
         commit('setPositionsLoadingObj', { key: currentPositionWrapper, value: false })
       }
     },
-    getAprAndTvl({ commit }) {
-      const aprAndTvl = [
-        {
-          "apr": "0",
-          "merge_pool": "BuAw6F7RBPQjMRj6v1APoBUfFNYBNrbCcqMQb92uo8ma",
-          "tvl": "0"
-        },
-        {
-          "apr": "0",
-          "merge_pool": "F3b7tshxgcEqUpQNXRyNeERcGoFohERDJj3idbJp8SFF",
-          "tvl": "0"
-        },
-        {
-          "apr": "0",
-          "merge_pool": "HUxnFnqFYStWhKL2NH57HC6jXqoCyA4CptuQAE3HnHWq",
-          "tvl": "0"
-        },
+    async getAprAndTvl({ commit }) {
+      try {
+        const res: any = await this.$axios.get('https://api.crema.finance/indexer/farming-apr')
+        const aprAndTvl = res && res.data || [
+          {
+            "apr": "0",
+            "merge_pool": "BuAw6F7RBPQjMRj6v1APoBUfFNYBNrbCcqMQb92uo8ma",
+            "tvl": "0"
+          },
+          {
+            "apr": "0",
+            "merge_pool": "F3b7tshxgcEqUpQNXRyNeERcGoFohERDJj3idbJp8SFF",
+            "tvl": "0"
+          },
+          {
+            "apr": "0",
+            "merge_pool": "HUxnFnqFYStWhKL2NH57HC6jXqoCyA4CptuQAE3HnHWq",
+            "tvl": "0"
+          },
+        ]
 
-        // {
-        //   "apr": "0",
-        //   "merge_pool": "6jZ1KK9LephzTTTL4pRnHwL9qBG8ymHk5Biv7vFdNtrR",
-        //   "tvl": "0"
-        // },
-        // {
-        //   "apr": "0",
-        //   "merge_pool": "VN7kVGTF8yNejs1Su1owEN3byo4HaBoZk9dnBnC9z4V",
-        //   "tvl": "0"
-        // },
-        // {
-        //   "apr": "0",
-        //   "merge_pool": "CjCoqsummKzipiJTmPRPUYfm8yz1gSHptZfhhAZsPVsR",
-        //   "tvl": "0"
-        // },
-        // {
-        //   "apr": "225257.1428571428571428571428571428571428571428571428571428571429",
-        //   "merge_pool": "CRM8JcGQstDainWZKr3PzhioCyNNpNKNq9P6ayGe7aok",
-        //   "tvl": "2"
-        // }
-      ]
-      commit('setAprAndTvlObj', aprAndTvl)
+        const result: any = {}
+        aprAndTvl.forEach((item: any) => {
+          result[item.merge_pool] = {
+            ...item,
+            aprView: Number(item.apr) > 10000 ? Infinity : `${fixD(item.apr, 2)}%`,
+            tvlView: Number(item.tvl) ? `$ ${addCommom(item.tvl, 2)}` : '--',
+          }
+        })
+        commit('setAprAndTvlObj', result)
+      } catch (err) { console.log('getAprAndTvl##error', err) }
+
     }
   }
 )
