@@ -132,7 +132,7 @@
               <p v-else-if="wallet.connected" class="tips-text">{{ tipText || isClaimedText }}</p>
               <ul v-if="currentKeyItem.isCrmClaimed && canClaim" class="reward-coin-list">
                 <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
-                  <img :src="importIcon(`/coins/${item.name}.png`)" />
+                  <img :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
                   <span>x {{ item.amount }} {{ item.name.toUpperCase() }}</span>
                   <Button
                     v-if="!item.isSecondPartyClaimed"
