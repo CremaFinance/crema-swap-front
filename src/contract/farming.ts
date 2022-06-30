@@ -460,7 +460,7 @@ export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
   if (info && info.keys && info.keys.length > 0 && info.meta) {
     const decimals = info.meta.decimals
     const names = info.meta.names
-    const crmMint = 'CrMKwgPf5qFmvamgvZ7sdUiK4vYrwaHi9WK5qabJvddS'
+    const crmMint = 'CRMaDAzKCWYbhUfsKYA8448vaA1qUzCETd7gNBDzQ1ks'
 
     info.keys.forEach(item => {
       const claimAmounts = item.claimAmounts
