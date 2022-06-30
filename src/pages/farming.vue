@@ -256,6 +256,8 @@ export default Vue.extend({
     },
     toRefresh(unLoading) {
       this.$accessor.farmingv2.getFarmingList()
+      this.$accessor.farmingv2.getAprAndTvl()
+      this.$accessor.farmingv2.getWrappers()
       if (this.wallet.connected) {
         this.$accessor.farmingv2.getRewardsObj({ farmingList: this.farmingv2.farmingList, haveLoading: !unLoading })
       }
