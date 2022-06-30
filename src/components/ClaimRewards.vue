@@ -39,7 +39,7 @@
         <ul class="reward-coin-list">
           <!-- <ul v-if="type !== 'claim' && currentKeyItem.newClaimAmounts" class="reward-coin-list"> -->
           <li v-for="(item, key) in currentKeyItem.newClaimAmounts" :key="key">
-            <img :src="importIcon(`/coins/${item.name}.png`)" />
+            <img :src="importIcon(`/coins/${item.name.toLowerCase()}.png`)" />
             <span>x {{ item.amount }}</span>
             <span>{{ item.name.toUpperCase() }}</span>
           </li>

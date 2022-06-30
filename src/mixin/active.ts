@@ -570,7 +570,7 @@ export default Vue.extend({
         const wallet = (this as any).$wallet
         const conn = this.$web3
         const activeInfo = await fetchActivitymaster(conn, wallet, new PublicKey(MasterPda))
-        console.log('activeInfo####', activeInfo)
+        console.log('getCanClaimData###activeInfo####', activeInfo)
         if (activeInfo && activeInfo.openRewardTimestamp) {
           this.openRewardTimestamp = activeInfo.openRewardTimestamp.toNumber()
           console.log('activeInfo.openRewardTimestamp.toNumber()###', activeInfo.openRewardTimestamp.toNumber())
@@ -578,6 +578,8 @@ export default Vue.extend({
           // this.openRewardTimestamp = 1656518400
         }
         if (activeInfo && activeInfo.crmExchangeRate) {
+          console.log('getCanClaimData###activeInfo.crmExchangeRate.toNumber()###', activeInfo.crmExchangeRate.toNumber())
+          console.log('getCanClaimData###activeInfo.crmPriceDecimal###', activeInfo.crmPriceDecimal)
           const crmToUstRate = activeInfo.crmExchangeRate.toNumber() / Math.pow(10, activeInfo.crmPriceDecimal)
           const caffeineToUstRate = 0.1
           const caffeineToCrmRate = caffeineToUstRate / crmToUstRate

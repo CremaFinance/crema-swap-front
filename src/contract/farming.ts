@@ -469,7 +469,7 @@ export async function fetchCremakeys(conn: any, wallet: any, user: PublicKey) {
 
       console.log('开启宝箱crm不展示问题测试###', item.mint, 'item####', item, '###item.crmClaimedAmount###', item.crmClaimedAmount)
       newObj[crmMint] = {
-        amount: decimalFormat(new Decimal(item.crmClaimedAmount).div(Math.pow(10, 6)).toString(), 6),
+        amount: decimalFormat(new Decimal(item.crmClaimedAmount).div(Math.pow(10, 9)).toString(), 6),
         amountOrigin: item.crmClaimedAmount,
         isSecondPartyClaimed: isSecondPartyClaimed.get(crmMint),
         name: 'crm'
