@@ -111,8 +111,11 @@
                   </li>
                   <li>
                     <h3>Farm</h3>
-                    <p v-if="farming.statisticsDataObj && farming.statisticsDataObj[item.swap_account]">
+                    <!-- <p v-if="farming.statisticsDataObj && farming.statisticsDataObj[item.swap_account]">
                       {{ fixD(Number(farming.statisticsDataObj[item.swap_account].apr) * 100, 2) }}%
+                    </p> -->
+                    <p v-if="farmingv2AprObj && farmingv2AprObj[item.swap_account]">
+                      {{ farmingv2AprObj[item.swap_account].aprView }}
                     </p>
                     <p v-else>N/A</p>
                   </li>
@@ -445,7 +448,23 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['farming', 'liquidity'])
+    ...mapState(['farming', 'liquidity', 'farmingv2']),
+    farmingv2AprObj() {
+      const result: any = {}
+      if (this.farmingv2.aprAndTvlObj && this.farmingv2.farmingList) {
+        const aprAndTvlObj = this.farmingv2.aprAndTvlObj
+        const farmingList = this.farmingv2.farmingList
+
+        farmingList.forEach((item) => {
+          if (aprAndTvlObj[item.mpKey]) {
+            result[item.swap_key] = {
+              ...aprAndTvlObj[item.mpKey]
+            }
+          }
+        })
+      }
+      return result
+    }
   },
   watch: {
     'tokenPage.page'(newVal, oldVal) {
@@ -485,6 +504,8 @@ export default Vue.extend({
     this.$accessor.farming.getStatisticsDataObj()
   },
   mounted() {
+    this.$accessor.farmingv2.getFarmingList()
+    this.$accessor.farmingv2.getAprAndTvl()
     this.getUct()
     this.getDatum()
     // this.getJupiterDay()
@@ -602,9 +623,9 @@ export default Vue.extend({
       })
     },
     getUct() {
-      // this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
-      // this.$axios.get(`https://pre-api-crema.bitank.com/v1/swap/count`).then((res) => {
-      this.$axios.get(`https://api.crema.finance/v1/swap/count/new`).then((res) => {
+      this.$axios.get(`https://api.crema.finance/v1/swap/count`).then((res) => {
+        // this.$axios.get(`https://pre-api-crema.bitank.com/v1/swap/count`).then((res) => {
+        // this.$axios.get(`https://api.crema.finance/v1/swap/count/new`).then((res) => {
         let results = res.data
         const list = res.data.pools
         const token = res.data.tokens
