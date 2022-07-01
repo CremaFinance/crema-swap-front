@@ -202,11 +202,17 @@ export default Vue.extend({
       deep: true
     },
     poolInfo: {
-      handler(value: any) {
-        console.log('这里第一次没进来吗####value####', value)
+      handler(value: any, old: any) {
         if (value && value.tokenSwapKey) {
+          if (value?.name !== old?.name) {
+            if (this.fixedFromCoin) {
+              this.toCoinAmount = ''
+            } else {
+              this.fromCoinAmount = ''
+            }
+          }
           this.getTokenSwap()
-          this.updateAmounts()
+          this.updateAmounts(value)
         } else {
           this.fromCoinAmount = ''
           this.toCoinAmount = ''
@@ -216,10 +222,10 @@ export default Vue.extend({
       deep: true
     },
     fromCoinAmount: debounce(function (newAmount: string, oldAmount: string) {
-      if (!newAmount || !Number(newAmount)) {
-        this.toCoinAmount = ''
-        return
-      }
+      // if (!newAmount || !Number(newAmount)) {
+      //   this.toCoinAmount = ''
+      //   return
+      // }
       this.$nextTick(() => {
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.fromCoinAmount = oldAmount
@@ -231,10 +237,10 @@ export default Vue.extend({
       })
     }, 500),
     toCoinAmount: debounce(function (newAmount: string, oldAmount: string) {
-      if (!newAmount || !Number(newAmount)) {
-        this.fromCoinAmount = ''
-        return
-      }
+      // if (!newAmount || !Number(newAmount)) {
+      //   this.fromCoinAmount = ''
+      //   return
+      // }
       this.$nextTick(() => {
         if (!inputRegex.test(escapeRegExp(newAmount))) {
           this.toCoinAmount = oldAmount
@@ -308,8 +314,9 @@ export default Vue.extend({
         }
       }
     },
-    async updateAmounts() {
-      if (!this.poolInfo) return
+    async updateAmounts(value) {
+      const poolInfo = value || this.poolInfo
+      if (!poolInfo) return
       const fromCoinMint =
         this.fromCoin?.token_mint === '11111111111111111111111111111111'
           ? 'So11111111111111111111111111111111111111112'
@@ -318,14 +325,13 @@ export default Vue.extend({
         this.toCoin?.token_mint === '11111111111111111111111111111111'
           ? 'So11111111111111111111111111111111111111112'
           : this.toCoin?.token_mint
-      const direct =
-        fromCoinMint === this.poolInfo.token_a.token_mint && toCoinMint === this.poolInfo.token_b.token_mint ? 0 : 1
+      const direct = fromCoinMint === poolInfo.token_a.token_mint && toCoinMint === poolInfo.token_b.token_mint ? 0 : 1
 
       let swap: any
-      if (this.tokenSwap) {
+      if (this.tokenSwap && !value) {
         swap = this.tokenSwap
       } else {
-        swap = await loadSwapPair(this.poolInfo.tokenSwapKey, this.$wallet)
+        swap = await loadSwapPair(poolInfo.tokenSwapKey, this.$wallet)
         this.tokenSwap = swap
       }
 

@@ -105,22 +105,42 @@ export default Vue.extend({
   },
   data() {
     return {
-      defaultRates: '',
+      // defaultRates: '',
       autoRefreshTime: 20,
       countdown: 0,
       refreshTimer: null
+    }
+  },
+  computed: {
+    defaultRates() {
+      if (
+        this.poolInfo &&
+        this.fromCoin?.symbol.toLowerCase() === this.poolInfo.token_a.symbol.toLowerCase() &&
+        this.toCoin?.symbol.toLowerCase() === this.poolInfo.token_b.symbol.toLowerCase()
+      ) {
+        // this.defaultRates = this.currentPriceView || poolInfo.currentPriceView
+        return this.poolInfo.currentPriceView
+      } else if (
+        this.poolInfo &&
+        this.fromCoin?.symbol.toLowerCase() === this.poolInfo.token_b.symbol.toLowerCase() &&
+        this.toCoin?.symbol.toLowerCase() === this.poolInfo.token_a.symbol.toLowerCase()
+      ) {
+        // this.defaultRates = this.currentPriceViewReverse || poolInfo.currentPriceViewReverse
+        return this.poolInfo.currentPriceViewReverse
+      }
+      return ''
     }
   },
   watch: {
     poolInfo: {
       handler: 'poolInfoWatch',
       immediate: true
-    },
-    fromCoin() {
-      if (this.poolInfo && this.poolInfo.token_a && this.fromCoin && this.toCoin) {
-        this.setDefaultExchangeRate(this.poolInfo)
-      }
     }
+    // fromCoin() {
+    //   if (this.poolInfo && this.poolInfo.token_a && this.fromCoin && this.toCoin) {
+    //     this.setDefaultExchangeRate(this.poolInfo)
+    //   }
+    // }
   },
   mounted() {
     this.setRefreshTimer()
@@ -131,21 +151,36 @@ export default Vue.extend({
   },
   methods: {
     fixD,
-    poolInfoWatch(poolInfo: any) {
-      if (poolInfo && poolInfo.token_a && this.fromCoin && this.toCoin) {
-        this.setDefaultExchangeRate(poolInfo)
+    poolInfoWatch(poolInfo: any, old: any) {
+      console.log('swapInfo###poolInfoWatch###poolInfo###', poolInfo)
+      console.log('swapInfo###poolInfoWatch###old###', old)
+      if (poolInfo?.name !== old?.name) {
+        this.isChangePool = true
       }
+      // if (poolInfo && poolInfo.token_a && this.fromCoin && this.toCoin) {
+      //   this.setDefaultExchangeRate(poolInfo)
+      // }
     },
-    setDefaultExchangeRate(poolInfo: any) {
-      if (
-        this.fromCoin?.symbol.toLowerCase() === poolInfo.token_a.symbol.toLowerCase() &&
-        this.toCoin?.symbol.toLowerCase() === poolInfo.token_b.symbol.toLowerCase()
-      ) {
-        this.defaultRates = this.currentPriceView || poolInfo.currentPriceView
-      } else {
-        this.defaultRates = this.currentPriceViewReverse || poolInfo.currentPriceViewReverse
-      }
-    },
+    // setDefaultExchangeRate(poolInfo: any) {
+    //   console.log('setDefaultExchangeRate####poolInfo###', poolInfo)
+    //   console.log('setDefaultExchangeRate####this.currentPriceView###', this.currentPriceView)
+    //   console.log('setDefaultExchangeRate####this.currentPriceViewReverse###', this.currentPriceViewReverse)
+    // if (
+    //   this.fromCoin?.symbol.toLowerCase() === poolInfo.token_a.symbol.toLowerCase() &&
+    //   this.toCoin?.symbol.toLowerCase() === poolInfo.token_b.symbol.toLowerCase()
+    // ) {
+    //   // this.defaultRates = this.currentPriceView || poolInfo.currentPriceView
+    //   this.defaultRates = poolInfo.currentPriceView || this.currentPriceView
+    // } else if (
+    //   this.fromCoin?.symbol.toLowerCase() === poolInfo.token_b.symbol.toLowerCase() &&
+    //   this.toCoin?.symbol.toLowerCase() === poolInfo.token_a.symbol.toLowerCase()
+    // ) {
+    //   // this.defaultRates = this.currentPriceViewReverse || poolInfo.currentPriceViewReverse
+    //   this.defaultRates = poolInfo.currentPriceViewReverse || this.currentPriceViewReverse
+    // } else {
+    //   this.defaultRates = '--'
+    // }
+    // },
     toRefreshData() {
       this.countdown = 0
       this.$emit('refresh')

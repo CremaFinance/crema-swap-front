@@ -102,12 +102,24 @@
           <div class="trade-info-item">
             <div class="trade-info-title">Reward</div>
             <div class="trade-info-text" style="margin-top: 8px">
-              <img
+              <!-- <img
                 v-for="qitem in item.quarries"
                 :key="qitem.quarry"
                 :src="importIcon(`/coins/${rewardTokenObj[qitem.reward_token_mint].name.toLowerCase()}.png`)"
                 alt=""
-              />
+              /> -->
+              <Tooltip
+                v-for="qitem in item.quarries"
+                :key="qitem.quarry"
+                overlay-class-name="reward-coin-tooltip"
+                placement="top"
+              >
+                <img
+                  :src="importIcon(`/coins/${rewardTokenObj[qitem.reward_token_mint].name.toLowerCase()}.png`)"
+                  alt=""
+                />
+                <template slot="title">{{ rewardTokenObj[qitem.reward_token_mint].name.toUpperCase() }}</template>
+              </Tooltip>
               <!-- {{
                 (farming.earningObj &&
                   farming.earningObj[item.positionWrapperWrapMint] &&
@@ -321,6 +333,12 @@ export default Vue.extend({
     &::before {
       background: rgba(#000, 0) !important;
     }
+  }
+}
+.reward-coin-tooltip {
+  .ant-tooltip-inner {
+    padding: 5px 12px !important;
+    font-size: 12px;
   }
 }
 </style>
