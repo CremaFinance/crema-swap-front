@@ -33,7 +33,7 @@
         <p>
           <span>Min:</span>
           {{ decimalFormat(pItem.minPrice, 6) }}
-          {{ pItem.token_a.symbol }} per {{ pItem.token_b.symbol }}
+          {{ pItem.token_b.symbol }} per {{ pItem.token_a.symbol }}
         </p>
         <svg class="icon" aria-hidden="true">
           <use xlink:href="#icon-icon-link"></use>
@@ -41,7 +41,7 @@
         <p>
           <span>Max:</span>
           {{ pItem.maxPrice.indexOf('+') > 0 ? '∞' : decimalFormat(pItem.maxPrice, 6) }}
-          {{ pItem.token_a.symbol }} per {{ pItem.token_b.symbol }}
+          {{ pItem.token_b.symbol }} per {{ pItem.token_a.symbol }}
         </p>
       </div>
     </div>
