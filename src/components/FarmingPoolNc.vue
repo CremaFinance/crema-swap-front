@@ -59,12 +59,18 @@
             <div class="td-text">
               <!-- {{ item.minPrice }} -
               {{ item.maxPrice }} -->
-              <img
+              <Tooltip
                 v-for="qitem in item.quarries"
                 :key="qitem.quarry"
-                :src="importIcon(`/coins/${rewardTokenObj[qitem.reward_token_mint].name.toLowerCase()}.png`)"
-                alt=""
-              />
+                overlay-class-name="reward-coin-tooltip"
+                placement="top"
+              >
+                <img
+                  :src="importIcon(`/coins/${rewardTokenObj[qitem.reward_token_mint].name.toLowerCase()}.png`)"
+                  alt=""
+                />
+                <template slot="title">{{ rewardTokenObj[qitem.reward_token_mint].name.toUpperCase() }}</template>
+              </Tooltip>
               <!-- <img src="../assets/coins/cusdc.png" alt="" /> -->
             </div>
           </div>
@@ -309,6 +315,12 @@ export default Vue.extend({
 .td-text {
   .ant-spin-dot-item {
     background-color: rgba(255, 255, 255, 0.5);
+  }
+}
+.reward-coin-tooltip {
+  .ant-tooltip-inner {
+    padding: 5px 12px !important;
+    font-size: 12px;
   }
 }
 </style>

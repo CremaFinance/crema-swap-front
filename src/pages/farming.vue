@@ -1,8 +1,8 @@
 <template>
   <div class="farming-container">
     <div class="banners-all">
-      <img class="banners-pc" src="../assets/images/farming-imge-banner.png" alt="" />
-      <img class="banners-h5" src="../assets/images/farming-imge-banner-h5.png" alt="" />
+      <img class="banners-pc" src="../assets/images/farming-img-banner.png" alt="" />
+      <img class="banners-h5" src="../assets/images/farming-img-banner-h5.png" alt="" />
       <nuxt-link to="/active" class="farming-jump"></nuxt-link>
     </div>
     <div class="farming-container-center">
@@ -567,7 +567,8 @@ export default Vue.extend({
         display: block;
         border-radius: 20px;
         margin-top: 20px;
-        height: 180px;
+        // height: 180px;
+        width: 100%;
       }
       .farming-jump {
         bottom: 0;
