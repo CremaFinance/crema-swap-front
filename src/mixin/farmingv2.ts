@@ -42,12 +42,13 @@ import { makeSDK, getTokenAccountsByOwnerAndMint } from '@/contract/farming'
 import { Token, TokenAmount, getOrCreateATA, getATAAddress } from '@saberhq/token-utils'
 import { Tooltip, Spin } from 'ant-design-vue'
 import { fixD, addCommom, decimalFormat } from '@/utils'
-import { fetchMergePools, calculateWrapAmount } from '@/contract/farmingv2'
+import { fetchMergePools, calculateWrapAmount, fetchMergeMiner } from '@/contract/farmingv2'
 import { deposit } from '@/utils/stake'
 import { publicKey } from '@project-serum/anchor/dist/cjs/utils'
 import { tick2UiPrice } from 'test-crema-sdk'
 import Decimal from 'decimal.js'
 import { program } from '@project-serum/anchor/dist/cjs/spl/token'
+import BN from 'bn.js';
 
 Vue.use(Button)
 export default Vue.extend({
@@ -578,6 +579,28 @@ export default Vue.extend({
           positionInfo: userSwapPosition,
           tokenProgram: TOKEN_PROGRAM_ID
         })
+
+
+        // const res = await mintRes.tx.simulate();
+        // if (res.value.err !== null) {
+        //   console.log(res);
+        // }
+        // invariant(
+        //   res.value.err === null,
+        //   ProgramError.parse(res.value.logs ?? [0], PositionWrapperErrors)?.msg
+        // );
+        // const mintEvent = QUARRY_CODERS.PositionWrapper.parseProgramLogEvents(
+        //   res.value.logs ?? []
+        // )[0];
+        // invariant(
+        //   mintEvent && mintEvent.name === "MintWrapTokensEvent",
+        //   "Mint wrap token event not found"
+        // );
+        // let stakeAmount = mintEvent.data.amount;
+
+
+
+
         console.log('toStake###mintRes.tx.instructions####', mintRes.tx.instructions)
         const instructions: TransactionInstruction[] = [...mintRes.tx.instructions]
 
@@ -693,11 +716,13 @@ export default Vue.extend({
       }
     },
     async toUnStake(poolInfo: any, positionInfo: any) {
+      console.log('toUnStake####poolInfo####', poolInfo)
       this.currentPosition = positionInfo
       const positionWrapper = poolInfo.positionWrapper
       const mergePool = poolInfo['merge_pool'].address
       const quarries = poolInfo.quarries
       const nftMint = new PublicKey(positionInfo.nftMintAddress)
+      const positionWrapperMint = poolInfo['position_wrapper'].wrap_mint
 
       const wallet = (this as any).$wallet
       const conn = this.$web3
@@ -711,6 +736,9 @@ export default Vue.extend({
       let txid = ''
 
       try {
+
+
+
         // unstake replica
         const mmKey = await sdk.mergeMine.findMergeMinerAddress({
           pool: new PublicKey(mergePool),
@@ -729,15 +757,21 @@ export default Vue.extend({
           const item: any = quarries[i]
           // is primaryToken
           if (item.stake_token_mint === primaryMint) {
-            console.log('is primaryToken')
+
+            const account: any = this.wallet.tokenAccounts
+            const userPosionWrapperBalance: any = account && account[positionWrapperMint] && account[positionWrapperMint]?.balance || null
+
+
             const primaryRewarder = item.rewarder
             const primaryTokenAmount = positionInfo.wrapBalance
-
             const primaryToken = await Token.load(sdk.provider.connection, mm.primaryMint)
             invariant(primaryToken !== null, 'The primary token is null')
-            console.log('toUnStake###TokenAmount####', new TokenAmount(primaryToken, 1).toString())
+            console.log('toUnStake###primaryTokenAmount###', primaryTokenAmount.toString())
+            console.log('toUnStake###userPosionWrapperBalance###', userPosionWrapperBalance.toWei().toString())
+            const resPrimaryTokenAmount = userPosionWrapperBalance ? new Decimal(primaryTokenAmount.toString()).sub(userPosionWrapperBalance.toWei().toString()) : primaryTokenAmount
+            console.log('toUnStake###resPrimaryTokenAmount####', resPrimaryTokenAmount.toString())
             const unstakePrimaryRes = await mm.withdraw({
-              amount: new TokenAmount(primaryToken, primaryTokenAmount),
+              amount: new TokenAmount(primaryToken, resPrimaryTokenAmount.toString()),
               rewarder: new PublicKey(primaryRewarder)
             })
 
