@@ -13,6 +13,10 @@
           </svg>
           <span>Docs</span>
         </a> -->
+        <a href="https://ido.crema.finance/" target="_blank">
+          <img class="pc-icon" src="../../assets/images/icon_ido.png" />
+          <span>IDO</span>
+        </a>
         <a href="https://gitbook.crema.finance/" target="_blank">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-docs"></use>
@@ -105,6 +109,11 @@ export default Vue.extend({
       width: 20px;
       height: 20px;
       fill: #fff;
+    }
+    .pc-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
     }
     span {
       margin-left: 20px;

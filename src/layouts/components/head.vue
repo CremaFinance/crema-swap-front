@@ -8,12 +8,11 @@
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </a>
         <!-- <div v-if="fairShow == 'header-fair'" class="fair-gi"> -->
-        <div class="fair-gi">
+        <!-- <div class="fair-gi">
           <img src="@/assets/images/icon-left.png" alt="" />
-          <!-- <img src="@/assets/images/Fire-lans.gif" alt="" /> -->
           <a href="https://ido.crema.finance/" target="_blank"><img src="@/assets/images/Text-NGU.gif" alt="" /></a>
           <img src="@/assets/images/icon-right.png" alt="" />
-        </div>
+        </div> -->
         <div class="left">
           <nav>
             <!-- <a href="https://trade.crema.finance/" class="to-trading" target="_blank">
