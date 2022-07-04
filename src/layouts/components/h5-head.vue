@@ -370,7 +370,7 @@ export default {
       justify-content: center;
       position: absolute;
       left: 0px;
-      bottom: 0px;
+      bottom: 100px;
       padding: 30px 0px;
       a {
         margin: 0px 10px;
@@ -380,8 +380,8 @@ export default {
         justify-content: center;
       }
       .icon {
-        width: 16px;
-        height: 16px;
+        width: 28px;
+        height: 28px;
         fill: rgba(255, 255, 255, 0.5);
       }
     }
