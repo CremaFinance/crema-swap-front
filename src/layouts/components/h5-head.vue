@@ -8,11 +8,9 @@
           <!-- <img class="test-or-main" src="../../assets/images/tag-Devnet.png" alt="" /> -->
         </div>
         <div class="right">
-          <div class="fair-gi">
+          <!-- <div class="fair-gi">
             <a href="https://ido.crema.finance/" target="_blank"><img src="@/assets/images/Text-NGU.gif" alt="" /></a>
-            <!-- <img src="@/assets/images/Fire-lans.gif" alt="" /> -->
-            <!-- <span><nuxt-link to="/fair">Fair Launch</nuxt-link></span> -->
-          </div>
+          </div> -->
           <SystemSetting></SystemSetting>
           <svg v-if="!showMenu" class="icon" aria-hidden="true" @click="toggleMenu">
             <use xlink:href="#icon-a-icon_Menu1"></use>
@@ -105,6 +103,9 @@
       </a> -->
 
         <div class="contact-list">
+          <a href="https://ido.crema.finance/" target="_blank">
+            <img class="icon" src="../../assets/images/icon_ido_h5.png" />
+          </a>
           <a href="https://gitbook.crema.finance/" target="_blank">
             <svg class="icon" aria-hidden="true">
               <use xlink:href="#icon-icon-Docs"></use>
@@ -369,15 +370,18 @@ export default {
       justify-content: center;
       position: absolute;
       left: 0px;
-      bottom: 0px;
+      bottom: 100px;
       padding: 30px 0px;
       a {
         margin: 0px 10px;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .icon {
-        width: 16px;
-        height: 16px;
+        width: 28px;
+        height: 28px;
         fill: rgba(255, 255, 255, 0.5);
       }
     }
