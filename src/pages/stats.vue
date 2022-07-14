@@ -94,9 +94,9 @@
             >-->
           </td>
           <td class="fee-bot">
-            <!-- $ {{ addCommom(item.tvl_in_usd, 2) }} -->
+            $ {{ addCommom(item.tvl_in_usd, 2) }}
 
-            {{ item.name === 'CRM-USDC' ? `$ ${addCommom(item.tvl_in_usd, 2)}` : '--' }}
+            <!-- {{ item.name === 'CRM-USDC' ? `$ ${addCommom(item.tvl_in_usd, 2)}` : '- -' }} -->
           </td>
           <td>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</td>
           <!-- <td>{{ item.apr }}</td> -->
@@ -133,7 +133,7 @@
             }}</span>
             <Button class="deposit-btn" @click="gotoLp(item)">Deposit</Button> -->
             <div class="deposit-btn-box">
-              <span>--</span>
+              <span v-if="item.name === 'CRM-USDC'">- -</span>
               <Tooltip v-if="item.name === 'CRM-USDC'" overlay-class-name="temporary-tooltip" placement="top">
                 <div><Button class="deposit-btn" disabled @click="gotoLp(item)">Deposit</Button></div>
                 <template slot="title">
@@ -245,8 +245,9 @@
         <div class="block">
           <div class="left">
             <h3>TVL</h3>
-            <p v-if="item.name === 'CRM-USDC'">$ {{ addCommom(item.tvl_in_usd, 2) }}</p>
-            <p v-else>--</p>
+            <!-- <p v-if="item.name === 'CRM-USDC'">$ {{ addCommom(item.tvl_in_usd, 2) }}</p>
+            <p v-else>- -</p> -->
+            <p>$ {{ addCommom(item.tvl_in_usd, 2) }}</p>
           </div>
           <div class="right">
             <h3>Volume(24H)</h3>
@@ -571,7 +572,7 @@ export default Vue.extend({
         if (total > 10000) {
           return 'Infinity'
         } else {
-          return `${fixD(String(total), 2)}%`
+          return total ? `${fixD(String(total), 2)}%` : '0%'
         }
       } else {
         return item.apr

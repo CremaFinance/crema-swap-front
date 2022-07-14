@@ -378,7 +378,7 @@ export const actions = actionTree(
         aprAndTvl.forEach((item: any) => {
           result[item.merge_pool] = {
             ...item,
-            aprView: Number(item.apr) > 10000 ? Infinity : `${fixD(item.apr, 2)}%`,
+            aprView: Number(item.apr) > 10000 ? Infinity : (Number(item.apr) < 0.001 ? '0%' : `${fixD(item.apr, 2)}%`),
             tvlView: Number(item.tvl) ? `$ ${addCommom(item.tvl, 2)}` : '--',
           }
         })

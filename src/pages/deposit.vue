@@ -117,7 +117,9 @@
           <Button
             v-else
             class="add-liquidity-btn"
-            :disabled="!poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance"
+            :disabled="
+              true || !poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance
+            "
             :loading="suppling"
             @click="openAddLiquiditySecondConfirm"
           >
