@@ -21,7 +21,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import * as d3 from 'd3'
-import { tick2Price, price2Tick, tick2UiPrice, uiPrice2Tick } from 'test-crema-sdk'
+import { tick2UiPrice, uiPrice2Tick } from '@cremafinance/crema-sdk'
 import { fixD, checkNullObj, decimalFormat } from '@/utils'
 import Decimal from 'decimal.js'
 import { Spin } from 'ant-design-vue'

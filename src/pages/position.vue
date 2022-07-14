@@ -14,16 +14,24 @@
         >Your Positions
         <span>{{ list.length > 0 ? `( ${list.length} )` : '' }}</span>
       </span>
-      <span v-else
-        >Your Positions
-        <span>(0)</span>
-      </span>
+      <span v-else>Your Positions </span>
       <div class="btn-list">
-        <button>
+        <!-- <button>
           <div @click="gotoPool">
             <span>Add Liquidity</span>
           </div>
-        </button>
+        </button> -->
+
+        <div class="temporary-tips">
+          <svg class="icon warnning-icon" aria-hidden="true">
+            <use xlink:href="#icon-error"></use>
+          </svg>
+          <span
+            >You can close your positions and withdraw assets from
+
+            <a href="https://lp-refund-test.netlify.app/#/" target="_blank">here</a>
+          </span>
+        </div>
         <div v-if="wallet.connected" class="refresh-box pc-refresh-box">
           <!-- <div class="refresh">
             <svg class="icon" aria-hidden="true" @click="refresh">
@@ -33,6 +41,16 @@
           <RefreshIcon :loading="liquidity.myPositionLoading" @refresh="refresh"></RefreshIcon>
         </div>
       </div>
+    </div>
+    <div class="h5-temporary-tips">
+      <svg class="icon warnning-icon" aria-hidden="true">
+        <use xlink:href="#icon-error"></use>
+      </svg>
+      <span
+        >You can close your positions and withdraw assets from
+
+        <a href="https://lp-refund-test.netlify.app/#/" target="_blank">here</a>
+      </span>
     </div>
 
     <div v-if="wallet.connected && list.length > 0" class="position-list">
@@ -174,6 +192,29 @@ export default Vue.extend({
       .go-back {
         display: none;
       }
+
+      .temporary-tips {
+        display: flex;
+        align-items: center;
+        svg {
+          width: 12px;
+          height: 12px;
+          fill: rgba(255, 255, 255, 0.5);
+        }
+        span {
+          font-size: 14px;
+          color: #b5b8c2;
+          margin-left: 8px;
+        }
+        a {
+          font-size: 14px;
+          color: #07ebad;
+          margin-left: 4px;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
       .refresh-box {
         // width: 32px;
         // height: 32px;
@@ -197,6 +238,10 @@ export default Vue.extend({
       }
     }
   }
+  .h5-temporary-tips {
+    display: none;
+  }
+
   .h5-btn-list {
     display: none;
   }
@@ -257,8 +302,36 @@ export default Vue.extend({
           font-size: 14px;
           color: rgba(255, 255, 255, 0.5);
         }
+        .temporary-tips {
+          display: none;
+        }
       }
     }
+
+    .h5-temporary-tips {
+      display: flex;
+      // align-items: center;
+      margin-top: 20px;
+      svg {
+        width: 20px;
+        height: 20px;
+        fill: rgba(255, 255, 255, 0.5);
+      }
+      span {
+        font-size: 14px;
+        color: #b5b8c2;
+        margin-left: 8px;
+      }
+      a {
+        font-size: 14px;
+        color: #07ebad;
+        margin-left: 4px;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
     .h5-btn-list {
       display: flex;
       align-items: center;

@@ -1,5 +1,5 @@
 <template>
-  <div class="position-block" @click="gotoDetail(pItem)">
+  <div class="position-block" :class="pItem.isEnded ? 'not-allowed' : ''" @click="gotoDetail(pItem)">
     <div class="left">
       <div class="pos-info">
         <div class="icon-box">
@@ -91,6 +91,7 @@ export default Vue.extend({
       console.log('positionBlock###pItemWatch####value####', value)
     },
     gotoDetail(item: any) {
+      if (item.isEnded) return
       this.$accessor.liquidity.setCurrentPositon(null)
       this.$router.push(`/detail/${item.nftTokenId}`)
     },
@@ -129,6 +130,12 @@ export default Vue.extend({
   padding-right: 40px;
   cursor: pointer;
   margin-top: 12px;
+  &.not-allowed {
+    cursor: not-allowed;
+    &:hover {
+      background: linear-gradient(214deg, #3e434e 0%, #2c303b 100%);
+    }
+  }
   &:hover {
     background: #393e48;
     > .left .pos-info .icon-box .coin-after-box {
@@ -270,7 +277,8 @@ export default Vue.extend({
 }
 @media screen and (max-width: 750px) {
   .pc-right {
-    width: 160px;
+    // width: 160px;
+    width: 100%;
     margin: 20px auto 0;
     // display: none;
   }

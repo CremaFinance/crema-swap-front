@@ -1,6 +1,6 @@
 import { getterTree, mutationTree, actionTree } from 'typed-vuex'
 import { getQuarries, fetchMiners, fetchWrappers, fetchCremaSwaps, fetchStakedPositions, fetchSwapPositionsByOwner, fetchMergeMiner } from '@/contract/farmingv2'
-import { tick2UiPrice, lamportPrice2uiPrice, calculateTokenAmount } from 'test-crema-sdk'
+import { tick2UiPrice, lamportPrice2uiPrice, calculateTokenAmount } from '@cremafinance/crema-sdk'
 import { PublicKey } from '@solana/web3.js'
 import Decimal from 'decimal.js'
 import { decimalFormat, addCommom, fixD } from '@/utils'

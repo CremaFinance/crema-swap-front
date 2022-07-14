@@ -1,6 +1,7 @@
 <template>
   <div class="header-container">
     <NetworkWarnning v-if="$accessor.showNetWorkWarnning" @close="closeNetworkWarning"></NetworkWarnning>
+    <TemporaryTip />
     <div class="header-content-container">
       <div class="header-content">
         <a class="logo" href="https://www.crema.finance/" target="_blank">
@@ -93,10 +94,12 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 import Contactus from './contactus.vue'
 import { checkNullObj } from '@/utils'
+import TemporaryTip from './temporaryTip.vue'
 
 export default Vue.extend({
   components: {
-    Contactus
+    Contactus,
+    TemporaryTip
   },
   data() {
     return {

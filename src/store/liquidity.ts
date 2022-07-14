@@ -8,7 +8,7 @@ import BigNumber from 'bignumber.js'
 import { fetchSwapPositions } from '@/contract/farming'
 import { getprice } from '@/utils/stake'
 import { fetchSwapPairs, loadSwapPair } from '@/contract/pool'
-import { lamportPrice2uiPrice, calculateTokenAmount, tick2UiPrice } from 'test-crema-sdk'
+import { lamportPrice2uiPrice, calculateTokenAmount, tick2UiPrice } from '@cremafinance/crema-sdk'
 
 // const AUTO_REFRESH_TIME = 60
 const AUTO_REFRESH_TIME = 60
@@ -172,13 +172,16 @@ export const actions = actionTree(
             // )
             const minPrice = tick2UiPrice(item.lowerTick, citem.token_a.decimal, citem.token_b.decimal)
             const maxPrice = tick2UiPrice(item.upperTick, citem.token_a.decimal, citem.token_b.decimal)
+            console.log('这里####poolsList[i]###', poolsList[i])
+            console.log('这里####item###', item)
             list.push({
               ...poolsList[i],
               ...item,
               minPrice: fixD(minPrice.toString(), 12),
               maxPrice: fixD(maxPrice.toString(), 12),
               nftTokenAccount: tokenAccounts[item.nftTokenId.toBase58()].tokenAccountAddress,
-              nftTokenMint: item.nftTokenId.toBase58()
+              nftTokenMint: item.nftTokenId.toBase58(),
+              isEnded: poolsList[i] && (poolsList[i].name !== 'CRM-USDC')
             })
           }
         }

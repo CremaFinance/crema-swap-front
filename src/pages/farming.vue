@@ -105,7 +105,7 @@ import Vue from 'vue'
 import { Spin, Select } from 'ant-design-vue'
 import { mapState } from 'vuex'
 import { fixD, addCommom, decimalFormat, checkNullObj } from '@/utils'
-import { tick2Price } from 'test-crema-sdk'
+import { tick2Price } from '@cremafinance/crema-sdk'
 const Option = Select.Option
 Vue.use(Option)
 export default Vue.extend({
