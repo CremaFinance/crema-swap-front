@@ -1,9 +1,12 @@
 <template>
-  <div class="deta-block-status-box" :class="currentStatus === 'Inactive' ? 'deta-block-status-box-disable' : ''">
+  <div
+    class="deta-block-status-box"
+    :class="currentStatus === 'Inactive' || pItem.isEnded ? 'deta-block-status-box-disable' : ''"
+  >
     <div class="deta-block-status-bottom-box">
       <div class="deta-block-status-bottom"></div>
     </div>
-    <div class="deta-block-status">
+    <div v-if="!pItem.isEnded" class="deta-block-status">
       <div v-if="currentStatus === 'Closed'">
         <span>Closed</span>
       </div>
@@ -18,7 +21,13 @@
         <span>{{ currentStatus }}</span>
       </div>
     </div>
-    <div class="active-tooltip">
+    <div v-else class="deta-block-status">
+      <div class="ended-status">
+        <i class="circle"></i>
+        <span>Ended</span>
+      </div>
+    </div>
+    <div class="active-tooltip" v-if="!pItem.isEnded">
       {{
         currentStatus === 'Active'
           ? 'The price of this pool is currently within your position price range.'
@@ -134,6 +143,11 @@ export default Vue.extend({
       background: #00ff4d;
       border-radius: 50%;
     }
+    .ended-status {
+      .circle {
+        background: #666;
+      }
+    }
     svg {
       width: 20px;
       height: 20px;
@@ -179,6 +193,22 @@ export default Vue.extend({
       input {
         width: 100px;
       }
+    }
+  }
+  .deta-block-status-box {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 20px;
+    .deta-block-status-bottom-box {
+      left: 0px;
+      .deta-block-status-bottom {
+        width: 100%;
+      }
+    }
+    .address {
+      margin: 0px;
     }
   }
 }

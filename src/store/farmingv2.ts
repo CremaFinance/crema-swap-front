@@ -1,6 +1,6 @@
 import { getterTree, mutationTree, actionTree } from 'typed-vuex'
 import { getQuarries, fetchMiners, fetchWrappers, fetchCremaSwaps, fetchStakedPositions, fetchSwapPositionsByOwner, fetchMergeMiner } from '@/contract/farmingv2'
-import { tick2UiPrice, lamportPrice2uiPrice, calculateTokenAmount } from 'test-crema-sdk'
+import { tick2UiPrice, lamportPrice2uiPrice, calculateTokenAmount } from '@cremafinance/crema-sdk'
 import { PublicKey } from '@solana/web3.js'
 import Decimal from 'decimal.js'
 import { decimalFormat, addCommom, fixD } from '@/utils'
@@ -379,7 +379,7 @@ export const actions = actionTree(
         aprAndTvl.forEach((item: any) => {
           result[item.merge_pool] = {
             ...item,
-            aprView: Number(item.apr) > 10000 ? Infinity : `${fixD(item.apr, 2)}%`,
+            aprView: Number(item.apr) > 10000 ? Infinity : (Number(item.apr) < 0.001 ? '0%' : `${fixD(item.apr, 2)}%`),
             tvlView: Number(item.tvl) ? `$ ${addCommom(item.tvl, 2)}` : '--',
           }
         })

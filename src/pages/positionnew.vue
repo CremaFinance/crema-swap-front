@@ -14,10 +14,7 @@
         >Your Positions
         <span>{{ list.length > 0 ? `( ${list.length} )` : '' }}</span>
       </span>
-      <span v-else
-        >Your Positions
-        <span>(0)</span>
-      </span>
+      <span v-else>Your Positions </span>
       <div class="btn-list">
         <button>
           <div @click="gotoPool">

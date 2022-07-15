@@ -1,4 +1,4 @@
-import { TokenSwap } from 'test-crema-sdk'
+import { TokenSwap } from '@cremafinance/crema-sdk'
 import { SolanaProvider, Provider } from '@saberhq/solana-contrib'
 import { Connection, PublicKey } from '@solana/web3.js'
 import { SWAPV3_PROGRAMID } from '@/utils/ids'

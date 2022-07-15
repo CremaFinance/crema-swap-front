@@ -117,7 +117,9 @@
           <Button
             v-else
             class="add-liquidity-btn"
-            :disabled="!poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance"
+            :disabled="
+              true || !poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance
+            "
             :loading="suppling"
             @click="openAddLiquiditySecondConfirm"
           >
@@ -333,7 +335,9 @@
           <Button
             v-else
             class="add-liquidity-btn"
-            :disabled="!poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance"
+            :disabled="
+              true || !poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance
+            "
             :loading="suppling"
             @click="openAddLiquiditySecondConfirm"
           >
@@ -380,10 +384,8 @@ import {
   price2Tick,
   calculateLiquityOnlyA,
   calculateLiquityOnlyB,
-  calculateLiquity,
-  uiPrice2LamportPrice,
-  lamportPrice2uiPrice
-} from 'test-crema-sdk'
+  calculateLiquity
+} from '@cremafinance/crema-sdk'
 import Decimal from 'decimal.js'
 import { getATAAddress } from '@saberhq/token-utils'
 import { BroadcastOptions } from '@saberhq/solana-contrib'

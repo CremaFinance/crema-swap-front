@@ -45,7 +45,7 @@ import { fixD, addCommom, decimalFormat } from '@/utils'
 import { fetchMergePools, calculateWrapAmount, fetchMergeMiner } from '@/contract/farmingv2'
 import { deposit } from '@/utils/stake'
 import { publicKey } from '@project-serum/anchor/dist/cjs/utils'
-import { tick2UiPrice } from 'test-crema-sdk'
+import { tick2UiPrice } from '@cremafinance/crema-sdk'
 import Decimal from 'decimal.js'
 import { program } from '@project-serum/anchor/dist/cjs/spl/token'
 import BN from 'bn.js';

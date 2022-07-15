@@ -38,15 +38,24 @@
                     </div>
                     <div class="symbol-name">{{ pItem.tokenA }} - {{ pItem.tokenB }}</div>
                   </div>
-                  <Button class="add-liquidity" @click="gotoPool(pItem)">
-                    <span>Add Liquidity</span>
+                  <template v-if="pItem.name === 'CRM-USDC'">
+                    <Button class="add-liquidity">
+                      <span>Add Liquidity</span>
+                    </Button>
+                    <div class="text-tips">Under upgrade</div>
+                  </template>
+                  <Button v-else class="add-liquidity add-liquidity-disabled">
+                    <span>Ended</span>
                   </Button>
+                  <!-- <Button class="add-liquidity" @click="gotoPool(pItem)">
+                    <span>Add Liquidity</span>
+                  </Button> -->
                 </div>
-                <div class="total-deposits">
+                <div class="total-deposits" v-if="pItem.name === 'CRM-USDC'">
                   <div class="leabl">Total Deposits</div>
                   <div class="text">${{ pItem && pItem.tvl_in_usd && thousands(pItem.tvl_in_usd) }}</div>
                 </div>
-                <div class="volume-24h">
+                <div class="volume-24h" v-if="pItem.name === 'CRM-USDC'">
                   <div class="leabl">Volume (24H)</div>
                   <div class="text">${{ pItem && pItem.vol_in_usd_24h && thousands(pItem.vol_in_usd_24h) }}</div>
                 </div>
@@ -112,7 +121,7 @@ import BigNumber from 'bignumber.js'
 import { RATES } from '@/utils/tokens'
 import { getprice } from '@/utils/stake'
 import { Spin } from 'ant-design-vue'
-import { lamportPrice2uiPrice, tick2Price, calculateTokenAmount, tick2UiPrice } from 'test-crema-sdk'
+import { calculateTokenAmount } from '@cremafinance/crema-sdk'
 export default Vue.extend({
   components: {
     Spin
@@ -213,7 +222,8 @@ export default Vue.extend({
     },
     gotoDetail(item: any) {
       this.$accessor.liquidity.setCurrentPositon(null)
-      this.$router.push(`/detail/${item.nftTokenId}`)
+      // this.$router.push(`/detail/${item.nftTokenId}`)
+      this.$router.push('/position')
     },
     watchPoolsDefaultPriceRangeObj(info) {
       this.poolsDefaultPriceRangeObj = info
@@ -242,7 +252,8 @@ export default Vue.extend({
             name: ele.name,
             tvl_in_usd: fixD(result && result.tvl_in_usd, 2),
             vol_in_usd_24h: fixD(result && result.vol_in_usd_24h, 2),
-            ...this.myPosition[ele.name]
+            ...this.myPosition[ele.name],
+            sort: ele.name == 'CRM-USDC' ? 1 : -1
             // amount_usd,
           })
         })
@@ -251,9 +262,17 @@ export default Vue.extend({
         //   return a.tvl_in_usd - b.tvl_in_usd
         // })
         console.log(tepList, 'tepList##')
-        this.list = tepList.sort((a, b) => {
-          return b.tvl_in_usd - a.tvl_in_usd
-        })
+
+        // this.list = tepList.sort((a, b) => {
+        //   return b.tvl_in_usd - a.tvl_in_usd
+        // })
+        this.list = tepList
+          .sort((a, b) => {
+            return b.tvl_in_usd - a.tvl_in_usd
+          })
+          .sort((a, b) => {
+            return b.sort - a.sort
+          })
       }
     },
     watchInputValue(value) {
@@ -414,6 +433,7 @@ export default Vue.extend({
           .positon-item {
             width: 260px;
             height: 100%;
+            min-height: 385px;
             border-radius: 180px;
             position: relative;
             z-index: 5;
@@ -499,9 +519,12 @@ export default Vue.extend({
                 background: linear-gradient(90deg, rgba(183, 98, 255, 1), rgba(93, 193, 221, 1));
                 padding: 2px;
                 &:hover {
-                  background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
-                  span {
-                    background: transparent;
+                  // background: linear-gradient(233deg, #5fe6d0 0%, #596cff 38%, #9380ff 72%, #e590ff 100%);
+                  // span {
+                  //   background: transparent;
+                  // }
+                  & + .text-tips {
+                    display: block;
                   }
                 }
                 span {
@@ -516,6 +539,26 @@ export default Vue.extend({
                   font-weight: normal;
                   color: #fff;
                 }
+              }
+              .add-liquidity-disabled {
+                background: #5d626d !important;
+                color: rgba(#fff, 0.5);
+                span {
+                  background: #5d626d !important;
+                  color: rgba(#fff, 0.5);
+                }
+                &:hover {
+                  background: #5d626d !important;
+                }
+              }
+              .text-tips {
+                position: absolute;
+                bottom: 30px;
+                text-align: center;
+                padding: 5px 10px;
+                background: linear-gradient(214deg, #3e434e 0%, #23262b 100%);
+                border-radius: 10px;
+                display: none;
               }
             }
             .total-deposits,

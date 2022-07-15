@@ -49,10 +49,26 @@
           <StatusBlock :current-status="currentData.currentStatus" />
         </div>
         <div class="right">
-          <button v-if="poolInfo" class="remove-btn" :disabled="!wallet.connected" @click="gotoRemove">Remove</button>
-          <button v-if="poolInfo" class="increase-btn" :disabled="!wallet.connected" @click="gotoIncrease">
-            Increase
-          </button>
+          <Tooltip overlay-class-name="temporary-tooltip" placement="top">
+            <div>
+              <button v-if="poolInfo" class="remove-btn" :disabled="!wallet.connected || true" @click="gotoRemove">
+                Remove
+              </button>
+            </div>
+            <template slot="title">
+              <div>Under upgrade</div>
+            </template>
+          </Tooltip>
+          <Tooltip overlay-class-name="temporary-tooltip" placement="top">
+            <div>
+              <button v-if="poolInfo" class="increase-btn" :disabled="!wallet.connected || true" @click="gotoIncrease">
+                Increase
+              </button>
+            </div>
+            <template slot="title">
+              <div>Under upgrade</div>
+            </template>
+          </Tooltip>
         </div>
       </div>
     </Skeleton>
@@ -185,18 +201,18 @@ import { claim, removeLiquidity } from '@/utils/liquidity'
 import importIcon from '@/utils/import-icon'
 import { PublicKey, Connection } from '@solana/web3.js'
 import Decimal from 'decimal.js'
-import { TokenSwap as TokenSwapNew } from 'test-crema-sdk'
 import { getATAAddress } from '@saberhq/token-utils'
 import { BroadcastOptions, SolanaProvider } from '@saberhq/solana-contrib'
 import type { Provider } from '@saberhq/solana-contrib'
 import mixin from '@/mixin/position'
 import { loadSwapPair } from '@/contract/pool'
-import { Skeleton, Spin } from 'ant-design-vue'
+import { Skeleton, Spin, Tooltip } from 'ant-design-vue'
 
 export default Vue.extend({
   components: {
     Skeleton,
-    Spin
+    Spin,
+    Tooltip
   },
   mixins: [mixin],
   data() {
@@ -489,6 +505,13 @@ export default Vue.extend({
           background: linear-gradient(270deg, #5fe6d0 0%, #60b2f1 33%, #9380ff 68%, #e590ff 100%);
           &:hover {
             background: linear-gradient(268deg, #74ffe8 0%, #7592ff 39%, #a08fff 74%, #e89aff 100%);
+          }
+        }
+        &:disabled {
+          background: rgba(255, 255, 255, 0.1);
+          cursor: not-allowed;
+          &:hover {
+            background: rgba(255, 255, 255, 0.1);
           }
         }
       }

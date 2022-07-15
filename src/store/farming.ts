@@ -8,7 +8,7 @@ import {
   fetchCremaSwaps
 } from '@/contract/farming'
 import { PublicKey } from '@solana/web3.js'
-import { calculateTokenAmount, tick2Price, tick2UiPrice, lamportPrice2uiPrice } from 'test-crema-sdk'
+import { calculateTokenAmount, tick2Price, tick2UiPrice, lamportPrice2uiPrice } from '@cremafinance/crema-sdk'
 import Decimal from 'decimal.js'
 import { TOKENS } from '@/utils/tokens'
 import { decimalFormat, addCommom } from '@/utils'

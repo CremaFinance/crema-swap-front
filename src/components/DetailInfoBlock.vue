@@ -3,16 +3,26 @@
     <Skeleton :loading="!poolInfo" active>
       <div class="title">
         <h3>{{ title }}</h3>
-        <button
-          v-if="title !== 'Liquidity'"
-          :disabled="
-            isLoading || !wallet.connected || !(Number(currentData.tokenaFee) || Number(currentData.tokenbFee))
-          "
-          :loading="isLoading"
-          @click="toClaim"
-        >
-          Claim
-        </button>
+        <Tooltip overlay-class-name="temporary-tooltip" placement="top">
+          <div>
+            <button
+              v-if="title !== 'Liquidity'"
+              :disabled="
+                true ||
+                isLoading ||
+                !wallet.connected ||
+                !(Number(currentData.tokenaFee) || Number(currentData.tokenbFee))
+              "
+              :loading="isLoading"
+              @click="toClaim"
+            >
+              Claim
+            </button>
+          </div>
+          <template slot="title">
+            <div>Under upgrade</div>
+          </template>
+        </Tooltip>
       </div>
 
       <div class="rates">
@@ -58,11 +68,12 @@ import Vue from 'vue'
 import importIcon from '@/utils/import-icon'
 import { mapState } from 'vuex'
 import { decimalFormat } from '@/utils/index'
-import { Skeleton } from 'ant-design-vue'
+import { Skeleton, Tooltip } from 'ant-design-vue'
 
 export default Vue.extend({
   components: {
-    Skeleton
+    Skeleton,
+    Tooltip
   },
   props: {
     currentData: {

@@ -2,7 +2,7 @@ import { Vue } from 'nuxt-property-decorator'
 import { mapState } from 'vuex'
 import { checkNullObj } from '@/utils'
 import { loadSwapPair } from '@/contract/pool'
-import { lamportPrice2uiPrice } from 'test-crema-sdk'
+import { lamportPrice2uiPrice } from '@cremafinance/crema-sdk'
 
 export default Vue.extend({
   data() {

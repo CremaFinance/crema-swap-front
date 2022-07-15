@@ -285,6 +285,18 @@ html {
   }
 }
 
+.temporary-tooltip {
+  .ant-tooltip-inner {
+    background: rgba(#000, 0.2) !important;
+    backdrop-filter: blur(10px);
+  }
+  .ant-tooltip-arrow {
+    &::before {
+      background: rgba(#000, 0) !important;
+    }
+  }
+}
+
 @media screen and (max-width: 750px) {
   .have-min-width {
     min-width: 100%;

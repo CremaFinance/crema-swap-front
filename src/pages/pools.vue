@@ -20,7 +20,48 @@
             </svg>
           </Button>
         </div>
-        <div class="total-val">
+        <div class="filter">
+          <div v-if="!value" class="coin-tab">
+            <!-- <span  :class="direct ? 'active' : ''" @click="changeDirect(true, 'USD')">USD</span>
+          <span :class="direct ? 'active' : ''" @click="changeDirect(true, 'USD')">USD</span>
+          <span :class="!direct ? 'active' : ''" @click="changeDirect(false, 'SOL')">SOL</span> -->
+            <span
+              v-for="item in coinList"
+              :key="item"
+              :class="item == selectCoin ? 'active' : ''"
+              @click="changeDirect(true, item)"
+            >
+              {{ item }}
+            </span>
+            <!-- <div class="check-content" v-for="(item, index) in coinList" :key="index" @click="selectCoin = item">
+            <div class="check-box">
+              <div v-show="selectCoin == item" class="check-box-active"></div>
+            </div>
+            <div class="check-name">{{ item }}</div>
+          </div> -->
+          </div>
+          <div class="search-symbol">
+            <input
+              type="text"
+              :value="value"
+              autocomplete="off"
+              autocorrect="off"
+              placeholder="Search by symbol"
+              minlength="1"
+              maxlength="79"
+              spellcheck="false"
+              oninput="this.value=this.value.replace(/[^a-zA-Z]/g,'')"
+              @input="handleInput"
+            />
+            <svg v-if="!value" class="icon" aria-hidden="true">
+              <use xlink:href="#icon-a-bianzu30"></use>
+            </svg>
+            <svg v-else class="icon" aria-hidden="true" @click="value = ''">
+              <use xlink:href="#icon-a-icon_Shutdownbeifen"></use>
+            </svg>
+          </div>
+        </div>
+        <!-- <div class="total-val">
           <div class="total-value-locked">
             <div class="label">Total Value Locked</div>
             <div class="text">
@@ -35,48 +76,7 @@
               ${{ statisticsInfo && thousands(fixD(statisticsInfo.vol_in_usd_24h, 2)) }}
             </div>
           </div>
-        </div>
-      </div>
-      <div class="filter">
-        <div v-if="!value" class="coin-tab">
-          <!-- <span  :class="direct ? 'active' : ''" @click="changeDirect(true, 'USD')">USD</span>
-          <span :class="direct ? 'active' : ''" @click="changeDirect(true, 'USD')">USD</span>
-          <span :class="!direct ? 'active' : ''" @click="changeDirect(false, 'SOL')">SOL</span> -->
-          <span
-            v-for="item in coinList"
-            :key="item"
-            :class="item == selectCoin ? 'active' : ''"
-            @click="changeDirect(true, item)"
-          >
-            {{ item }}
-          </span>
-          <!-- <div class="check-content" v-for="(item, index) in coinList" :key="index" @click="selectCoin = item">
-            <div class="check-box">
-              <div v-show="selectCoin == item" class="check-box-active"></div>
-            </div>
-            <div class="check-name">{{ item }}</div>
-          </div> -->
-        </div>
-        <div class="search-symbol">
-          <input
-            type="text"
-            :value="value"
-            autocomplete="off"
-            autocorrect="off"
-            placeholder="Search by symbol"
-            minlength="1"
-            maxlength="79"
-            spellcheck="false"
-            oninput="this.value=this.value.replace(/[^a-zA-Z]/g,'')"
-            @input="handleInput"
-          />
-          <svg v-if="!value" class="icon" aria-hidden="true">
-            <use xlink:href="#icon-a-bianzu30"></use>
-          </svg>
-          <svg v-else class="icon" aria-hidden="true" @click="value = ''">
-            <use xlink:href="#icon-a-icon_Shutdownbeifen"></use>
-          </svg>
-        </div>
+        </div> -->
       </div>
     </div>
     <!-- 轮播图形式 -->
@@ -496,6 +496,9 @@ export default Vue.extend({
       }
     }
   }
+  .positon-container .positon-center .my-pisiton {
+    margin-top: 10px;
+  }
   .positon-container .positon-center .my-pisiton .my-pisiton-box {
     display: none;
   }
@@ -510,6 +513,9 @@ export default Vue.extend({
   }
   .positon-container .positon-center .filter {
     display: block;
+    align-items: center;
+    width: 100%;
+    margin-top: 0px;
     .search-symbol {
       margin-left: 0;
       input {

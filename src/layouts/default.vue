@@ -141,8 +141,8 @@ export default Vue.extend({
 .body-container {
   width: 100%;
   min-height: 100vh;
-  // padding-top: 200px;
-  padding-top: 100px;
+  // padding-top: 100px;
+  padding-top: 154px;
   padding-bottom: 40px;
   position: relative;
   z-index: 20;
@@ -154,9 +154,9 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 1366px) {
-  .body-container {
-    padding-top: 120px;
-  }
+  // .body-container {
+  // padding-top: 120px;
+  // }
 }
 .h5-header-container {
   display: none;

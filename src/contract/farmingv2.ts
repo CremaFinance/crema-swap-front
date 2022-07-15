@@ -13,7 +13,7 @@ import { web3Config } from '@/utils/web3'
 import { currentTs } from './utils'
 
 export function loadProvider(wallet: any): Provider {
-  const localRpc = window.localStorage.getItem('c-current-rpc')
+  const localRpc = window.localStorage.getItem('pro-current-rpc')
   let url: string
   if (localRpc) {
     url = localRpc
@@ -38,7 +38,7 @@ export function loadProvider(wallet: any): Provider {
 }
 
 export function makeSDK(wallet: any): QuarrySDK {
-  const localRpc = window.localStorage.getItem('c-current-rpc')
+  const localRpc = window.localStorage.getItem('pro-current-rpc')
   let url: string
   if (localRpc) {
     url = localRpc

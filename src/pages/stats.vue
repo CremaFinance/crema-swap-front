@@ -93,7 +93,11 @@
               }}</i
             >-->
           </td>
-          <td class="fee-bot">$ {{ addCommom(item.tvl_in_usd, 2) }}</td>
+          <td class="fee-bot">
+            $ {{ addCommom(item.tvl_in_usd, 2) }}
+
+            <!-- {{ item.name === 'CRM-USDC' ? `$ ${addCommom(item.tvl_in_usd, 2)}` : '- -' }} -->
+          </td>
           <td>$ {{ addCommom(item.vol_in_usd_24h, 2) }}</td>
           <!-- <td>{{ item.apr }}</td> -->
           <td>
@@ -124,10 +128,20 @@
             </Tooltip>
           </td>
           <td>
-            <span>{{
-              item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : ''
+            <!-- <span>{{
+              item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : '- -'
             }}</span>
-            <Button class="deposit-btn" @click="gotoLp(item)">Deposit</Button>
+            <Button class="deposit-btn" @click="gotoLp(item)">Deposit</Button> -->
+            <div class="deposit-btn-box">
+              <span v-if="item.name === 'CRM-USDC'">- -</span>
+              <Tooltip v-if="item.name === 'CRM-USDC'" overlay-class-name="temporary-tooltip" placement="top">
+                <div><Button class="deposit-btn" disabled @click="gotoLp(item)">Deposit</Button></div>
+                <template slot="title">
+                  <div>Under upgrade</div>
+                </template>
+              </Tooltip>
+              <span v-else class="ended">Ended</span>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -231,6 +245,8 @@
         <div class="block">
           <div class="left">
             <h3>TVL</h3>
+            <!-- <p v-if="item.name === 'CRM-USDC'">$ {{ addCommom(item.tvl_in_usd, 2) }}</p>
+            <p v-else>- -</p> -->
             <p>$ {{ addCommom(item.tvl_in_usd, 2) }}</p>
           </div>
           <div class="right">
@@ -240,14 +256,23 @@
           <div class="right">
             <h3>Recommend Range</h3>
             <p>
-              {{ item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : '' }}
+              <!-- {{
+                item.price_interval ? item.price_interval.lower_price + ' - ' + item.price_interval.upper_price : '- -'
+              }} -->
+              --
             </p>
           </div>
         </div>
         <div v-if="item.isShowPop" class="top-title">
           Estimated based on trading activity in the past 7D plus farming rewards.
         </div>
-        <Button class="deposit-btn-h5" @click="gotoLp(item)">Deposit</Button>
+        <Tooltip v-if="item.name === 'CRM-USDC'" overlay-class-name="temporary-tooltip" placement="top">
+          <div><Button class="deposit-btn-h5" disabled @click="gotoLp(item)">Deposit</Button></div>
+          <template slot="title">
+            <div>Under upgrade</div>
+          </template>
+        </Tooltip>
+        <div v-else class="ended">Ended</div>
       </li>
     </ul>
     <div class="page-table-h5">
@@ -547,7 +572,7 @@ export default Vue.extend({
         if (total > 10000) {
           return 'Infinity'
         } else {
-          return `${fixD(String(total), 2)}%`
+          return total ? `${fixD(String(total), 2)}%` : '0%'
         }
       } else {
         return item.apr
@@ -1019,6 +1044,15 @@ export default Vue.extend({
           border-radius: 10px;
         }
       }
+      .deposit-btn-box {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        .ended {
+          color: rgba(255, 255, 255, 0.5);
+          margin-left: 12px;
+        }
+      }
       .deposit-btn {
         width: 68px;
         height: 28px;
@@ -1035,6 +1069,14 @@ export default Vue.extend({
           border: 1px solid rgba(255, 255, 255, 0.4);
           // border-image: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58)) 1 1;
           color: #fff;
+        }
+        &:disabled {
+          cursor: not-allowed;
+          color: rgba(255, 255, 255, 0.5);
+          &:hover {
+            background: linear-gradient(270deg, #3e434e 0%, #333740 100%);
+            border: none;
+          }
         }
       }
     }
@@ -1374,6 +1416,13 @@ export default Vue.extend({
           margin-left: 8px;
           padding: 0 2px;
         }
+        .ended {
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255, 255, 255, 0.5);
+        }
         .deposit-btn-h5 {
           width: 100%;
           height: 30px;
@@ -1391,6 +1440,14 @@ export default Vue.extend({
             border: 1px solid rgba(255, 255, 255, 0.4);
             // border-image: linear-gradient(180deg, rgba(232, 228, 255, 1), rgba(0, 143, 232, 0.58)) 1 1;
             color: #fff;
+          }
+          &:disabled {
+            color: rgba(255, 255, 255, 0.5);
+            &:hover {
+              color: rgba(255, 255, 255, 0.5);
+              background: linear-gradient(270deg, #3e434e 0%, #333740 100%);
+              border: none;
+            }
           }
         }
       }

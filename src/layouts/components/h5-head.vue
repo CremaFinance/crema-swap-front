@@ -1,6 +1,7 @@
 <template>
   <div class="h5-head-container">
     <NetworkWarnning v-if="$accessor.showNetWorkWarnning" @close="closeNetworkWarning"></NetworkWarnning>
+    <TemporaryTip />
     <div class="h5-head-content">
       <div class="top">
         <div class="left">
@@ -142,8 +143,12 @@
   </div>
 </template>
 <script>
+import TemporaryTip from './temporaryTip.vue'
 export default {
   name: 'H5Header',
+  components: {
+    TemporaryTip
+  },
   data() {
     return {
       showMenu: false,
