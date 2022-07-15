@@ -47,7 +47,7 @@
         <use xlink:href="#icon-error"></use>
       </svg>
       <span
-        >You can close your positions and withdraw assets from
+        >You can close your ended positions and withdraw assets from here
 
         <a href="https://lp-refund-test.netlify.app/#/" target="_blank">here</a>
       </span>
