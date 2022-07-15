@@ -222,7 +222,8 @@ export default Vue.extend({
     },
     gotoDetail(item: any) {
       this.$accessor.liquidity.setCurrentPositon(null)
-      this.$router.push(`/detail/${item.nftTokenId}`)
+      // this.$router.push(`/detail/${item.nftTokenId}`)
+      this.$router.push('/position')
     },
     watchPoolsDefaultPriceRangeObj(info) {
       this.poolsDefaultPriceRangeObj = info
