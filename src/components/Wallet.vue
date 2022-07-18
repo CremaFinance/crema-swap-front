@@ -186,13 +186,13 @@ export default class Wallet extends Vue {
         return new SlopeWalletAdapter()
       }
     },
-    // BitKeep: {
-    //   website: 'https://bitkeep.com',
-    //   chromeUrl: 'https://chrome.google.com/webstore/detail/bitkeep-bitcoin-crypto-wa/jiidiaalihmmhddjgbnbgdfflelocpak',
-    //   getAdapter() {
-    //     return new BitKeepWalletAdapter()
-    //   }
-    // },
+    BitKeep: {
+      website: 'https://bitkeep.com',
+      chromeUrl: 'https://chrome.google.com/webstore/detail/bitkeep-bitcoin-crypto-wa/jiidiaalihmmhddjgbnbgdfflelocpak',
+      getAdapter() {
+        return new BitKeepWalletAdapter()
+      }
+    },
     'Solflare Extension': {
       website: 'https://solflare.com',
       firefoxUrl: 'https://addons.mozilla.org/en-US/firefox/addon/solflare-wallet',
