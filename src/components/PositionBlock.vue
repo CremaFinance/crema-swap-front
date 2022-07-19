@@ -93,7 +93,7 @@ export default Vue.extend({
     gotoDetail(item: any) {
       if (item.isEnded) return
       this.$accessor.liquidity.setCurrentPositon(null)
-      this.$router.push(`/detail/${item.nftTokenId}`)
+      this.$router.push(`/detail?id=${item.nftTokenId}`)
     },
     getCurrentStatus(pItem: any) {
       if (!pItem.liquity || pItem.liquity.toString() == '0') {

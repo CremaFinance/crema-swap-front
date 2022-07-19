@@ -134,12 +134,13 @@
             <Button class="deposit-btn" @click="gotoLp(item)">Deposit</Button> -->
             <div class="deposit-btn-box">
               <span v-if="item.name === 'CRM-USDC'">- -</span>
-              <Tooltip v-if="item.name === 'CRM-USDC'" overlay-class-name="temporary-tooltip" placement="top">
+              <!-- <Tooltip v-if="item.name === 'CRM-USDC'" overlay-class-name="temporary-tooltip" placement="top">
                 <div><Button class="deposit-btn" disabled @click="gotoLp(item)">Deposit</Button></div>
                 <template slot="title">
                   <div>Under upgrade</div>
                 </template>
-              </Tooltip>
+              </Tooltip> -->
+              <Button v-if="item.name === 'CRM-USDC'" class="deposit-btn" @click="gotoLp(item)">Deposit</Button>
               <span v-else class="ended">Ended</span>
             </div>
           </td>

@@ -38,24 +38,35 @@
                     </div>
                     <div class="symbol-name">{{ pItem.tokenA }} - {{ pItem.tokenB }}</div>
                   </div>
-                  <template v-if="pItem.name === 'CRM-USDC'">
+                  <!-- <template>
                     <Button class="add-liquidity">
                       <span>Add Liquidity</span>
                     </Button>
                     <div class="text-tips">Under upgrade</div>
-                  </template>
-                  <Button v-else class="add-liquidity add-liquidity-disabled">
+                  </template> -->
+                  <Button v-if="pItem.name !== 'CRM-USDC'" class="add-liquidity add-liquidity-disabled">
                     <span>Ended</span>
+                  </Button>
+                  <Button v-else class="add-liquidity" @click="gotoPool(pItem)">
+                    <span>Add Liquidity</span>
                   </Button>
                   <!-- <Button class="add-liquidity" @click="gotoPool(pItem)">
                     <span>Add Liquidity</span>
                   </Button> -->
                 </div>
-                <div class="total-deposits" v-if="pItem.name === 'CRM-USDC'">
+                <!-- <div class="total-deposits" v-if="pItem.name === 'CRM-USDC'">
                   <div class="leabl">Total Deposits</div>
                   <div class="text">${{ pItem && pItem.tvl_in_usd && thousands(pItem.tvl_in_usd) }}</div>
                 </div>
                 <div class="volume-24h" v-if="pItem.name === 'CRM-USDC'">
+                  <div class="leabl">Volume (24H)</div>
+                  <div class="text">${{ pItem && pItem.vol_in_usd_24h && thousands(pItem.vol_in_usd_24h) }}</div>
+                </div> -->
+                <div class="total-deposits">
+                  <div class="leabl">Total Deposits</div>
+                  <div class="text">${{ pItem && pItem.tvl_in_usd && thousands(pItem.tvl_in_usd) }}</div>
+                </div>
+                <div class="volume-24h">
                   <div class="leabl">Volume (24H)</div>
                   <div class="text">${{ pItem && pItem.vol_in_usd_24h && thousands(pItem.vol_in_usd_24h) }}</div>
                 </div>
@@ -222,8 +233,8 @@ export default Vue.extend({
     },
     gotoDetail(item: any) {
       this.$accessor.liquidity.setCurrentPositon(null)
-      // this.$router.push(`/detail/${item.nftTokenId}`)
-      this.$router.push('/position')
+      this.$router.push(`/detail?id=${item.nftTokenId}`)
+      // this.$router.push('/position')
     },
     watchPoolsDefaultPriceRangeObj(info) {
       this.poolsDefaultPriceRangeObj = info

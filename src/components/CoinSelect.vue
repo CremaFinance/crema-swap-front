@@ -153,6 +153,10 @@ export default Vue.extend({
 
         // tokenInfo.symbol = symbol
 
+        if (tokenInfo.symbol.toUpperCase() !== 'CRM' && tokenInfo.symbol.toUpperCase() !== 'USDC') {
+          tokenInfo.unusable = true
+        }
+
         const tokenAccount = this.wallet.tokenAccounts[tokenInfo.token_mint]
 
         if (tokenAccount) {
@@ -167,19 +171,19 @@ export default Vue.extend({
       const solAccount = this.wallet.tokenAccounts[NATIVE_SOL.mintAddress]
 
       if (solAccount) {
-        nativeSol = { ...nativeSol, ...solAccount }
+        nativeSol = { ...nativeSol, ...solAccount, unusable: true }
       }
 
       hasBalance = hasBalance.sort((a, b) => {
         return b.balance.toEther() - a.balance.toEther()
       })
 
-      if (this.existingCoins !== 'SOL') {
-        tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
-      } else {
-        tokenList = [...hasBalance, ...noBalance]
-      }
-      console.log('solAccount###', solAccount)
+      // if (this.existingCoins !== 'SOL') {
+      //   tokenList = [...[nativeSol], ...hasBalance, ...noBalance]
+      // } else {
+      //   tokenList = [...hasBalance, ...noBalance]
+      // }
+      // console.log('solAccount###', solAccount)
 
       // 暂时没有sol相关交易对，先注释了
       tokenList = [...[nativeSol], ...hasBalance, ...noBalance]

@@ -61,8 +61,8 @@
           class="swap-btn"
           :loading="loading"
           :disabled="
-            true ||
             !poolInfo ||
+            poolInfo.name !== 'CRM-USDC' ||
             insufficientLiquidity ||
             loading ||
             !fromCoin ||
@@ -268,7 +268,7 @@ export default Vue.extend({
           if (this.$route.query.from) {
             this.fromCoin = getTokenBySymbol(newVal, this.$route.query.from)
           } else {
-            this.fromCoin = getTokenBySymbol(newVal, 'usdt')
+            this.fromCoin = getTokenBySymbol(newVal, 'crm')
           }
           if (this.$route.query.to) {
             this.toCoin = getTokenBySymbol(newVal, this.$route.query.to)

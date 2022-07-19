@@ -399,8 +399,8 @@ export default Vue.extend({
       }
     },
     goBackDetail() {
-      const id = this.$route.params.id
-      this.$router.push(`/detail/${id}`)
+      const id = this.$route.query.id
+      this.$router.push(`/detail?id=${id}`)
     },
     watchMyPosions(myPosions: any) {
       // const id = this.$route.params.id
@@ -412,7 +412,7 @@ export default Vue.extend({
       // }
     },
     watchCurrentPositon(currentPositon: any) {
-      const id = this.$route.params.id
+      const id = this.$route.query.id
       if (currentPositon && currentPositon.nftTokenMint === id) {
         this.currentData = currentPositon
         if (!checkNullObj(currentPositon)) {

@@ -118,7 +118,13 @@
             v-else
             class="add-liquidity-btn"
             :disabled="
-              true || !poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance
+              !poolInfo ||
+              poolInfo.name !== 'CRM-USDC' ||
+              suppling ||
+              isDisabled ||
+              noEnterAmount ||
+              invalidPriceRange ||
+              insufficientBalance
             "
             :loading="suppling"
             @click="openAddLiquiditySecondConfirm"
@@ -335,9 +341,7 @@
           <Button
             v-else
             class="add-liquidity-btn"
-            :disabled="
-              true || !poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance
-            "
+            :disabled="!poolInfo || suppling || isDisabled || noEnterAmount || invalidPriceRange || insufficientBalance"
             :loading="suppling"
             @click="openAddLiquiditySecondConfirm"
           >
@@ -675,7 +679,7 @@ export default Vue.extend({
           if (this.$route.query.from) {
             this.fromCoin = getTokenBySymbol(newVal, this.$route.query.from)
           } else {
-            this.fromCoin = getTokenBySymbol(newVal, 'usdt')
+            this.fromCoin = getTokenBySymbol(newVal, 'crm')
           }
           if (this.$route.query.to) {
             this.toCoin = getTokenBySymbol(newVal, this.$route.query.to)

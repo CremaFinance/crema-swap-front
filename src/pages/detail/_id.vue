@@ -49,9 +49,13 @@
           <StatusBlock :current-status="currentData.currentStatus" />
         </div>
         <div class="right">
-          <Tooltip overlay-class-name="temporary-tooltip" placement="top">
+          <Tooltip
+            v-if="poolInfo && poolInfo.name !== 'CRM-USDC'"
+            overlay-class-name="temporary-tooltip"
+            placement="top"
+          >
             <div>
-              <button v-if="poolInfo" class="remove-btn" :disabled="!wallet.connected || true" @click="gotoRemove">
+              <button v-if="poolInfo" class="remove-btn" :disabled="!wallet.connected" @click="gotoRemove">
                 Remove
               </button>
             </div>
@@ -59,9 +63,21 @@
               <div>Under upgrade</div>
             </template>
           </Tooltip>
-          <Tooltip overlay-class-name="temporary-tooltip" placement="top">
+          <button
+            v-if="poolInfo && poolInfo.name === 'CRM-USDC'"
+            class="remove-btn"
+            :disabled="!wallet.connected"
+            @click="gotoRemove"
+          >
+            Remove
+          </button>
+          <Tooltip
+            v-if="poolInfo && poolInfo.name !== 'CRM-USDC'"
+            overlay-class-name="temporary-tooltip"
+            placement="top"
+          >
             <div>
-              <button v-if="poolInfo" class="increase-btn" :disabled="!wallet.connected || true" @click="gotoIncrease">
+              <button v-if="poolInfo" class="increase-btn" :disabled="!wallet.connected" @click="gotoIncrease">
                 Increase
               </button>
             </div>
@@ -69,6 +85,14 @@
               <div>Under upgrade</div>
             </template>
           </Tooltip>
+          <button
+            v-if="poolInfo && poolInfo.name === 'CRM-USDC'"
+            class="increase-btn"
+            :disabled="!wallet.connected"
+            @click="gotoIncrease"
+          >
+            Increase
+          </button>
         </div>
       </div>
     </Skeleton>
@@ -211,8 +235,8 @@ import { Skeleton, Spin, Tooltip } from 'ant-design-vue'
 export default Vue.extend({
   components: {
     Skeleton,
-    Spin,
-    Tooltip
+    Spin
+    // Tooltip
   },
   mixins: [mixin],
   data() {
@@ -287,16 +311,16 @@ export default Vue.extend({
       this.$router.push('/position')
     },
     gotoIncrease() {
-      const id = this.$route.params.id
-      this.$router.push(`/increase/${id}`)
+      const id = this.$route.query.id
+      this.$router.push(`/increase?id=${id}`)
     },
     gotoRemove() {
-      const id = this.$route.params.id
-      this.$router.push(`/remove/${id}`)
+      const id = this.$route.query.id
+      this.$router.push(`/remove?id=${id}`)
     },
     openRemoveLiquidityHint() {
-      const id = this.$route.params.id
-      this.$router.push(`/remove-liquidity/${id}`)
+      const id = this.$route.query.id
+      this.$router.push(`/remove-liquidity?id=${id}`)
       this.showRemoveLiquidityHint = true
     },
     watchMyPosions(myPosions: any) {

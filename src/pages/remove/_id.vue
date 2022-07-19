@@ -66,13 +66,13 @@
           <div class="before-coin">
             <div v-if="poolInfo" class="coin-label">{{ poolInfo.token_a.symbol }} Fees Earned:</div>
             <div class="coin-num">
-              {{ currentData.tokenaFee }}
+              {{ getFeeView(currentData.tokenaFee) }}
             </div>
           </div>
           <div class="before-coin after-coin">
             <div v-if="poolInfo" class="coin-label">{{ poolInfo.token_b.symbol }} Fees Earned :</div>
             <div class="coin-num">
-              {{ currentData.tokenbFee }}
+              {{ getFeeView(currentData.tokenbFee) }}
             </div>
           </div>
         </template>
@@ -166,6 +166,13 @@ export default Vue.extend({
   methods: {
     decimalFormat,
     importIcon,
+    getFeeView(value: any) {
+      if (value) {
+        const v = fixD(value, 9)
+        return Number(v) === 0 ? '0' : v
+      }
+      return '--'
+    },
     gotoPosition() {
       this.$router.push('/position')
     },
@@ -180,7 +187,7 @@ export default Vue.extend({
     },
     watchCurrentPositon(currentPositon: any) {
       console.log('remove##watchCurrentPositon###currentPositon###', currentPositon)
-      const id = this.$route.params.id
+      const id = this.$route.query.id
 
       if (currentPositon && currentPositon.nftTokenMint === id) {
         this.currentData = currentPositon

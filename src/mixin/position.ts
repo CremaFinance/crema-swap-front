@@ -50,7 +50,7 @@ export default Vue.extend({
         console.log('mixin###watchMyPosition###newVal###', newVal)
         this.$accessor.liquidity.setCurrentPositon({
           myPosions: newVal,
-          id: this.$route.params.id
+          id: this.$route.query.id
         })
       }
     },

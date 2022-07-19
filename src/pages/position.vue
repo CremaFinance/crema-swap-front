@@ -28,7 +28,6 @@
           </svg>
           <span
             >You can close your ended positions and withdraw assets from
-
             <a href="https://redeem.crema.finance/#/" target="_blank">here</a>
           </span>
         </div>
