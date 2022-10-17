@@ -1,4 +1,11 @@
 /*!
+ * vue-virtual-scroll-list v2.3.3
+ * open source under the MIT license
+ * https://github.com/tangbc/vue-virtual-scroll-list#readme
+ */
+
+
+/*!
   Copyright (C) 2013-2017 by Andrea Giammarchi - @WebReflection
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,13 +38,6 @@
    * @copyright Chen, Yi-Cyuan 2015-2018
    * @license MIT
    */
-
-
-/*!
- * vue-virtual-scroll-list v2.3.3
- * open source under the MIT license
- * https://github.com/tangbc/vue-virtual-scroll-list#readme
- */
 
 
 /*!
@@ -102,6 +102,11 @@ object-assign
 */
 
 /*!
+   * mustache.js - Logic-less {{mustache}} templates with JavaScript
+   * http://github.com/janl/mustache.js
+   */
+
+/*!
   Copyright (c) 2018 Jed Watson.
   Licensed under the MIT License (MIT), see
   http://jedwatson.github.io/classnames
@@ -139,6 +144,32 @@ object-assign
  * https://clipboardjs.com/
  *
  * Licensed MIT © Zeno Rocha
+ */
+
+/*!
+ * depd
+ * Copyright(c) 2015 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+/*!
+ * http-errors
+ * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2016 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+/*!
+ * statuses
+ * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2016 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+/*!
+ * toidentifier
+ * Copyright(c) 2016 Douglas Christopher Wilson
+ * MIT Licensed
  */
 
 /*!
@@ -181,6 +212,12 @@ THE SOFTWARE.
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+/*! noble-ed25519 - MIT License (c) 2019 Paul Miller (paulmillr.com) */
+
+/*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
+
+/*! noble-secp256k1 - MIT License (c) 2019 Paul Miller (paulmillr.com) */
 
 /**
   * vue-class-component v7.2.6
