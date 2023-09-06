@@ -1,3 +1,0 @@
-# crema-app
-
-crema app
