@@ -24,28 +24,6 @@ PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 
 
-/*!
- * vue-virtual-scroll-list v2.3.4
- * open source under the MIT license
- * https://github.com/tangbc/vue-virtual-scroll-list#readme
- */
-
-
-/*!
- * Vue.js v2.7.14
- * (c) 2014-2022 Evan You
- * Released under the MIT License.
- */
-
-/*!
- * vuex v3.6.2
- * (c) 2021 Evan You
- * @license MIT
- */
-
-/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-
-
 /*
 object-assign
 (c) Sindre Sorhus
@@ -407,6 +385,28 @@ object-assign
  * @copyright Chen, Yi-Cyuan 2015-2018
  * @license MIT
  */
+
+
+/*!
+ * vue-virtual-scroll-list v2.3.4
+ * open source under the MIT license
+ * https://github.com/tangbc/vue-virtual-scroll-list#readme
+ */
+
+
+/*!
+ * Vue.js v2.7.14
+ * (c) 2014-2022 Evan You
+ * Released under the MIT License.
+ */
+
+/*!
+ * vuex v3.6.2
+ * (c) 2021 Evan You
+ * @license MIT
+ */
+
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
 
 
 /*!
